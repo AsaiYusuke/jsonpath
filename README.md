@@ -116,7 +116,7 @@ For the entire comparisons, please check [this result](https://asaiyusuke.github
 The character types that can not be used for the identifiers in the dot notation are as follows :
 
 ```text
-^ . [ ) = ! > < \t \r \n *SPACE*
+. [ ) = ! > < \t \r \n *SPACE*
 ```
 
 You have to encode these characters when you enter them :
@@ -148,7 +148,7 @@ srcJSON  : ["Case","Hello"]
 Output   : ["Case"]
 ```
 
-### Benchmarks
+## Benchmarks
 
 <details>
 <summary>Show results</summary>
