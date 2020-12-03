@@ -1,0 +1,8 @@
+<style>
+  /* asai */
+  .markdown-body thead tr:nth-child(1) th:nth-child(9),
+  .markdown-body thead tr:nth-child(2) th:nth-child(11),
+  .markdown-body tbody td:nth-child(11) {
+    background-color: rgb(236, 230, 253) !important;
+  }
+</style>

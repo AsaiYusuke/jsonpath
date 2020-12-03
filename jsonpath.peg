@@ -1,0 +1,467 @@
+package jsonpath
+
+import "strings"
+import "regexp"
+
+type parser Peg {
+    jsonPathParser
+}
+
+expression <-
+    jsonpath END {
+        p.root = p.pop().(syntaxNode)
+    } /
+
+    jsonpath? < .+ > END {
+        p.syntaxErr(begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer)
+    }
+
+END <- !.
+
+jsonpath <-
+    space rootNode (
+        childNodes {
+            child := p.pop().(syntaxNode)
+            root := p.pop().(syntaxNode)
+            root.setNext(&child)
+            p.push(root)
+        }
+    )? space {
+        rootNode := p.pop().(syntaxNode)
+        checkNode := rootNode
+        for {
+            if checkNode.isMultiValue() {
+                rootNode.setMultiValue()
+                break
+            }
+            next := checkNode.getNext()
+            if next == nil {
+                break
+            }
+            checkNode = *next
+        }
+        p.push(rootNode)
+    }
+
+rootNode <-
+    rootIdentifier /
+    < currentRootIdentifier > {
+        if len(p.params) == 1 {
+            p.syntaxErr(begin, msgErrorInvalidSyntaxUseBeginAtsign, buffer)
+        }
+    } /
+    < ( bracketNode / dotChildIdentifier ) > {
+        if len(p.params) != 1 {
+            p.syntaxErr(begin, msgErrorInvalidSyntaxOmitDollar, buffer)
+        }
+    }
+
+childNodes <-
+    (
+        < '..' ( bracketNode / dotChildIdentifier ) > {
+            node := p.pop().(syntaxNode)
+            if identifier, ok := node.(syntaxChildIdentifier); ok {
+                identifier.setText(text)
+                identifier.setMultiValue()
+                p.push(syntaxRecursiveChildIdentifier{
+                    syntaxChildIdentifier: identifier,
+                })
+
+            } else {
+                p.push(syntaxRecursiveChildIdentifier{
+                    syntaxChildIdentifier: syntaxChildIdentifier{
+                        identifiers: []string{``},
+                        syntaxBasicNode: &syntaxBasicNode{
+                            text: `..`,
+                            multiValue: true,
+                            next: &node,
+                        },
+                    },
+                })
+            }
+        } /
+
+        < '.' dotChildIdentifier > {
+            identifier := p.pop().(syntaxChildIdentifier)
+            identifier.setText(text)
+            p.push(identifier)
+        } /
+
+        bracketNode
+
+    ) ( childNodes {
+        child := p.pop().(syntaxNode)
+        parent := p.pop().(syntaxNode)
+        parent.setNext(&child)
+        p.push(parent)
+    } )?
+
+bracketNode <-
+    < squareBracketStart ( bracketChildIdentifier / qualifier ) squareBracketEnd > {
+        node := p.pop().(syntaxNode)
+        node.setText(text)
+        p.push(node)
+    }
+
+rootIdentifier <-
+    '$' {
+        p.push(syntaxRootIdentifier{
+            syntaxBasicNode: &syntaxBasicNode{text: `$`},
+        })
+    }
+currentRootIdentifier <-
+    '@' {
+        p.push(syntaxCurrentRootIdentifier{
+            syntaxBasicNode: &syntaxBasicNode{text: `@`},
+        })
+    }
+
+dotChildIdentifier <-
+    < ( '\\' '\\' / '\\' [.[)=!>< \t\r\n] / [^.[)=!>< \t\r\n] )+ > {
+        unescapedText := p.unescape(text)
+        p.push(syntaxChildIdentifier{
+            identifiers: []string{unescapedText},
+            isAsterisk: unescapedText == `*`,
+            syntaxBasicNode: &syntaxBasicNode{
+                text: unescapedText,
+                multiValue: unescapedText == `*`,
+            },
+        })
+    }
+
+bracketChildIdentifier <-
+    bracketNodeIdentifiers {
+        identifier := p.pop().([]string)
+        p.push(syntaxChildIdentifier{
+            identifiers: identifier,
+            isAsterisk: false,
+            syntaxBasicNode: &syntaxBasicNode{
+                multiValue: len(identifier) > 1,
+            },
+        })
+    }
+
+bracketNodeIdentifiers <-
+    ( singleQuotedNodeIdentifier / doubleQuotedNodeIdentifier ) {
+        p.push([]string{p.pop().(string)})
+    } (
+        sepBracketIdentifier bracketNodeIdentifiers {
+            identifier2 := p.pop().([]string)
+            identifier1 := p.pop().([]string)
+            identifier1 = append(identifier1, identifier2...)
+            p.push(identifier1)
+        }
+    )?
+
+singleQuotedNodeIdentifier <-
+    '\'' < ( '\\' '\\' / '\\' '\'' / [^'] )* > '\'' {
+        p.push(p.unescape(text))
+    }
+
+doubleQuotedNodeIdentifier <-
+    '"' < ( '\\' '\\' / '\\' '"' / [^"] )* > '"' { // '
+        p.push(p.unescape(text))
+    }
+
+sepBracketIdentifier <- space ',' space
+
+qualifier <- union / script / filter
+
+union <-
+    index {
+        subscript := p.pop().(syntaxSubscript)
+        union := syntaxUnion{
+            syntaxBasicNode: &syntaxBasicNode{
+                multiValue: subscript.isMultiValue(),
+            }}
+        union.add(subscript)
+        p.push(union)
+    } (
+        sepUnion union {
+            childIndexUnion := p.pop().(syntaxUnion)
+            parentIndexUnion := p.pop().(syntaxUnion)
+            parentIndexUnion.merge(childIndexUnion)
+            parentIndexUnion.setMultiValue()
+            p.push(parentIndexUnion)
+        }
+    )?
+
+index <-
+    slice {
+        step  := p.pop().(syntaxIndex)
+        end   := p.pop().(syntaxIndex)
+        start := p.pop().(syntaxIndex)
+        p.push(syntaxSlice{
+            syntaxBasicSubscript: &syntaxBasicSubscript{
+                multiValue: true,
+            },
+            start: start,
+            end: end,
+            step: step,
+        })
+    } /
+
+    < indexNumber > {
+        p.push(syntaxIndex{
+            syntaxBasicSubscript: &syntaxBasicSubscript{
+                multiValue: false,
+            },
+            number: p.toInt(text),
+        })
+    } /
+
+    '*' {
+        p.push(syntaxAsterisk{
+            syntaxBasicSubscript: &syntaxBasicSubscript{
+                multiValue: true,
+            },
+        })
+    }
+
+slice <-
+    anyIndex sepSlice anyIndex (
+        sepSlice anyIndex /
+        space {
+            p.push(syntaxIndex{number: 1})
+        }
+    )
+
+anyIndex <-
+    < ( indexNumber )? > {
+        if len(text) > 0 {
+            p.push(syntaxIndex{number: p.toInt(text)})
+        } else {
+            p.push(syntaxIndex{number: 0, isOmitted: true})
+        }
+    }
+
+indexNumber <- [-+]? [0-9]+
+
+sepUnion <- space ',' space
+sepSlice <- space ':' space
+
+script <-
+    scriptStart < command > scriptEnd {
+        p.push(syntaxScript{
+            command: text,
+            syntaxBasicNode: &syntaxBasicNode{
+                multiValue: true,
+            },
+        })
+    }
+
+command <- [^)]*
+
+filter <-
+    filterStart query filterEnd {
+        p.push(syntaxFilter{
+            query: p.pop().(syntaxQuery),
+            syntaxBasicNode: &syntaxBasicNode{
+                multiValue: true,
+            },
+        })
+    }
+
+query <-
+    andQuery (
+        logicOr query {
+            childQuery := p.pop().(syntaxQuery)
+            parentQuery := p.pop().(syntaxQuery)
+            p.push(syntaxLogicalOr{parentQuery, childQuery})
+        }
+    )?
+
+andQuery <-
+    subQueryStart query subQueryEnd /
+    
+    basicQuery (
+        logicAnd andQuery {
+            childQuery := p.pop().(syntaxQuery)
+            parentQuery := p.pop().(syntaxQuery)
+            p.push(syntaxLogicalAnd{parentQuery, childQuery})
+        }
+    )?
+
+basicQuery <-
+    < comparator > {
+        if !p.hasErr() {
+            query := p.pop().(syntaxQuery)
+
+            var checkQuery syntaxBasicCompareQuery
+            switch query.(type) {
+            case syntaxBasicCompareQuery:
+                checkQuery = query.(syntaxBasicCompareQuery)
+            case syntaxLogicalNot:
+                checkQuery = (query.(syntaxLogicalNot)).param.(syntaxBasicCompareQuery)
+            }
+        
+            leftFilter, leftIsCurrentRoot := checkQuery.leftParam.(syntaxNodeFilter)
+            rightFilter, rigthIsCurrentRoot := checkQuery.rightParam.(syntaxNodeFilter)
+            if leftIsCurrentRoot && rigthIsCurrentRoot && leftFilter.isCurrentRoot() && rightFilter.isCurrentRoot() {
+                p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
+            }
+        
+            p.push(query)
+        }
+    } /
+    
+    < ( logicNot )? > {
+        p.push(strings.HasPrefix(text, `!`))
+    } jsonpath {
+        nodeFilter := syntaxNodeFilter{p.pop().(syntaxNode)}
+        isLogicalNot := p.pop().(bool)
+        if isLogicalNot {
+            p.push(syntaxLogicalNot{nodeFilter})
+        } else {
+            p.push(nodeFilter)
+        }
+    }
+
+logicOr  <- space '||' space
+logicAnd <- space '&&' space
+logicNot <- '!' space
+
+comparator <-
+    qParam space (
+        '==' space qParam {
+            rightParam := p.pop().(syntaxQuery)
+            leftParam := p.pop().(syntaxQuery)
+            p.push(syntaxBasicCompareQuery{
+                leftParam: leftParam,
+                rightParam: rightParam,
+                comparator: syntaxCompareEQ{},
+            })
+        } /
+
+        '!=' space qParam {
+            rightParam := p.pop().(syntaxQuery)
+            leftParam := p.pop().(syntaxQuery)
+            p.push(syntaxLogicalNot{syntaxBasicCompareQuery{
+                leftParam: leftParam,
+                rightParam: rightParam,
+                comparator: syntaxCompareEQ{},
+            }})
+        }
+    ) /
+
+    qNumericParam space (
+        '<=' space qNumericParam {
+            rightParam := p.pop().(syntaxQuery)
+            leftParam := p.pop().(syntaxQuery)
+            p.push(syntaxBasicCompareQuery{
+                leftParam: leftParam,
+                rightParam: rightParam,
+                comparator: syntaxCompareGE{},
+            })
+        } /
+
+        '<' space qNumericParam {
+            rightParam := p.pop().(syntaxQuery)
+            leftParam := p.pop().(syntaxQuery)
+            p.push(syntaxBasicCompareQuery{
+                leftParam: leftParam,
+                rightParam: rightParam,
+                comparator: syntaxCompareGT{},
+            })
+        } /
+
+        '>=' space qNumericParam {
+            rightParam := p.pop().(syntaxQuery)
+            leftParam := p.pop().(syntaxQuery)
+            p.push(syntaxBasicCompareQuery{
+                leftParam: leftParam,
+                rightParam: rightParam,
+                comparator: syntaxCompareLE{},
+            })
+        } /
+
+        '>' space qNumericParam {
+            rightParam := p.pop().(syntaxQuery)
+            leftParam := p.pop().(syntaxQuery)
+            p.push(syntaxBasicCompareQuery{
+                leftParam: leftParam,
+                rightParam: rightParam,
+                comparator: syntaxCompareLT{},
+            })
+        }
+    ) /
+
+    jsonpath space '=~' space '/' < regex > '/' {
+        nodeFilter := syntaxNodeFilter{p.pop().(syntaxNode)}
+        regex := regexp.MustCompile(text)
+        p.push(syntaxBasicCompareQuery{
+            leftParam: nodeFilter,
+            rightParam: syntaxCompareLiteral{literal: `regex`},
+            comparator: syntaxCompareRegex{
+                regex: regex,
+            },
+        })
+    }
+
+qParam <-
+    qLiteral {
+        p.push(syntaxCompareLiteral{p.pop()})
+    } /
+
+    nodeFilter
+    
+qNumericParam <-
+    lNumber {
+        p.push(syntaxCompareLiteral{p.pop()})
+    } /
+
+    nodeFilter
+
+qLiteral <- lNumber / lBool / lString / lNull
+
+nodeFilter <-
+    < jsonpath > {
+        node := p.pop().(syntaxNode)
+        p.push(syntaxNodeFilter{node})
+
+        if !p.hasErr() && node.isMultiValue() {
+            p.syntaxErr(begin, msgErrorInvalidSyntaxFilterMultiValuedNode, buffer)
+        }
+    }
+
+lNumber <- < [-+]? [0-9] [-+.0-9a-zA-Z]* > {
+        p.push(p.toFloat(text, 0))
+    }
+
+lBool <-
+    ( 'true' / 'True' / 'TRUE' ) {
+        p.push(true)
+    } /
+    
+    ( 'false' / 'False' / 'FALSE' ) {
+        p.push(false)
+    }
+
+lString <-
+    '\'' < ( '\\' '\\' / '\\' '\'' / [^'] )* > '\'' {
+        p.push(p.unescape(text))
+    } /
+
+    '"' < ( '\\' '\\' / '\\' '"' / [^"] )* > '"' { // '
+        p.push(p.unescape(text))
+    }
+
+lNull <- ( 'null' / 'Null' / 'NULL' ) {
+        p.push(nil)
+    }
+
+regex <- ( '\\' '\\' / '\\' '/' / [^/] )*
+
+squareBracketStart <- '[' space
+squareBracketEnd   <- space ']'
+
+scriptStart <- '(' space
+scriptEnd   <- space ')'
+
+filterStart <- '?(' space
+filterEnd   <- space ')'
+
+subQueryStart <- '(' space
+subQueryEnd   <- space ')'
+
+space <- ( ' ' / '\t' )*
