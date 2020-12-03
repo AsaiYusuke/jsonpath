@@ -226,12 +226,13 @@ BenchmarkParserFunc_filter_regex-4                          	  801913	      1431
   - [ ] Release version
   - Unit tests
     - [x] syntax tests
-	- [ ] coverage >80%
+    - [x] benchmark
+    - [ ] coverage >80%
   - [ ] Examples
   - [ ] CI automation
   - Documentation
     - [x] README
-	- [ ] API doc
+    - [ ] API doc
   - [x] comparison result (local)
 - future todo
   - [ ] Syntax expansion
