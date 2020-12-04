@@ -3,6 +3,8 @@ package jsonpath
 import "regexp"
 
 type syntaxCompareRegex struct {
+	*syntaxBasicAnyValueComparator
+
 	regex *regexp.Regexp
 }
 

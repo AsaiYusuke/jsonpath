@@ -4,12 +4,48 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
 type TestGroup struct {
 	name      string
 	testCases [][]interface{}
+}
+
+func execTestRetrieve(t *testing.T, src interface{}, testCase []interface{}) {
+	jsonPath := testCase[0].(string)
+	expectedOutputJSON := testCase[2].(string)
+	var expectedError error
+	if len(testCase) >= 4 {
+		expectedError = testCase[3].(error)
+	}
+	actualObject, err := Retrieve(jsonPath, src)
+	if err != nil {
+		if reflect.TypeOf(expectedError) == reflect.TypeOf(err) &&
+			fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
+			return
+		}
+		t.Errorf("expected error<%s> != actual error<%s>\n",
+			expectedError, err)
+		return
+	}
+	if expectedError != nil {
+		t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
+		return
+	}
+
+	actualOutputJSON, err := json.Marshal(actualObject)
+	if err != nil {
+		t.Errorf("%w", err)
+		return
+	}
+
+	if string(actualOutputJSON) != expectedOutputJSON {
+		t.Errorf("expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
+			expectedOutputJSON, actualOutputJSON)
+		return
+	}
 }
 
 func TestRetrieve(t *testing.T) {
@@ -2399,11 +2435,6 @@ func TestRetrieve(t *testing.T) {
 		for _, testCase := range testGroup.testCases {
 			jsonPath := testCase[0].(string)
 			srcJSON := testCase[1].(string)
-			expectedOutputJSON := testCase[2].(string)
-			var expectedError error
-			if len(testCase) >= 4 {
-				expectedError = testCase[3].(error)
-			}
 			t.Run(
 				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
 				func(t *testing.T) {
@@ -2412,33 +2443,68 @@ func TestRetrieve(t *testing.T) {
 						t.Errorf("%w", err)
 						return
 					}
+					execTestRetrieve(t, src, testCase)
+				})
+		}
+	}
+}
 
-					actualObject, err := Retrieve(jsonPath, src)
-					if err != nil {
-						if reflect.TypeOf(expectedError) == reflect.TypeOf(err) &&
-							fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
-							return
-						}
-						t.Errorf("expected error<%s> != actual error<%s>\n",
-							expectedError, err)
-						return
-					}
-					if expectedError != nil {
-						t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
-						return
-					}
+func TestRetrieve_jsonNumber(t *testing.T) {
+	testGroups := []TestGroup{
+		{
+			`filter`,
+			[][]interface{}{
+				{
+					`$[?(@.a > 123)].a`,
+					`[{"a":123.456}]`,
+					`[123.456]`,
+				},
+				{
+					`$[?(@.a > 123.46)].a`,
+					`[{"a":123.456}]`,
+					`[]`,
+					ErrorNoneMatched{`[?(@.a > 123.46)].a`},
+				},
+				{
+					`$[?(@.a > 122)].a`,
+					`[{"a":123}]`,
+					`[123]`,
+				},
+				{
+					`$[?(123 < @.a)].a`,
+					`[{"a":123.456}]`,
+					`[123.456]`,
+				},
+				{
+					`$[?(@.a==-0.123e2)]`,
+					`[{"a":-12.3,"b":1},{"a":-0.123e2,"b":2},{"a":-0.123},{"a":-12},{"a":12.3},{"a":2},{"a":"-0.123e2"}]`,
+					`[{"a":-12.3,"b":1},{"a":-0.123e2,"b":2}]`,
+				},
+				{
+					`$[?(@.a==11)]`,
+					`[{"a":10.999},{"a":11.00},{"a":11.10}]`,
+					`[{"a":11.00}]`,
+				},
+			},
+		},
+	}
 
-					actualOutputJSON, err := json.Marshal(actualObject)
-					if err != nil {
+	for _, testGroup := range testGroups {
+		for _, testCase := range testGroup.testCases {
+			jsonPath := testCase[0].(string)
+			srcJSON := testCase[1].(string)
+			t.Run(
+				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
+				func(t *testing.T) {
+					var src interface{}
+					reader := strings.NewReader(srcJSON)
+					decoder := json.NewDecoder(reader)
+					decoder.UseNumber()
+					if err := decoder.Decode(&src); err != nil {
 						t.Errorf("%w", err)
 						return
 					}
-
-					if string(actualOutputJSON) != expectedOutputJSON {
-						t.Errorf("expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
-							expectedOutputJSON, actualOutputJSON)
-						return
-					}
+					execTestRetrieve(t, src, testCase)
 				})
 		}
 	}

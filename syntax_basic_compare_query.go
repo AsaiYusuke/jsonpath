@@ -11,31 +11,37 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 	isRightLiteral, rightValues := q.getComputeParameters(root, currentMap, q.rightParam)
 
 	if isLeftLiteral && isRightLiteral {
-		leftValue := leftValues[0]
-		rightValue := rightValues[0]
-		if q.comparator.comparator(leftValue, rightValue) {
+		leftValue, leftOk := q.comparator.typeCast(leftValues[0])
+		rightValue, rightOk := q.comparator.typeCast(rightValues[0])
+		if leftOk && rightOk && q.comparator.comparator(leftValue, rightValue) {
 			return currentMap
 		}
 		return nil
 	}
 
 	if !isLeftLiteral && isRightLiteral {
-		rightValue := rightValues[0]
 		result := make(map[int]interface{}, len(leftValues))
-		for leftIndex, leftValue := range leftValues {
-			if q.comparator.comparator(leftValue, rightValue) {
-				result[leftIndex] = leftValue
+		rightValue, rightOk := q.comparator.typeCast(rightValues[0])
+		if rightOk {
+			for leftIndex, leftValue := range leftValues {
+				leftValue, leftOk := q.comparator.typeCast(leftValue)
+				if leftOk && q.comparator.comparator(leftValue, rightValue) {
+					result[leftIndex] = leftValue
+				}
 			}
 		}
 		return result
 	}
 
 	if isLeftLiteral && !isRightLiteral {
-		leftValue := leftValues[0]
 		result := make(map[int]interface{}, len(rightValues))
-		for rightIndex, rightValue := range rightValues {
-			if q.comparator.comparator(leftValue, rightValue) {
-				result[rightIndex] = rightValue
+		leftValue, leftOk := q.comparator.typeCast(leftValues[0])
+		if leftOk {
+			for rightIndex, rightValue := range rightValues {
+				rightValue, rightOk := q.comparator.typeCast(rightValue)
+				if rightOk && q.comparator.comparator(leftValue, rightValue) {
+					result[rightIndex] = rightValue
+				}
 			}
 		}
 		return result

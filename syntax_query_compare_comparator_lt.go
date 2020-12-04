@@ -1,10 +1,9 @@
 package jsonpath
 
 type syntaxCompareLT struct {
+	*syntaxBasicNumericComparator
 }
 
 func (c syntaxCompareLT) comparator(left, right interface{}) bool {
-	leftValue, leftOk := left.(float64)
-	rightValue, rightOk := right.(float64)
-	return leftOk && rightOk && leftValue > rightValue
+	return left.(float64) > right.(float64)
 }
