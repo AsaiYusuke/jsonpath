@@ -33,7 +33,7 @@ func (u syntaxUnion) retrieve(root, current interface{}, result *resultContainer
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
-		return ErrorTypeUnmatched{u.text, `array`, foundType}
+		return ErrorTypeUnmatched{`array`, foundType, u.text}
 	}
 
 	indexes := make([]int, 0)

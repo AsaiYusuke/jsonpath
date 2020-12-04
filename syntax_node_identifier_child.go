@@ -37,7 +37,7 @@ func (i syntaxChildIdentifier) retrieve(root, current interface{}, result *resul
 		}
 
 		if len(i.identifiers) > 1 || len(i.identifiers[0]) > 0 {
-			return ErrorTypeUnmatched{i.text, `map`, reflect.TypeOf(current).String()}
+			return ErrorTypeUnmatched{`map`, reflect.TypeOf(current).String(), i.text}
 		}
 
 		return i.retrieveNext(root, current, result)
@@ -47,7 +47,7 @@ func (i syntaxChildIdentifier) retrieve(root, current interface{}, result *resul
 	if current != nil {
 		foundType = reflect.TypeOf(current).String()
 	}
-	return ErrorTypeUnmatched{i.text, `map/array`, foundType}
+	return ErrorTypeUnmatched{`map/array`, foundType, i.text}
 }
 
 func (i *syntaxChildIdentifier) processAsteriskValue(
