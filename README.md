@@ -222,8 +222,14 @@ BenchmarkParserFunc_filter_regex-4                          	  801913	      1431
 - archtecture
   - [x] PEG syntax analyzing
   - [x] Error handling
+- Go language manner
+  - [x] retrieve with interface unmarshal
+  - [ ] retrieve with struct unmarshal
+    - [ ] struct tag
+  - [x] json.Number type
+  - [ ] retrieve with custom object
 - source code
-  - [ ] Release version
+  - [x] Release version
   - Unit tests
     - [x] syntax tests
     - [x] benchmark
