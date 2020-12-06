@@ -223,11 +223,8 @@ BenchmarkParserFunc_filter_regex-4                          	  801913	      1431
   - [x] PEG syntax analyzing
   - [x] Error handling
 - Go language manner
-  - [x] retrieve with interface unmarshal
-  - [ ] retrieve with struct unmarshal
-    - [ ] struct tag
-  - [x] json.Number type
-  - [ ] retrieve with custom object
+  - [x] retrieve with the object in interface unmarshal
+  - [x] retrieve with the json.Number type
 - source code
   - [x] Release version
   - Unit tests
@@ -243,3 +240,7 @@ BenchmarkParserFunc_filter_regex-4                          	  801913	      1431
 - future todo
   - [ ] Syntax expansion
   - [ ] Refer to the something standard
+  - Go language affinity
+    - [ ] retrieve with the object in struct unmarshal
+    - [ ] retrieve with the struct tags
+    - [ ] retrieve with the user defined objects
