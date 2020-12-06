@@ -15,14 +15,13 @@ func (u syntaxUnion) retrieve(root, current interface{}, result *resultContainer
 				// Switch to the all node analysis mode,
 				// if "current" variable points the map structure and
 				// specifying the Asterisk subscript
-				syntax := syntaxChildIdentifier{
-					isAsterisk: true,
+				asteriskIdentifier := syntaxChildAsteriskIdentifier{
 					syntaxBasicNode: &syntaxBasicNode{
 						text: u.text,
 						next: u.next,
 					},
 				}
-				return syntax.retrieve(root, current, result)
+				return asteriskIdentifier.retrieve(root, current, result)
 			}
 		}
 	}

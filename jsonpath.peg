@@ -58,31 +58,19 @@ rootNode <-
 
 childNodes <-
     (
-        < '..' ( bracketNode / dotChildIdentifier ) > {
+        '..' ( bracketNode / dotChildIdentifier ) {
             node := p.pop().(syntaxNode)
-            if identifier, ok := node.(syntaxChildIdentifier); ok {
-                identifier.setText(text)
-                identifier.setMultiValue()
-                p.push(syntaxRecursiveChildIdentifier{
-                    syntaxChildIdentifier: identifier,
-                })
-
-            } else {
-                p.push(syntaxRecursiveChildIdentifier{
-                    syntaxChildIdentifier: syntaxChildIdentifier{
-                        identifiers: []string{``},
-                        syntaxBasicNode: &syntaxBasicNode{
-                            text: `..`,
-                            multiValue: true,
-                            next: &node,
-                        },
-                    },
-                })
-            }
+            p.push(syntaxRecursiveChildIdentifier{
+                syntaxBasicNode: &syntaxBasicNode{
+                    text: `..`,
+                    multiValue: true,
+                    next: &node,
+                },
+            })
         } /
 
         < '.' dotChildIdentifier > {
-            identifier := p.pop().(syntaxChildIdentifier)
+            identifier := p.pop().(syntaxNode)
             identifier.setText(text)
             p.push(identifier)
         } /
@@ -119,26 +107,42 @@ currentRootIdentifier <-
 dotChildIdentifier <-
     < ( '\\' '\\' / '\\' [.[)=!>< \t\r\n] / [^.[)=!>< \t\r\n] )+ > {
         unescapedText := p.unescape(text)
-        p.push(syntaxChildIdentifier{
-            identifiers: []string{unescapedText},
-            isAsterisk: unescapedText == `*`,
-            syntaxBasicNode: &syntaxBasicNode{
-                text: unescapedText,
-                multiValue: unescapedText == `*`,
-            },
-        })
+        if unescapedText == `*` {
+            p.push(syntaxChildAsteriskIdentifier{
+                syntaxBasicNode: &syntaxBasicNode{
+                    text: unescapedText,
+                    multiValue: true,
+                },
+            })
+        } else {
+            p.push(syntaxChildSingleIdentifier{
+                identifier: unescapedText,
+                syntaxBasicNode: &syntaxBasicNode{
+                    text: unescapedText,
+                    multiValue: false,
+                },
+            })
+        }
     }
 
 bracketChildIdentifier <-
     bracketNodeIdentifiers {
         identifier := p.pop().([]string)
-        p.push(syntaxChildIdentifier{
-            identifiers: identifier,
-            isAsterisk: false,
-            syntaxBasicNode: &syntaxBasicNode{
-                multiValue: len(identifier) > 1,
-            },
-        })
+        if len(identifier) > 1 {
+            p.push(syntaxChildMultiIdentifier{
+                identifiers: identifier,
+                syntaxBasicNode: &syntaxBasicNode{
+                    multiValue: true,
+                },
+            })
+        } else {
+            p.push(syntaxChildSingleIdentifier{
+                identifier: identifier[0],
+                syntaxBasicNode: &syntaxBasicNode{
+                    multiValue: false,
+                },
+            })
+        }
     }
 
 bracketNodeIdentifiers <-
