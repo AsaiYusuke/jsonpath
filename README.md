@@ -234,9 +234,9 @@ BenchmarkParserFunc_filter_regex-4                          	  801913	      1431
   - Unit tests
     - [x] syntax tests
     - [x] benchmark
-    - [ ] coverage >80%
+    - [x] coverage >80%
   - [ ] Examples
-  - [ ] CI automation
+  - [x] CI automation
   - Documentation
     - [x] README
     - [ ] API doc
