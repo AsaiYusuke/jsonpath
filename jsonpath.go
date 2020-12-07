@@ -36,14 +36,11 @@ func (j *jsonPathParser) toInt(text string) int {
 	return value
 }
 
-func (j *jsonPathParser) toFloat(text string, defaultValue float64) float64 {
-	if len(text) == 0 {
-		return defaultValue
-	}
+func (j *jsonPathParser) toFloat(text string) float64 {
 	value, err := strconv.ParseFloat(text, 64)
 	if err != nil {
 		j.thisError = ErrorInvalidArgument{text, err}
-		return defaultValue
+		return 0
 	}
 	return value
 }

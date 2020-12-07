@@ -963,7 +963,7 @@ func (p *parser) Execute() {
 
 		case ruleAction42:
 
-			p.push(p.toFloat(text, 0))
+			p.push(p.toFloat(text))
 
 		case ruleAction43:
 
@@ -4270,7 +4270,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 94 Action42 <- <{
-		    p.push(p.toFloat(text, 0))
+		    p.push(p.toFloat(text))
 		}> */
 		func() bool {
 			{
