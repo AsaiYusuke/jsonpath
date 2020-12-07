@@ -27,7 +27,11 @@ func main() {
 	}
 
 	var jsonData interface{}
-	json.Unmarshal([]byte(data), &jsonData)
+	err = json.Unmarshal([]byte(data), &jsonData)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	result, err := jsonpath.Retrieve(selector, jsonData)
 	if err != nil {
@@ -51,5 +55,10 @@ func main() {
 		os.Exit(1)
 	}
 	jsonResult, err := json.Marshal(result)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	fmt.Println(string(jsonResult))
 }

@@ -1481,7 +1481,7 @@ func TestRetrieve(t *testing.T) {
 				},
 				{
 					`$..*[?(@.id>2)]`,
-					`[{"complext":{"one":[{"name":"first","id":1},{"name":"next","id":2},{"name":"another","id":3},{"name":"more","id":4}],"more":{"name":"next to last","id":5}}},{"name":"last","id":6}]`,
+					`[{"complexity":{"one":[{"name":"first","id":1},{"name":"next","id":2},{"name":"another","id":3},{"name":"more","id":4}],"more":{"name":"next to last","id":5}}},{"name":"last","id":6}]`,
 					`[{"id":5,"name":"next to last"},{"id":3,"name":"another"},{"id":4,"name":"more"}]`,
 				},
 				{
@@ -1539,7 +1539,7 @@ func TestRetrieve(t *testing.T) {
 				{
 					`$[?(@['a<=b']<2.1)]`,
 					`[{"a<=b":1.9},{"a":2},{"a":2.1},{"b":3},{"a<=b":"test"}]`,
-					// The charactor '<' is encoded to \u003c using Go's json.Marshal()
+					// The character '<' is encoded to \u003c using Go's json.Marshal()
 					`[{"a\u003c=b":1.9}]`,
 				},
 				{
@@ -1716,7 +1716,7 @@ func TestRetrieve(t *testing.T) {
 				{
 					`$[?(@.a=="~!@#$%^&*()-_=+[]\\{}|;':\",./<>?")]`,
 					`[{"a":"~!@#$%^&*()-_=+[]\\{}|;':\",./<>?"}]`,
-					// The charactor ['&','<','>'] is encoded to [\u0026,\u003c,\u003e] using Go's json.Marshal()
+					// The character ['&','<','>'] is encoded to [\u0026,\u003c,\u003e] using Go's json.Marshal()
 					`[{"a":"~!@#$%^\u0026*()-_=+[]\\{}|;':\",./\u003c\u003e?"}]`,
 				},
 				{
@@ -1727,7 +1727,7 @@ func TestRetrieve(t *testing.T) {
 				{
 					`$[?(@.a=='~!@#$%^&*()-_=+[]\\{}|;\':",./<>?')]`,
 					`[{"a":"~!@#$%^&*()-_=+[]\\{}|;':\",./<>?"}]`,
-					// The charactor ['&','<','>'] is encoded to [\u0026,\u003c,\u003e] using Go's json.Marshal()
+					// The character ['&','<','>'] is encoded to [\u0026,\u003c,\u003e] using Go's json.Marshal()
 					`[{"a":"~!@#$%^\u0026*()-_=+[]\\{}|;':\",./\u003c\u003e?"}]`,
 				},
 				{
