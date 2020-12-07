@@ -8,10 +8,7 @@ func (e syntaxNodeFilter) compute(root interface{}, currentMap map[int]interface
 	result := make(map[int]interface{}, len(currentMap))
 	for index, srcNode := range currentMap {
 		values := resultContainer{}
-		if err := e.param.retrieve(root, srcNode, &values); err != nil {
-			continue
-		}
-		if !values.hasResult() {
+		if err := e.param.retrieve(root, srcNode, &values); err != nil || !values.hasResult() {
 			continue
 		}
 		_result := values.getResult()
