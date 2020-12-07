@@ -254,7 +254,7 @@ script <-
         })
     }
 
-command <- [^)]*
+command <- [^)]+
 
 filter <-
     filterStart query filterEnd {
