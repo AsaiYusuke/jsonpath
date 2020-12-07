@@ -175,6 +175,124 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
+					`$.\\`,
+					`{"\\":1}`,
+					`[1]`,
+				},
+				{
+					`$.\.`,
+					`{".":1}`,
+					`[1]`,
+				},
+				{
+					`$.\[`,
+					`{"[":1}`,
+					`[1]`,
+				},
+				{
+					`$.\)`,
+					`{")":1}`,
+					`[1]`,
+				},
+				{
+					`$.\=`,
+					`{"=":1}`,
+					`[1]`,
+				},
+				{
+					`$.\!`,
+					`{"!":1}`,
+					`[1]`,
+				},
+				{
+					`$.\>`,
+					`{">":1}`,
+					`[1]`,
+				},
+				{
+					`$.\<`,
+					`{"<":1}`,
+					`[1]`,
+				},
+				{
+					`$.\ `,
+					`{" ":1}`,
+					`[1]`,
+				},
+				{
+					`$.\	`,
+					`{"":123}`,
+					``,
+					ErrorMemberNotExist{`.\	`},
+				},
+				{
+					`$.\
+`,
+					`{"":123}`,
+					``,
+					ErrorMemberNotExist{`.\
+`},
+				},
+				{
+					`$.a\\`,
+					`{"a\\":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\.`,
+					`{"a.":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\[`,
+					`{"a[":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\)`,
+					`{"a)":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\=`,
+					`{"a=":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\!`,
+					`{"a!":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\>`,
+					`{"a>":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\<`,
+					`{"a<":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\ `,
+					`{"a ":1}`,
+					`[1]`,
+				},
+				{
+					`$.a\	`,
+					`{"a":123}`,
+					``,
+					ErrorMemberNotExist{`.a\	`},
+				},
+				{
+					`$.a\
+`,
+					`{"a":123}`,
+					``,
+					ErrorMemberNotExist{`.a\
+`},
+				},
+				{
 					`$.ﾃｽﾄソポァゼゾタダＡボマミ①`,
 					`{"ﾃｽﾄソポァゼゾタダＡボマミ①":1}`,
 					`[1]`,
@@ -429,6 +547,11 @@ func TestRetrieve(t *testing.T) {
 				{
 					`$['a\'b']`,
 					`{"a'b":1,"b":2}`,
+					`[1]`,
+				},
+				{
+					`$['ab\'c']`,
+					`{"ab'c":1,"b":2}`,
 					`[1]`,
 				},
 				{
@@ -1782,7 +1905,7 @@ func TestRetrieve(t *testing.T) {
 			},
 		},
 		{
-			`Sub-query`,
+			`Sub-filter`,
 			[][]interface{}{
 				{
 					`$[?(@.a[?(@.b>1)])]`,
@@ -1901,6 +2024,14 @@ func TestRetrieve(t *testing.T) {
 					`	$.a	`,
 					`{"a":123}`,
 					`[123]`,
+				},
+				{
+					`$.a
+`,
+					`{"a":123}`,
+					``,
+					ErrorInvalidSyntax{3, `unrecognized input`, `
+`},
 				},
 				{
 					`$[ "a" , "c" ]`,
@@ -2286,6 +2417,23 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{13, `the omission of '$' allowed only at the beginning`, `true)]`},
 				},
 				{
+					`$[?(@.a>1 && ())]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a>1 && ())]`},
+				},
+				{
+					`$[?(((@.a>1)))]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					`[{"a":2},{"a":3}]`,
+				},
+				{
+					`$[?((@.a>1 )]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?((@.a>1 )]`},
+				},
+				{
 					`$[?(!(@.a==2))]`,
 					`[{"a":1.9999},{"a":2},{"a":2.0001},{"a":"2"},{"a":true},{"a":{}},{"a":[]},{"a":["b"]},{"a":{"a":"value"}},{"b":"value"}]`,
 					``,
@@ -2304,16 +2452,160 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `fAlse)]`},
 				},
 				{
+					`$[?(@.a==faLse)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `faLse)]`},
+				},
+				{
+					`$[?(@.a==falSe)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `falSe)]`},
+				},
+				{
+					`$[?(@.a==falsE)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `falsE)]`},
+				},
+				{
+					`$[?(@.a==FaLse)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FaLse)]`},
+				},
+				{
+					`$[?(@.a==FalSe)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FalSe)]`},
+				},
+				{
+					`$[?(@.a==FalsE)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FalsE)]`},
+				},
+				{
+					`$[?(@.a==FaLSE)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FaLSE)]`},
+				},
+				{
+					`$[?(@.a==FAlSE)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FAlSE)]`},
+				},
+				{
+					`$[?(@.a==FALsE)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FALsE)]`},
+				},
+				{
+					`$[?(@.a==FALSe)]`,
+					`[{"a":false}]`,
+					`[{"a":false}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `FALSe)]`},
+				},
+				{
 					`$[?(@.a==tRue)]`,
 					`[{"a":true}]`,
 					`[{"a":true}]`,
 					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `tRue)]`},
 				},
 				{
+					`$[?(@.a==trUe)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `trUe)]`},
+				},
+				{
+					`$[?(@.a==truE)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `truE)]`},
+				},
+				{
+					`$[?(@.a==TrUe)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `TrUe)]`},
+				},
+				{
+					`$[?(@.a==TruE)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `TruE)]`},
+				},
+				{
+					`$[?(@.a==TrUE)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `TrUE)]`},
+				},
+				{
+					`$[?(@.a==TRuE)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `TRuE)]`},
+				},
+				{
+					`$[?(@.a==TRUe)]`,
+					`[{"a":true}]`,
+					`[{"a":true}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `TRUe)]`},
+				},
+				{
 					`$[?(@.a==nUll)]`,
 					`[{"a":null}]`,
 					`[{"a":null}]`,
 					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `nUll)]`},
+				},
+				{
+					`$[?(@.a==nuLl)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `nuLl)]`},
+				},
+				{
+					`$[?(@.a==nulL)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `nulL)]`},
+				},
+				{
+					`$[?(@.a==NuLl)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `NuLl)]`},
+				},
+				{
+					`$[?(@.a==NulL)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `NulL)]`},
+				},
+				{
+					`$[?(@.a==NuLL)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `NuLL)]`},
+				},
+				{
+					`$[?(@.a==NUlL)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `NUlL)]`},
+				},
+				{
+					`$[?(@.a==NULl)]`,
+					`[{"a":null}]`,
+					`[{"a":null}]`,
+					ErrorInvalidSyntax{9, `the omission of '$' allowed only at the beginning`, `NULl)]`},
 				},
 				{
 					`$[?(@=={"k":"v"})]`,
@@ -2362,6 +2654,12 @@ func TestRetrieve(t *testing.T) {
 					`{}`,
 					``,
 					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a),?(@.b)]`},
+				},
+				{
+					`$[?(@.a & @.b)]`,
+					`{}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a & @.b)]`},
 				},
 			},
 		},
