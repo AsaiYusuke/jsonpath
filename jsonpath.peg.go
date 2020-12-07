@@ -1053,7 +1053,7 @@ func (p *parser) Init() {
 
 	_rules = [...]func() bool{
 		nil,
-		/* 0 expression <- <((jsonpath END Action0) / (jsonpath? <.+> END Action1))> */
+		/* 0 expression <- <((jsonpath END Action0) / (jsonpath? <.*> END Action1))> */
 		func() bool {
 			position0, tokenIndex0, depth0 := position, tokenIndex, depth
 			{
@@ -1086,9 +1086,6 @@ func (p *parser) Init() {
 					{
 						position6 := position
 						depth++
-						if !matchDot() {
-							goto l0
-						}
 					l7:
 						{
 							position8, tokenIndex8, depth8 := position, tokenIndex, depth

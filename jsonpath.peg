@@ -12,7 +12,7 @@ expression <-
         p.root = p.pop().(syntaxNode)
     } /
 
-    jsonpath? < .+ > END {
+    jsonpath? < .* > END {
         p.syntaxErr(begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer)
     }
 

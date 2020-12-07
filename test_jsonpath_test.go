@@ -2099,6 +2099,12 @@ func TestRetrieve(t *testing.T) {
 			`Invalid syntax`,
 			[][]interface{}{
 				{
+					``,
+					`{"a":1}`,
+					``,
+					ErrorInvalidSyntax{0, `unrecognized input`, ``},
+				},
+				{
 					`@`,
 					`{"a":1}`,
 					``,
