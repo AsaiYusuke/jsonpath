@@ -1,0 +1,9 @@
+language: go
+
+go:
+  - 1.15
+
+script:
+  - go test -race
+  - go test -cover -coverprofile coverage.out 
+  - go tool cover -func coverage.out
