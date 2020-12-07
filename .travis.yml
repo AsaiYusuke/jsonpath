@@ -3,15 +3,10 @@ language: go
 go:
   - 1.15
 
-env:
-  global:
-    - secure: "Z5BY9fmSUQp+LsGX7L4XvRmy4BsN6wwa5PlylKqRKB9RZCAA6aQc0PcCkBeFimrZMc2bRMahpGCy31XSlNFaVpLKluPGr+vzRb4Kixz3KZYBK3h2PYLYc6ocDgbxejNg0BeTT8qlrcKY/RJXOJyxpnVY+3tL1VfKYcqQ1P4CL9k3t5/NsaBca7OFc7gNu4Ov0A9HtdtdJsJI7YDMfLWbEP/nQinYVpAinE12npA6stUVM7nZaaH2W8tpa9nDIwJf7wXVm6eX04rYa5TT7DyvNLWfy5ewrXnyYkUV45eGWU9dbesSYNfrjkOJPJEaLpGPuLnCDMkF9tqp/jZQkyuLp+QKiR+XasYZ0hoakdO1wWLUiyIBtH50prU0KUstBNeBwDj15J/JadyVtakogJ2/ok0iv8mjOO+pOZ7TfCl9exJrTN7zdZe85XYR9CYum7BWUIJDpCmbeRM9Ev+4AC27ySLpv39/w0+4WxybLyUVciGeI8O5PNF7I0LtTOZbXC6qQ5TLV+/cpJ8sSDzEOuzpQJflnJUD9YoyBEsgM2hNV3EE5jdVkVztTxtTixjvHY59iMYFGzmBJLiqa1I+G03B87WibbXy6azU0kY9TYhwJgWK/n9TFytraKR7yIrWBv0+D2EM6cgxFZ3iLPT58W3LCa31X0mcmRXXha6/chzxGvM="
-
-before_script:
+before_install:
   - go get golang.org/x/tools/cmd/cover # coveralls.io
   - go get github.com/mattn/goveralls   # coveralls.io
 
 script:
   - go test -race
-  - go test -v -covermode=count -coverprofile=coverage.out # coveralls.io
-  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN # coveralls.io
+  - $GOPATH/bin/goveralls -service=travis-ci # coveralls.io
