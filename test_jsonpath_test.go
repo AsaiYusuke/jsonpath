@@ -533,6 +533,12 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
+					`$[''][0]`,
+					`[1,2,3]`,
+					`[1]`,
+					ErrorTypeUnmatched{`object`, `[]interface {}`, `['']`},
+				},
+				{
 					`$['a','b']`,
 					`{"a":1, "b":2}`,
 					`[1,2]`,

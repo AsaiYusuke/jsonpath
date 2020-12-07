@@ -24,11 +24,7 @@ func (i syntaxChildSingleIdentifier) retrieve(
 		return i.retrieveNext(root, child, result)
 
 	case []interface{}:
-		if len(i.identifier) > 0 {
-			return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}
-		}
-		return i.retrieveNext(root, current, result)
-
+		return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}
 	}
 
 	foundType := `null`
