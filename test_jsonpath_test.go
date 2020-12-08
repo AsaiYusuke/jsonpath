@@ -555,6 +555,16 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
+					`$['a\c']`,
+					`{"ac":1,"b":2}`,
+					`[1]`,
+				},
+				{
+					`$["a\c"]`,
+					`{"ac":1,"b":2}`,
+					`[1]`,
+				},
+				{
 					`$['a.b']`,
 					`{"a.b":1,"a":{"b":2}}`,
 					`[1]`,
@@ -621,13 +631,13 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
-					`$['\'']`,
+					`$["'"]`,
 					`{"'":1}`,
 					`[1]`,
 				},
 				{
-					`$['\\']`,
-					`{"\\":1}`,
+					`$['\'']`,
+					`{"'":1}`,
 					`[1]`,
 				},
 				{
@@ -636,8 +646,13 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
-					`$["'"]`,
-					`{"'":1}`,
+					`$['\\']`,
+					`{"\\":1}`,
+					`[1]`,
+				},
+				{
+					`$["\\"]`,
+					`{"\\":1}`,
 					`[1]`,
 				},
 				{
@@ -680,6 +695,12 @@ func TestRetrieve(t *testing.T) {
 					`$['a','b']`,
 					`{"b":2,"a":1}`,
 					`[1,2]`,
+				},
+				{
+					`$['a','b',0]`,
+					`{"b":2,"a":1,"c":3}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `['a','b',0]`},
 				},
 				{
 					`$['a','b'].a`,
@@ -1584,6 +1605,49 @@ func TestRetrieve(t *testing.T) {
 					`[{"a":1.000001},{"a":1.001},{"a":2,"b":4}]`,
 				},
 				{
+					`$[?(@.a=='ab')]`,
+					`[{"a":"ab"}]`,
+					`[{"a":"ab"}]`,
+				},
+				{
+					`$[?(@.a!='ab')]`,
+					`[{"a":"ab"}]`,
+					``,
+					ErrorNoneMatched{`[?(@.a!='ab')]`},
+				},
+				{
+					`$[?(@.a=='a\b')]`,
+					`[{"a":"ab"}]`,
+					`[{"a":"ab"}]`,
+				},
+				{
+					`$[?(@.a!='a\b')]`,
+					`[{"a":"ab"}]`,
+					``,
+					ErrorNoneMatched{`[?(@.a!='a\b')]`},
+				},
+				{
+					`$[?(@.a=="ab")]`,
+					`[{"a":"ab"}]`,
+					`[{"a":"ab"}]`,
+				},
+				{
+					`$[?(@.a!="ab")]`,
+					`[{"a":"ab"}]`,
+					``,
+					ErrorNoneMatched{`[?(@.a!="ab")]`},
+				},
+				{
+					`$[?(@.a=="a\b")]`,
+					`[{"a":"ab"}]`,
+					`[{"a":"ab"}]`,
+				},
+				{
+					`$[?(@.a!="a\b")]`,
+					`[{"a":"ab"}]`,
+					``,
+					ErrorNoneMatched{`[?(@.a!="a\b")]`},
+				}, {
 					`$[?(@.a =~ /ab/)]`,
 					`[{"a":"abc"},{"a":1},{"a":"def"}]`,
 					`[{"a":"abc"}]`,
@@ -2153,6 +2217,18 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{1, `unrecognized input`, `a`},
 				},
 				{
+					`$['a]`,
+					`{"a":1}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `['a]`},
+				},
+				{
+					`$["a]`,
+					`{"a":1}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `["a]`},
+				},
+				{
 					`$.['a']`,
 					`{"a":1}`,
 					``,
@@ -2333,6 +2409,72 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{1, `unrecognized input`, `[?@a]`},
 				},
 				{
+					`$[?(@.a!!=1)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a!!=1)]`},
+				},
+				{
+					`$[?(@.a!=)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a!=)]`},
+				},
+				{
+					`$[?(@.a<=)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a<=)]`},
+				},
+				{
+					`$[?(@.a<)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a<)]`},
+				},
+				{
+					`$[?(@.a>=)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a>=)]`},
+				},
+				{
+					`$[?(@.a>)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a>)]`},
+				},
+				{
+					`$[?(!=@.a)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(!=@.a)]`},
+				},
+				{
+					`$[?(<=@.a)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(<=@.a)]`},
+				},
+				{
+					`$[?(<@.a)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(<@.a)]`},
+				},
+				{
+					`$[?(>=@.a)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(>=@.a)]`},
+				},
+				{
+					`$[?(>@.a)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(>@.a)]`},
+				},
+				{
 					`$[?(@.a===1)]`,
 					`[]`,
 					``,
@@ -2397,6 +2539,30 @@ func TestRetrieve(t *testing.T) {
 					`[0,1,false,true,null,{},[]]`,
 					`[]`,
 					ErrorInvalidSyntax{4, `the omission of '$' allowed only at the beginning`, `null)]`},
+				},
+				{
+					`$[?(@.a>1 && )]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a>1 && )]`},
+				},
+				{
+					`$[?(@.a>1 || )]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a>1 || )]`},
+				},
+				{
+					`$[?( && @.a>1 )]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?( && @.a>1 )]`},
+				},
+				{
+					`$[?( || @.a>1 )]`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?( || @.a>1 )]`},
 				},
 				{
 					`$[?(@.a>1 && false)]`,
@@ -2620,6 +2786,12 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{7, `the omission of '$' allowed only at the beginning`, `{"k":"v"})]`},
 				},
 				{
+					`$[?(@.a=~/abc)]`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a=~/abc)]`},
+				},
+				{
 					`$[?(@.a=~///)]`,
 					`[]`,
 					``,
@@ -2666,6 +2838,18 @@ func TestRetrieve(t *testing.T) {
 					`{}`,
 					``,
 					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a & @.b)]`},
+				},
+				{
+					`$[?(@.a | @.b)]`,
+					`{}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a | @.b)]`},
+				},
+				{
+					`$[()]`,
+					`{}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[()]`},
 				},
 			},
 		},
