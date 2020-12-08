@@ -3151,3 +3151,22 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 		}
 	}
 }
+
+func TestParserExecuteFunctions(t *testing.T) {
+	parser := parser{Buffer: `$`}
+	parser.Init()
+	parser.Parse()
+	parser.Execute()
+
+	parser.AST().isZero()
+	parser.Print()
+	parser.PreOrder()
+	parser.PrintSyntax()
+	parser.PrintSyntaxTree()
+	parser.Error()
+	parser.Expand(10)
+	parser.Highlighter()
+
+	err := parseError{p: &parser}
+	_ = err.Error()
+}
