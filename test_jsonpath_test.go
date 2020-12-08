@@ -557,12 +557,14 @@ func TestRetrieve(t *testing.T) {
 				{
 					`$['a\c']`,
 					`{"ac":1,"b":2}`,
-					`[1]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `['a\c']`},
 				},
 				{
 					`$["a\c"]`,
 					`{"ac":1,"b":2}`,
-					`[1]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `["a\c"]`},
 				},
 				{
 					`$['a.b']`,

@@ -105,7 +105,7 @@ currentRootIdentifier <-
     }
 
 dotChildIdentifier <-
-    < ( '\\' '\\' / '\\' [.[)=!>< \t\r\n] / [^.[)=!>< \t\r\n] )+ > {
+    < ( '\\' '\\' / '\\' [.[)=!>< \t\r\n] / [^\\.[)=!>< \t\r\n] )+ > {
         unescapedText := p.unescape(text)
         if unescapedText == `*` {
             p.push(syntaxChildAsteriskIdentifier{
@@ -158,12 +158,12 @@ bracketNodeIdentifiers <-
     )?
 
 singleQuotedNodeIdentifier <-
-    '\'' < ( '\\' '\\' / '\\' '\'' / [^'] )* > '\'' {
+    '\'' < ( '\\' '\\' / '\\' '\'' / [^\\'] )* > '\'' {
         p.push(p.unescape(text))
     }
 
 doubleQuotedNodeIdentifier <-
-    '"' < ( '\\' '\\' / '\\' '"' / [^"] )* > '"' { // '
+    '"' < ( '\\' '\\' / '\\' '"' / [^\\"] )* > '"' { // '
         p.push(p.unescape(text))
     }
 
