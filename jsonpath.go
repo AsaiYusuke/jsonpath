@@ -1,7 +1,6 @@
 package jsonpath
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 )
@@ -18,10 +17,6 @@ func (j *jsonPathParser) push(param interface{}) {
 }
 
 func (j *jsonPathParser) pop() interface{} {
-	if len(j.params) < 1 {
-		j.thisError = fmt.Errorf(`internal error (empty queue)`)
-		return nil
-	}
 	var param interface{}
 	param, j.params = j.params[len(j.params)-1], j.params[:len(j.params)-1]
 	return param
@@ -48,9 +43,6 @@ func (j *jsonPathParser) toFloat(text string) float64 {
 func (j *jsonPathParser) unescape(text string) string {
 	return j.unescapeRegex.ReplaceAllStringFunc(text, func(block string) string {
 		varBlockSet := j.unescapeRegex.FindStringSubmatch(block)
-		if len(varBlockSet) != 2 {
-			return block
-		}
 		return varBlockSet[1]
 	})
 }
@@ -66,25 +58,15 @@ func (j *jsonPathParser) hasErr() bool {
 func (j *jsonPathParser) parse(jsonPath string) error {
 	parser := parser{Buffer: jsonPath}
 
-	regex, err := regexp.Compile(`\\(.)`)
-	if err != nil {
-		return err
-	}
+	regex, _ := regexp.Compile(`\\(.)`)
 	parser.unescapeRegex = regex
 
 	parser.Init()
-	err = parser.Parse()
-	if err != nil {
-		return err
-	}
-
+	parser.Parse()
 	parser.Execute()
+
 	if parser.thisError != nil {
 		return parser.thisError
-	}
-
-	if len(parser.params) > 0 {
-		return fmt.Errorf(`internal error (%v)`, parser.params)
 	}
 
 	j.root = parser.root
