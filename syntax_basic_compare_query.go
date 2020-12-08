@@ -10,44 +10,22 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 	isLeftLiteral, leftValues := q.getComputeParameters(root, currentMap, q.leftParam)
 	isRightLiteral, rightValues := q.getComputeParameters(root, currentMap, q.rightParam)
 
-	if isLeftLiteral && isRightLiteral {
-		leftValue, leftOk := q.comparator.typeCast(leftValues[0])
-		rightValue, rightOk := q.comparator.typeCast(rightValues[0])
-		if leftOk && rightOk && q.comparator.comparator(leftValue, rightValue) {
-			return currentMap
-		}
-		return nil
-	}
-
-	if !isLeftLiteral && isRightLiteral {
-		result := make(map[int]interface{}, len(leftValues))
-		rightValue, rightOk := q.comparator.typeCast(rightValues[0])
-		if rightOk {
-			for leftIndex, leftValue := range leftValues {
-				leftValue, leftOk := q.comparator.typeCast(leftValue)
-				if leftOk && q.comparator.comparator(leftValue, rightValue) {
+	result := make(map[int]interface{}, len(leftValues))
+	for leftIndex, leftValue := range leftValues {
+		for rightIndex, rightValue := range rightValues {
+			if q.comparator.comparator(leftValue, rightValue) {
+				if isLeftLiteral && isRightLiteral {
+					return currentMap
+				} else if !isLeftLiteral {
 					result[leftIndex] = leftValue
-				}
-			}
-		}
-		return result
-	}
-
-	if isLeftLiteral && !isRightLiteral {
-		result := make(map[int]interface{}, len(rightValues))
-		leftValue, leftOk := q.comparator.typeCast(leftValues[0])
-		if leftOk {
-			for rightIndex, rightValue := range rightValues {
-				rightValue, rightOk := q.comparator.typeCast(rightValue)
-				if rightOk && q.comparator.comparator(leftValue, rightValue) {
+				} else {
 					result[rightIndex] = rightValue
 				}
 			}
 		}
-		return result
 	}
 
-	return nil
+	return result
 }
 
 func (q *syntaxBasicCompareQuery) getComputeParameters(
@@ -67,5 +45,13 @@ func (q *syntaxBasicCompareQuery) getComputeParameters(
 		}
 	}
 
-	return isLiteral, param.compute(root, currentMap)
+	computedValues := param.compute(root, currentMap)
+	result := make(map[int]interface{}, len(computedValues))
+	for index, value := range computedValues {
+		if cast, ok := q.comparator.typeCast(value); ok {
+			result[index] = cast
+		}
+	}
+
+	return isLiteral, result
 }
