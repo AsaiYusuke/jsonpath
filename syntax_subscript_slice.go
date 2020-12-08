@@ -24,7 +24,22 @@ func (s syntaxSlice) getIndexes(src []interface{}) []int {
 	}
 
 	srcLength := len(src)
+	loopStart := s.getLoopStart(direction, srcLength)
+	loopEnd := s.getLoopEnd(direction, srcLength)
 
+	result := make([]int, 0)
+
+	for i := loopStart; i*direction < loopEnd*direction; i += loopStep {
+		if i < 0 || i >= srcLength {
+			break
+		}
+		result = append(result, i)
+	}
+
+	return result
+}
+
+func (s syntaxSlice) getLoopStart(direction, srcLength int) int {
 	loopStart := s.start.number
 	if direction > 0 {
 		if s.start.isOmitted {
@@ -41,7 +56,10 @@ func (s syntaxSlice) getIndexes(src []interface{}) []int {
 			loopStart = int(math.Min(float64(loopStart-srcLength), float64(srcLength-1)))
 		}
 	}
+	return loopStart
+}
 
+func (s syntaxSlice) getLoopEnd(direction, srcLength int) int {
 	loopEnd := s.end.number
 	if direction > 0 {
 		if s.end.isOmitted {
@@ -58,15 +76,5 @@ func (s syntaxSlice) getIndexes(src []interface{}) []int {
 			loopEnd = int(math.Min(float64(loopEnd-srcLength), float64(srcLength)))
 		}
 	}
-
-	result := make([]int, 0)
-
-	for i := loopStart; i*direction < loopEnd*direction; i += loopStep {
-		if i < 0 || i >= srcLength {
-			break
-		}
-		result = append(result, i)
-	}
-
-	return result
+	return loopEnd
 }
