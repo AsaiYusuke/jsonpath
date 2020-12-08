@@ -1,12 +1,12 @@
 package jsonpath
 
 import (
-	"strings"
-	"regexp"
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const endSymbol rune = 1114112
