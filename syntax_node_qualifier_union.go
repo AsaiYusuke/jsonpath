@@ -2,13 +2,13 @@ package jsonpath
 
 import "reflect"
 
-type syntaxUnion struct {
+type syntaxUnionQualifier struct {
 	*syntaxBasicNode
 
 	subscripts []syntaxSubscript
 }
 
-func (u syntaxUnion) retrieve(root, current interface{}, result *resultContainer) error {
+func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *resultContainer) error {
 	if _, ok := current.(map[string]interface{}); ok {
 		if len(u.subscripts) == 1 {
 			if _, ok := u.subscripts[0].(syntaxAsterisk); ok {
@@ -60,10 +60,10 @@ func (u syntaxUnion) retrieve(root, current interface{}, result *resultContainer
 	return u.retrieveNext(root, srcArray[indexes[0]], result)
 }
 
-func (u *syntaxUnion) add(subscript syntaxSubscript) {
+func (u *syntaxUnionQualifier) add(subscript syntaxSubscript) {
 	u.subscripts = append(u.subscripts, subscript)
 }
 
-func (u *syntaxUnion) merge(union syntaxUnion) {
+func (u *syntaxUnionQualifier) merge(union syntaxUnionQualifier) {
 	u.subscripts = append(u.subscripts, union.subscripts...)
 }

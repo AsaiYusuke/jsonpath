@@ -1,11 +1,11 @@
 package jsonpath
 
-type syntaxScript struct {
+type syntaxScriptQualifier struct {
 	*syntaxBasicNode
 
 	command string
 }
 
-func (s syntaxScript) retrieve(root, current interface{}, result *resultContainer) error {
+func (s syntaxScriptQualifier) retrieve(root, current interface{}, result *resultContainer) error {
 	return ErrorNotSupported{`script`, s.text}
 }

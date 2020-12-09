@@ -748,7 +748,7 @@ func (p *parser) Execute() {
 		case ruleAction18:
 
 			subscript := p.pop().(syntaxSubscript)
-			union := syntaxUnion{
+			union := syntaxUnionQualifier{
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: subscript.isMultiValue(),
 				}}
@@ -757,8 +757,8 @@ func (p *parser) Execute() {
 
 		case ruleAction19:
 
-			childIndexUnion := p.pop().(syntaxUnion)
-			parentIndexUnion := p.pop().(syntaxUnion)
+			childIndexUnion := p.pop().(syntaxUnionQualifier)
+			parentIndexUnion := p.pop().(syntaxUnionQualifier)
 			parentIndexUnion.merge(childIndexUnion)
 			parentIndexUnion.setMultiValue()
 			p.push(parentIndexUnion)
@@ -824,7 +824,7 @@ func (p *parser) Execute() {
 
 		case ruleAction25:
 
-			p.push(syntaxScript{
+			p.push(syntaxScriptQualifier{
 				command: text,
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: true,
@@ -833,7 +833,7 @@ func (p *parser) Execute() {
 
 		case ruleAction26:
 
-			p.push(syntaxFilter{
+			p.push(syntaxFilterQualifier{
 				query: p.pop().(syntaxQuery),
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: true,
@@ -4025,7 +4025,7 @@ func (p *parser) Init() {
 		},
 		/* 70 Action18 <- <{
 		    subscript := p.pop().(syntaxSubscript)
-		    union := syntaxUnion{
+		    union := syntaxUnionQualifier{
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: subscript.isMultiValue(),
 		        }}
@@ -4039,8 +4039,8 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 71 Action19 <- <{
-		    childIndexUnion := p.pop().(syntaxUnion)
-		    parentIndexUnion := p.pop().(syntaxUnion)
+		    childIndexUnion := p.pop().(syntaxUnionQualifier)
+		    parentIndexUnion := p.pop().(syntaxUnionQualifier)
 		    parentIndexUnion.merge(childIndexUnion)
 		    parentIndexUnion.setMultiValue()
 		    p.push(parentIndexUnion)
@@ -4136,7 +4136,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 77 Action25 <- <{
-		    p.push(syntaxScript{
+		    p.push(syntaxScriptQualifier{
 		        command: text,
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: true,
@@ -4150,7 +4150,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 78 Action26 <- <{
-		    p.push(syntaxFilter{
+		    p.push(syntaxFilterQualifier{
 		        query: p.pop().(syntaxQuery),
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: true,

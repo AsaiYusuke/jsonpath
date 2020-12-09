@@ -4,13 +4,13 @@ import (
 	"sort"
 )
 
-type syntaxFilter struct {
+type syntaxFilterQualifier struct {
 	*syntaxBasicNode
 
 	query syntaxQuery
 }
 
-func (f syntaxFilter) retrieve(root, current interface{}, result *resultContainer) error {
+func (f syntaxFilterQualifier) retrieve(root, current interface{}, result *resultContainer) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
