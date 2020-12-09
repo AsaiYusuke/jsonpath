@@ -3,6 +3,7 @@ package jsonpath
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -1493,6 +1494,12 @@ func TestRetrieve(t *testing.T) {
 					`["first","second","third"]`,
 					``,
 					ErrorNoneMatched{`[2:6:-1]`},
+				},
+				{
+					`$[2:7:-1]`,
+					`["first","second","third"]`,
+					``,
+					ErrorNoneMatched{`[2:7:-1]`},
 				},
 				{
 					`$[-1:0:-1]`,
@@ -3153,6 +3160,9 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 }
 
 func TestParserExecuteFunctions(t *testing.T) {
+	stdoutBackup := os.Stdout
+	os.Stdout = nil
+
 	parser := parser{Buffer: `$`}
 	parser.Init()
 	parser.Parse()
@@ -3169,4 +3179,6 @@ func TestParserExecuteFunctions(t *testing.T) {
 
 	err := parseError{p: &parser}
 	_ = err.Error()
+
+	os.Stdout = stdoutBackup
 }
