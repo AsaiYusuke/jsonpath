@@ -11,11 +11,8 @@ func (e syntaxQueryParamRoot) compute(root interface{}, currentMap map[int]inter
 		return result
 	}
 	var _result interface{}
-	if e.param.isMultiValue() {
-		_result = values.getResult()
-	} else {
-		_result = values.getResult()[0]
-	}
+	// e.param.isMultiValue() should always be false.
+	_result = values.getResult()[0]
 	for index := range currentMap {
 		result[index] = _result
 	}
