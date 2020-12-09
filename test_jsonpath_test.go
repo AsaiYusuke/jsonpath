@@ -1796,10 +1796,6 @@ func TestRetrieve(t *testing.T) {
 					`[{"a":"ab"}]`,
 					``,
 					ErrorNoneMatched{`[?(@.a!="a\b")]`},
-				}, {
-					`$[?(@.a =~ /ab/)]`,
-					`[{"a":"abc"},{"a":1},{"a":"def"}]`,
-					`[{"a":"abc"}]`,
 				},
 				{
 					`$[?(@.a == $[2].b)]`,
@@ -2149,6 +2145,11 @@ func TestRetrieve(t *testing.T) {
 			`Regex`,
 			[][]interface{}{
 				{
+					`$[?(@.a =~ /ab/)]`,
+					`[{"a":"abc"},{"a":1},{"a":"def"}]`,
+					`[{"a":"abc"}]`,
+				},
+				{
 					`$[?(@.a =~ /123/)]`,
 					`[{"a":123},{"a":"123"},{"a":"12"},{"a":"23"},{"a":"0123"},{"a":"1234"}]`,
 					`[{"a":"123"},{"a":"0123"},{"a":"1234"}]`,
@@ -2239,12 +2240,10 @@ func TestRetrieve(t *testing.T) {
 					`[123]`,
 				},
 				{
-					`$.a
-`,
+					`$.a` + "\n",
 					`{"a":123}`,
 					``,
-					ErrorInvalidSyntax{3, `unrecognized input`, `
-`},
+					ErrorInvalidSyntax{3, `unrecognized input`, "\n"},
 				},
 				{
 					`$[ "a" , "c" ]`,
