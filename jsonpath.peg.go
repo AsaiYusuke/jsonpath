@@ -865,8 +865,8 @@ func (p *parser) Execute() {
 					checkQuery = (query.(syntaxLogicalNot)).param.(syntaxBasicCompareQuery)
 				}
 
-				_, leftIsCurrentRoot := checkQuery.leftParam.(syntaxCurrentRootNodeFilter)
-				_, rigthIsCurrentRoot := checkQuery.rightParam.(syntaxCurrentRootNodeFilter)
+				_, leftIsCurrentRoot := checkQuery.leftParam.(syntaxQueryParamCurrentRoot)
+				_, rigthIsCurrentRoot := checkQuery.rightParam.(syntaxQueryParamCurrentRoot)
 				if leftIsCurrentRoot && rigthIsCurrentRoot {
 					p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
 				}
@@ -885,11 +885,11 @@ func (p *parser) Execute() {
 			var nodeFilter syntaxQuery
 			switch node.(type) {
 			case syntaxRootIdentifier:
-				nodeFilter = syntaxRootNodeFilter{node.(syntaxRootIdentifier)}
+				nodeFilter = syntaxQueryParamRoot{node.(syntaxRootIdentifier)}
 			case syntaxCurrentRootIdentifier:
-				nodeFilter = syntaxCurrentRootNodeFilter{node.(syntaxCurrentRootIdentifier)}
+				nodeFilter = syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)}
 			default:
-				nodeFilter = syntaxRootNodeFilter{}
+				nodeFilter = syntaxQueryParamRoot{}
 			}
 			if isLogicalNot {
 				p.push(syntaxLogicalNot{nodeFilter})
@@ -964,15 +964,15 @@ func (p *parser) Execute() {
 			var nodeFilter syntaxQuery
 			switch node.(type) {
 			case syntaxRootIdentifier:
-				nodeFilter = syntaxRootNodeFilter{node.(syntaxRootIdentifier)}
+				nodeFilter = syntaxQueryParamRoot{node.(syntaxRootIdentifier)}
 			case syntaxCurrentRootIdentifier:
-				nodeFilter = syntaxCurrentRootNodeFilter{node.(syntaxCurrentRootIdentifier)}
+				nodeFilter = syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)}
 			default:
-				nodeFilter = syntaxRootNodeFilter{}
+				nodeFilter = syntaxQueryParamRoot{}
 			}
 			p.push(syntaxBasicCompareQuery{
 				leftParam:  nodeFilter,
-				rightParam: syntaxCompareLiteral{literal: `regex`},
+				rightParam: syntaxQueryParamLiteral{literal: `regex`},
 				comparator: syntaxCompareRegex{
 					regex: regex,
 				},
@@ -980,22 +980,22 @@ func (p *parser) Execute() {
 
 		case ruleAction39:
 
-			p.push(syntaxCompareLiteral{p.pop()})
+			p.push(syntaxQueryParamLiteral{p.pop()})
 
 		case ruleAction40:
 
-			p.push(syntaxCompareLiteral{p.pop()})
+			p.push(syntaxQueryParamLiteral{p.pop()})
 
 		case ruleAction41:
 
 			node := p.pop().(syntaxNode)
 			switch node.(type) {
 			case syntaxRootIdentifier:
-				p.push(syntaxRootNodeFilter{node.(syntaxRootIdentifier)})
+				p.push(syntaxQueryParamRoot{node.(syntaxRootIdentifier)})
 			case syntaxCurrentRootIdentifier:
-				p.push(syntaxCurrentRootNodeFilter{node.(syntaxCurrentRootIdentifier)})
+				p.push(syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)})
 			default:
-				p.push(syntaxRootNodeFilter{})
+				p.push(syntaxQueryParamRoot{})
 			}
 			if !p.hasErr() && node.isMultiValue() {
 				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterMultiValuedNode, buffer)
@@ -4197,8 +4197,8 @@ func (p *parser) Init() {
 		            checkQuery = (query.(syntaxLogicalNot)).param.(syntaxBasicCompareQuery)
 		        }
 
-		        _, leftIsCurrentRoot := checkQuery.leftParam.(syntaxCurrentRootNodeFilter)
-		        _, rigthIsCurrentRoot := checkQuery.rightParam.(syntaxCurrentRootNodeFilter)
+		        _, leftIsCurrentRoot := checkQuery.leftParam.(syntaxQueryParamCurrentRoot)
+		        _, rigthIsCurrentRoot := checkQuery.rightParam.(syntaxQueryParamCurrentRoot)
 		        if leftIsCurrentRoot && rigthIsCurrentRoot {
 		            p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
 		        }
@@ -4227,11 +4227,11 @@ func (p *parser) Init() {
 		    var nodeFilter syntaxQuery
 		    switch node.(type) {
 		    case syntaxRootIdentifier:
-		        nodeFilter = syntaxRootNodeFilter{node.(syntaxRootIdentifier)}
+		        nodeFilter = syntaxQueryParamRoot{node.(syntaxRootIdentifier)}
 		    case syntaxCurrentRootIdentifier:
-		        nodeFilter = syntaxCurrentRootNodeFilter{node.(syntaxCurrentRootIdentifier)}
+		        nodeFilter = syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)}
 		    default:
-		        nodeFilter = syntaxRootNodeFilter{}
+		        nodeFilter = syntaxQueryParamRoot{}
 		    }
 		    if isLogicalNot {
 		        p.push(syntaxLogicalNot{nodeFilter})
@@ -4341,15 +4341,15 @@ func (p *parser) Init() {
 		    var nodeFilter syntaxQuery
 		    switch node.(type) {
 		    case syntaxRootIdentifier:
-		        nodeFilter = syntaxRootNodeFilter{node.(syntaxRootIdentifier)}
+		        nodeFilter = syntaxQueryParamRoot{node.(syntaxRootIdentifier)}
 		    case syntaxCurrentRootIdentifier:
-		        nodeFilter = syntaxCurrentRootNodeFilter{node.(syntaxCurrentRootIdentifier)}
+		        nodeFilter = syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)}
 		    default:
-		        nodeFilter = syntaxRootNodeFilter{}
+		        nodeFilter = syntaxQueryParamRoot{}
 		    }
 		    p.push(syntaxBasicCompareQuery{
 		        leftParam: nodeFilter,
-		        rightParam: syntaxCompareLiteral{literal: `regex`},
+		        rightParam: syntaxQueryParamLiteral{literal: `regex`},
 		        comparator: syntaxCompareRegex{
 		            regex: regex,
 		        },
@@ -4362,7 +4362,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 91 Action39 <- <{
-		    p.push(syntaxCompareLiteral{p.pop()})
+		    p.push(syntaxQueryParamLiteral{p.pop()})
 		}> */
 		func() bool {
 			{
@@ -4371,7 +4371,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 92 Action40 <- <{
-		    p.push(syntaxCompareLiteral{p.pop()})
+		    p.push(syntaxQueryParamLiteral{p.pop()})
 		}> */
 		func() bool {
 			{
@@ -4383,11 +4383,11 @@ func (p *parser) Init() {
 		    node := p.pop().(syntaxNode)
 		    switch node.(type) {
 		    case syntaxRootIdentifier:
-		        p.push(syntaxRootNodeFilter{node.(syntaxRootIdentifier)})
+		        p.push(syntaxQueryParamRoot{node.(syntaxRootIdentifier)})
 		    case syntaxCurrentRootIdentifier:
-		        p.push(syntaxCurrentRootNodeFilter{node.(syntaxCurrentRootIdentifier)})
+		        p.push(syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)})
 		    default:
-		        p.push(syntaxRootNodeFilter{})
+		        p.push(syntaxQueryParamRoot{})
 		    }
 		    if !p.hasErr() && node.isMultiValue() {
 		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterMultiValuedNode, buffer)

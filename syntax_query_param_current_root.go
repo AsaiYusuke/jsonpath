@@ -1,10 +1,10 @@
 package jsonpath
 
-type syntaxCurrentRootNodeFilter struct {
+type syntaxQueryParamCurrentRoot struct {
 	param syntaxCurrentRootIdentifier
 }
 
-func (e syntaxCurrentRootNodeFilter) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+func (e syntaxQueryParamCurrentRoot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 	result := make(map[int]interface{}, len(currentMap))
 	for index, srcNode := range currentMap {
 		values := resultContainer{}

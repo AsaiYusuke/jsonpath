@@ -1,10 +1,10 @@
 package jsonpath
 
-type syntaxRootNodeFilter struct {
+type syntaxQueryParamRoot struct {
 	param syntaxRootIdentifier
 }
 
-func (e syntaxRootNodeFilter) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+func (e syntaxQueryParamRoot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 	result := make(map[int]interface{}, 0)
 	values := resultContainer{}
 	if err := e.param.retrieve(root, root, &values); err != nil {
