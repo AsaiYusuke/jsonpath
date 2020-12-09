@@ -1718,6 +1718,17 @@ func TestRetrieve(t *testing.T) {
 					``,
 					ErrorNoneMatched{`.*[?(@.a)]`},
 				},
+				{
+					`$[?($[0].a)]`,
+					`[{"a":1},{"b":2}]`,
+					`[{"a":1},{"b":2}]`,
+				},
+				{
+					`$[?(!$[0].a)]`,
+					`[{"a":1},{"b":2}]`,
+					``,
+					ErrorNoneMatched{`[?(!$[0].a)]`},
+				},
 			},
 		},
 		{
@@ -2111,6 +2122,12 @@ func TestRetrieve(t *testing.T) {
 					``,
 					ErrorInvalidSyntax{6, `multi-valued node retrieve into the filter is prohibited`, `@[*]>=$.y.a[0:1])]`},
 				},
+				{
+					`$[?(@.a == $.b)]`,
+					`[{"a":1},{"a":2}]`,
+					``,
+					ErrorNoneMatched{`[?(@.a == $.b)]`},
+				},
 			},
 		},
 		{
@@ -2168,6 +2185,11 @@ func TestRetrieve(t *testing.T) {
 					`$[?(@.a=~/(?i)CASE/)]`,
 					`[{"a":"case"},{"a":"CASE"},{"a":"Case"},{"a":"abc"}]`,
 					`[{"a":"case"},{"a":"CASE"},{"a":"Case"}]`,
+				},
+				{
+					`$[?($..a=~/123/)]`,
+					`[{"a":"123"},{"a":123}]`,
+					`[{"a":"123"},{"a":123}]`,
 				},
 			},
 		},
@@ -2956,6 +2978,12 @@ func TestRetrieve(t *testing.T) {
 					`[]`,
 					``,
 					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a=~@abc@)]`},
+				},
+				{
+					`$[?(a=~/123/)]`,
+					`[{"a":"123"},{"a":123}]`,
+					``,
+					ErrorInvalidSyntax{4, `the omission of '$' allowed only at the beginning`, `a=~/123/)]`},
 				},
 				{
 					`$[?(@.a=2)]`,
