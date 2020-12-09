@@ -20,8 +20,7 @@ func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, resu
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			child := srcMap[key]
-			i.retrieve(root, child, result)
+			i.retrieve(root, srcMap[key], result)
 		}
 
 	case []interface{}:

@@ -11,8 +11,11 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 	isRightLiteral, rightValues := q.getComputeParameters(root, currentMap, q.rightParam)
 
 	result := make(map[int]interface{}, len(leftValues))
-	for leftIndex, leftValue := range leftValues {
-		for rightIndex, rightValue := range rightValues {
+
+	var leftIndex, rightIndex int
+	var leftValue, rightValue interface{}
+	for leftIndex, leftValue = range leftValues {
+		for rightIndex, rightValue = range rightValues {
 			if q.comparator.comparator(leftValue, rightValue) {
 				if isLeftLiteral && isRightLiteral {
 					return currentMap
