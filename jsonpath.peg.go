@@ -768,14 +768,30 @@ func (p *parser) Execute() {
 			step := p.pop().(syntaxIndex)
 			end := p.pop().(syntaxIndex)
 			start := p.pop().(syntaxIndex)
-			p.push(syntaxSlice{
-				syntaxBasicSubscript: &syntaxBasicSubscript{
-					multiValue: true,
-				},
-				start: start,
-				end:   end,
-				step:  step,
-			})
+
+			if step.isOmitted || step.number == 0 {
+				step.number = 1
+			}
+
+			if step.number > 0 {
+				p.push(syntaxSlicePositiveStep{
+					syntaxBasicSubscript: &syntaxBasicSubscript{
+						multiValue: true,
+					},
+					start: start,
+					end:   end,
+					step:  step,
+				})
+			} else {
+				p.push(syntaxSliceNegativeStep{
+					syntaxBasicSubscript: &syntaxBasicSubscript{
+						multiValue: true,
+					},
+					start: start,
+					end:   end,
+					step:  step,
+				})
+			}
 
 		case ruleAction21:
 
@@ -4015,14 +4031,30 @@ func (p *parser) Init() {
 		    step  := p.pop().(syntaxIndex)
 		    end   := p.pop().(syntaxIndex)
 		    start := p.pop().(syntaxIndex)
-		    p.push(syntaxSlice{
-		        syntaxBasicSubscript: &syntaxBasicSubscript{
-		            multiValue: true,
-		        },
-		        start: start,
-		        end: end,
-		        step: step,
-		    })
+
+		    if step.isOmitted || step.number == 0 {
+		        step.number = 1
+		    }
+
+		    if step.number > 0 {
+		        p.push(syntaxSlicePositiveStep{
+		            syntaxBasicSubscript: &syntaxBasicSubscript{
+		                multiValue: true,
+		            },
+		            start: start,
+		            end: end,
+		            step: step,
+		        })
+		    } else {
+		        p.push(syntaxSliceNegativeStep{
+		            syntaxBasicSubscript: &syntaxBasicSubscript{
+		                multiValue: true,
+		            },
+		            start: start,
+		            end: end,
+		            step: step,
+		        })
+		    }
 		}> */
 		func() bool {
 			{
