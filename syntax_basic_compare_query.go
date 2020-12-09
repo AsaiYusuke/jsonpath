@@ -37,12 +37,9 @@ func (q *syntaxBasicCompareQuery) getComputeParameters(
 	switch param.(type) {
 	case syntaxCompareLiteral:
 		isLiteral = true
-	case syntaxNodeFilter:
-		filter := param.(syntaxNodeFilter)
-		if filter.isRoot() {
-			isLiteral = true
-			currentMap = map[int]interface{}{0: root}
-		}
+	case syntaxRootNodeFilter:
+		isLiteral = true
+		currentMap = map[int]interface{}{0: root}
 	}
 
 	computedValues := param.compute(root, currentMap)
