@@ -2128,6 +2128,24 @@ func TestRetrieve(t *testing.T) {
 					``,
 					ErrorNoneMatched{`[?(@.a == $.b)]`},
 				},
+				{
+					`$[?($.b == @.a)]`,
+					`[{"a":1},{"a":2}]`,
+					``,
+					ErrorNoneMatched{`[?($.b == @.a)]`},
+				},
+				{
+					`$[?(@.b == $[0].a)]`,
+					`[{"a":1},{"a":2}]`,
+					``,
+					ErrorNoneMatched{`[?(@.b == $[0].a)]`},
+				},
+				{
+					`$[?($[0].a == @.b)]`,
+					`[{"a":1},{"a":2}]`,
+					``,
+					ErrorNoneMatched{`[?($[0].a == @.b)]`},
+				},
 			},
 		},
 		{
