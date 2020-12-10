@@ -619,17 +619,13 @@ func (p *parser) Execute() {
 		case ruleAction3:
 
 			rootNode := p.pop().(syntaxNode)
-			checkNode := rootNode
-			for {
-				if checkNode.isMultiValue() {
+			checkNode := &rootNode
+			for checkNode != nil {
+				if (*checkNode).isMultiValue() {
 					rootNode.setMultiValue()
 					break
 				}
-				next := checkNode.getNext()
-				if next == nil {
-					break
-				}
-				checkNode = *next
+				checkNode = (*checkNode).getNext()
 			}
 			p.push(rootNode)
 
@@ -3820,21 +3816,17 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 55 Action3 <- <{
-		    rootNode := p.pop().(syntaxNode)
-		    checkNode := rootNode
-		    for {
-		        if checkNode.isMultiValue() {
-		            rootNode.setMultiValue()
-		            break
+		        rootNode := p.pop().(syntaxNode)
+		        checkNode := &rootNode
+		        for checkNode != nil {
+					if (*checkNode).isMultiValue() {
+		                rootNode.setMultiValue()
+		                break
+		            }
+		            checkNode =  (*checkNode).getNext()
 		        }
-		        next := checkNode.getNext()
-		        if next == nil {
-		            break
-		        }
-		        checkNode = *next
-		    }
-		    p.push(rootNode)
-		}> */
+		        p.push(rootNode)
+		    }> */
 		func() bool {
 			{
 				add(ruleAction3, position)

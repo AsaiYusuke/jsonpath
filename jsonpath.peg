@@ -28,17 +28,13 @@ jsonpath <-
         }
     )? space {
         rootNode := p.pop().(syntaxNode)
-        checkNode := rootNode
-        for {
-            if checkNode.isMultiValue() {
+        checkNode := &rootNode
+        for checkNode != nil {
+			if (*checkNode).isMultiValue() {
                 rootNode.setMultiValue()
                 break
             }
-            next := checkNode.getNext()
-            if next == nil {
-                break
-            }
-            checkNode = *next
+            checkNode =  (*checkNode).getNext()
         }
         p.push(rootNode)
     }
