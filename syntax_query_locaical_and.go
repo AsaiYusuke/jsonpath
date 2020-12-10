@@ -6,13 +6,12 @@ type syntaxLogicalAnd struct {
 }
 
 func (l syntaxLogicalAnd) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
-	computedMap1 := l.leftParam.compute(root, currentMap)
-	computedMap2 := l.rightParam.compute(root, currentMap)
-	resultMap := make(map[int]interface{}, len(computedMap1))
-	for index := range computedMap1 {
-		if _, ok := computedMap2[index]; ok {
-			resultMap[index] = 1
+	leftComputedMap := l.leftParam.compute(root, currentMap)
+	rightComputedMap := l.rightParam.compute(root, currentMap)
+	for index := range leftComputedMap {
+		if _, ok := rightComputedMap[index]; !ok {
+			delete(leftComputedMap, index)
 		}
 	}
-	return resultMap
+	return leftComputedMap
 }

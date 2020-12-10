@@ -32,8 +32,7 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 }
 
 func (q *syntaxBasicCompareQuery) getComputeParameters(
-	root interface{}, currentMap map[int]interface{},
-	param syntaxQuery) (bool, map[int]interface{}) {
+	root interface{}, currentMap map[int]interface{}, param syntaxQuery) (bool, map[int]interface{}) {
 
 	var isLiteral bool
 
@@ -46,12 +45,14 @@ func (q *syntaxBasicCompareQuery) getComputeParameters(
 	}
 
 	computedValues := param.compute(root, currentMap)
-	result := make(map[int]interface{}, len(computedValues))
+
 	for index, value := range computedValues {
 		if cast, ok := q.comparator.typeCast(value); ok {
-			result[index] = cast
+			computedValues[index] = cast
+		} else {
+			delete(computedValues, index)
 		}
 	}
 
-	return isLiteral, result
+	return isLiteral, computedValues
 }

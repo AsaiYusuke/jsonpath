@@ -6,13 +6,12 @@ type syntaxLogicalOr struct {
 }
 
 func (l syntaxLogicalOr) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
-	computedMap1 := l.leftParam.compute(root, currentMap)
-	computedMap2 := l.rightParam.compute(root, currentMap)
-	resultMap := computedMap1
-	for index := range computedMap2 {
-		if _, ok := computedMap1[index]; !ok {
-			resultMap[index] = 1
+	leftComputedMap := l.leftParam.compute(root, currentMap)
+	rightComputedMap := l.rightParam.compute(root, currentMap)
+	for index := range rightComputedMap {
+		if _, ok := leftComputedMap[index]; !ok {
+			leftComputedMap[index] = 1
 		}
 	}
-	return resultMap
+	return leftComputedMap
 }
