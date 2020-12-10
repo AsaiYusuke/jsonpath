@@ -10,8 +10,6 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 	isLeftLiteral, leftValues := q.getComputeParameters(root, currentMap, q.leftParam)
 	isRightLiteral, rightValues := q.getComputeParameters(root, currentMap, q.rightParam)
 
-	result := make(map[int]interface{}, len(leftValues))
-
 	var leftIndex, rightIndex int
 	var leftValue, rightValue interface{}
 	for leftIndex, leftValue = range leftValues {
@@ -19,16 +17,24 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 			if q.comparator.comparator(leftValue, rightValue) {
 				if isLeftLiteral && isRightLiteral {
 					return currentMap
-				} else if !isLeftLiteral {
-					result[leftIndex] = leftValue
+				}
+			} else {
+				if !isLeftLiteral {
+					delete(leftValues, leftIndex)
 				} else {
-					result[rightIndex] = rightValue
+					delete(rightValues, rightIndex)
 				}
 			}
 		}
 	}
 
-	return result
+	if !isLeftLiteral && len(rightValues) > 0 {
+		return leftValues
+	}
+	if !isRightLiteral && len(leftValues) > 0 {
+		return rightValues
+	}
+	return nil
 }
 
 func (q *syntaxBasicCompareQuery) getComputeParameters(
