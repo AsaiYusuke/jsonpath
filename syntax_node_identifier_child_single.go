@@ -16,8 +16,7 @@ func (i syntaxChildSingleIdentifier) retrieve(
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
-		identifier := i.identifier
-		child, ok := srcMap[identifier]
+		child, ok := srcMap[i.identifier]
 		if !ok {
 			return ErrorMemberNotExist{i.text}
 		}
