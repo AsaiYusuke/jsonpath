@@ -27,9 +27,9 @@ func (f syntaxFilterQualifier) retrieve(root, current interface{}, result *resul
 		computedMap := f.query.compute(root, argumentMap)
 
 		if len(computedMap) > 0 {
-			for index, key := range keys {
+			for index := range keys {
 				if _, ok := computedMap[index]; ok {
-					f.retrieveNext(root, srcMap[key], result)
+					f.retrieveNext(root, argumentMap[index], result)
 				}
 			}
 		}
