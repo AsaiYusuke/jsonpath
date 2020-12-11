@@ -73,15 +73,6 @@ func (j *jsonPathParser) parse(jsonPath string) error {
 	return nil
 }
 
-func (j *jsonPathParser) retrieve(src interface{}) ([]interface{}, error) {
-	result := resultContainer{}
-	if err := j.root.retrieve(src, src, &result); err != nil {
-		return nil, err
-	}
-
-	return result.getResult(), nil
-}
-
 // Retrieve returns the retrieved JSON using the given JSONPath.
 func Retrieve(jsonPath string, src interface{}) ([]interface{}, error) {
 	jsonPathFunc, err := Parse(jsonPath)
@@ -98,6 +89,10 @@ func Parse(jsonPath string) (func(src interface{}) ([]interface{}, error), error
 		return nil, err
 	}
 	return func(src interface{}) ([]interface{}, error) {
-		return jsonpath.retrieve(src)
+		result := make([]interface{}, 0)
+		if err := jsonpath.root.retrieve(src, src, &result); err != nil {
+			return nil, err
+		}
+		return result, nil
 	}, nil
 }

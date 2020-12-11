@@ -11,7 +11,7 @@ type syntaxChildSingleIdentifier struct {
 }
 
 func (i syntaxChildSingleIdentifier) retrieve(
-	root, current interface{}, result *resultContainer) error {
+	root, current interface{}, result *[]interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:

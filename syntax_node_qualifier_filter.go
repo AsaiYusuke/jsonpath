@@ -10,7 +10,7 @@ type syntaxFilterQualifier struct {
 	query syntaxQuery
 }
 
-func (f syntaxFilterQualifier) retrieve(root, current interface{}, result *resultContainer) error {
+func (f syntaxFilterQualifier) retrieve(root, current interface{}, result *[]interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
@@ -54,7 +54,7 @@ func (f syntaxFilterQualifier) retrieve(root, current interface{}, result *resul
 
 	}
 
-	if !result.hasResult() {
+	if len(*result) == 0 {
 		return ErrorNoneMatched{f.getConnectedText()}
 	}
 

@@ -37,10 +37,10 @@ func (i *syntaxBasicNode) getNext() *syntaxNode {
 	return i.next
 }
 
-func (i *syntaxBasicNode) retrieveNext(root, current interface{}, result *resultContainer) error {
+func (i *syntaxBasicNode) retrieveNext(root, current interface{}, result *[]interface{}) error {
 	if i.next != nil {
 		return (*i.next).retrieve(root, current, result)
 	}
-	result.append(current)
+	*result = append(*result, current)
 	return nil
 }

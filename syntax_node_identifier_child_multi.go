@@ -11,7 +11,7 @@ type syntaxChildMultiIdentifier struct {
 }
 
 func (i syntaxChildMultiIdentifier) retrieve(
-	root interface{}, current interface{}, result *resultContainer) error {
+	root interface{}, current interface{}, result *[]interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:
@@ -26,7 +26,7 @@ func (i syntaxChildMultiIdentifier) retrieve(
 		return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}
 	}
 
-	if !result.hasResult() {
+	if len(*result) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 

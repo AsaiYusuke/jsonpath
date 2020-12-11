@@ -8,7 +8,7 @@ type syntaxUnionQualifier struct {
 	subscripts []syntaxSubscript
 }
 
-func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *resultContainer) error {
+func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *[]interface{}) error {
 	if _, ok := current.(map[string]interface{}); ok {
 		if len(u.subscripts) == 1 {
 			if _, ok := u.subscripts[0].(syntaxAsterisk); ok {
@@ -46,7 +46,7 @@ func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *result
 			u.retrieveNext(root, srcArray[index], result)
 		}
 
-		if !result.hasResult() {
+		if len(*result) == 0 {
 			return ErrorNoneMatched{u.getConnectedText()}
 		}
 

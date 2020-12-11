@@ -9,7 +9,7 @@ type syntaxChildAsteriskIdentifier struct {
 }
 
 func (i syntaxChildAsteriskIdentifier) retrieve(
-	root, current interface{}, result *resultContainer) error {
+	root, current interface{}, result *[]interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:
@@ -29,7 +29,7 @@ func (i syntaxChildAsteriskIdentifier) retrieve(
 		}
 	}
 
-	if !result.hasResult() {
+	if len(*result) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 

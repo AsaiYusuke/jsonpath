@@ -7,15 +7,14 @@ type syntaxQueryParamCurrentRoot struct {
 func (e syntaxQueryParamCurrentRoot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 	result := make(map[int]interface{}, len(currentMap))
 	for index, srcNode := range currentMap {
-		values := resultContainer{}
+		values := make([]interface{}, 0)
 		if err := e.param.retrieve(root, srcNode, &values); err != nil {
 			continue
 		}
-		_result := values.getResult()
 		if e.param.isMultiValue() {
-			result[index] = _result
+			result[index] = values
 		} else {
-			result[index] = _result[0]
+			result[index] = values[0]
 		}
 	}
 	return result

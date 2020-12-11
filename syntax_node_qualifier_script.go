@@ -6,6 +6,6 @@ type syntaxScriptQualifier struct {
 	command string
 }
 
-func (s syntaxScriptQualifier) retrieve(root, current interface{}, result *resultContainer) error {
+func (s syntaxScriptQualifier) retrieve(root, current interface{}, result *[]interface{}) error {
 	return ErrorNotSupported{`script`, s.text}
 }

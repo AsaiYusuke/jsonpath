@@ -8,7 +8,7 @@ type syntaxRecursiveChildIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, result *resultContainer) error {
+func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, result *[]interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
@@ -32,7 +32,7 @@ func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, resu
 		}
 	}
 
-	if !result.hasResult() {
+	if len(*result) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 	return nil
