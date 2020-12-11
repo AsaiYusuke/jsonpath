@@ -11,8 +11,8 @@ func (c *syntaxBasicNumericComparator) typeCast(value interface{}) (interface{},
 		return value, true
 	case json.Number:
 		number := value.(json.Number)
-		if numberFloat, err := number.Float64(); err == nil {
-			return numberFloat, true
+		if floatNumber, err := number.Float64(); err == nil {
+			return floatNumber, true
 		}
 	}
 	return 0, false
