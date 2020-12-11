@@ -115,6 +115,7 @@ if err != nil {
 
 Some behaviors that differ from the consensus exists in this package.
 For the entire comparisons, please check [this result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html) to see which responses are different.
+These behaviors will be changed in the future if appropriate ones are found.
 
 ### Character types
 
@@ -153,6 +154,20 @@ srcJSON  : ["Case","Hello"]
 Output   : ["Case"]
 ```
 
+### JSONPaths in the filter-qualifier
+
+In the case of the `comparators` and `regular expressions` in the filter qualifier, the following JSONPaths that return a value group cannot be specified.
+On the other hand, in the case of the `existence check` in the filter qualifier, it can be specified.
+
+| JSONPaths that return a value group | example |
+| :------- | :------ |
+| Recursive descent | `@..a` |
+| Multiple identifier  | `@['a','b']` |
+| Asterisk identifier | `@.*` |
+| Slice qualifier | `@[0:1]` |
+| Asterisk qualifier | `@[*]` |
+| Union in the qualifier | `@[0,1]` |
+| Filter qualifier | `@.a[?(@.b)]` |
 ## Benchmarks
 
 <details>
@@ -207,30 +222,30 @@ BenchmarkParserFunc_filter_regex-4                          	  862663	      1411
 
 ## Project progress
 
-- syntax
-  - identifier
+- Syntax
+  - Identifier
     - [x] identifier in dot notations
     - [x] identifier in bracket notations
     - [x] asterisk identifier
     - [x] multiple-identifier in bracket
     - [x] recursive retrieve
-  - qualifier
+  - Qualifier
     - [x] index
     - [x] slice
     - [x] asterisk
-    - filter
+    - Filter
       - [x] logical operation
       - [x] comparator
       - [x] JSONPath retrieve in filter
     - [ ] script
   - [x] Refer to the consensus behaviors
-- archtecture
+- Archtecture
   - [x] PEG syntax analyzing
   - [x] Error handling
 - Go language manner
   - [x] retrieve with the object in interface unmarshal
   - [x] retrieve with the json.Number type
-- source code
+- Source code
   - [x] Release version
   - Unit tests
     - [x] syntax tests
@@ -242,7 +257,12 @@ BenchmarkParserFunc_filter_regex-4                          	  862663	      1411
     - [x] README
     - [ ] API doc
   - [x] comparison result (local)
-- future todo
+- Development status
+  - [x] determine requirements / functional design
+  - [x] design-based coding
+  - [ ] testing
+  - [ ] documentation
+- Future ToDo
   - [ ] Syntax expansion
   - [ ] Refer to the something standard
   - Go language affinity
