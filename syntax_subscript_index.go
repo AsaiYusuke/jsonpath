@@ -12,11 +12,11 @@ func (i syntaxIndex) getIndexes(src []interface{}) []int {
 	srcLength := len(src)
 
 	if index < 0 {
-		index = index + srcLength
+		index += srcLength
 	}
 
 	if index < 0 || index >= srcLength {
-		return make([]int, 0)
+		return []int{}
 	}
 	return []int{index}
 }

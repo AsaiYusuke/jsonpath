@@ -14,9 +14,10 @@ func (f syntaxFilterQualifier) retrieve(root, current interface{}, result *[]int
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
-		keys := make([]string, 0, len(srcMap))
+		index, keys := 0, make([]string, len(srcMap))
 		for key := range srcMap {
-			keys = append(keys, key)
+			keys[index] = key
+			index++
 		}
 		sort.Strings(keys)
 		argumentMap := make(map[int]interface{}, len(keys))

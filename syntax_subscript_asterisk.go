@@ -5,9 +5,10 @@ type syntaxAsterisk struct {
 }
 
 func (syntaxAsterisk) getIndexes(src []interface{}) []int {
-	result := make([]int, 0, len(src))
+	index, result := 0, make([]int, len(src))
 	for i := range src {
-		result = append(result, i)
+		result[index] = i
+		index++
 	}
 	return result
 }

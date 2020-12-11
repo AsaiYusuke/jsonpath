@@ -14,9 +14,10 @@ func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, resu
 		srcMap := current.(map[string]interface{})
 		i.retrieveNext(root, srcMap, result)
 
-		keys := make([]string, 0, len(srcMap))
+		index, keys := 0, make([]string, len(srcMap))
 		for key := range srcMap {
-			keys = append(keys, key)
+			keys[index] = key
+			index++
 		}
 		sort.Strings(keys)
 		for _, key := range keys {

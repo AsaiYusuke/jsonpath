@@ -13,16 +13,16 @@ func (s syntaxSlicePositiveStep) getIndexes(src []interface{}) []int {
 	loopStart := s.getLoopStart(srcLength)
 	loopEnd := s.getLoopEnd(srcLength)
 
-	result := make([]int, 0)
-
+	index, result := 0, make([]int, srcLength)
 	for i := loopStart; i < loopEnd; i += s.step.number {
 		if i < 0 || i >= srcLength {
 			break
 		}
-		result = append(result, i)
+		result[index] = i
+		index++
 	}
 
-	return result
+	return result[:index]
 }
 
 func (s syntaxSlicePositiveStep) getLoopStart(srcLength int) int {
