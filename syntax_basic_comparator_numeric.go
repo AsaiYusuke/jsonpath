@@ -10,9 +10,9 @@ func (c *syntaxBasicNumericComparator) typeCast(value interface{}) (interface{},
 	case float64:
 		return value, true
 	case json.Number:
-		leftNumber := value.(json.Number)
-		if leftNumberFloat, err := leftNumber.Float64(); err == nil {
-			return leftNumberFloat, true
+		number := value.(json.Number)
+		if numberFloat, err := number.Float64(); err == nil {
+			return numberFloat, true
 		}
 	}
 	return 0, false
