@@ -983,7 +983,7 @@ func (p *parser) Execute() {
 			isLiteral := p.pop().(bool)
 			param := p.pop().(syntaxQueryParameter)
 			if !p.hasErr() && param.isMultiValueParameter() {
-				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterMultiValuedNode, buffer)
+				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 			}
 			p.push(syntaxBasicCompareParameter{
 				param:     param,
@@ -4395,7 +4395,7 @@ func (p *parser) Init() {
 		    isLiteral := p.pop().(bool)
 		    param := p.pop().(syntaxQueryParameter)
 		    if !p.hasErr() && param.isMultiValueParameter() {
-		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterMultiValuedNode, buffer)
+		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 		    }
 		    p.push(syntaxBasicCompareParameter{
 		        param: param,
