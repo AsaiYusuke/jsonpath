@@ -4,6 +4,10 @@ type syntaxQueryParamCurrentRoot struct {
 	param syntaxCurrentRootIdentifier
 }
 
+func (e syntaxQueryParamCurrentRoot) isMultiValueParameter() bool {
+	return e.param.isMultiValue()
+}
+
 func (e syntaxQueryParamCurrentRoot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 	result := make(map[int]interface{}, len(currentMap))
 	for index, srcNode := range currentMap {

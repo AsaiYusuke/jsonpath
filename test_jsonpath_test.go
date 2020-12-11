@@ -2207,7 +2207,14 @@ func TestRetrieve(t *testing.T) {
 				{
 					`$[?($..a=~/123/)]`,
 					`[{"a":"123"},{"a":123}]`,
-					`[{"a":"123"},{"a":123}]`,
+					``,
+					ErrorInvalidSyntax{4, `multi-valued node retrieve into the filter is prohibited`, `$..a=~/123/)]`},
+				},
+				{
+					`$[?($..a=~/123/)]`,
+					`[{"b":"123"},{"a":"123"}]`,
+					``,
+					ErrorInvalidSyntax{4, `multi-valued node retrieve into the filter is prohibited`, `$..a=~/123/)]`},
 				},
 			},
 		},

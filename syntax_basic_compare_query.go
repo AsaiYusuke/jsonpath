@@ -1,25 +1,40 @@
 package jsonpath
 
 type syntaxBasicCompareQuery struct {
-	leftParam  syntaxQuery
-	rightParam syntaxQuery
+	leftParam  syntaxBasicCompareParameter
+	rightParam syntaxBasicCompareParameter
 	comparator syntaxComparator
 }
 
 func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
-	isLeftLiteral, leftValues := q.getComputeParameters(root, currentMap, q.leftParam)
-	isRightLiteral, rightValues := q.getComputeParameters(root, currentMap, q.rightParam)
+	leftValues := q.leftParam.get(root, currentMap)
+	for index, value := range leftValues {
+		if cast, ok := q.comparator.typeCast(value); ok {
+			leftValues[index] = cast
+		} else {
+			delete(leftValues, index)
+		}
+	}
+
+	rightValues := q.rightParam.get(root, currentMap)
+	for index, value := range rightValues {
+		if cast, ok := q.comparator.typeCast(value); ok {
+			rightValues[index] = cast
+		} else {
+			delete(rightValues, index)
+		}
+	}
 
 	var leftIndex, rightIndex int
 	var leftValue, rightValue interface{}
 	for leftIndex, leftValue = range leftValues {
 		for rightIndex, rightValue = range rightValues {
 			if q.comparator.comparator(leftValue, rightValue) {
-				if isLeftLiteral && isRightLiteral {
+				if q.leftParam.isLiteral && q.rightParam.isLiteral {
 					return currentMap
 				}
 			} else {
-				if !isLeftLiteral {
+				if !q.leftParam.isLiteral {
 					delete(leftValues, leftIndex)
 				} else {
 					delete(rightValues, rightIndex)
@@ -28,37 +43,11 @@ func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]in
 		}
 	}
 
-	if !isLeftLiteral && len(rightValues) > 0 {
+	if !q.leftParam.isLiteral && len(rightValues) > 0 {
 		return leftValues
 	}
-	if !isRightLiteral && len(leftValues) > 0 {
+	if !q.rightParam.isLiteral && len(leftValues) > 0 {
 		return rightValues
 	}
 	return nil
-}
-
-func (q *syntaxBasicCompareQuery) getComputeParameters(
-	root interface{}, currentMap map[int]interface{}, param syntaxQuery) (bool, map[int]interface{}) {
-
-	var isLiteral bool
-
-	switch param.(type) {
-	case syntaxQueryParamLiteral:
-		isLiteral = true
-	case syntaxQueryParamRoot:
-		isLiteral = true
-		currentMap = map[int]interface{}{0: root}
-	}
-
-	computedValues := param.compute(root, currentMap)
-
-	for index, value := range computedValues {
-		if cast, ok := q.comparator.typeCast(value); ok {
-			computedValues[index] = cast
-		} else {
-			delete(computedValues, index)
-		}
-	}
-
-	return isLiteral, computedValues
 }
