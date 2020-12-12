@@ -3330,6 +3330,57 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 	}
 }
 
+func TestParserFuncExecTwice(t *testing.T) {
+	jsonpath := `$.a`
+	srcJSON1 := `{"a":1}`
+	srcJSON2 := `{"a":2}`
+
+	var src1 interface{}
+	if err := json.Unmarshal([]byte(srcJSON1), &src1); err != nil {
+		t.Errorf("%w", err)
+		return
+	}
+	var src2 interface{}
+	if err := json.Unmarshal([]byte(srcJSON2), &src2); err != nil {
+		t.Errorf("%w", err)
+		return
+	}
+
+	parserFunc, err := Parse(jsonpath)
+	if err != nil {
+		t.Errorf("expected error<nil> != actual error<%s>\n", err)
+		return
+	}
+
+	actualObject1, err := parserFunc(src1)
+	if err != nil {
+		t.Errorf("expected error<nil> != actual error<%s>\n", err)
+		return
+	}
+	actualObject2, err := parserFunc(src2)
+	if err != nil {
+		t.Errorf("expected error<nil> != actual error<%s>\n", err)
+		return
+	}
+
+	actualOutputJSON1, err := json.Marshal(actualObject1)
+	if err != nil {
+		t.Errorf("%w", err)
+		return
+	}
+	actualOutputJSON2, err := json.Marshal(actualObject2)
+	if err != nil {
+		t.Errorf("%w", err)
+		return
+	}
+
+	if string(actualOutputJSON1) == string(actualOutputJSON2) {
+		t.Errorf("actualOutputJSON1<%s> == expectedOutputJSON2<%s>\n",
+			string(actualOutputJSON1), string(actualOutputJSON2))
+		return
+	}
+}
+
 func TestParserExecuteFunctions(t *testing.T) {
 	stdoutBackup := os.Stdout
 	os.Stdout = nil
