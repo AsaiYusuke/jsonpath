@@ -4,7 +4,6 @@ type syntaxBasicNode struct {
 	text       string
 	multiValue bool
 	next       syntaxNode
-	srcJSON    **interface{}
 	result     **[]interface{}
 }
 

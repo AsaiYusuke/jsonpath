@@ -2,7 +2,6 @@ package jsonpath
 
 type syntaxQueryParamCurrentRoot struct {
 	param     syntaxNode
-	srcJSON   **interface{}
 	resultPtr *[]interface{}
 }
 

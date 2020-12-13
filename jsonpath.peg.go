@@ -653,7 +653,6 @@ func (p *pegJSONPathParser) Execute() {
 					text:       `..`,
 					multiValue: true,
 					next:       node,
-					srcJSON:    &p.srcJSON,
 					result:     &p.resultPtr,
 				},
 			})
@@ -681,19 +680,18 @@ func (p *pegJSONPathParser) Execute() {
 
 			p.push(&syntaxRootIdentifier{
 				syntaxBasicNode: &syntaxBasicNode{
-					text:    `$`,
-					srcJSON: &p.srcJSON,
-					result:  &p.resultPtr,
+					text:   `$`,
+					result: &p.resultPtr,
 				},
+				srcJSON: &p.srcJSON,
 			})
 
 		case ruleAction11:
 
 			p.push(&syntaxCurrentRootIdentifier{
 				syntaxBasicNode: &syntaxBasicNode{
-					text:    `@`,
-					srcJSON: &p.srcJSON,
-					result:  &p.resultPtr,
+					text:   `@`,
+					result: &p.resultPtr,
 				},
 			})
 
@@ -705,7 +703,6 @@ func (p *pegJSONPathParser) Execute() {
 					syntaxBasicNode: &syntaxBasicNode{
 						text:       unescapedText,
 						multiValue: true,
-						srcJSON:    &p.srcJSON,
 						result:     &p.resultPtr,
 					},
 				})
@@ -715,7 +712,6 @@ func (p *pegJSONPathParser) Execute() {
 					syntaxBasicNode: &syntaxBasicNode{
 						text:       unescapedText,
 						multiValue: false,
-						srcJSON:    &p.srcJSON,
 						result:     &p.resultPtr,
 					},
 				})
@@ -729,7 +725,6 @@ func (p *pegJSONPathParser) Execute() {
 					identifiers: identifier,
 					syntaxBasicNode: &syntaxBasicNode{
 						multiValue: true,
-						srcJSON:    &p.srcJSON,
 						result:     &p.resultPtr,
 					},
 				})
@@ -738,7 +733,6 @@ func (p *pegJSONPathParser) Execute() {
 					identifier: identifier[0],
 					syntaxBasicNode: &syntaxBasicNode{
 						multiValue: false,
-						srcJSON:    &p.srcJSON,
 						result:     &p.resultPtr,
 					},
 				})
@@ -769,7 +763,6 @@ func (p *pegJSONPathParser) Execute() {
 			p.push(&syntaxUnionQualifier{
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: subscript.isMultiValue(),
-					srcJSON:    &p.srcJSON,
 					result:     &p.resultPtr,
 				},
 				subscripts: []syntaxSubscript{subscript},
@@ -848,7 +841,6 @@ func (p *pegJSONPathParser) Execute() {
 				command: text,
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: true,
-					srcJSON:    &p.srcJSON,
 					result:     &p.resultPtr,
 				},
 			})
@@ -860,7 +852,6 @@ func (p *pegJSONPathParser) Execute() {
 				query: query,
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: true,
-					srcJSON:    &p.srcJSON,
 					result:     &p.resultPtr,
 				},
 			})
@@ -1031,7 +1022,6 @@ func (p *pegJSONPathParser) Execute() {
 			case *syntaxCurrentRootIdentifier:
 				param := &syntaxQueryParamCurrentRoot{
 					param:     node,
-					srcJSON:   &p.srcJSON,
 					resultPtr: &[]interface{}{},
 				}
 				p.updateResultPtr(param.param, &param.resultPtr)
@@ -3927,7 +3917,6 @@ func (p *pegJSONPathParser) Init() {
 		            text: `..`,
 		            multiValue: true,
 		            next: node,
-		            srcJSON: &p.srcJSON,
 		            result: &p.resultPtr,
 		        },
 		    })
@@ -3976,9 +3965,9 @@ func (p *pegJSONPathParser) Init() {
 		    p.push(&syntaxRootIdentifier{
 		        syntaxBasicNode: &syntaxBasicNode{
 		            text: `$`,
-		            srcJSON: &p.srcJSON,
 		            result: &p.resultPtr,
 		        },
+		        srcJSON: &p.srcJSON,
 		    })
 		}> */
 		func() bool {
@@ -3991,7 +3980,6 @@ func (p *pegJSONPathParser) Init() {
 		    p.push(&syntaxCurrentRootIdentifier{
 		        syntaxBasicNode: &syntaxBasicNode{
 		            text: `@`,
-		            srcJSON: &p.srcJSON,
 		            result: &p.resultPtr,
 		        },
 		    })
@@ -4009,7 +3997,6 @@ func (p *pegJSONPathParser) Init() {
 		            syntaxBasicNode: &syntaxBasicNode{
 		                text: unescapedText,
 		                multiValue: true,
-		                srcJSON: &p.srcJSON,
 		                result: &p.resultPtr,
 		            },
 		        })
@@ -4019,7 +4006,6 @@ func (p *pegJSONPathParser) Init() {
 		            syntaxBasicNode: &syntaxBasicNode{
 		                text: unescapedText,
 		                multiValue: false,
-		                srcJSON: &p.srcJSON,
 		                result: &p.resultPtr,
 		            },
 		        })
@@ -4038,7 +4024,6 @@ func (p *pegJSONPathParser) Init() {
 		            identifiers: identifier,
 		            syntaxBasicNode: &syntaxBasicNode{
 		                multiValue: true,
-		                srcJSON: &p.srcJSON,
 		                result: &p.resultPtr,
 		            },
 		        })
@@ -4047,7 +4032,6 @@ func (p *pegJSONPathParser) Init() {
 		            identifier: identifier[0],
 		            syntaxBasicNode: &syntaxBasicNode{
 		                multiValue: false,
-		                srcJSON: &p.srcJSON,
 		                result: &p.resultPtr,
 		            },
 		        })
@@ -4103,7 +4087,6 @@ func (p *pegJSONPathParser) Init() {
 		    p.push(&syntaxUnionQualifier{
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: subscript.isMultiValue(),
-		            srcJSON: &p.srcJSON,
 		            result: &p.resultPtr,
 		        },
 		        subscripts: []syntaxSubscript{subscript},
@@ -4217,7 +4200,6 @@ func (p *pegJSONPathParser) Init() {
 		        command: text,
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: true,
-		            srcJSON: &p.srcJSON,
 		            result: &p.resultPtr,
 		        },
 		    })
@@ -4234,7 +4216,6 @@ func (p *pegJSONPathParser) Init() {
 		        query: query,
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: true,
-		            srcJSON: &p.srcJSON,
 		            result: &p.resultPtr,
 		        },
 		    })
@@ -4485,7 +4466,6 @@ func (p *pegJSONPathParser) Init() {
 		    case *syntaxCurrentRootIdentifier:
 		        param := &syntaxQueryParamCurrentRoot{
 		            param: node,
-		            srcJSON: &p.srcJSON,
 		            resultPtr: &[]interface{}{},
 		        }
 		        p.updateResultPtr(param.param, &param.resultPtr)
