@@ -10,14 +10,14 @@ type syntaxChildMultiIdentifier struct {
 	identifiers []string
 }
 
-func (i *syntaxChildMultiIdentifier) retrieve(root, current interface{}) error {
+func (i *syntaxChildMultiIdentifier) retrieve(current interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
 		for _, key := range i.identifiers {
 			if _, ok := srcMap[key]; ok {
-				i.retrieveNext(root, srcMap[key])
+				i.retrieveNext(srcMap[key])
 			}
 		}
 

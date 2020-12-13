@@ -8,7 +8,7 @@ type syntaxUnionQualifier struct {
 	subscripts []syntaxSubscript
 }
 
-func (u *syntaxUnionQualifier) retrieve(root, current interface{}) error {
+func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 	if _, ok := current.(map[string]interface{}); ok {
 		if len(u.subscripts) == 1 {
 			if _, ok := u.subscripts[0].(*syntaxAsterisk); ok {
@@ -22,7 +22,7 @@ func (u *syntaxUnionQualifier) retrieve(root, current interface{}) error {
 						result: u.result,
 					},
 				}
-				return asteriskIdentifier.retrieve(root, current)
+				return asteriskIdentifier.retrieve(current)
 			}
 		}
 	}
@@ -44,7 +44,7 @@ func (u *syntaxUnionQualifier) retrieve(root, current interface{}) error {
 
 	if u.isMultiValue() {
 		for _, index := range indexes {
-			u.retrieveNext(root, srcArray[index])
+			u.retrieveNext(srcArray[index])
 		}
 
 		if len((**u.result)) == 0 {
@@ -58,7 +58,7 @@ func (u *syntaxUnionQualifier) retrieve(root, current interface{}) error {
 		return ErrorIndexOutOfRange{u.text}
 	}
 
-	return u.retrieveNext(root, srcArray[indexes[0]])
+	return u.retrieveNext(srcArray[indexes[0]])
 }
 
 func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {

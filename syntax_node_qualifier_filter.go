@@ -10,7 +10,7 @@ type syntaxFilterQualifier struct {
 	query syntaxQuery
 }
 
-func (f *syntaxFilterQualifier) retrieve(root, current interface{}) error {
+func (f *syntaxFilterQualifier) retrieve(current interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
@@ -25,12 +25,12 @@ func (f *syntaxFilterQualifier) retrieve(root, current interface{}) error {
 			argumentMap[index] = srcMap[key]
 		}
 
-		computedMap := f.query.compute(root, argumentMap)
+		computedMap := f.query.compute(argumentMap)
 
 		if len(computedMap) > 0 {
 			for index := range keys {
 				if _, ok := computedMap[index]; ok {
-					f.retrieveNext(root, argumentMap[index])
+					f.retrieveNext(argumentMap[index])
 				}
 			}
 		}
@@ -43,12 +43,12 @@ func (f *syntaxFilterQualifier) retrieve(root, current interface{}) error {
 			argumentMap[index] = entity
 		}
 
-		computedMap := f.query.compute(root, argumentMap)
+		computedMap := f.query.compute(argumentMap)
 
 		if len(computedMap) > 0 {
 			for index, entity := range srcList {
 				if _, ok := computedMap[index]; ok {
-					f.retrieveNext(root, entity)
+					f.retrieveNext(entity)
 				}
 			}
 		}

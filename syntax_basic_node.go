@@ -4,6 +4,7 @@ type syntaxBasicNode struct {
 	text       string
 	multiValue bool
 	next       syntaxNode
+	srcJSON    **interface{}
 	result     **[]interface{}
 }
 
@@ -38,9 +39,9 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 	return i.next
 }
 
-func (i *syntaxBasicNode) retrieveNext(root, current interface{}) error {
+func (i *syntaxBasicNode) retrieveNext(current interface{}) error {
 	if i.next != nil {
-		return i.next.retrieve(root, current)
+		return i.next.retrieve(current)
 	}
 	(**i.result) = append((**i.result), current)
 	return nil

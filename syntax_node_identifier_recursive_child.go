@@ -8,11 +8,11 @@ type syntaxRecursiveChildIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i *syntaxRecursiveChildIdentifier) retrieve(root, current interface{}) error {
+func (i *syntaxRecursiveChildIdentifier) retrieve(current interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
-		i.retrieveNext(root, srcMap)
+		i.retrieveNext(srcMap)
 
 		index, keys := 0, make([]string, len(srcMap))
 		for key := range srcMap {
@@ -21,15 +21,15 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(root, current interface{}) err
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			i.retrieve(root, srcMap[key])
+			i.retrieve(srcMap[key])
 		}
 
 	case []interface{}:
 		srcArray := current.([]interface{})
-		i.retrieveNext(root, srcArray)
+		i.retrieveNext(srcArray)
 
 		for _, child := range srcArray {
-			i.retrieve(root, child)
+			i.retrieve(child)
 		}
 	}
 

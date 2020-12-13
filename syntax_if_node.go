@@ -1,7 +1,7 @@
 package jsonpath
 
 type syntaxNode interface {
-	retrieve(root, current interface{}) error
+	retrieve(current interface{}) error
 
 	setText(text string)
 	setMultiValue()
@@ -9,6 +9,6 @@ type syntaxNode interface {
 	getConnectedText() string
 	setNext(next syntaxNode)
 	getNext() syntaxNode
-	retrieveNext(root, current interface{}) error
+	retrieveNext(current interface{}) error
 	setResultPtr(resultPtr **[]interface{})
 }

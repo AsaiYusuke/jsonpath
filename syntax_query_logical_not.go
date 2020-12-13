@@ -4,8 +4,8 @@ type syntaxLogicalNot struct {
 	param syntaxQuery
 }
 
-func (l *syntaxLogicalNot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
-	computedMap := l.param.compute(root, currentMap)
+func (l *syntaxLogicalNot) compute(currentMap map[int]interface{}) map[int]interface{} {
+	computedMap := l.param.compute(currentMap)
 	resultMap := currentMap
 	for index := range computedMap {
 		delete(resultMap, index)

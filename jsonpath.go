@@ -7,6 +7,7 @@ import (
 
 type jsonPathParser struct {
 	root          syntaxNode
+	srcJSON       *interface{}
 	resultPtr     *[]interface{}
 	params        []interface{}
 	thisError     error
@@ -48,9 +49,7 @@ func (j *jsonPathParser) unescape(text string) string {
 	})
 }
 
-func (j *jsonPathParser) updateResultPtr(
-	checkNode syntaxNode, result **[]interface{}) {
-
+func (j *jsonPathParser) updateResultPtr(checkNode syntaxNode, result **[]interface{}) {
 	for checkNode != nil {
 		checkNode.setResultPtr(result)
 		checkNode = checkNode.getNext()
@@ -96,8 +95,9 @@ func Parse(jsonPath string) (func(src interface{}) ([]interface{}, error), error
 
 	return func(src interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0)
+		parser.srcJSON = &src
 		parser.resultPtr = &result
-		if err := parser.root.retrieve(src, src); err != nil {
+		if err := parser.root.retrieve(src); err != nil {
 			return nil, err
 		}
 		return result, nil
