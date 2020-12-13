@@ -7,7 +7,7 @@ type syntaxIndex struct {
 	isOmitted bool
 }
 
-func (i syntaxIndex) getIndexes(src []interface{}) []int {
+func (i *syntaxIndex) getIndexes(src []interface{}) []int {
 	index := i.number
 	srcLength := len(src)
 

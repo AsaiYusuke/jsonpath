@@ -8,11 +8,11 @@ type syntaxRecursiveChildIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, result *[]interface{}) error {
+func (i *syntaxRecursiveChildIdentifier) retrieve(root, current interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
-		i.retrieveNext(root, srcMap, result)
+		i.retrieveNext(root, srcMap)
 
 		index, keys := 0, make([]string, len(srcMap))
 		for key := range srcMap {
@@ -21,19 +21,19 @@ func (i syntaxRecursiveChildIdentifier) retrieve(root, current interface{}, resu
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			i.retrieve(root, srcMap[key], result)
+			i.retrieve(root, srcMap[key])
 		}
 
 	case []interface{}:
 		srcArray := current.([]interface{})
-		i.retrieveNext(root, srcArray, result)
+		i.retrieveNext(root, srcArray)
 
 		for _, child := range srcArray {
-			i.retrieve(root, child, result)
+			i.retrieve(root, child)
 		}
 	}
 
-	if len(*result) == 0 {
+	if len((**i.result)) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 	return nil

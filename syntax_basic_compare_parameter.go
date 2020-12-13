@@ -5,10 +5,10 @@ type syntaxBasicCompareParameter struct {
 	isLiteral bool
 }
 
-func (p syntaxBasicCompareParameter) get(
+func (p *syntaxBasicCompareParameter) get(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
-	if _, ok := p.param.(syntaxQueryParamRoot); ok {
+	if _, ok := p.param.(*syntaxQueryParamRoot); ok {
 		currentMap = map[int]interface{}{0: root}
 	}
 	return p.param.compute(root, currentMap)

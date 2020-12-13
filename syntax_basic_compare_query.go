@@ -1,12 +1,12 @@
 package jsonpath
 
 type syntaxBasicCompareQuery struct {
-	leftParam  syntaxBasicCompareParameter
-	rightParam syntaxBasicCompareParameter
+	leftParam  *syntaxBasicCompareParameter
+	rightParam *syntaxBasicCompareParameter
 	comparator syntaxComparator
 }
 
-func (q syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+func (q *syntaxBasicCompareQuery) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 	leftValues := q.leftParam.get(root, currentMap)
 	for index, value := range leftValues {
 		if cast, ok := q.comparator.typeCast(value); ok {

@@ -1,18 +1,20 @@
 package jsonpath
 
 type syntaxQueryParamCurrentRoot struct {
-	param syntaxCurrentRootIdentifier
+	param     syntaxNode
+	resultPtr *[]interface{}
 }
 
-func (e syntaxQueryParamCurrentRoot) isMultiValueParameter() bool {
+func (e *syntaxQueryParamCurrentRoot) isMultiValueParameter() bool {
 	return e.param.isMultiValue()
 }
 
-func (e syntaxQueryParamCurrentRoot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+func (e *syntaxQueryParamCurrentRoot) compute(root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 	result := make(map[int]interface{}, len(currentMap))
 	for index, srcNode := range currentMap {
 		values := make([]interface{}, 0)
-		if err := e.param.retrieve(root, srcNode, &values); err != nil {
+		e.resultPtr = &values
+		if err := e.param.retrieve(root, srcNode); err != nil {
 			continue
 		}
 		if e.param.isMultiValue() {

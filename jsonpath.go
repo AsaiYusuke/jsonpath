@@ -7,6 +7,7 @@ import (
 
 type jsonPathParser struct {
 	root          syntaxNode
+	resultPtr     *[]interface{}
 	params        []interface{}
 	thisError     error
 	unescapeRegex *regexp.Regexp
@@ -47,30 +48,21 @@ func (j *jsonPathParser) unescape(text string) string {
 	})
 }
 
+func (j *jsonPathParser) updateResultPtr(
+	checkNode syntaxNode, result **[]interface{}) {
+
+	for checkNode != nil {
+		checkNode.setResultPtr(result)
+		checkNode = checkNode.getNext()
+	}
+}
+
 func (j *jsonPathParser) syntaxErr(pos int, reason string, buffer string) {
 	j.thisError = ErrorInvalidSyntax{pos, reason, buffer[pos:]}
 }
 
 func (j *jsonPathParser) hasErr() bool {
 	return j.thisError != nil
-}
-
-func (j *jsonPathParser) parse(jsonPath string) error {
-	parser := parser{Buffer: jsonPath}
-
-	regex, _ := regexp.Compile(`\\(.)`)
-	parser.unescapeRegex = regex
-
-	parser.Init()
-	parser.Parse()
-	parser.Execute()
-
-	if parser.thisError != nil {
-		return parser.thisError
-	}
-
-	j.root = parser.root
-	return nil
 }
 
 // Retrieve returns the retrieved JSON using the given JSONPath.
@@ -84,13 +76,28 @@ func Retrieve(jsonPath string, src interface{}) ([]interface{}, error) {
 
 // Parse returns the parser function using the given JSONPath.
 func Parse(jsonPath string) (func(src interface{}) ([]interface{}, error), error) {
-	jsonpath := jsonPathParser{}
-	if err := jsonpath.parse(jsonPath); err != nil {
-		return nil, err
+	unescapeRegex, _ := regexp.Compile(`\\(.)`)
+
+	parser := pegJSONPathParser{
+		Buffer: jsonPath,
+		jsonPathParser: jsonPathParser{
+			resultPtr:     &[]interface{}{},
+			unescapeRegex: unescapeRegex,
+		},
 	}
+
+	parser.Init()
+	parser.Parse()
+	parser.Execute()
+
+	if parser.thisError != nil {
+		return nil, parser.thisError
+	}
+
 	return func(src interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0)
-		if err := jsonpath.root.retrieve(src, src, &result); err != nil {
+		parser.resultPtr = &result
+		if err := parser.root.retrieve(src, src); err != nil {
 			return nil, err
 		}
 		return result, nil

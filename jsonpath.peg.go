@@ -516,7 +516,7 @@ func (t *tokens32) Expand(index int) {
 	}
 }
 
-type parser struct {
+type pegJSONPathParser struct {
 	jsonPathParser
 
 	Buffer string
@@ -560,7 +560,7 @@ search:
 }
 
 type parseError struct {
-	p   *parser
+	p   *pegJSONPathParser
 	max token32
 }
 
@@ -588,15 +588,15 @@ func (e *parseError) Error() string {
 	return error
 }
 
-func (p *parser) PrintSyntaxTree() {
+func (p *pegJSONPathParser) PrintSyntaxTree() {
 	p.tokens32.PrintSyntaxTree(p.Buffer)
 }
 
-func (p *parser) Highlighter() {
+func (p *pegJSONPathParser) Highlighter() {
 	p.PrintSyntax()
 }
 
-func (p *parser) Execute() {
+func (p *pegJSONPathParser) Execute() {
 	buffer, _buffer, text, begin, end := p.Buffer, p.buffer, "", 0, 0
 	for token := range p.Tokens() {
 		switch token.pegRule {
@@ -617,19 +617,19 @@ func (p *parser) Execute() {
 
 			child := p.pop().(syntaxNode)
 			root := p.pop().(syntaxNode)
-			root.setNext(&child)
+			root.setNext(child)
 			p.push(root)
 
 		case ruleAction3:
 
 			rootNode := p.pop().(syntaxNode)
-			checkNode := &rootNode
+			checkNode := rootNode
 			for checkNode != nil {
-				if (*checkNode).isMultiValue() {
+				if checkNode.isMultiValue() {
 					rootNode.setMultiValue()
 					break
 				}
-				checkNode = (*checkNode).getNext()
+				checkNode = checkNode.getNext()
 			}
 			p.push(rootNode)
 
@@ -648,11 +648,12 @@ func (p *parser) Execute() {
 		case ruleAction6:
 
 			node := p.pop().(syntaxNode)
-			p.push(syntaxRecursiveChildIdentifier{
+			p.push(&syntaxRecursiveChildIdentifier{
 				syntaxBasicNode: &syntaxBasicNode{
 					text:       `..`,
 					multiValue: true,
-					next:       &node,
+					next:       node,
+					result:     &p.resultPtr,
 				},
 			})
 
@@ -666,7 +667,7 @@ func (p *parser) Execute() {
 
 			child := p.pop().(syntaxNode)
 			parent := p.pop().(syntaxNode)
-			parent.setNext(&child)
+			parent.setNext(child)
 			p.push(parent)
 
 		case ruleAction9:
@@ -677,32 +678,40 @@ func (p *parser) Execute() {
 
 		case ruleAction10:
 
-			p.push(syntaxRootIdentifier{
-				syntaxBasicNode: &syntaxBasicNode{text: `$`},
+			p.push(&syntaxRootIdentifier{
+				syntaxBasicNode: &syntaxBasicNode{
+					text:   `$`,
+					result: &p.resultPtr,
+				},
 			})
 
 		case ruleAction11:
 
-			p.push(syntaxCurrentRootIdentifier{
-				syntaxBasicNode: &syntaxBasicNode{text: `@`},
+			p.push(&syntaxCurrentRootIdentifier{
+				syntaxBasicNode: &syntaxBasicNode{
+					text:   `@`,
+					result: &p.resultPtr,
+				},
 			})
 
 		case ruleAction12:
 
 			unescapedText := p.unescape(text)
 			if unescapedText == `*` {
-				p.push(syntaxChildAsteriskIdentifier{
+				p.push(&syntaxChildAsteriskIdentifier{
 					syntaxBasicNode: &syntaxBasicNode{
 						text:       unescapedText,
 						multiValue: true,
+						result:     &p.resultPtr,
 					},
 				})
 			} else {
-				p.push(syntaxChildSingleIdentifier{
+				p.push(&syntaxChildSingleIdentifier{
 					identifier: unescapedText,
 					syntaxBasicNode: &syntaxBasicNode{
 						text:       unescapedText,
 						multiValue: false,
+						result:     &p.resultPtr,
 					},
 				})
 			}
@@ -711,17 +720,19 @@ func (p *parser) Execute() {
 
 			identifier := p.pop().([]string)
 			if len(identifier) > 1 {
-				p.push(syntaxChildMultiIdentifier{
+				p.push(&syntaxChildMultiIdentifier{
 					identifiers: identifier,
 					syntaxBasicNode: &syntaxBasicNode{
 						multiValue: true,
+						result:     &p.resultPtr,
 					},
 				})
 			} else {
-				p.push(syntaxChildSingleIdentifier{
+				p.push(&syntaxChildSingleIdentifier{
 					identifier: identifier[0],
 					syntaxBasicNode: &syntaxBasicNode{
 						multiValue: false,
+						result:     &p.resultPtr,
 					},
 				})
 			}
@@ -748,33 +759,34 @@ func (p *parser) Execute() {
 		case ruleAction18:
 
 			subscript := p.pop().(syntaxSubscript)
-			union := syntaxUnionQualifier{
+			p.push(&syntaxUnionQualifier{
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: subscript.isMultiValue(),
-				}}
-			union.add(subscript)
-			p.push(union)
+					result:     &p.resultPtr,
+				},
+				subscripts: []syntaxSubscript{subscript},
+			})
 
 		case ruleAction19:
 
-			childIndexUnion := p.pop().(syntaxUnionQualifier)
-			parentIndexUnion := p.pop().(syntaxUnionQualifier)
+			childIndexUnion := p.pop().(*syntaxUnionQualifier)
+			parentIndexUnion := p.pop().(*syntaxUnionQualifier)
 			parentIndexUnion.merge(childIndexUnion)
 			parentIndexUnion.setMultiValue()
 			p.push(parentIndexUnion)
 
 		case ruleAction20:
 
-			step := p.pop().(syntaxIndex)
-			end := p.pop().(syntaxIndex)
-			start := p.pop().(syntaxIndex)
+			step := p.pop().(*syntaxIndex)
+			end := p.pop().(*syntaxIndex)
+			start := p.pop().(*syntaxIndex)
 
 			if step.isOmitted || step.number == 0 {
 				step.number = 1
 			}
 
 			if step.number > 0 {
-				p.push(syntaxSlicePositiveStep{
+				p.push(&syntaxSlicePositiveStep{
 					syntaxBasicSubscript: &syntaxBasicSubscript{
 						multiValue: true,
 					},
@@ -783,7 +795,7 @@ func (p *parser) Execute() {
 					step:  step,
 				})
 			} else {
-				p.push(syntaxSliceNegativeStep{
+				p.push(&syntaxSliceNegativeStep{
 					syntaxBasicSubscript: &syntaxBasicSubscript{
 						multiValue: true,
 					},
@@ -795,7 +807,7 @@ func (p *parser) Execute() {
 
 		case ruleAction21:
 
-			p.push(syntaxIndex{
+			p.push(&syntaxIndex{
 				syntaxBasicSubscript: &syntaxBasicSubscript{
 					multiValue: false,
 				},
@@ -804,7 +816,7 @@ func (p *parser) Execute() {
 
 		case ruleAction22:
 
-			p.push(syntaxAsterisk{
+			p.push(&syntaxAsterisk{
 				syntaxBasicSubscript: &syntaxBasicSubscript{
 					multiValue: true,
 				},
@@ -812,31 +824,34 @@ func (p *parser) Execute() {
 
 		case ruleAction23:
 
-			p.push(syntaxIndex{number: 1})
+			p.push(&syntaxIndex{number: 1})
 
 		case ruleAction24:
 
 			if len(text) > 0 {
-				p.push(syntaxIndex{number: p.toInt(text)})
+				p.push(&syntaxIndex{number: p.toInt(text)})
 			} else {
-				p.push(syntaxIndex{number: 0, isOmitted: true})
+				p.push(&syntaxIndex{number: 0, isOmitted: true})
 			}
 
 		case ruleAction25:
 
-			p.push(syntaxScriptQualifier{
+			p.push(&syntaxScriptQualifier{
 				command: text,
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: true,
+					result:     &p.resultPtr,
 				},
 			})
 
 		case ruleAction26:
 
-			p.push(syntaxFilterQualifier{
-				query: p.pop().(syntaxQuery),
+			query := p.pop().(syntaxQuery)
+			p.push(&syntaxFilterQualifier{
+				query: query,
 				syntaxBasicNode: &syntaxBasicNode{
 					multiValue: true,
+					result:     &p.resultPtr,
 				},
 			})
 
@@ -844,34 +859,30 @@ func (p *parser) Execute() {
 
 			childQuery := p.pop().(syntaxQuery)
 			parentQuery := p.pop().(syntaxQuery)
-			p.push(syntaxLogicalOr{parentQuery, childQuery})
+			p.push(&syntaxLogicalOr{parentQuery, childQuery})
 
 		case ruleAction28:
 
 			childQuery := p.pop().(syntaxQuery)
 			parentQuery := p.pop().(syntaxQuery)
-			p.push(syntaxLogicalAnd{parentQuery, childQuery})
+			p.push(&syntaxLogicalAnd{parentQuery, childQuery})
 
 		case ruleAction29:
 
 			if !p.hasErr() {
 				query := p.pop().(syntaxQuery)
-
-				var checkQuery syntaxBasicCompareQuery
-				switch query.(type) {
-				case syntaxBasicCompareQuery:
-					checkQuery = query.(syntaxBasicCompareQuery)
-				case syntaxLogicalNot:
-					checkQuery = (query.(syntaxLogicalNot)).param.(syntaxBasicCompareQuery)
-				}
-
-				_, leftIsCurrentRoot := checkQuery.leftParam.param.(syntaxQueryParamCurrentRoot)
-				_, rigthIsCurrentRoot := checkQuery.rightParam.param.(syntaxQueryParamCurrentRoot)
-				if leftIsCurrentRoot && rigthIsCurrentRoot {
-					p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
-				}
-
 				p.push(query)
+
+				if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+					query = (*logicalNot).param
+				}
+				if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+					_, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
+					_, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+					if leftIsCurrentRoot && rigthIsCurrentRoot {
+						p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
+					}
+				}
 			}
 
 		case ruleAction30:
@@ -884,97 +895,101 @@ func (p *parser) Execute() {
 			jsonpathFilter := p.pop().(syntaxQuery)
 			isLogicalNot := p.pop().(bool)
 			if isLogicalNot {
-				p.push(syntaxLogicalNot{jsonpathFilter})
+				p.push(&syntaxLogicalNot{
+					param: jsonpathFilter,
+				})
 			} else {
 				p.push(jsonpathFilter)
 			}
 
 		case ruleAction32:
 
-			rightParam := p.pop().(syntaxBasicCompareParameter)
-			leftParam := p.pop().(syntaxBasicCompareParameter)
-			p.push(syntaxBasicCompareQuery{
+			rightParam := p.pop().(*syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
+			p.push(&syntaxBasicCompareQuery{
 				leftParam:  leftParam,
 				rightParam: rightParam,
-				comparator: syntaxCompareEQ{},
+				comparator: &syntaxCompareEQ{},
 			})
 
 		case ruleAction33:
 
-			rightParam := p.pop().(syntaxBasicCompareParameter)
-			leftParam := p.pop().(syntaxBasicCompareParameter)
-			p.push(syntaxLogicalNot{syntaxBasicCompareQuery{
-				leftParam:  leftParam,
-				rightParam: rightParam,
-				comparator: syntaxCompareEQ{},
-			}})
+			rightParam := p.pop().(*syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
+			p.push(&syntaxLogicalNot{
+				param: &syntaxBasicCompareQuery{
+					leftParam:  leftParam,
+					rightParam: rightParam,
+					comparator: &syntaxCompareEQ{},
+				},
+			})
 
 		case ruleAction34:
 
-			rightParam := p.pop().(syntaxBasicCompareParameter)
-			leftParam := p.pop().(syntaxBasicCompareParameter)
-			p.push(syntaxBasicCompareQuery{
+			rightParam := p.pop().(*syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
+			p.push(&syntaxBasicCompareQuery{
 				leftParam:  leftParam,
 				rightParam: rightParam,
-				comparator: syntaxCompareGE{},
+				comparator: &syntaxCompareGE{},
 			})
 
 		case ruleAction35:
 
-			rightParam := p.pop().(syntaxBasicCompareParameter)
-			leftParam := p.pop().(syntaxBasicCompareParameter)
-			p.push(syntaxBasicCompareQuery{
+			rightParam := p.pop().(*syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
+			p.push(&syntaxBasicCompareQuery{
 				leftParam:  leftParam,
 				rightParam: rightParam,
-				comparator: syntaxCompareGT{},
+				comparator: &syntaxCompareGT{},
 			})
 
 		case ruleAction36:
 
-			rightParam := p.pop().(syntaxBasicCompareParameter)
-			leftParam := p.pop().(syntaxBasicCompareParameter)
-			p.push(syntaxBasicCompareQuery{
+			rightParam := p.pop().(*syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
+			p.push(&syntaxBasicCompareQuery{
 				leftParam:  leftParam,
 				rightParam: rightParam,
-				comparator: syntaxCompareLE{},
+				comparator: &syntaxCompareLE{},
 			})
 
 		case ruleAction37:
 
-			rightParam := p.pop().(syntaxBasicCompareParameter)
-			leftParam := p.pop().(syntaxBasicCompareParameter)
-			p.push(syntaxBasicCompareQuery{
+			rightParam := p.pop().(*syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
+			p.push(&syntaxBasicCompareQuery{
 				leftParam:  leftParam,
 				rightParam: rightParam,
-				comparator: syntaxCompareLT{},
+				comparator: &syntaxCompareLT{},
 			})
 
 		case ruleAction38:
 
-			leftParam := p.pop().(syntaxBasicCompareParameter)
+			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			regex := regexp.MustCompile(text)
-			p.push(syntaxBasicCompareQuery{
+			p.push(&syntaxBasicCompareQuery{
 				leftParam: leftParam,
-				rightParam: syntaxBasicCompareParameter{
-					param:     syntaxQueryParamLiteral{literal: `regex`},
+				rightParam: &syntaxBasicCompareParameter{
+					param:     &syntaxQueryParamLiteral{literal: `regex`},
 					isLiteral: true,
 				},
-				comparator: syntaxCompareRegex{
+				comparator: &syntaxCompareRegex{
 					regex: regex,
 				},
 			})
 
 		case ruleAction39:
 
-			p.push(syntaxBasicCompareParameter{
-				param:     syntaxQueryParamLiteral{p.pop()},
+			p.push(&syntaxBasicCompareParameter{
+				param:     &syntaxQueryParamLiteral{p.pop()},
 				isLiteral: true,
 			})
 
 		case ruleAction40:
 
-			p.push(syntaxBasicCompareParameter{
-				param:     syntaxQueryParamLiteral{p.pop()},
+			p.push(&syntaxBasicCompareParameter{
+				param:     &syntaxQueryParamLiteral{p.pop()},
 				isLiteral: true,
 			})
 
@@ -985,7 +1000,7 @@ func (p *parser) Execute() {
 			if !p.hasErr() && param.isMultiValueParameter() {
 				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 			}
-			p.push(syntaxBasicCompareParameter{
+			p.push(&syntaxBasicCompareParameter{
 				param:     param,
 				isLiteral: isLiteral,
 			})
@@ -994,14 +1009,24 @@ func (p *parser) Execute() {
 
 			node := p.pop().(syntaxNode)
 			switch node.(type) {
-			case syntaxRootIdentifier:
-				p.push(syntaxQueryParamRoot{node.(syntaxRootIdentifier)})
+			case *syntaxRootIdentifier:
+				param := &syntaxQueryParamRoot{
+					param:     node,
+					resultPtr: &[]interface{}{},
+				}
+				p.updateResultPtr(param.param, &param.resultPtr)
+				p.push(param)
 				p.push(true)
-			case syntaxCurrentRootIdentifier:
-				p.push(syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)})
+			case *syntaxCurrentRootIdentifier:
+				param := &syntaxQueryParamCurrentRoot{
+					param:     node,
+					resultPtr: &[]interface{}{},
+				}
+				p.updateResultPtr(param.param, &param.resultPtr)
+				p.push(param)
 				p.push(false)
 			default:
-				p.push(syntaxQueryParamRoot{})
+				p.push(&syntaxQueryParamRoot{})
 				p.push(true)
 			}
 
@@ -1034,7 +1059,7 @@ func (p *parser) Execute() {
 	_, _, _, _, _ = buffer, _buffer, text, begin, end
 }
 
-func (p *parser) Init() {
+func (p *pegJSONPathParser) Init() {
 	p.buffer = []rune(p.Buffer)
 	if len(p.buffer) == 0 || p.buffer[len(p.buffer)-1] != endSymbol {
 		p.buffer = append(p.buffer, endSymbol)
@@ -3834,7 +3859,7 @@ func (p *parser) Init() {
 		/* 55 Action2 <- <{
 		    child := p.pop().(syntaxNode)
 		    root := p.pop().(syntaxNode)
-		    root.setNext(&child)
+		    root.setNext(child)
 		    p.push(root)
 		}> */
 		func() bool {
@@ -3845,13 +3870,13 @@ func (p *parser) Init() {
 		},
 		/* 56 Action3 <- <{
 		        rootNode := p.pop().(syntaxNode)
-		        checkNode := &rootNode
+		        checkNode := rootNode
 		        for checkNode != nil {
-					if (*checkNode).isMultiValue() {
+					if checkNode.isMultiValue() {
 		                rootNode.setMultiValue()
 		                break
 		            }
-		            checkNode =  (*checkNode).getNext()
+		            checkNode =  checkNode.getNext()
 		        }
 		        p.push(rootNode)
 		    }> */
@@ -3885,11 +3910,12 @@ func (p *parser) Init() {
 		},
 		/* 59 Action6 <- <{
 		    node := p.pop().(syntaxNode)
-		    p.push(syntaxRecursiveChildIdentifier{
+		    p.push(&syntaxRecursiveChildIdentifier{
 		        syntaxBasicNode: &syntaxBasicNode{
 		            text: `..`,
 		            multiValue: true,
-		            next: &node,
+		            next: node,
+		            result: &p.resultPtr,
 		        },
 		    })
 		}> */
@@ -3913,7 +3939,7 @@ func (p *parser) Init() {
 		/* 61 Action8 <- <{
 		    child := p.pop().(syntaxNode)
 		    parent := p.pop().(syntaxNode)
-		    parent.setNext(&child)
+		    parent.setNext(child)
 		    p.push(parent)
 		}> */
 		func() bool {
@@ -3934,8 +3960,11 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 63 Action10 <- <{
-		    p.push(syntaxRootIdentifier{
-		        syntaxBasicNode: &syntaxBasicNode{text: `$`},
+		    p.push(&syntaxRootIdentifier{
+		        syntaxBasicNode: &syntaxBasicNode{
+		            text: `$`,
+		            result: &p.resultPtr,
+		        },
 		    })
 		}> */
 		func() bool {
@@ -3945,8 +3974,11 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 64 Action11 <- <{
-		    p.push(syntaxCurrentRootIdentifier{
-		        syntaxBasicNode: &syntaxBasicNode{text: `@`},
+		    p.push(&syntaxCurrentRootIdentifier{
+		        syntaxBasicNode: &syntaxBasicNode{
+		            text: `@`,
+		            result: &p.resultPtr,
+		        },
 		    })
 		}> */
 		func() bool {
@@ -3958,18 +3990,20 @@ func (p *parser) Init() {
 		/* 65 Action12 <- <{
 		    unescapedText := p.unescape(text)
 		    if unescapedText == `*` {
-		        p.push(syntaxChildAsteriskIdentifier{
+		        p.push(&syntaxChildAsteriskIdentifier{
 		            syntaxBasicNode: &syntaxBasicNode{
 		                text: unescapedText,
 		                multiValue: true,
+		                result: &p.resultPtr,
 		            },
 		        })
 		    } else {
-		        p.push(syntaxChildSingleIdentifier{
+		        p.push(&syntaxChildSingleIdentifier{
 		            identifier: unescapedText,
 		            syntaxBasicNode: &syntaxBasicNode{
 		                text: unescapedText,
 		                multiValue: false,
+		                result: &p.resultPtr,
 		            },
 		        })
 		    }
@@ -3983,17 +4017,19 @@ func (p *parser) Init() {
 		/* 66 Action13 <- <{
 		    identifier := p.pop().([]string)
 		    if len(identifier) > 1 {
-		        p.push(syntaxChildMultiIdentifier{
+		        p.push(&syntaxChildMultiIdentifier{
 		            identifiers: identifier,
 		            syntaxBasicNode: &syntaxBasicNode{
 		                multiValue: true,
+		                result: &p.resultPtr,
 		            },
 		        })
 		    } else {
-		        p.push(syntaxChildSingleIdentifier{
+		        p.push(&syntaxChildSingleIdentifier{
 		            identifier: identifier[0],
 		            syntaxBasicNode: &syntaxBasicNode{
 		                multiValue: false,
+		                result: &p.resultPtr,
 		            },
 		        })
 		    }
@@ -4045,12 +4081,13 @@ func (p *parser) Init() {
 		},
 		/* 71 Action18 <- <{
 		    subscript := p.pop().(syntaxSubscript)
-		    union := syntaxUnionQualifier{
+		    p.push(&syntaxUnionQualifier{
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: subscript.isMultiValue(),
-		        }}
-		    union.add(subscript)
-		    p.push(union)
+		            result: &p.resultPtr,
+		        },
+		        subscripts: []syntaxSubscript{subscript},
+		    })
 		}> */
 		func() bool {
 			{
@@ -4059,8 +4096,8 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 72 Action19 <- <{
-		    childIndexUnion := p.pop().(syntaxUnionQualifier)
-		    parentIndexUnion := p.pop().(syntaxUnionQualifier)
+		    childIndexUnion := p.pop().(*syntaxUnionQualifier)
+		    parentIndexUnion := p.pop().(*syntaxUnionQualifier)
 		    parentIndexUnion.merge(childIndexUnion)
 		    parentIndexUnion.setMultiValue()
 		    p.push(parentIndexUnion)
@@ -4072,16 +4109,16 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 73 Action20 <- <{
-		    step  := p.pop().(syntaxIndex)
-		    end   := p.pop().(syntaxIndex)
-		    start := p.pop().(syntaxIndex)
+		    step  := p.pop().(*syntaxIndex)
+		    end   := p.pop().(*syntaxIndex)
+		    start := p.pop().(*syntaxIndex)
 
 		    if step.isOmitted || step.number == 0 {
 		        step.number = 1
 		    }
 
 		    if step.number > 0 {
-		        p.push(syntaxSlicePositiveStep{
+		        p.push(&syntaxSlicePositiveStep{
 		            syntaxBasicSubscript: &syntaxBasicSubscript{
 		                multiValue: true,
 		            },
@@ -4090,7 +4127,7 @@ func (p *parser) Init() {
 		            step: step,
 		        })
 		    } else {
-		        p.push(syntaxSliceNegativeStep{
+		        p.push(&syntaxSliceNegativeStep{
 		            syntaxBasicSubscript: &syntaxBasicSubscript{
 		                multiValue: true,
 		            },
@@ -4107,7 +4144,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 74 Action21 <- <{
-		    p.push(syntaxIndex{
+		    p.push(&syntaxIndex{
 		        syntaxBasicSubscript: &syntaxBasicSubscript{
 		            multiValue: false,
 		        },
@@ -4121,7 +4158,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 75 Action22 <- <{
-		    p.push(syntaxAsterisk{
+		    p.push(&syntaxAsterisk{
 		        syntaxBasicSubscript: &syntaxBasicSubscript{
 		            multiValue: true,
 		        },
@@ -4134,7 +4171,7 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 76 Action23 <- <{
-		    p.push(syntaxIndex{number: 1})
+		    p.push(&syntaxIndex{number: 1})
 		}> */
 		func() bool {
 			{
@@ -4144,9 +4181,9 @@ func (p *parser) Init() {
 		},
 		/* 77 Action24 <- <{
 		    if len(text) > 0 {
-		        p.push(syntaxIndex{number: p.toInt(text)})
+		        p.push(&syntaxIndex{number: p.toInt(text)})
 		    } else {
-		        p.push(syntaxIndex{number: 0, isOmitted: true})
+		        p.push(&syntaxIndex{number: 0, isOmitted: true})
 		    }
 		}> */
 		func() bool {
@@ -4156,10 +4193,11 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 78 Action25 <- <{
-		    p.push(syntaxScriptQualifier{
+		    p.push(&syntaxScriptQualifier{
 		        command: text,
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: true,
+		            result: &p.resultPtr,
 		        },
 		    })
 		}> */
@@ -4170,10 +4208,12 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 79 Action26 <- <{
-		    p.push(syntaxFilterQualifier{
-		        query: p.pop().(syntaxQuery),
+		    query := p.pop().(syntaxQuery)
+		    p.push(&syntaxFilterQualifier{
+		        query: query,
 		        syntaxBasicNode: &syntaxBasicNode{
 		            multiValue: true,
+		            result: &p.resultPtr,
 		        },
 		    })
 		}> */
@@ -4186,7 +4226,7 @@ func (p *parser) Init() {
 		/* 80 Action27 <- <{
 		    childQuery := p.pop().(syntaxQuery)
 		    parentQuery := p.pop().(syntaxQuery)
-		    p.push(syntaxLogicalOr{parentQuery, childQuery})
+		    p.push(&syntaxLogicalOr{parentQuery, childQuery})
 		}> */
 		func() bool {
 			{
@@ -4197,7 +4237,7 @@ func (p *parser) Init() {
 		/* 81 Action28 <- <{
 		    childQuery := p.pop().(syntaxQuery)
 		    parentQuery := p.pop().(syntaxQuery)
-		    p.push(syntaxLogicalAnd{parentQuery, childQuery})
+		    p.push(&syntaxLogicalAnd{parentQuery, childQuery})
 		}> */
 		func() bool {
 			{
@@ -4206,26 +4246,22 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 82 Action29 <- <{
-		    if !p.hasErr() {
-		        query := p.pop().(syntaxQuery)
+		        if !p.hasErr() {
+		            query := p.pop().(syntaxQuery)
+		            p.push(query)
 
-		        var checkQuery syntaxBasicCompareQuery
-		        switch query.(type) {
-		        case syntaxBasicCompareQuery:
-		            checkQuery = query.(syntaxBasicCompareQuery)
-		        case syntaxLogicalNot:
-		            checkQuery = (query.(syntaxLogicalNot)).param.(syntaxBasicCompareQuery)
+					if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+						query = (*logicalNot).param
+					}
+		            if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+		                _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
+		                _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+		                if leftIsCurrentRoot && rigthIsCurrentRoot {
+		                    p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
+		                }
+					}
 		        }
-
-		        _, leftIsCurrentRoot := checkQuery.leftParam.param.(syntaxQueryParamCurrentRoot)
-		        _, rigthIsCurrentRoot := checkQuery.rightParam.param.(syntaxQueryParamCurrentRoot)
-		        if leftIsCurrentRoot && rigthIsCurrentRoot {
-		            p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
-		        }
-
-		        p.push(query)
-		    }
-		}> */
+		    }> */
 		func() bool {
 			{
 				add(ruleAction29, position)
@@ -4246,7 +4282,9 @@ func (p *parser) Init() {
 		    jsonpathFilter := p.pop().(syntaxQuery)
 		    isLogicalNot := p.pop().(bool)
 		    if isLogicalNot {
-		        p.push(syntaxLogicalNot{jsonpathFilter})
+		        p.push(&syntaxLogicalNot{
+		            param: jsonpathFilter,
+		        })
 		    } else {
 		        p.push(jsonpathFilter)
 		    }
@@ -4258,12 +4296,12 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 85 Action32 <- <{
-		    rightParam := p.pop().(syntaxBasicCompareParameter)
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
-		    p.push(syntaxBasicCompareQuery{
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.push(&syntaxBasicCompareQuery{
 		        leftParam: leftParam,
 		        rightParam: rightParam,
-		        comparator: syntaxCompareEQ{},
+		        comparator: &syntaxCompareEQ{},
 		    })
 		}> */
 		func() bool {
@@ -4273,13 +4311,15 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 86 Action33 <- <{
-		    rightParam := p.pop().(syntaxBasicCompareParameter)
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
-		    p.push(syntaxLogicalNot{syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: rightParam,
-		        comparator: syntaxCompareEQ{},
-		    }})
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.push(&syntaxLogicalNot{
+		        param: &syntaxBasicCompareQuery{
+		            leftParam: leftParam,
+		            rightParam: rightParam,
+		            comparator: &syntaxCompareEQ{},
+		        },
+		    })
 		}> */
 		func() bool {
 			{
@@ -4288,12 +4328,12 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 87 Action34 <- <{
-		    rightParam := p.pop().(syntaxBasicCompareParameter)
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
-		    p.push(syntaxBasicCompareQuery{
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.push(&syntaxBasicCompareQuery{
 		        leftParam: leftParam,
 		        rightParam: rightParam,
-		        comparator: syntaxCompareGE{},
+		        comparator: &syntaxCompareGE{},
 		    })
 		}> */
 		func() bool {
@@ -4303,12 +4343,12 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 88 Action35 <- <{
-		    rightParam := p.pop().(syntaxBasicCompareParameter)
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
-		    p.push(syntaxBasicCompareQuery{
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.push(&syntaxBasicCompareQuery{
 		        leftParam: leftParam,
 		        rightParam: rightParam,
-		        comparator: syntaxCompareGT{},
+		        comparator: &syntaxCompareGT{},
 		    })
 		}> */
 		func() bool {
@@ -4318,12 +4358,12 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 89 Action36 <- <{
-		    rightParam := p.pop().(syntaxBasicCompareParameter)
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
-		    p.push(syntaxBasicCompareQuery{
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.push(&syntaxBasicCompareQuery{
 		        leftParam: leftParam,
 		        rightParam: rightParam,
-		        comparator: syntaxCompareLE{},
+		        comparator: &syntaxCompareLE{},
 		    })
 		}> */
 		func() bool {
@@ -4333,12 +4373,12 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 90 Action37 <- <{
-		    rightParam := p.pop().(syntaxBasicCompareParameter)
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
-		    p.push(syntaxBasicCompareQuery{
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.push(&syntaxBasicCompareQuery{
 		        leftParam: leftParam,
 		        rightParam: rightParam,
-		        comparator: syntaxCompareLT{},
+		        comparator: &syntaxCompareLT{},
 		    })
 		}> */
 		func() bool {
@@ -4348,15 +4388,15 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 91 Action38 <- <{
-		    leftParam := p.pop().(syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
 		    regex := regexp.MustCompile(text)
-		    p.push(syntaxBasicCompareQuery{
+		    p.push(&syntaxBasicCompareQuery{
 		        leftParam: leftParam,
-		        rightParam: syntaxBasicCompareParameter{
-		            param: syntaxQueryParamLiteral{literal: `regex`},
+		        rightParam: &syntaxBasicCompareParameter{
+		            param: &syntaxQueryParamLiteral{literal: `regex`},
 		            isLiteral: true,
 		        },
-		        comparator: syntaxCompareRegex{
+		        comparator: &syntaxCompareRegex{
 		            regex: regex,
 		        },
 		    })
@@ -4368,8 +4408,8 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 92 Action39 <- <{
-		    p.push(syntaxBasicCompareParameter{
-		        param: syntaxQueryParamLiteral{p.pop()},
+		    p.push(&syntaxBasicCompareParameter{
+		        param: &syntaxQueryParamLiteral{p.pop()},
 		        isLiteral: true,
 		    })
 		}> */
@@ -4380,8 +4420,8 @@ func (p *parser) Init() {
 			return true
 		},
 		/* 93 Action40 <- <{
-		    p.push(syntaxBasicCompareParameter{
-		        param: syntaxQueryParamLiteral{p.pop()},
+		    p.push(&syntaxBasicCompareParameter{
+		        param: &syntaxQueryParamLiteral{p.pop()},
 		        isLiteral: true,
 		    })
 		}> */
@@ -4397,7 +4437,7 @@ func (p *parser) Init() {
 		    if !p.hasErr() && param.isMultiValueParameter() {
 		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 		    }
-		    p.push(syntaxBasicCompareParameter{
+		    p.push(&syntaxBasicCompareParameter{
 		        param: param,
 		        isLiteral: isLiteral,
 		    })
@@ -4411,14 +4451,24 @@ func (p *parser) Init() {
 		/* 95 Action42 <- <{
 		    node := p.pop().(syntaxNode)
 		    switch node.(type) {
-		    case syntaxRootIdentifier:
-		        p.push(syntaxQueryParamRoot{node.(syntaxRootIdentifier)})
+		    case *syntaxRootIdentifier:
+		        param := &syntaxQueryParamRoot{
+		            param: node,
+		            resultPtr: &[]interface{}{},
+		        }
+		        p.updateResultPtr(param.param, &param.resultPtr)
+		        p.push(param)
 		        p.push(true)
-		    case syntaxCurrentRootIdentifier:
-		        p.push(syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)})
+		    case *syntaxCurrentRootIdentifier:
+		        param := &syntaxQueryParamCurrentRoot{
+		            param: node,
+		            resultPtr: &[]interface{}{},
+		        }
+		        p.updateResultPtr(param.param, &param.resultPtr)
+		        p.push(param)
 		        p.push(false)
 		    default:
-		        p.push(syntaxQueryParamRoot{})
+		        p.push(&syntaxQueryParamRoot{})
 		        p.push(true)
 		    }
 		}> */

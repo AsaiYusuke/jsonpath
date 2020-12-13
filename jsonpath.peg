@@ -3,7 +3,7 @@ package jsonpath
 import "strings"
 import "regexp"
 
-type parser Peg {
+type pegJSONPathParser Peg {
     jsonPathParser
 }
 
@@ -23,18 +23,18 @@ jsonpath <-
         childNodes {
             child := p.pop().(syntaxNode)
             root := p.pop().(syntaxNode)
-            root.setNext(&child)
+            root.setNext(child)
             p.push(root)
         }
     )? space {
         rootNode := p.pop().(syntaxNode)
-        checkNode := &rootNode
+        checkNode := rootNode
         for checkNode != nil {
-			if (*checkNode).isMultiValue() {
+			if checkNode.isMultiValue() {
                 rootNode.setMultiValue()
                 break
             }
-            checkNode =  (*checkNode).getNext()
+            checkNode =  checkNode.getNext()
         }
         p.push(rootNode)
     }
@@ -56,11 +56,12 @@ childNodes <-
     (
         '..' ( bracketNode / dotChildIdentifier ) {
             node := p.pop().(syntaxNode)
-            p.push(syntaxRecursiveChildIdentifier{
+            p.push(&syntaxRecursiveChildIdentifier{
                 syntaxBasicNode: &syntaxBasicNode{
                     text: `..`,
                     multiValue: true,
-                    next: &node,
+                    next: node,
+                    result: &p.resultPtr,
                 },
             })
         } /
@@ -76,7 +77,7 @@ childNodes <-
     ) ( childNodes {
         child := p.pop().(syntaxNode)
         parent := p.pop().(syntaxNode)
-        parent.setNext(&child)
+        parent.setNext(child)
         p.push(parent)
     } )?
 
@@ -89,14 +90,20 @@ bracketNode <-
 
 rootIdentifier <-
     '$' {
-        p.push(syntaxRootIdentifier{
-            syntaxBasicNode: &syntaxBasicNode{text: `$`},
+        p.push(&syntaxRootIdentifier{
+            syntaxBasicNode: &syntaxBasicNode{
+                text: `$`,
+                result: &p.resultPtr,
+            },
         })
     }
 currentRootIdentifier <-
     '@' {
-        p.push(syntaxCurrentRootIdentifier{
-            syntaxBasicNode: &syntaxBasicNode{text: `@`},
+        p.push(&syntaxCurrentRootIdentifier{
+            syntaxBasicNode: &syntaxBasicNode{
+                text: `@`,
+                result: &p.resultPtr,
+            },
         })
     }
 
@@ -104,18 +111,20 @@ dotChildIdentifier <-
     < ( '\\' '\\' / '\\' [.[)=!>< \t\r\n] / [^\\.[)=!>< \t\r\n] )+ > {
         unescapedText := p.unescape(text)
         if unescapedText == `*` {
-            p.push(syntaxChildAsteriskIdentifier{
+            p.push(&syntaxChildAsteriskIdentifier{
                 syntaxBasicNode: &syntaxBasicNode{
                     text: unescapedText,
                     multiValue: true,
+                    result: &p.resultPtr,
                 },
             })
         } else {
-            p.push(syntaxChildSingleIdentifier{
+            p.push(&syntaxChildSingleIdentifier{
                 identifier: unescapedText,
                 syntaxBasicNode: &syntaxBasicNode{
                     text: unescapedText,
                     multiValue: false,
+                    result: &p.resultPtr,
                 },
             })
         }
@@ -125,17 +134,19 @@ bracketChildIdentifier <-
     bracketNodeIdentifiers {
         identifier := p.pop().([]string)
         if len(identifier) > 1 {
-            p.push(syntaxChildMultiIdentifier{
+            p.push(&syntaxChildMultiIdentifier{
                 identifiers: identifier,
                 syntaxBasicNode: &syntaxBasicNode{
                     multiValue: true,
+                    result: &p.resultPtr,
                 },
             })
         } else {
-            p.push(syntaxChildSingleIdentifier{
+            p.push(&syntaxChildSingleIdentifier{
                 identifier: identifier[0],
                 syntaxBasicNode: &syntaxBasicNode{
                     multiValue: false,
+                    result: &p.resultPtr,
                 },
             })
         }
@@ -170,16 +181,17 @@ qualifier <- union / script / filter
 union <-
     index {
         subscript := p.pop().(syntaxSubscript)
-        union := syntaxUnionQualifier{
+        p.push(&syntaxUnionQualifier{
             syntaxBasicNode: &syntaxBasicNode{
                 multiValue: subscript.isMultiValue(),
-            }}
-        union.add(subscript)
-        p.push(union)
+                result: &p.resultPtr,
+            },
+            subscripts: []syntaxSubscript{subscript},
+        })
     } (
         sepUnion union {
-            childIndexUnion := p.pop().(syntaxUnionQualifier)
-            parentIndexUnion := p.pop().(syntaxUnionQualifier)
+            childIndexUnion := p.pop().(*syntaxUnionQualifier)
+            parentIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion.merge(childIndexUnion)
             parentIndexUnion.setMultiValue()
             p.push(parentIndexUnion)
@@ -188,16 +200,16 @@ union <-
 
 index <-
     slice {
-        step  := p.pop().(syntaxIndex)
-        end   := p.pop().(syntaxIndex)
-        start := p.pop().(syntaxIndex)
+        step  := p.pop().(*syntaxIndex)
+        end   := p.pop().(*syntaxIndex)
+        start := p.pop().(*syntaxIndex)
 
         if step.isOmitted || step.number == 0 {
             step.number = 1
         }
 
         if step.number > 0 {
-            p.push(syntaxSlicePositiveStep{
+            p.push(&syntaxSlicePositiveStep{
                 syntaxBasicSubscript: &syntaxBasicSubscript{
                     multiValue: true,
                 },
@@ -206,7 +218,7 @@ index <-
                 step: step,
             })
         } else {
-            p.push(syntaxSliceNegativeStep{
+            p.push(&syntaxSliceNegativeStep{
                 syntaxBasicSubscript: &syntaxBasicSubscript{
                     multiValue: true,
                 },
@@ -218,7 +230,7 @@ index <-
     } /
 
     < indexNumber > {
-        p.push(syntaxIndex{
+        p.push(&syntaxIndex{
             syntaxBasicSubscript: &syntaxBasicSubscript{
                 multiValue: false,
             },
@@ -227,7 +239,7 @@ index <-
     } /
 
     '*' {
-        p.push(syntaxAsterisk{
+        p.push(&syntaxAsterisk{
             syntaxBasicSubscript: &syntaxBasicSubscript{
                 multiValue: true,
             },
@@ -238,16 +250,16 @@ slice <-
     anyIndex sepSlice anyIndex (
         sepSlice anyIndex /
         space {
-            p.push(syntaxIndex{number: 1})
+            p.push(&syntaxIndex{number: 1})
         }
     )
 
 anyIndex <-
     < ( indexNumber )? > {
         if len(text) > 0 {
-            p.push(syntaxIndex{number: p.toInt(text)})
+            p.push(&syntaxIndex{number: p.toInt(text)})
         } else {
-            p.push(syntaxIndex{number: 0, isOmitted: true})
+            p.push(&syntaxIndex{number: 0, isOmitted: true})
         }
     }
 
@@ -258,10 +270,11 @@ sepSlice <- space ':' space
 
 script <-
     scriptStart < command > scriptEnd {
-        p.push(syntaxScriptQualifier{
+        p.push(&syntaxScriptQualifier{
             command: text,
             syntaxBasicNode: &syntaxBasicNode{
                 multiValue: true,
+                result: &p.resultPtr,
             },
         })
     }
@@ -270,10 +283,12 @@ command <- [^)]+
 
 filter <-
     filterStart query filterEnd {
-        p.push(syntaxFilterQualifier{
-            query: p.pop().(syntaxQuery),
+        query := p.pop().(syntaxQuery)
+        p.push(&syntaxFilterQualifier{
+            query: query,
             syntaxBasicNode: &syntaxBasicNode{
                 multiValue: true,
+                result: &p.resultPtr,
             },
         })
     }
@@ -283,7 +298,7 @@ query <-
         logicOr query {
             childQuery := p.pop().(syntaxQuery)
             parentQuery := p.pop().(syntaxQuery)
-            p.push(syntaxLogicalOr{parentQuery, childQuery})
+            p.push(&syntaxLogicalOr{parentQuery, childQuery})
         }
     )?
 
@@ -294,7 +309,7 @@ andQuery <-
         logicAnd andQuery {
             childQuery := p.pop().(syntaxQuery)
             parentQuery := p.pop().(syntaxQuery)
-            p.push(syntaxLogicalAnd{parentQuery, childQuery})
+            p.push(&syntaxLogicalAnd{parentQuery, childQuery})
         }
     )?
 
@@ -302,22 +317,18 @@ basicQuery <-
     < comparator > {
         if !p.hasErr() {
             query := p.pop().(syntaxQuery)
-
-            var checkQuery syntaxBasicCompareQuery
-            switch query.(type) {
-            case syntaxBasicCompareQuery:
-                checkQuery = query.(syntaxBasicCompareQuery)
-            case syntaxLogicalNot:
-                checkQuery = (query.(syntaxLogicalNot)).param.(syntaxBasicCompareQuery)
-            }
-        
-            _, leftIsCurrentRoot := checkQuery.leftParam.param.(syntaxQueryParamCurrentRoot)
-            _, rigthIsCurrentRoot := checkQuery.rightParam.param.(syntaxQueryParamCurrentRoot)
-            if leftIsCurrentRoot && rigthIsCurrentRoot {
-                p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
-            }
-        
             p.push(query)
+
+			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+				query = (*logicalNot).param
+			}
+            if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+                _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
+                _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+                if leftIsCurrentRoot && rigthIsCurrentRoot {
+                    p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
+                }
+			}
         }
     } /
     
@@ -328,7 +339,9 @@ basicQuery <-
         jsonpathFilter := p.pop().(syntaxQuery)
         isLogicalNot := p.pop().(bool)
         if isLogicalNot {
-            p.push(syntaxLogicalNot{jsonpathFilter})
+            p.push(&syntaxLogicalNot{
+                param: jsonpathFilter,
+            })
         } else {
             p.push(jsonpathFilter)
         }
@@ -341,78 +354,80 @@ logicNot <- '!' space
 comparator <-
     qParam space (
         '==' space qParam {
-            rightParam := p.pop().(syntaxBasicCompareParameter)
-            leftParam := p.pop().(syntaxBasicCompareParameter)
-            p.push(syntaxBasicCompareQuery{
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.push(&syntaxBasicCompareQuery{
                 leftParam: leftParam,
                 rightParam: rightParam,
-                comparator: syntaxCompareEQ{},
+                comparator: &syntaxCompareEQ{},
             })
         } /
 
         '!=' space qParam {
-            rightParam := p.pop().(syntaxBasicCompareParameter)
-            leftParam := p.pop().(syntaxBasicCompareParameter)
-            p.push(syntaxLogicalNot{syntaxBasicCompareQuery{
-                leftParam: leftParam,
-                rightParam: rightParam,
-                comparator: syntaxCompareEQ{},
-            }})
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.push(&syntaxLogicalNot{
+                param: &syntaxBasicCompareQuery{
+                    leftParam: leftParam,
+                    rightParam: rightParam,
+                    comparator: &syntaxCompareEQ{},
+                },
+            })
         }
     ) /
 
     qNumericParam space (
         '<=' space qNumericParam {
-            rightParam := p.pop().(syntaxBasicCompareParameter)
-            leftParam := p.pop().(syntaxBasicCompareParameter)
-            p.push(syntaxBasicCompareQuery{
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.push(&syntaxBasicCompareQuery{
                 leftParam: leftParam,
                 rightParam: rightParam,
-                comparator: syntaxCompareGE{},
+                comparator: &syntaxCompareGE{},
             })
         } /
 
         '<' space qNumericParam {
-            rightParam := p.pop().(syntaxBasicCompareParameter)
-            leftParam := p.pop().(syntaxBasicCompareParameter)
-            p.push(syntaxBasicCompareQuery{
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.push(&syntaxBasicCompareQuery{
                 leftParam: leftParam,
                 rightParam: rightParam,
-                comparator: syntaxCompareGT{},
+                comparator: &syntaxCompareGT{},
             })
         } /
 
         '>=' space qNumericParam {
-            rightParam := p.pop().(syntaxBasicCompareParameter)
-            leftParam := p.pop().(syntaxBasicCompareParameter)
-            p.push(syntaxBasicCompareQuery{
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.push(&syntaxBasicCompareQuery{
                 leftParam: leftParam,
                 rightParam: rightParam,
-                comparator: syntaxCompareLE{},
+                comparator: &syntaxCompareLE{},
             })
         } /
 
         '>' space qNumericParam {
-            rightParam := p.pop().(syntaxBasicCompareParameter)
-            leftParam := p.pop().(syntaxBasicCompareParameter)
-            p.push(syntaxBasicCompareQuery{
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.push(&syntaxBasicCompareQuery{
                 leftParam: leftParam,
                 rightParam: rightParam,
-                comparator: syntaxCompareLT{},
+                comparator: &syntaxCompareLT{},
             })
         }
     ) /
 
     singleJsonpathFilter space '=~' space '/' < regex > '/' {
-        leftParam := p.pop().(syntaxBasicCompareParameter)
+        leftParam := p.pop().(*syntaxBasicCompareParameter)
         regex := regexp.MustCompile(text)
-        p.push(syntaxBasicCompareQuery{
+        p.push(&syntaxBasicCompareQuery{
             leftParam: leftParam,
-            rightParam: syntaxBasicCompareParameter{
-                param: syntaxQueryParamLiteral{literal: `regex`},
+            rightParam: &syntaxBasicCompareParameter{
+                param: &syntaxQueryParamLiteral{literal: `regex`},
                 isLiteral: true,
             },
-            comparator: syntaxCompareRegex{
+            comparator: &syntaxCompareRegex{
                 regex: regex,
             },
         })
@@ -420,8 +435,8 @@ comparator <-
 
 qParam <-
     qLiteral {
-        p.push(syntaxBasicCompareParameter{
-            param: syntaxQueryParamLiteral{p.pop()},
+        p.push(&syntaxBasicCompareParameter{
+            param: &syntaxQueryParamLiteral{p.pop()},
             isLiteral: true,
         })
     } /
@@ -430,8 +445,8 @@ qParam <-
     
 qNumericParam <-
     lNumber {
-        p.push(syntaxBasicCompareParameter{
-            param: syntaxQueryParamLiteral{p.pop()},
+        p.push(&syntaxBasicCompareParameter{
+            param: &syntaxQueryParamLiteral{p.pop()},
             isLiteral: true,
         })
     } /
@@ -447,7 +462,7 @@ singleJsonpathFilter <-
         if !p.hasErr() && param.isMultiValueParameter() {
             p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
         }
-        p.push(syntaxBasicCompareParameter{
+        p.push(&syntaxBasicCompareParameter{
             param: param,
             isLiteral: isLiteral,
         })
@@ -457,14 +472,24 @@ jsonpathFilter <-
     < jsonpath > {
         node := p.pop().(syntaxNode)
         switch node.(type) {
-        case syntaxRootIdentifier:
-            p.push(syntaxQueryParamRoot{node.(syntaxRootIdentifier)})
+        case *syntaxRootIdentifier:
+            param := &syntaxQueryParamRoot{
+                param: node,
+                resultPtr: &[]interface{}{},
+            }
+            p.updateResultPtr(param.param, &param.resultPtr)
+            p.push(param)
             p.push(true)
-        case syntaxCurrentRootIdentifier:
-            p.push(syntaxQueryParamCurrentRoot{node.(syntaxCurrentRootIdentifier)})
+        case *syntaxCurrentRootIdentifier:
+            param := &syntaxQueryParamCurrentRoot{
+                param: node,
+                resultPtr: &[]interface{}{},
+            }
+            p.updateResultPtr(param.param, &param.resultPtr)
+            p.push(param)
             p.push(false)
         default:
-            p.push(syntaxQueryParamRoot{})
+            p.push(&syntaxQueryParamRoot{})
             p.push(true)
         }
     }

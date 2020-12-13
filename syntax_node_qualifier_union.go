@@ -8,20 +8,21 @@ type syntaxUnionQualifier struct {
 	subscripts []syntaxSubscript
 }
 
-func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *[]interface{}) error {
+func (u *syntaxUnionQualifier) retrieve(root, current interface{}) error {
 	if _, ok := current.(map[string]interface{}); ok {
 		if len(u.subscripts) == 1 {
-			if _, ok := u.subscripts[0].(syntaxAsterisk); ok {
+			if _, ok := u.subscripts[0].(*syntaxAsterisk); ok {
 				// Switch to the all node analysis mode,
 				// if "current" variable points the map structure and
 				// specifying the Asterisk subscript
 				asteriskIdentifier := syntaxChildAsteriskIdentifier{
 					syntaxBasicNode: &syntaxBasicNode{
-						text: u.text,
-						next: u.next,
+						text:   u.text,
+						next:   u.next,
+						result: u.result,
 					},
 				}
-				return asteriskIdentifier.retrieve(root, current, result)
+				return asteriskIdentifier.retrieve(root, current)
 			}
 		}
 	}
@@ -43,10 +44,10 @@ func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *[]inte
 
 	if u.isMultiValue() {
 		for _, index := range indexes {
-			u.retrieveNext(root, srcArray[index], result)
+			u.retrieveNext(root, srcArray[index])
 		}
 
-		if len(*result) == 0 {
+		if len((**u.result)) == 0 {
 			return ErrorNoneMatched{u.getConnectedText()}
 		}
 
@@ -57,13 +58,9 @@ func (u syntaxUnionQualifier) retrieve(root, current interface{}, result *[]inte
 		return ErrorIndexOutOfRange{u.text}
 	}
 
-	return u.retrieveNext(root, srcArray[indexes[0]], result)
+	return u.retrieveNext(root, srcArray[indexes[0]])
 }
 
-func (u *syntaxUnionQualifier) add(subscript syntaxSubscript) {
-	u.subscripts = append(u.subscripts, subscript)
-}
-
-func (u *syntaxUnionQualifier) merge(union syntaxUnionQualifier) {
+func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {
 	u.subscripts = append(u.subscripts, union.subscripts...)
 }

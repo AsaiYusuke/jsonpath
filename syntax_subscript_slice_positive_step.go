@@ -3,12 +3,12 @@ package jsonpath
 type syntaxSlicePositiveStep struct {
 	*syntaxBasicSubscript
 
-	start syntaxIndex
-	end   syntaxIndex
-	step  syntaxIndex
+	start *syntaxIndex
+	end   *syntaxIndex
+	step  *syntaxIndex
 }
 
-func (s syntaxSlicePositiveStep) getIndexes(src []interface{}) []int {
+func (s *syntaxSlicePositiveStep) getIndexes(src []interface{}) []int {
 	srcLength := len(src)
 	loopStart := s.getLoopStart(srcLength)
 	loopEnd := s.getLoopEnd(srcLength)
@@ -25,7 +25,7 @@ func (s syntaxSlicePositiveStep) getIndexes(src []interface{}) []int {
 	return result[:index]
 }
 
-func (s syntaxSlicePositiveStep) getLoopStart(srcLength int) int {
+func (s *syntaxSlicePositiveStep) getLoopStart(srcLength int) int {
 	loopStart := s.start.number
 	if s.start.isOmitted {
 		loopStart = 0
@@ -39,7 +39,7 @@ func (s syntaxSlicePositiveStep) getLoopStart(srcLength int) int {
 	return loopStart
 }
 
-func (s syntaxSlicePositiveStep) getLoopEnd(srcLength int) int {
+func (s *syntaxSlicePositiveStep) getLoopEnd(srcLength int) int {
 	loopEnd := s.end.number
 	if s.end.isOmitted {
 		loopEnd = srcLength

@@ -3,7 +3,8 @@ package jsonpath
 type syntaxBasicNode struct {
 	text       string
 	multiValue bool
-	next       *syntaxNode
+	next       syntaxNode
+	result     **[]interface{}
 }
 
 func (i *syntaxBasicNode) setText(text string) {
@@ -20,27 +21,31 @@ func (i *syntaxBasicNode) isMultiValue() bool {
 
 func (i *syntaxBasicNode) getConnectedText() string {
 	if i.next != nil {
-		return i.text + (*i.next).getConnectedText()
+		return i.text + i.next.getConnectedText()
 	}
 	return i.text
 }
 
-func (i *syntaxBasicNode) setNext(next *syntaxNode) {
+func (i *syntaxBasicNode) setNext(next syntaxNode) {
 	if i.next != nil {
-		(*i.next).setNext(next)
+		i.next.setNext(next)
 	} else {
 		i.next = next
 	}
 }
 
-func (i *syntaxBasicNode) getNext() *syntaxNode {
+func (i *syntaxBasicNode) getNext() syntaxNode {
 	return i.next
 }
 
-func (i *syntaxBasicNode) retrieveNext(root, current interface{}, result *[]interface{}) error {
+func (i *syntaxBasicNode) retrieveNext(root, current interface{}) error {
 	if i.next != nil {
-		return (*i.next).retrieve(root, current, result)
+		return i.next.retrieve(root, current)
 	}
-	*result = append(*result, current)
+	(**i.result) = append((**i.result), current)
 	return nil
+}
+
+func (i *syntaxBasicNode) setResultPtr(resultPtr **[]interface{}) {
+	i.result = resultPtr
 }

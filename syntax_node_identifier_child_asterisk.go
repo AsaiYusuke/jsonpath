@@ -8,8 +8,7 @@ type syntaxChildAsteriskIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i syntaxChildAsteriskIdentifier) retrieve(
-	root, current interface{}, result *[]interface{}) error {
+func (i *syntaxChildAsteriskIdentifier) retrieve(root, current interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:
@@ -21,16 +20,16 @@ func (i syntaxChildAsteriskIdentifier) retrieve(
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			i.retrieveNext(root, srcMap[key], result)
+			i.retrieveNext(root, srcMap[key])
 		}
 
 	case []interface{}:
 		for _, value := range current.([]interface{}) {
-			i.retrieveNext(root, value, result)
+			i.retrieveNext(root, value)
 		}
 	}
 
-	if len(*result) == 0 {
+	if len((**i.result)) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 

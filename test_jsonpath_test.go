@@ -3385,7 +3385,7 @@ func TestParserExecuteFunctions(t *testing.T) {
 	stdoutBackup := os.Stdout
 	os.Stdout = nil
 
-	parser := parser{Buffer: `$`}
+	parser := pegJSONPathParser{Buffer: `$`}
 	parser.Init()
 	parser.Parse()
 	parser.Execute()
