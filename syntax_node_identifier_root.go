@@ -6,6 +6,6 @@ type syntaxRootIdentifier struct {
 	srcJSON **interface{}
 }
 
-func (i *syntaxRootIdentifier) retrieve(current interface{}) error {
+func (i *syntaxRootIdentifier) retrieve(_ interface{}) error {
 	return i.retrieveNext(**i.srcJSON)
 }
