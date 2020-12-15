@@ -11,7 +11,7 @@ type syntaxUnionQualifier struct {
 func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 	if _, ok := current.(map[string]interface{}); ok {
 		if len(u.subscripts) == 1 {
-			if _, ok := u.subscripts[0].(*syntaxAsterisk); ok {
+			if _, ok := u.subscripts[0].(*syntaxAsteriskSubscript); ok {
 				// Switch to the all node analysis mode,
 				// if "current" variable points the map structure and
 				// specifying the Asterisk subscript

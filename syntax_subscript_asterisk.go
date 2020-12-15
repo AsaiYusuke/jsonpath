@@ -1,10 +1,10 @@
 package jsonpath
 
-type syntaxAsterisk struct {
+type syntaxAsteriskSubscript struct {
 	*syntaxBasicSubscript
 }
 
-func (*syntaxAsterisk) getIndexes(src []interface{}) []int {
+func (*syntaxAsteriskSubscript) getIndexes(src []interface{}) []int {
 	index, result := 0, make([]int, len(src))
 	for i := range src {
 		result[index] = i

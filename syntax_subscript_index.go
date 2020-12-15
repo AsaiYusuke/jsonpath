@@ -1,13 +1,13 @@
 package jsonpath
 
-type syntaxIndex struct {
+type syntaxIndexSubscript struct {
 	*syntaxBasicSubscript
 
 	number    int
 	isOmitted bool
 }
 
-func (i *syntaxIndex) getIndexes(src []interface{}) []int {
+func (i *syntaxIndexSubscript) getIndexes(src []interface{}) []int {
 	index := i.number
 	srcLength := len(src)
 

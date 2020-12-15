@@ -3,10 +3,8 @@ package jsonpath
 import (
 	"fmt"
 	"math"
-	"regexp"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 const endSymbol rune = 1114112
@@ -615,10 +613,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction2:
 
-			child := p.pop().(syntaxNode)
-			root := p.pop().(syntaxNode)
-			root.setNext(child)
-			p.push(root)
+			p.setNodeChain()
 
 		case ruleAction3:
 
@@ -647,95 +642,44 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction6:
 
-			node := p.pop().(syntaxNode)
-			p.push(&syntaxRecursiveChildIdentifier{
-				syntaxBasicNode: &syntaxBasicNode{
-					text:       `..`,
-					multiValue: true,
-					next:       node,
-					result:     &p.resultPtr,
-				},
-			})
+			p.push(p.createRecursiveChildIdentifier(p.pop().(syntaxNode)))
 
 		case ruleAction7:
 
-			identifier := p.pop().(syntaxNode)
-			identifier.setText(text)
-			p.push(identifier)
+			p.setNodeText(text)
 
 		case ruleAction8:
 
-			child := p.pop().(syntaxNode)
-			parent := p.pop().(syntaxNode)
-			parent.setNext(child)
-			p.push(parent)
+			p.setNodeChain()
 
 		case ruleAction9:
 
-			node := p.pop().(syntaxNode)
-			node.setText(text)
-			p.push(node)
+			p.setNodeText(text)
 
 		case ruleAction10:
 
-			p.push(&syntaxRootIdentifier{
-				syntaxBasicNode: &syntaxBasicNode{
-					text:   `$`,
-					result: &p.resultPtr,
-				},
-				srcJSON: &p.srcJSON,
-			})
+			p.push(p.createRootIdentifier())
 
 		case ruleAction11:
 
-			p.push(&syntaxCurrentRootIdentifier{
-				syntaxBasicNode: &syntaxBasicNode{
-					text:   `@`,
-					result: &p.resultPtr,
-				},
-			})
+			p.push(p.createCurrentRootIdentifier())
 
 		case ruleAction12:
 
 			unescapedText := p.unescape(text)
 			if unescapedText == `*` {
-				p.push(&syntaxChildAsteriskIdentifier{
-					syntaxBasicNode: &syntaxBasicNode{
-						text:       unescapedText,
-						multiValue: true,
-						result:     &p.resultPtr,
-					},
-				})
+				p.push(p.createChildAsteriskIdentifier(unescapedText))
 			} else {
-				p.push(&syntaxChildSingleIdentifier{
-					identifier: unescapedText,
-					syntaxBasicNode: &syntaxBasicNode{
-						text:       unescapedText,
-						multiValue: false,
-						result:     &p.resultPtr,
-					},
-				})
+				p.push(p.createChildSingleIdentifier(unescapedText))
 			}
 
 		case ruleAction13:
 
 			identifier := p.pop().([]string)
 			if len(identifier) > 1 {
-				p.push(&syntaxChildMultiIdentifier{
-					identifiers: identifier,
-					syntaxBasicNode: &syntaxBasicNode{
-						multiValue: true,
-						result:     &p.resultPtr,
-					},
-				})
+				p.push(p.createChildMultiIdentifier(identifier))
 			} else {
-				p.push(&syntaxChildSingleIdentifier{
-					identifier: identifier[0],
-					syntaxBasicNode: &syntaxBasicNode{
-						multiValue: false,
-						result:     &p.resultPtr,
-					},
-				})
+				p.push(p.createChildSingleIdentifier(identifier[0]))
 			}
 
 		case ruleAction14:
@@ -760,13 +704,7 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction18:
 
 			subscript := p.pop().(syntaxSubscript)
-			p.push(&syntaxUnionQualifier{
-				syntaxBasicNode: &syntaxBasicNode{
-					multiValue: subscript.isMultiValue(),
-					result:     &p.resultPtr,
-				},
-				subscripts: []syntaxSubscript{subscript},
-			})
+			p.push(p.createUnionQualifier(subscript))
 
 		case ruleAction19:
 
@@ -778,95 +716,59 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction20:
 
-			step := p.pop().(*syntaxIndex)
-			end := p.pop().(*syntaxIndex)
-			start := p.pop().(*syntaxIndex)
+			step := p.pop().(*syntaxIndexSubscript)
+			end := p.pop().(*syntaxIndexSubscript)
+			start := p.pop().(*syntaxIndexSubscript)
 
 			if step.isOmitted || step.number == 0 {
 				step.number = 1
 			}
 
 			if step.number > 0 {
-				p.push(&syntaxSlicePositiveStep{
-					syntaxBasicSubscript: &syntaxBasicSubscript{
-						multiValue: true,
-					},
-					start: start,
-					end:   end,
-					step:  step,
-				})
+				p.push(p.createSliceSubscript(true, start, end, step))
 			} else {
-				p.push(&syntaxSliceNegativeStep{
-					syntaxBasicSubscript: &syntaxBasicSubscript{
-						multiValue: true,
-					},
-					start: start,
-					end:   end,
-					step:  step,
-				})
+				p.push(p.createSliceSubscript(false, start, end, step))
 			}
 
 		case ruleAction21:
 
-			p.push(&syntaxIndex{
-				syntaxBasicSubscript: &syntaxBasicSubscript{
-					multiValue: false,
-				},
-				number: p.toInt(text),
-			})
+			p.push(p.createIndexSubscript(text, false))
 
 		case ruleAction22:
 
-			p.push(&syntaxAsterisk{
-				syntaxBasicSubscript: &syntaxBasicSubscript{
-					multiValue: true,
-				},
-			})
+			p.push(p.createAsteriskSubscript())
 
 		case ruleAction23:
 
-			p.push(&syntaxIndex{number: 1})
+			p.push(p.createIndexSubscript(`1`, false))
 
 		case ruleAction24:
 
 			if len(text) > 0 {
-				p.push(&syntaxIndex{number: p.toInt(text)})
+				p.push(p.createIndexSubscript(text, false))
 			} else {
-				p.push(&syntaxIndex{number: 0, isOmitted: true})
+				p.push(p.createIndexSubscript(`0`, true))
 			}
 
 		case ruleAction25:
 
-			p.push(&syntaxScriptQualifier{
-				command: text,
-				syntaxBasicNode: &syntaxBasicNode{
-					multiValue: true,
-					result:     &p.resultPtr,
-				},
-			})
+			p.push(p.createScriptQualifier(text))
 
 		case ruleAction26:
 
-			query := p.pop().(syntaxQuery)
-			p.push(&syntaxFilterQualifier{
-				query: query,
-				syntaxBasicNode: &syntaxBasicNode{
-					multiValue: true,
-					result:     &p.resultPtr,
-				},
-			})
+			p.push(p.createFilterQualifier(p.pop().(syntaxQuery)))
 
 		case ruleAction27:
 
 			childQuery := p.pop().(syntaxQuery)
 			parentQuery := p.pop().(syntaxQuery)
-			p.push(&syntaxLogicalOr{parentQuery, childQuery})
+			p.push(p.createLogicalOr(parentQuery, childQuery))
 
 		case ruleAction28:
 
 			childQuery := p.pop().(syntaxQuery)
 			parentQuery := p.pop().(syntaxQuery)
-			p.push(&syntaxLogicalAnd{parentQuery, childQuery})
+			p.push(p.createLogicalAnd(parentQuery, childQuery))
 
 		case ruleAction29:
 
@@ -888,7 +790,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction30:
 
-			p.push(strings.HasPrefix(text, `!`))
+			p.push(len(text) > 0 && text[0:1] == `!`)
 
 		case ruleAction31:
 
@@ -896,9 +798,7 @@ func (p *pegJSONPathParser) Execute() {
 			jsonpathFilter := p.pop().(syntaxQuery)
 			isLogicalNot := p.pop().(bool)
 			if isLogicalNot {
-				p.push(&syntaxLogicalNot{
-					param: jsonpathFilter,
-				})
+				p.push(p.createLogicalNot(jsonpathFilter))
 			} else {
 				p.push(jsonpathFilter)
 			}
@@ -907,33 +807,19 @@ func (p *pegJSONPathParser) Execute() {
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.push(&syntaxBasicCompareQuery{
-				leftParam:  leftParam,
-				rightParam: rightParam,
-				comparator: &syntaxCompareEQ{},
-			})
+			p.push(p.createCompareEQ(leftParam, rightParam))
 
 		case ruleAction33:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.push(&syntaxLogicalNot{
-				param: &syntaxBasicCompareQuery{
-					leftParam:  leftParam,
-					rightParam: rightParam,
-					comparator: &syntaxCompareEQ{},
-				},
-			})
+			p.push(p.createCompareNE(leftParam, rightParam))
 
 		case ruleAction34:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.push(&syntaxBasicCompareQuery{
-				leftParam:  leftParam,
-				rightParam: rightParam,
-				comparator: &syntaxCompareGE{},
-			})
+			p.push(p.createCompareGE(leftParam, rightParam))
 
 		case ruleAction35:
 
@@ -949,50 +835,26 @@ func (p *pegJSONPathParser) Execute() {
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.push(&syntaxBasicCompareQuery{
-				leftParam:  leftParam,
-				rightParam: rightParam,
-				comparator: &syntaxCompareLE{},
-			})
+			p.push(p.createCompareLE(leftParam, rightParam))
 
 		case ruleAction37:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.push(&syntaxBasicCompareQuery{
-				leftParam:  leftParam,
-				rightParam: rightParam,
-				comparator: &syntaxCompareLT{},
-			})
+			p.push(p.createCompareLT(leftParam, rightParam))
 
 		case ruleAction38:
 
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			regex := regexp.MustCompile(text)
-			p.push(&syntaxBasicCompareQuery{
-				leftParam: leftParam,
-				rightParam: &syntaxBasicCompareParameter{
-					param:     &syntaxQueryParamLiteral{literal: `regex`},
-					isLiteral: true,
-				},
-				comparator: &syntaxCompareRegex{
-					regex: regex,
-				},
-			})
+			p.push(p.createCompareRegex(leftParam, text))
 
 		case ruleAction39:
 
-			p.push(&syntaxBasicCompareParameter{
-				param:     &syntaxQueryParamLiteral{p.pop()},
-				isLiteral: true,
-			})
+			p.push(p.createCompareParameterLiteral(p.pop()))
 
 		case ruleAction40:
 
-			p.push(&syntaxBasicCompareParameter{
-				param:     &syntaxQueryParamLiteral{p.pop()},
-				isLiteral: true,
-			})
+			p.push(p.createCompareParameterLiteral(p.pop()))
 
 		case ruleAction41:
 
@@ -1001,31 +863,18 @@ func (p *pegJSONPathParser) Execute() {
 			if !p.hasErr() && param.isMultiValueParameter() {
 				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 			}
-			p.push(&syntaxBasicCompareParameter{
-				param:     param,
-				isLiteral: isLiteral,
-			})
+			p.push(p.createBasicCompareParameter(param, isLiteral))
 
 		case ruleAction42:
 
 			node := p.pop().(syntaxNode)
+
 			switch node.(type) {
 			case *syntaxRootIdentifier:
-				param := &syntaxQueryParamRoot{
-					param:     node,
-					srcJSON:   &p.srcJSON,
-					resultPtr: &[]interface{}{},
-				}
-				p.updateResultPtr(param.param, &param.resultPtr)
-				p.push(param)
+				p.push(p.createCompareParameterRoot(node))
 				p.push(true)
 			case *syntaxCurrentRootIdentifier:
-				param := &syntaxQueryParamCurrentRoot{
-					param:     node,
-					resultPtr: &[]interface{}{},
-				}
-				p.updateResultPtr(param.param, &param.resultPtr)
-				p.push(param)
+				p.push(p.createCompareParameterCurrentRoot(node))
 				p.push(false)
 			default:
 				p.push(&syntaxQueryParamRoot{})
@@ -3859,10 +3708,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 55 Action2 <- <{
-		    child := p.pop().(syntaxNode)
-		    root := p.pop().(syntaxNode)
-		    root.setNext(child)
-		    p.push(root)
+		    p.setNodeChain()
 		}> */
 		func() bool {
 			{
@@ -3911,15 +3757,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 59 Action6 <- <{
-		    node := p.pop().(syntaxNode)
-		    p.push(&syntaxRecursiveChildIdentifier{
-		        syntaxBasicNode: &syntaxBasicNode{
-		            text: `..`,
-		            multiValue: true,
-		            next: node,
-		            result: &p.resultPtr,
-		        },
-		    })
+		    p.push(p.createRecursiveChildIdentifier(p.pop().(syntaxNode)))
 		}> */
 		func() bool {
 			{
@@ -3928,9 +3766,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 60 Action7 <- <{
-		    identifier := p.pop().(syntaxNode)
-		    identifier.setText(text)
-		    p.push(identifier)
+		    p.setNodeText(text)
 		}> */
 		func() bool {
 			{
@@ -3939,10 +3775,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 61 Action8 <- <{
-		    child := p.pop().(syntaxNode)
-		    parent := p.pop().(syntaxNode)
-		    parent.setNext(child)
-		    p.push(parent)
+		    p.setNodeChain()
 		}> */
 		func() bool {
 			{
@@ -3951,9 +3784,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 62 Action9 <- <{
-		    node := p.pop().(syntaxNode)
-		    node.setText(text)
-		    p.push(node)
+		    p.setNodeText(text)
 		}> */
 		func() bool {
 			{
@@ -3962,13 +3793,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 63 Action10 <- <{
-		    p.push(&syntaxRootIdentifier{
-		        syntaxBasicNode: &syntaxBasicNode{
-		            text: `$`,
-		            result: &p.resultPtr,
-		        },
-		        srcJSON: &p.srcJSON,
-		    })
+		    p.push(p.createRootIdentifier())
 		}> */
 		func() bool {
 			{
@@ -3977,12 +3802,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 64 Action11 <- <{
-		    p.push(&syntaxCurrentRootIdentifier{
-		        syntaxBasicNode: &syntaxBasicNode{
-		            text: `@`,
-		            result: &p.resultPtr,
-		        },
-		    })
+		    p.push(p.createCurrentRootIdentifier())
 		}> */
 		func() bool {
 			{
@@ -3993,22 +3813,9 @@ func (p *pegJSONPathParser) Init() {
 		/* 65 Action12 <- <{
 		    unescapedText := p.unescape(text)
 		    if unescapedText == `*` {
-		        p.push(&syntaxChildAsteriskIdentifier{
-		            syntaxBasicNode: &syntaxBasicNode{
-		                text: unescapedText,
-		                multiValue: true,
-		                result: &p.resultPtr,
-		            },
-		        })
+		        p.push(p.createChildAsteriskIdentifier(unescapedText))
 		    } else {
-		        p.push(&syntaxChildSingleIdentifier{
-		            identifier: unescapedText,
-		            syntaxBasicNode: &syntaxBasicNode{
-		                text: unescapedText,
-		                multiValue: false,
-		                result: &p.resultPtr,
-		            },
-		        })
+		        p.push(p.createChildSingleIdentifier(unescapedText))
 		    }
 		}> */
 		func() bool {
@@ -4020,21 +3827,9 @@ func (p *pegJSONPathParser) Init() {
 		/* 66 Action13 <- <{
 		    identifier := p.pop().([]string)
 		    if len(identifier) > 1 {
-		        p.push(&syntaxChildMultiIdentifier{
-		            identifiers: identifier,
-		            syntaxBasicNode: &syntaxBasicNode{
-		                multiValue: true,
-		                result: &p.resultPtr,
-		            },
-		        })
+		        p.push(p.createChildMultiIdentifier(identifier))
 		    } else {
-		        p.push(&syntaxChildSingleIdentifier{
-		            identifier: identifier[0],
-		            syntaxBasicNode: &syntaxBasicNode{
-		                multiValue: false,
-		                result: &p.resultPtr,
-		            },
-		        })
+		        p.push(p.createChildSingleIdentifier(identifier[0]))
 		    }
 		}> */
 		func() bool {
@@ -4084,13 +3879,7 @@ func (p *pegJSONPathParser) Init() {
 		},
 		/* 71 Action18 <- <{
 		    subscript := p.pop().(syntaxSubscript)
-		    p.push(&syntaxUnionQualifier{
-		        syntaxBasicNode: &syntaxBasicNode{
-		            multiValue: subscript.isMultiValue(),
-		            result: &p.resultPtr,
-		        },
-		        subscripts: []syntaxSubscript{subscript},
-		    })
+		    p.push(p.createUnionQualifier(subscript))
 		}> */
 		func() bool {
 			{
@@ -4112,32 +3901,18 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 73 Action20 <- <{
-		    step  := p.pop().(*syntaxIndex)
-		    end   := p.pop().(*syntaxIndex)
-		    start := p.pop().(*syntaxIndex)
+		    step  := p.pop().(*syntaxIndexSubscript)
+		    end   := p.pop().(*syntaxIndexSubscript)
+		    start := p.pop().(*syntaxIndexSubscript)
 
 		    if step.isOmitted || step.number == 0 {
 		        step.number = 1
 		    }
 
 		    if step.number > 0 {
-		        p.push(&syntaxSlicePositiveStep{
-		            syntaxBasicSubscript: &syntaxBasicSubscript{
-		                multiValue: true,
-		            },
-		            start: start,
-		            end: end,
-		            step: step,
-		        })
+		        p.push(p.createSliceSubscript(true, start, end, step))
 		    } else {
-		        p.push(&syntaxSliceNegativeStep{
-		            syntaxBasicSubscript: &syntaxBasicSubscript{
-		                multiValue: true,
-		            },
-		            start: start,
-		            end: end,
-		            step: step,
-		        })
+		        p.push(p.createSliceSubscript(false, start, end, step))
 		    }
 		}> */
 		func() bool {
@@ -4147,12 +3922,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 74 Action21 <- <{
-		    p.push(&syntaxIndex{
-		        syntaxBasicSubscript: &syntaxBasicSubscript{
-		            multiValue: false,
-		        },
-		        number: p.toInt(text),
-		    })
+		    p.push(p.createIndexSubscript(text, false))
 		}> */
 		func() bool {
 			{
@@ -4161,11 +3931,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 75 Action22 <- <{
-		    p.push(&syntaxAsterisk{
-		        syntaxBasicSubscript: &syntaxBasicSubscript{
-		            multiValue: true,
-		        },
-		    })
+		    p.push(p.createAsteriskSubscript())
 		}> */
 		func() bool {
 			{
@@ -4174,7 +3940,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 76 Action23 <- <{
-		    p.push(&syntaxIndex{number: 1})
+		    p.push(p.createIndexSubscript(`1`, false))
 		}> */
 		func() bool {
 			{
@@ -4184,9 +3950,9 @@ func (p *pegJSONPathParser) Init() {
 		},
 		/* 77 Action24 <- <{
 		    if len(text) > 0 {
-		        p.push(&syntaxIndex{number: p.toInt(text)})
+		        p.push(p.createIndexSubscript(text, false))
 		    } else {
-		        p.push(&syntaxIndex{number: 0, isOmitted: true})
+		        p.push(p.createIndexSubscript(`0`, true))
 		    }
 		}> */
 		func() bool {
@@ -4196,13 +3962,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 78 Action25 <- <{
-		    p.push(&syntaxScriptQualifier{
-		        command: text,
-		        syntaxBasicNode: &syntaxBasicNode{
-		            multiValue: true,
-		            result: &p.resultPtr,
-		        },
-		    })
+		    p.push(p.createScriptQualifier(text))
 		}> */
 		func() bool {
 			{
@@ -4211,14 +3971,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 79 Action26 <- <{
-		    query := p.pop().(syntaxQuery)
-		    p.push(&syntaxFilterQualifier{
-		        query: query,
-		        syntaxBasicNode: &syntaxBasicNode{
-		            multiValue: true,
-		            result: &p.resultPtr,
-		        },
-		    })
+		    p.push(p.createFilterQualifier(p.pop().(syntaxQuery)))
 		}> */
 		func() bool {
 			{
@@ -4229,7 +3982,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 80 Action27 <- <{
 		    childQuery := p.pop().(syntaxQuery)
 		    parentQuery := p.pop().(syntaxQuery)
-		    p.push(&syntaxLogicalOr{parentQuery, childQuery})
+		    p.push(p.createLogicalOr(parentQuery, childQuery))
 		}> */
 		func() bool {
 			{
@@ -4240,7 +3993,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 81 Action28 <- <{
 		    childQuery := p.pop().(syntaxQuery)
 		    parentQuery := p.pop().(syntaxQuery)
-		    p.push(&syntaxLogicalAnd{parentQuery, childQuery})
+		    p.push(p.createLogicalAnd(parentQuery, childQuery))
 		}> */
 		func() bool {
 			{
@@ -4272,7 +4025,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 83 Action30 <- <{
-		    p.push(strings.HasPrefix(text, `!`))
+		    p.push(len(text) > 0 && text[0:1] == `!`)
 		}> */
 		func() bool {
 			{
@@ -4285,9 +4038,7 @@ func (p *pegJSONPathParser) Init() {
 		    jsonpathFilter := p.pop().(syntaxQuery)
 		    isLogicalNot := p.pop().(bool)
 		    if isLogicalNot {
-		        p.push(&syntaxLogicalNot{
-		            param: jsonpathFilter,
-		        })
+		        p.push(p.createLogicalNot(jsonpathFilter))
 		    } else {
 		        p.push(jsonpathFilter)
 		    }
@@ -4301,11 +4052,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 85 Action32 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.push(&syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: rightParam,
-		        comparator: &syntaxCompareEQ{},
-		    })
+		    p.push(p.createCompareEQ(leftParam, rightParam))
 		}> */
 		func() bool {
 			{
@@ -4316,13 +4063,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 86 Action33 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.push(&syntaxLogicalNot{
-		        param: &syntaxBasicCompareQuery{
-		            leftParam: leftParam,
-		            rightParam: rightParam,
-		            comparator: &syntaxCompareEQ{},
-		        },
-		    })
+		    p.push(p.createCompareNE(leftParam, rightParam))
 		}> */
 		func() bool {
 			{
@@ -4333,11 +4074,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 87 Action34 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.push(&syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: rightParam,
-		        comparator: &syntaxCompareGE{},
-		    })
+		    p.push(p.createCompareGE(leftParam, rightParam))
 		}> */
 		func() bool {
 			{
@@ -4363,11 +4100,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 89 Action36 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.push(&syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: rightParam,
-		        comparator: &syntaxCompareLE{},
-		    })
+		    p.push(p.createCompareLE(leftParam, rightParam))
 		}> */
 		func() bool {
 			{
@@ -4378,11 +4111,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 90 Action37 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.push(&syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: rightParam,
-		        comparator: &syntaxCompareLT{},
-		    })
+		    p.push(p.createCompareLT(leftParam, rightParam))
 		}> */
 		func() bool {
 			{
@@ -4392,17 +4121,7 @@ func (p *pegJSONPathParser) Init() {
 		},
 		/* 91 Action38 <- <{
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    regex := regexp.MustCompile(text)
-		    p.push(&syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: &syntaxBasicCompareParameter{
-		            param: &syntaxQueryParamLiteral{literal: `regex`},
-		            isLiteral: true,
-		        },
-		        comparator: &syntaxCompareRegex{
-		            regex: regex,
-		        },
-		    })
+		    p.push(p.createCompareRegex(leftParam, text))
 		}> */
 		func() bool {
 			{
@@ -4411,10 +4130,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 92 Action39 <- <{
-		    p.push(&syntaxBasicCompareParameter{
-		        param: &syntaxQueryParamLiteral{p.pop()},
-		        isLiteral: true,
-		    })
+		    p.push(p.createCompareParameterLiteral(p.pop()))
 		}> */
 		func() bool {
 			{
@@ -4423,10 +4139,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 93 Action40 <- <{
-		    p.push(&syntaxBasicCompareParameter{
-		        param: &syntaxQueryParamLiteral{p.pop()},
-		        isLiteral: true,
-		    })
+		    p.push(p.createCompareParameterLiteral(p.pop()))
 		}> */
 		func() bool {
 			{
@@ -4440,10 +4153,7 @@ func (p *pegJSONPathParser) Init() {
 		    if !p.hasErr() && param.isMultiValueParameter() {
 		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 		    }
-		    p.push(&syntaxBasicCompareParameter{
-		        param: param,
-		        isLiteral: isLiteral,
-		    })
+		    p.push(p.createBasicCompareParameter(param, isLiteral))
 		}> */
 		func() bool {
 			{
@@ -4453,23 +4163,13 @@ func (p *pegJSONPathParser) Init() {
 		},
 		/* 95 Action42 <- <{
 		    node := p.pop().(syntaxNode)
+
 		    switch node.(type) {
 		    case *syntaxRootIdentifier:
-		        param := &syntaxQueryParamRoot{
-		            param: node,
-		            srcJSON: &p.srcJSON,
-		            resultPtr: &[]interface{}{},
-		        }
-		        p.updateResultPtr(param.param, &param.resultPtr)
-		        p.push(param)
+		        p.push(p.createCompareParameterRoot(node))
 		        p.push(true)
 		    case *syntaxCurrentRootIdentifier:
-		        param := &syntaxQueryParamCurrentRoot{
-		            param: node,
-		            resultPtr: &[]interface{}{},
-		        }
-		        p.updateResultPtr(param.param, &param.resultPtr)
-		        p.push(param)
+		        p.push(p.createCompareParameterCurrentRoot(node))
 		        p.push(false)
 		    default:
 		        p.push(&syntaxQueryParamRoot{})

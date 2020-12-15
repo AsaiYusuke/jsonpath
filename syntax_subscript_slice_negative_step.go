@@ -1,14 +1,14 @@
 package jsonpath
 
-type syntaxSliceNegativeStep struct {
+type syntaxSliceNegativeStepSubscript struct {
 	*syntaxBasicSubscript
 
-	start *syntaxIndex
-	end   *syntaxIndex
-	step  *syntaxIndex
+	start *syntaxIndexSubscript
+	end   *syntaxIndexSubscript
+	step  *syntaxIndexSubscript
 }
 
-func (s *syntaxSliceNegativeStep) getIndexes(src []interface{}) []int {
+func (s *syntaxSliceNegativeStepSubscript) getIndexes(src []interface{}) []int {
 	srcLength := len(src)
 	loopStart := s.getLoopStart(srcLength)
 	loopEnd := s.getLoopEnd(srcLength)
@@ -25,7 +25,7 @@ func (s *syntaxSliceNegativeStep) getIndexes(src []interface{}) []int {
 	return result[:index]
 }
 
-func (s *syntaxSliceNegativeStep) getLoopStart(srcLength int) int {
+func (s *syntaxSliceNegativeStepSubscript) getLoopStart(srcLength int) int {
 	loopStart := s.start.number
 	if s.start.isOmitted {
 		loopStart = srcLength - 1
@@ -39,7 +39,7 @@ func (s *syntaxSliceNegativeStep) getLoopStart(srcLength int) int {
 	return loopStart
 }
 
-func (s *syntaxSliceNegativeStep) getLoopEnd(srcLength int) int {
+func (s *syntaxSliceNegativeStepSubscript) getLoopEnd(srcLength int) int {
 	loopEnd := s.end.number
 	if s.end.isOmitted {
 		loopEnd = -1
