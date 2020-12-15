@@ -71,10 +71,21 @@ func (p *jsonPathParser) setNodeChain() {
 	p.push(parent)
 }
 
-func (p *jsonPathParser) setNodeText(text string) {
-	node := p.pop().(syntaxNode)
+func (p *jsonPathParser) setLastNodeText(text string) {
+	node := p.params[len(p.params)-1].(syntaxNode)
 	node.setText(text)
-	p.push(node)
+}
+
+func (p *jsonPathParser) setRecursiveMultiValue() {
+	node := p.params[len(p.params)-1].(syntaxNode)
+	checkNode := node
+	for checkNode != nil {
+		if checkNode.isMultiValue() {
+			node.setMultiValue()
+			break
+		}
+		checkNode = checkNode.getNext()
+	}
 }
 
 func (p *jsonPathParser) createRootIdentifier() syntaxNode {

@@ -21,16 +21,7 @@ jsonpath <-
             p.setNodeChain()
         }
     )? space {
-        rootNode := p.pop().(syntaxNode)
-        checkNode := rootNode
-        for checkNode != nil {
-			if checkNode.isMultiValue() {
-                rootNode.setMultiValue()
-                break
-            }
-            checkNode =  checkNode.getNext()
-        }
-        p.push(rootNode)
+        p.setRecursiveMultiValue()
     }
 
 rootNode <-
@@ -53,7 +44,7 @@ childNodes <-
         } /
 
         < '.' dotChildIdentifier > {
-            p.setNodeText(text)
+            p.setLastNodeText(text)
         } /
 
         bracketNode
@@ -64,7 +55,7 @@ childNodes <-
 
 bracketNode <-
     < squareBracketStart ( bracketChildIdentifier / qualifier ) squareBracketEnd > {
-        p.setNodeText(text)
+        p.setLastNodeText(text)
     }
 
 rootIdentifier <-

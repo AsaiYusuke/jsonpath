@@ -617,16 +617,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction3:
 
-			rootNode := p.pop().(syntaxNode)
-			checkNode := rootNode
-			for checkNode != nil {
-				if checkNode.isMultiValue() {
-					rootNode.setMultiValue()
-					break
-				}
-				checkNode = checkNode.getNext()
-			}
-			p.push(rootNode)
+			p.setRecursiveMultiValue()
 
 		case ruleAction4:
 
@@ -646,7 +637,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction7:
 
-			p.setNodeText(text)
+			p.setLastNodeText(text)
 
 		case ruleAction8:
 
@@ -654,7 +645,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction9:
 
-			p.setNodeText(text)
+			p.setLastNodeText(text)
 
 		case ruleAction10:
 
@@ -3717,17 +3708,8 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 56 Action3 <- <{
-		        rootNode := p.pop().(syntaxNode)
-		        checkNode := rootNode
-		        for checkNode != nil {
-					if checkNode.isMultiValue() {
-		                rootNode.setMultiValue()
-		                break
-		            }
-		            checkNode =  checkNode.getNext()
-		        }
-		        p.push(rootNode)
-		    }> */
+		    p.setRecursiveMultiValue()
+		}> */
 		func() bool {
 			{
 				add(ruleAction3, position)
@@ -3766,7 +3748,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 60 Action7 <- <{
-		    p.setNodeText(text)
+		    p.setLastNodeText(text)
 		}> */
 		func() bool {
 			{
@@ -3784,7 +3766,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 62 Action9 <- <{
-		    p.setNodeText(text)
+		    p.setLastNodeText(text)
 		}> */
 		func() bool {
 			{
