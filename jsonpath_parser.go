@@ -231,7 +231,7 @@ func (p *jsonPathParser) createLogicalNot(jsonpathFilter syntaxQuery) syntaxQuer
 	return &syntaxLogicalNot{param: jsonpathFilter}
 }
 
-func (p *jsonPathParser) createBasicCompareQuery(
+func (p *jsonPathParser) _createBasicCompareQuery(
 	leftParam, rightParam *syntaxBasicCompareParameter,
 	comparator syntaxComparator) syntaxQuery {
 
@@ -244,39 +244,39 @@ func (p *jsonPathParser) createBasicCompareQuery(
 
 func (p *jsonPathParser) createCompareEQ(
 	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p.createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{})
+	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{})
 }
 
 func (p *jsonPathParser) createCompareNE(
 	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
 	return &syntaxLogicalNot{
-		param: p.createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
+		param: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
 	}
 }
 
 func (p *jsonPathParser) createCompareGE(
 	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p.createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGE{})
+	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGE{})
 }
 
 func (p *jsonPathParser) createCompareGT(
 	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p.createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGT{})
+	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGT{})
 }
 
 func (p *jsonPathParser) createCompareLE(
 	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p.createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLE{})
+	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLE{})
 }
 
 func (p *jsonPathParser) createCompareLT(
 	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p.createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLT{})
+	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLT{})
 }
 
 func (p *jsonPathParser) createCompareRegex(
 	leftParam *syntaxBasicCompareParameter, regex string) syntaxQuery {
-	return p.createBasicCompareQuery(
+	return p._createBasicCompareQuery(
 		leftParam, &syntaxBasicCompareParameter{
 			param:     &syntaxQueryParamLiteral{literal: `regex`},
 			isLiteral: true,
