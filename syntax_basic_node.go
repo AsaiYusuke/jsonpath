@@ -42,7 +42,7 @@ func (i *syntaxBasicNode) retrieveNext(current interface{}) error {
 	if i.next != nil {
 		return i.next.retrieve(current)
 	}
-	(**i.result) = append(**i.result, current)
+	**i.result = append(**i.result, current)
 	return nil
 }
 
