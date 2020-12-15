@@ -25,7 +25,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(current interface{}) error {
 		return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}
 	}
 
-	if len((**i.result)) == 0 {
+	if len(**i.result) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 

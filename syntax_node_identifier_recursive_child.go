@@ -33,7 +33,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(current interface{}) error {
 		}
 	}
 
-	if len((**i.result)) == 0 {
+	if len(**i.result) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 	return nil

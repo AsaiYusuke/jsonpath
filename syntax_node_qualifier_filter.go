@@ -55,7 +55,7 @@ func (f *syntaxFilterQualifier) retrieve(current interface{}) error {
 
 	}
 
-	if len((**f.result)) == 0 {
+	if len(**f.result) == 0 {
 		return ErrorNoneMatched{f.getConnectedText()}
 	}
 

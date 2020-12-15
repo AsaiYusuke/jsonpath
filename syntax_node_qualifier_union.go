@@ -47,7 +47,7 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 			u.retrieveNext(srcArray[index])
 		}
 
-		if len((**u.result)) == 0 {
+		if len(**u.result) == 0 {
 			return ErrorNoneMatched{u.getConnectedText()}
 		}
 
