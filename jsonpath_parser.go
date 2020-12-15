@@ -297,7 +297,7 @@ func (p *jsonPathParser) createCompareParameterRoot(node syntaxNode) syntaxQuery
 	return param
 }
 
-func (p *jsonPathParser) createCompareParameterCurrentRoot(node syntaxNode) syntaxQuery {
+func (p *jsonPathParser) createCompareParameterCurrentRoot(node syntaxNode) syntaxQueryParameter {
 	param := &syntaxQueryParamCurrentRoot{
 		param:     node,
 		resultPtr: &[]interface{}{},
