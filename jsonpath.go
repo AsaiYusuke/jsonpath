@@ -5,8 +5,8 @@ import (
 )
 
 // Retrieve returns the retrieved JSON using the given JSONPath.
-func Retrieve(jsonPath string, src interface{}) ([]interface{}, error) {
-	jsonPathFunc, err := Parse(jsonPath)
+func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}, error) {
+	jsonPathFunc, err := Parse(jsonPath, config...)
 	if err != nil {
 		return nil, err
 	}
@@ -14,15 +14,19 @@ func Retrieve(jsonPath string, src interface{}) ([]interface{}, error) {
 }
 
 // Parse returns the parser function using the given JSONPath.
-func Parse(jsonPath string) (func(src interface{}) ([]interface{}, error), error) {
-	unescapeRegex, _ := regexp.Compile(`\\(.)`)
-
+func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interface{}, error), error) {
 	parser := pegJSONPathParser{
 		Buffer: jsonPath,
 		jsonPathParser: jsonPathParser{
-			resultPtr:     &[]interface{}{},
-			unescapeRegex: unescapeRegex,
+			resultPtr: &[]interface{}{},
 		},
+	}
+
+	parser.unescapeRegex, _ = regexp.Compile(`\\(.)`)
+
+	if len(config) > 0 {
+		parser.filterFunctions = config[0].filterFunctions
+		parser.aggregateFunctions = config[0].aggregateFunctions
 	}
 
 	parser.Init()

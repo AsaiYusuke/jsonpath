@@ -122,7 +122,7 @@ These behaviors will be changed in the future if appropriate ones are found.
 The character types that can not be used for the identifiers in the dot notation are as follows :
 
 ```text
-. [ ) = ! > < \t \r \n *SPACE*
+. [ ( ) = ! > < \t \r \n *SPACE*
 ```
 
 You have to encode these characters when you enter them :

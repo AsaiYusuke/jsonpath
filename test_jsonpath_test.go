@@ -18,7 +18,7 @@ func execTestRetrieve(t *testing.T, src interface{}, testCase []interface{}) {
 	jsonPath := testCase[0].(string)
 	expectedOutputJSON := testCase[2].(string)
 	var expectedError error
-	if len(testCase) >= 4 {
+	if len(testCase) > 3 {
 		expectedError = testCase[3].(error)
 	}
 	actualObject, err := Retrieve(jsonPath, src)
@@ -3325,6 +3325,360 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 						return
 					}
 					execTestRetrieve(t, src, testCase)
+				})
+		}
+	}
+}
+
+func TestRetrieveConfigFunction(t *testing.T) {
+	twiceFunc := func(param interface{}) (interface{}, error) {
+		if input, ok := param.(float64); ok {
+			return input * 2, nil
+		}
+		return nil, fmt.Errorf(`type error`)
+	}
+	quarterFunc := func(param interface{}) (interface{}, error) {
+		if input, ok := param.(float64); ok {
+			return input / 4, nil
+		}
+		return nil, fmt.Errorf(`type error`)
+	}
+	maxFunc := func(param []interface{}) (interface{}, error) {
+		var result float64
+		for _, value := range param {
+			if result < value.(float64) {
+				result = value.(float64)
+			}
+		}
+		return result, nil
+	}
+	minFunc := func(param []interface{}) (interface{}, error) {
+		var result float64 = 999
+		for _, value := range param {
+			if result > value.(float64) {
+				result = value.(float64)
+			}
+		}
+		return result, nil
+	}
+	errAggregateFunc := func(param []interface{}) (interface{}, error) {
+		return nil, fmt.Errorf(`aggregate error`)
+	}
+	errFilterFunc := func(param interface{}) (interface{}, error) {
+		return nil, fmt.Errorf(`filter error`)
+	}
+
+	testGroups := []TestGroup{
+		{
+			`filter-function`,
+			[][]interface{}{
+				{
+					`$.*.twice()`,
+					`[123.456,256]`,
+					`[246.912,512]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$.*.twice().twice()`,
+					`[123.456,256]`,
+					`[493.824,1024]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$.*.twice().quarter()`,
+					`[123.456,256]`,
+					`[61.728,128]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`:   twiceFunc,
+						`quarter`: quarterFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$.*.quarter().twice()`,
+					`[123.456,256]`,
+					`[61.728,128]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`:   twiceFunc,
+						`quarter`: quarterFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+			},
+		},
+		{
+			`aggregate-function`,
+			[][]interface{}{
+				{
+					`$.*.max()`,
+					`[122.345,123.0,123.456]`,
+					`[123.456]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$.*.max().max()`,
+					`[122.345,123.0,123.456]`,
+					`[123.456]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$.*.max().min()`,
+					`[122.345,123.0,123.456]`,
+					`[123.456]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+						`min`: minFunc,
+					},
+				},
+				{
+					`$.*.min().max()`,
+					`[122.345,123.0,123.456]`,
+					`[122.345]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+						`min`: minFunc,
+					},
+				},
+			},
+		},
+		{
+			`aggregate-filter-mix`,
+			[][]interface{}{
+				{
+					`$.*.max().twice()`,
+					`[122.345,123.0,123.456]`,
+					`[246.912]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$.*.twice().max()`,
+					`[122.345,123.0,123.456]`,
+					`[246.912]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+			},
+		},
+		{
+			`filter-error`,
+			[][]interface{}{
+				{
+					`$.errFilter()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+					ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				},
+				{
+					`$.*.errFilter()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+					ErrorNoneMatched{path: `.*.errFilter()`},
+				},
+				{
+					`$.*.max().errFilter()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+					ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				},
+				{
+					`$.*.twice().errFilter()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+						`twice`:     twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+					ErrorNoneMatched{path: `.*.twice().errFilter()`},
+				}, {
+					`$.errFilter().twice()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+						`twice`:     twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+					ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				},
+				{
+					`$.*.errFilter().twice()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+						`twice`:     twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+					ErrorNoneMatched{path: `.*.errFilter().twice()`},
+				},
+				{
+					`$.*.max().errFilter().twice()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`errFilter`: errFilterFunc,
+						`twice`:     twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+					ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				},
+			},
+		},
+		{
+			`aggregate-error`,
+			[][]interface{}{
+				{
+					`$.*.errAggregate()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`errAggregate`: errAggregateFunc,
+					},
+					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				},
+				{
+					`$.*.max().errAggregate()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`errAggregate`: errAggregateFunc,
+						`max`:          maxFunc,
+					},
+					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				},
+				{
+					`$.*.twice().errAggregate()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`errAggregate`: errAggregateFunc,
+					},
+					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				},
+				{
+					`$.*.errAggregate().twice()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`errAggregate`: errAggregateFunc,
+					},
+					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				},
+				{
+					`$.*.max().errAggregate().twice()`,
+					`[122.345,123.0,123.456]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){
+						`errAggregate`: errAggregateFunc,
+						`max`:          maxFunc,
+					},
+					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				},
+			},
+		},
+	}
+
+	for _, testGroup := range testGroups {
+		for _, testCase := range testGroup.testCases {
+			jsonPath := testCase[0].(string)
+			srcJSON := testCase[1].(string)
+			expectedJSON := testCase[2].(string)
+			filterFunctions := testCase[3].(map[string]func(interface{}) (interface{}, error))
+			aggregateFunctions := testCase[4].(map[string]func([]interface{}) (interface{}, error))
+			var expectedError error
+			if len(testCase) > 5 {
+				expectedError = testCase[5].(error)
+			}
+			t.Run(
+				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
+				func(t *testing.T) {
+					var src interface{}
+					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
+						t.Errorf("%w", err)
+						return
+					}
+					config := Config{}
+					for id, function := range filterFunctions {
+						config.SetFilterFunction(id, function)
+					}
+					for id, function := range aggregateFunctions {
+						config.SetAggregateFunction(id, function)
+					}
+					actualObject, err := Retrieve(jsonPath, src, config)
+					if err != nil {
+						if reflect.TypeOf(expectedError) == reflect.TypeOf(err) &&
+							fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
+							return
+						}
+						t.Errorf("expected error<%s> != actual error<%s>\n",
+							expectedError, err)
+						return
+					}
+					if expectedError != nil {
+						t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
+						return
+					}
+					actualOutputJSON, err := json.Marshal(actualObject)
+					if err != nil {
+						t.Errorf("%w", err)
+						return
+					}
+					if string(expectedJSON) != string(actualOutputJSON) {
+						t.Errorf("expectedJSON<%s> == actualOutputJSON<%s>\n",
+							string(expectedJSON), string(actualOutputJSON))
+						return
+					}
 				})
 		}
 	}

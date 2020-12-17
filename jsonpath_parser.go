@@ -6,12 +6,29 @@ import (
 )
 
 type jsonPathParser struct {
-	root          syntaxNode
-	srcJSON       *interface{}
-	resultPtr     *[]interface{}
-	params        []interface{}
-	thisError     error
-	unescapeRegex *regexp.Regexp
+	root               syntaxNode
+	srcJSON            *interface{}
+	resultPtr          *[]interface{}
+	paramsList         [][]interface{}
+	params             []interface{}
+	thisError          error
+	unescapeRegex      *regexp.Regexp
+	filterFunctions    map[string]func(interface{}) (interface{}, error)
+	aggregateFunctions map[string]func([]interface{}) (interface{}, error)
+}
+
+func (p *jsonPathParser) saveParams() {
+	if len(p.params) > 0 {
+		p.paramsList = append(p.paramsList, p.params)
+		p.params = nil
+	}
+}
+
+func (p *jsonPathParser) loadParams() {
+	if len(p.paramsList) > 0 {
+		p.params = append(p.paramsList[len(p.paramsList)-1], p.params...)
+		p.paramsList = p.paramsList[:len(p.paramsList)-1]
+	}
 }
 
 func (p *jsonPathParser) push(param interface{}) {
@@ -65,10 +82,25 @@ func (p *jsonPathParser) hasErr() bool {
 }
 
 func (p *jsonPathParser) setNodeChain() {
-	child := p.pop().(syntaxNode)
-	parent := p.pop().(syntaxNode)
-	parent.setNext(child)
-	p.push(parent)
+	if len(p.params) > 1 {
+		root := p.params[0].(syntaxNode)
+		last := root
+		for _, next := range p.params[1:] {
+			switch next.(type) {
+			case *syntaxAggregateFunction:
+				funcNode := next.(*syntaxAggregateFunction)
+				funcNode.param = root
+				p.updateResultPtr(funcNode.param, &funcNode.resultPtr)
+				root = funcNode
+				last = root
+			default:
+				nextNode := next.(syntaxNode)
+				last.setNext(nextNode)
+				last = nextNode
+			}
+		}
+		p.params = []interface{}{root}
+	}
 }
 
 func (p *jsonPathParser) setLastNodeText(text string) {
@@ -77,7 +109,7 @@ func (p *jsonPathParser) setLastNodeText(text string) {
 }
 
 func (p *jsonPathParser) setRecursiveMultiValue() {
-	node := p.params[len(p.params)-1].(syntaxNode)
+	node := p.params[0].(syntaxNode)
 	checkNode := node
 	for checkNode != nil {
 		if checkNode.isMultiValue() {
@@ -88,147 +120,175 @@ func (p *jsonPathParser) setRecursiveMultiValue() {
 	}
 }
 
-func (p *jsonPathParser) createRootIdentifier() syntaxNode {
-	return &syntaxRootIdentifier{
+func (p *jsonPathParser) pushFunction(text string, funcName string) {
+	if function, ok := p.filterFunctions[funcName]; ok {
+		p.push(&syntaxFilterFunction{
+			syntaxBasicNode: &syntaxBasicNode{
+				text:   text,
+				result: &p.resultPtr,
+			},
+			function: function,
+		})
+		return
+	}
+	if function, ok := p.aggregateFunctions[funcName]; ok {
+		p.push(&syntaxAggregateFunction{
+			syntaxBasicNode: &syntaxBasicNode{
+				text:   text,
+				result: &p.resultPtr,
+			},
+			function: function,
+		})
+		return
+	}
+
+	p.thisError = ErrorFunctionNotFound{
+		function: text,
+	}
+}
+
+func (p *jsonPathParser) pushRootIdentifier() {
+	p.push(&syntaxRootIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:   `$`,
 			result: &p.resultPtr,
 		},
 		srcJSON: &p.srcJSON,
-	}
+	})
 }
 
-func (p *jsonPathParser) createCurrentRootIdentifier() syntaxNode {
-	return &syntaxCurrentRootIdentifier{
+func (p *jsonPathParser) pushCurrentRootIdentifier() {
+	p.push(&syntaxCurrentRootIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:   `@`,
 			result: &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createChildSingleIdentifier(text string) syntaxNode {
-	return &syntaxChildSingleIdentifier{
+func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
+	p.push(&syntaxChildSingleIdentifier{
 		identifier: text,
 		syntaxBasicNode: &syntaxBasicNode{
 			text:       text,
 			multiValue: false,
 			result:     &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createChildMultiIdentifier(identifiers []string) syntaxNode {
-	return &syntaxChildMultiIdentifier{
+func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
+	p.push(&syntaxChildMultiIdentifier{
 		identifiers: identifiers,
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue: true,
 			result:     &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createChildAsteriskIdentifier(text string) syntaxNode {
-	return &syntaxChildAsteriskIdentifier{
+func (p *jsonPathParser) pushChildAsteriskIdentifier(text string) {
+	p.push(&syntaxChildAsteriskIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:       text,
 			multiValue: true,
 			result:     &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createRecursiveChildIdentifier(node syntaxNode) syntaxNode {
-	return &syntaxRecursiveChildIdentifier{
+func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
+	p.push(&syntaxRecursiveChildIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:       `..`,
 			multiValue: true,
 			next:       node,
 			result:     &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createUnionQualifier(subscript syntaxSubscript) *syntaxUnionQualifier {
-	return &syntaxUnionQualifier{
+func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
+	p.push(&syntaxUnionQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue: subscript.isMultiValue(),
 			result:     &p.resultPtr,
 		},
 		subscripts: []syntaxSubscript{subscript},
-	}
+	})
 }
 
-func (p *jsonPathParser) createFilterQualifier(query syntaxQuery) syntaxNode {
-	return &syntaxFilterQualifier{
+func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
+	p.push(&syntaxFilterQualifier{
 		query: query,
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue: true,
 			result:     &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createScriptQualifier(text string) syntaxNode {
-	return &syntaxScriptQualifier{
+func (p *jsonPathParser) pushScriptQualifier(text string) {
+	p.push(&syntaxScriptQualifier{
 		command: text,
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue: true,
 			result:     &p.resultPtr,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createSliceSubscript(isPositiveStep bool, start, end, step *syntaxIndexSubscript) syntaxSubscript {
+func (p *jsonPathParser) pushSliceSubscript(isPositiveStep bool, start, end, step *syntaxIndexSubscript) {
 	if isPositiveStep {
-		return &syntaxSlicePositiveStepSubscript{
+		p.push(&syntaxSlicePositiveStepSubscript{
 			syntaxBasicSubscript: &syntaxBasicSubscript{
 				multiValue: true,
 			},
 			start: start,
 			end:   end,
 			step:  step,
-		}
+		})
+		return
 	}
 
-	return &syntaxSliceNegativeStepSubscript{
+	p.push(&syntaxSliceNegativeStepSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
 			multiValue: true,
 		},
 		start: start,
 		end:   end,
 		step:  step,
-	}
+	})
 }
 
-func (p *jsonPathParser) createIndexSubscript(text string, isOmitted bool) syntaxSubscript {
-	return &syntaxIndexSubscript{
+func (p *jsonPathParser) pushIndexSubscript(text string, isOmitted bool) {
+	p.push(&syntaxIndexSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
 			multiValue: false,
 		},
 		number:    p.toInt(text),
 		isOmitted: isOmitted,
-	}
+	})
 }
 
-func (p *jsonPathParser) createAsteriskSubscript() syntaxSubscript {
-	return &syntaxAsteriskSubscript{
+func (p *jsonPathParser) pushAsteriskSubscript() {
+	p.push(&syntaxAsteriskSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
 			multiValue: true,
 		},
-	}
+	})
 }
 
-func (p *jsonPathParser) createLogicalOr(query1, query2 syntaxQuery) syntaxQuery {
-	return &syntaxLogicalOr{query1, query2}
+func (p *jsonPathParser) pushLogicalOr(query1, query2 syntaxQuery) {
+	p.push(&syntaxLogicalOr{query1, query2})
 }
 
-func (p *jsonPathParser) createLogicalAnd(query1, query2 syntaxQuery) syntaxQuery {
-	return &syntaxLogicalAnd{query1, query2}
+func (p *jsonPathParser) pushLogicalAnd(query1, query2 syntaxQuery) {
+	p.push(&syntaxLogicalAnd{query1, query2})
 }
 
-func (p *jsonPathParser) createLogicalNot(jsonpathFilter syntaxQuery) syntaxQuery {
-	return &syntaxLogicalNot{param: jsonpathFilter}
+func (p *jsonPathParser) pushLogicalNot(jsonpathFilter syntaxQuery) {
+	p.push(&syntaxLogicalNot{param: jsonpathFilter})
 }
 
 func (p *jsonPathParser) _createBasicCompareQuery(
@@ -242,77 +302,77 @@ func (p *jsonPathParser) _createBasicCompareQuery(
 	}
 }
 
-func (p *jsonPathParser) createCompareEQ(
-	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{})
+func (p *jsonPathParser) pushCompareEQ(
+	leftParam, rightParam *syntaxBasicCompareParameter) {
+	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}))
 }
 
-func (p *jsonPathParser) createCompareNE(
-	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return &syntaxLogicalNot{
+func (p *jsonPathParser) pushCompareNE(
+	leftParam, rightParam *syntaxBasicCompareParameter) {
+	p.push(&syntaxLogicalNot{
 		param: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
-	}
+	})
 }
 
-func (p *jsonPathParser) createCompareGE(
-	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGE{})
+func (p *jsonPathParser) pushCompareGE(
+	leftParam, rightParam *syntaxBasicCompareParameter) {
+	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGE{}))
 }
 
-func (p *jsonPathParser) createCompareGT(
-	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGT{})
+func (p *jsonPathParser) pushCompareGT(
+	leftParam, rightParam *syntaxBasicCompareParameter) {
+	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGT{}))
 }
 
-func (p *jsonPathParser) createCompareLE(
-	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLE{})
+func (p *jsonPathParser) pushCompareLE(
+	leftParam, rightParam *syntaxBasicCompareParameter) {
+	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLE{}))
 }
 
-func (p *jsonPathParser) createCompareLT(
-	leftParam, rightParam *syntaxBasicCompareParameter) syntaxQuery {
-	return p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLT{})
+func (p *jsonPathParser) pushCompareLT(
+	leftParam, rightParam *syntaxBasicCompareParameter) {
+	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLT{}))
 }
 
-func (p *jsonPathParser) createCompareRegex(
-	leftParam *syntaxBasicCompareParameter, regex string) syntaxQuery {
-	return p._createBasicCompareQuery(
+func (p *jsonPathParser) pushCompareRegex(
+	leftParam *syntaxBasicCompareParameter, regex string) {
+	p.push(p._createBasicCompareQuery(
 		leftParam, &syntaxBasicCompareParameter{
 			param:     &syntaxQueryParamLiteral{literal: `regex`},
 			isLiteral: true,
 		},
 		&syntaxCompareRegex{
 			regex: regexp.MustCompile(regex),
-		})
+		}))
 }
 
-func (p *jsonPathParser) createBasicCompareParameter(
-	parameter syntaxQueryParameter, isLiteral bool) *syntaxBasicCompareParameter {
-	return &syntaxBasicCompareParameter{
+func (p *jsonPathParser) pushBasicCompareParameter(
+	parameter syntaxQueryParameter, isLiteral bool) {
+	p.push(&syntaxBasicCompareParameter{
 		param:     parameter,
 		isLiteral: isLiteral,
-	}
+	})
 }
-func (p *jsonPathParser) createCompareParameterLiteral(text interface{}) *syntaxBasicCompareParameter {
-	return p.createBasicCompareParameter(
+func (p *jsonPathParser) pushCompareParameterLiteral(text interface{}) {
+	p.pushBasicCompareParameter(
 		&syntaxQueryParamLiteral{text}, true)
 }
 
-func (p *jsonPathParser) createCompareParameterRoot(node syntaxNode) syntaxQueryParameter {
+func (p *jsonPathParser) pushCompareParameterRoot(node syntaxNode) {
 	param := &syntaxQueryParamRoot{
 		param:     node,
 		srcJSON:   &p.srcJSON,
 		resultPtr: &[]interface{}{},
 	}
 	p.updateResultPtr(param.param, &param.resultPtr)
-	return param
+	p.push(param)
 }
 
-func (p *jsonPathParser) createCompareParameterCurrentRoot(node syntaxNode) syntaxQueryParameter {
+func (p *jsonPathParser) pushCompareParameterCurrentRoot(node syntaxNode) {
 	param := &syntaxQueryParamCurrentRoot{
 		param:     node,
 		resultPtr: &[]interface{}{},
 	}
 	p.updateResultPtr(param.param, &param.resultPtr)
-	return param
+	p.push(param)
 }
