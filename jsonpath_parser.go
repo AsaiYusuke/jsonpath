@@ -238,19 +238,18 @@ func (p *jsonPathParser) pushScriptQualifier(text string) {
 	})
 }
 
-func (p *jsonPathParser) pushSliceSubscript(isPositiveStep bool, start, end, step *syntaxIndexSubscript) {
-	if isPositiveStep {
-		p.push(&syntaxSlicePositiveStepSubscript{
-			syntaxBasicSubscript: &syntaxBasicSubscript{
-				multiValue: true,
-			},
-			start: start,
-			end:   end,
-			step:  step,
-		})
-		return
-	}
+func (p *jsonPathParser) pushSlicePositiveStepSubscript(start, end, step *syntaxIndexSubscript) {
+	p.push(&syntaxSlicePositiveStepSubscript{
+		syntaxBasicSubscript: &syntaxBasicSubscript{
+			multiValue: true,
+		},
+		start: start,
+		end:   end,
+		step:  step,
+	})
+}
 
+func (p *jsonPathParser) pushSliceNegativeStepSubscript(start, end, step *syntaxIndexSubscript) {
 	p.push(&syntaxSliceNegativeStepSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
 			multiValue: true,

@@ -727,9 +727,9 @@ func (p *pegJSONPathParser) Execute() {
 			}
 
 			if step.number > 0 {
-				p.pushSliceSubscript(true, start, end, step)
+				p.pushSlicePositiveStepSubscript(start, end, step)
 			} else {
-				p.pushSliceSubscript(false, start, end, step)
+				p.pushSliceNegativeStepSubscript(start, end, step)
 			}
 
 		case ruleAction22:
@@ -4082,9 +4082,9 @@ func (p *pegJSONPathParser) Init() {
 		    }
 
 		    if step.number > 0 {
-		        p.pushSliceSubscript(true, start, end, step)
+		        p.pushSlicePositiveStepSubscript(start, end, step)
 		    } else {
-		        p.pushSliceSubscript(false, start, end, step)
+		        p.pushSliceNegativeStepSubscript(start, end, step)
 		    }
 		}> */
 		func() bool {
