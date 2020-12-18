@@ -191,6 +191,11 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
+					`$.\(`,
+					`{"(":1}`,
+					`[1]`,
+				},
+				{
 					`$.\)`,
 					`{")":1}`,
 					`[1]`,
@@ -260,6 +265,11 @@ func TestRetrieve(t *testing.T) {
 					`[1]`,
 				},
 				{
+					`$.a\(b`,
+					`{"a(b":1}`,
+					`[1]`,
+				},
+				{
 					`$.a\)b`,
 					`{"a)b":1}`,
 					`[1]`,
@@ -320,6 +330,12 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{1, `unrecognized input`, `.\`},
 				},
 				{
+					`$.(`,
+					`{"(":1}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `.(`},
+				},
+				{
 					`$.)`,
 					`{")":1}`,
 					``,
@@ -378,6 +394,12 @@ func TestRetrieve(t *testing.T) {
 					`{"a\\b":1}`,
 					``,
 					ErrorInvalidSyntax{3, `unrecognized input`, `\b`},
+				},
+				{
+					`$.a(b`,
+					`{"(":1}`,
+					``,
+					ErrorInvalidSyntax{3, `unrecognized input`, `(b`},
 				},
 				{
 					`$.a)b`,
@@ -2795,6 +2817,18 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a===1)]`},
 				},
 				{
+					`$[?(@.a=='abc`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a=='abc`},
+				},
+				{
+					`$[?(@.a=="abc`,
+					`[]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?(@.a=="abc`},
+				},
+				{
 					`$[?(@.a==["b"])]`,
 					`[{"a":["b"]}]`,
 					``,
@@ -2918,6 +2952,12 @@ func TestRetrieve(t *testing.T) {
 					`[{"a":1},{"a":2},{"a":3}]`,
 					``,
 					ErrorInvalidSyntax{1, `unrecognized input`, `[?((@.a>1 )]`},
+				},
+				{
+					`$[?((@.a>1`,
+					`[{"a":1},{"a":2},{"a":3}]`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[?((@.a>1`},
 				},
 				{
 					`$[?(!(@.a==2))]`,
@@ -3172,10 +3212,22 @@ func TestRetrieve(t *testing.T) {
 					ErrorInvalidSyntax{1, `unrecognized input`, `[()]`},
 				},
 				{
+					`$[(`,
+					`{}`,
+					``,
+					ErrorInvalidSyntax{1, `unrecognized input`, `[(`},
+				},
+				{
 					`$[(]`,
 					`{}`,
 					``,
 					ErrorInvalidSyntax{1, `unrecognized input`, `[(]`},
+				},
+				{
+					`$.func(`,
+					`{}`,
+					``,
+					ErrorInvalidSyntax{6, `unrecognized input`, `(`},
 				},
 			},
 		},
@@ -3705,6 +3757,38 @@ func TestRetrieveConfigFunction(t *testing.T) {
 						`max`:          maxFunc,
 					},
 					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				},
+			},
+		},
+		{
+			`function-syntax-check`,
+			[][]interface{}{
+				{
+					`$.*.TWICE()`,
+					`[123.456,256]`,
+					`[246.912,512]`,
+					map[string]func(interface{}) (interface{}, error){
+						`TWICE`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$.*.--()`,
+					`[123.456,256]`,
+					`[246.912,512]`,
+					map[string]func(interface{}) (interface{}, error){
+						`--`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$.*.__()`,
+					`[123.456,256]`,
+					`[246.912,512]`,
+					map[string]func(interface{}) (interface{}, error){
+						`__`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
 				},
 			},
 		},
