@@ -14,6 +14,11 @@ func (f *syntaxAggregateFunction) retrieve(current interface{}) error {
 	if err := f.param.retrieve(current); err != nil {
 		return err
 	}
+	if !f.param.isMultiValue() {
+		if arrayParam, ok := values[0].([]interface{}); ok {
+			values = arrayParam
+		}
+	}
 	filteredValue, err := f.function(values)
 	if err != nil {
 		return ErrorFunctionFailed{

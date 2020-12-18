@@ -3410,6 +3410,42 @@ func TestRetrieveConfigFunction(t *testing.T) {
 					},
 					map[string]func([]interface{}) (interface{}, error){},
 				},
+				{
+					`$[?(@.twice())]`,
+					`[123.456,256]`,
+					`[123.456,256]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$[?(@.twice() == 512)]`,
+					`[123.456,256]`,
+					`[256]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$[?(512 != @.twice())]`,
+					`[123.456,256]`,
+					`[123.456]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
+				{
+					`$[?(@.twice() == $[0].twice())]`,
+					`[123.456,256]`,
+					`[123.456]`,
+					map[string]func(interface{}) (interface{}, error){
+						`twice`: twiceFunc,
+					},
+					map[string]func([]interface{}) (interface{}, error){},
+				},
 			},
 		},
 		{
@@ -3417,7 +3453,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			[][]interface{}{
 				{
 					`$.*.max()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					`[123.456]`,
 					map[string]func(interface{}) (interface{}, error){},
 					map[string]func([]interface{}) (interface{}, error){
@@ -3426,7 +3462,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.max().max()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					`[123.456]`,
 					map[string]func(interface{}) (interface{}, error){},
 					map[string]func([]interface{}) (interface{}, error){
@@ -3435,7 +3471,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.max().min()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					`[123.456]`,
 					map[string]func(interface{}) (interface{}, error){},
 					map[string]func([]interface{}) (interface{}, error){
@@ -3445,12 +3481,57 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.min().max()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					`[122.345]`,
 					map[string]func(interface{}) (interface{}, error){},
 					map[string]func([]interface{}) (interface{}, error){
 						`max`: maxFunc,
 						`min`: minFunc,
+					},
+				},
+				{
+					`$[?(@.max())]`,
+					`[122.345,123.45,123.456]`,
+					`[122.345,123.45,123.456]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$[?(@.max() == 123.45)]`,
+					`[122.345,123.45,123.456]`,
+					`[123.45]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$[?(123.45 != @.max())]`,
+					`[122.345,123.45,123.456]`,
+					`[122.345,123.456]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$[?(@.max() != 123.45)]`,
+					`[[122.345,123.45,123.456],[122.345,123.45]]`,
+					`[[122.345,123.45,123.456]]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+				},
+				{
+					`$[?(@.max() == $[1].max())]`,
+					`[[122.345,123.45,123.456],[122.345,123.45]]`,
+					`[[122.345,123.45]]`,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
 					},
 				},
 			},
@@ -3460,7 +3541,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			[][]interface{}{
 				{
 					`$.*.max().twice()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					`[246.912]`,
 					map[string]func(interface{}) (interface{}, error){
 						`twice`: twiceFunc,
@@ -3471,7 +3552,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.twice().max()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					`[246.912]`,
 					map[string]func(interface{}) (interface{}, error){
 						`twice`: twiceFunc,
@@ -3487,7 +3568,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			[][]interface{}{
 				{
 					`$.errFilter()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3497,7 +3578,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.errFilter()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3507,7 +3588,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.max().errFilter()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3519,7 +3600,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.twice().errFilter()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3529,7 +3610,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 					ErrorNoneMatched{path: `.*.twice().errFilter()`},
 				}, {
 					`$.errFilter().twice()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3540,7 +3621,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.errFilter().twice()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3551,7 +3632,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.max().errFilter().twice()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`errFilter`: errFilterFunc,
@@ -3569,7 +3650,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			[][]interface{}{
 				{
 					`$.*.errAggregate()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){},
 					map[string]func([]interface{}) (interface{}, error){
@@ -3579,7 +3660,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.max().errAggregate()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){},
 					map[string]func([]interface{}) (interface{}, error){
@@ -3590,7 +3671,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.twice().errAggregate()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`twice`: twiceFunc,
@@ -3602,7 +3683,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.errAggregate().twice()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`twice`: twiceFunc,
@@ -3614,7 +3695,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 				},
 				{
 					`$.*.max().errAggregate().twice()`,
-					`[122.345,123.0,123.456]`,
+					`[122.345,123.45,123.456]`,
 					``,
 					map[string]func(interface{}) (interface{}, error){
 						`twice`: twiceFunc,

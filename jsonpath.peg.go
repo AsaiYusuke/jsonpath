@@ -872,8 +872,12 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction43:
 
 			node := p.pop().(syntaxNode)
+			checkNode := node
+			if aggregateFunction, ok := node.(*syntaxAggregateFunction); ok {
+				checkNode = aggregateFunction.param
+			}
 
-			switch node.(type) {
+			switch checkNode.(type) {
 			case *syntaxRootIdentifier:
 				p.pushCompareParameterRoot(node)
 				p.push(true)
@@ -4335,8 +4339,12 @@ func (p *pegJSONPathParser) Init() {
 		},
 		/* 98 Action43 <- <{
 		    node := p.pop().(syntaxNode)
+		    checkNode := node
+		    if aggregateFunction, ok := node.(*syntaxAggregateFunction); ok {
+		        checkNode = aggregateFunction.param
+		    }
 
-		    switch node.(type) {
+		    switch checkNode.(type) {
 		    case *syntaxRootIdentifier:
 		        p.pushCompareParameterRoot(node)
 		        p.push(true)

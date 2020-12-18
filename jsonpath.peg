@@ -330,8 +330,12 @@ singleJsonpathFilter <-
 jsonpathFilter <-
     < jsonpath > {
         node := p.pop().(syntaxNode)
+        checkNode := node
+        if aggregateFunction, ok := node.(*syntaxAggregateFunction); ok {
+            checkNode = aggregateFunction.param
+        }
 
-        switch node.(type) {
+        switch checkNode.(type) {
         case *syntaxRootIdentifier:
             p.pushCompareParameterRoot(node)
             p.push(true)
