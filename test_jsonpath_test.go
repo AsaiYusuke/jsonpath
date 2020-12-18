@@ -3758,6 +3758,16 @@ func TestRetrieveConfigFunction(t *testing.T) {
 					},
 					ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
 				},
+				{
+					`$.a.max()`,
+					`{}`,
+					``,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){
+						`max`: maxFunc,
+					},
+					ErrorMemberNotExist{path: `.a`},
+				},
 			},
 		},
 		{
