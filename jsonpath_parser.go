@@ -261,7 +261,7 @@ func (p *jsonPathParser) pushSliceSubscript(isPositiveStep bool, start, end, ste
 	})
 }
 
-func (p *jsonPathParser) pushIndexSubscript(text string, isOmitted bool) {
+func (p *jsonPathParser) _pushIndexSubscript(text string, isOmitted bool) {
 	p.push(&syntaxIndexSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
 			multiValue: false,
@@ -269,6 +269,14 @@ func (p *jsonPathParser) pushIndexSubscript(text string, isOmitted bool) {
 		number:    p.toInt(text),
 		isOmitted: isOmitted,
 	})
+}
+
+func (p *jsonPathParser) pushIndexSubscript(text string) {
+	p._pushIndexSubscript(text, false)
+}
+
+func (p *jsonPathParser) pushOmittedIndexSubscript(text string) {
+	p._pushIndexSubscript(text, true)
 }
 
 func (p *jsonPathParser) pushAsteriskSubscript() {

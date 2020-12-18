@@ -649,8 +649,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction8:
 
-			funcName := p.pop().(string)
-			p.pushFunction(text, funcName)
+			p.pushFunction(text, p.pop().(string))
 
 		case ruleAction9:
 
@@ -694,8 +693,7 @@ func (p *pegJSONPathParser) Execute() {
 
 			identifier2 := p.pop().([]string)
 			identifier1 := p.pop().([]string)
-			identifier1 = append(identifier1, identifier2...)
-			p.push(identifier1)
+			p.push(append(identifier1, identifier2...))
 
 		case ruleAction17:
 
@@ -736,7 +734,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction22:
 
-			p.pushIndexSubscript(text, false)
+			p.pushIndexSubscript(text)
 
 		case ruleAction23:
 
@@ -744,14 +742,14 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction24:
 
-			p.pushIndexSubscript(`1`, false)
+			p.pushIndexSubscript(`1`)
 
 		case ruleAction25:
 
 			if len(text) > 0 {
-				p.pushIndexSubscript(text, false)
+				p.pushIndexSubscript(text)
 			} else {
-				p.pushIndexSubscript(`0`, true)
+				p.pushOmittedIndexSubscript(`0`)
 			}
 
 		case ruleAction26:
@@ -3941,8 +3939,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 63 Action8 <- <{
-		    funcName := p.pop().(string)
-		    p.pushFunction(text, funcName)
+		    p.pushFunction(text, p.pop().(string))
 		}> */
 		func() bool {
 			{
@@ -4026,8 +4023,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 71 Action16 <- <{
 		    identifier2 := p.pop().([]string)
 		    identifier1 := p.pop().([]string)
-		    identifier1 = append(identifier1, identifier2...)
-		    p.push(identifier1)
+		    p.push(append(identifier1, identifier2...))
 		}> */
 		func() bool {
 			{
@@ -4098,7 +4094,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 77 Action22 <- <{
-		    p.pushIndexSubscript(text, false)
+		    p.pushIndexSubscript(text)
 		}> */
 		func() bool {
 			{
@@ -4116,7 +4112,7 @@ func (p *pegJSONPathParser) Init() {
 			return true
 		},
 		/* 79 Action24 <- <{
-		    p.pushIndexSubscript(`1`, false)
+		    p.pushIndexSubscript(`1`)
 		}> */
 		func() bool {
 			{
@@ -4126,9 +4122,9 @@ func (p *pegJSONPathParser) Init() {
 		},
 		/* 80 Action25 <- <{
 		    if len(text) > 0 {
-		        p.pushIndexSubscript(text, false)
+		        p.pushIndexSubscript(text)
 		    } else {
-		        p.pushIndexSubscript(`0`, true)
+		        p.pushOmittedIndexSubscript(`0`)
 		    }
 		}> */
 		func() bool {
