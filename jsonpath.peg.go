@@ -827,11 +827,7 @@ func (p *pegJSONPathParser) Execute() {
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.push(&syntaxBasicCompareQuery{
-				leftParam:  leftParam,
-				rightParam: rightParam,
-				comparator: &syntaxCompareGT{},
-			})
+			p.pushCompareGT(leftParam, rightParam)
 
 		case ruleAction37:
 
@@ -4257,11 +4253,7 @@ func (p *pegJSONPathParser) Init() {
 		/* 91 Action36 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.push(&syntaxBasicCompareQuery{
-		        leftParam: leftParam,
-		        rightParam: rightParam,
-		        comparator: &syntaxCompareGT{},
-		    })
+		    p.pushCompareGT(leftParam, rightParam)
 		}> */
 		func() bool {
 			{

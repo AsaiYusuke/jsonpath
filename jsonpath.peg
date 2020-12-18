@@ -274,11 +274,7 @@ comparator <-
         '<' space qNumericParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.push(&syntaxBasicCompareQuery{
-                leftParam: leftParam,
-                rightParam: rightParam,
-                comparator: &syntaxCompareGT{},
-            })
+            p.pushCompareGT(leftParam, rightParam)
         } /
 
         '>=' space qNumericParam {

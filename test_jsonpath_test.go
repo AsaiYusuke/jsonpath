@@ -3790,6 +3790,14 @@ func TestRetrieveConfigFunction(t *testing.T) {
 					},
 					map[string]func([]interface{}) (interface{}, error){},
 				},
+				{
+					`$.*.unknown()`,
+					`[123.456,256]`,
+					``,
+					map[string]func(interface{}) (interface{}, error){},
+					map[string]func([]interface{}) (interface{}, error){},
+					ErrorFunctionNotFound{function: `.unknown()`},
+				},
 			},
 		},
 	}
