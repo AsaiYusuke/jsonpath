@@ -26,21 +26,21 @@ go get github.com/AsaiYusuke/jsonpath
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+  "encoding/json"
+  "fmt"
 
-	"github.com/AsaiYusuke/jsonpath"
+  "github.com/AsaiYusuke/jsonpath"
 )
 
 func main() {
-	jsonPath, srcJSON := `$.key`, `{"key":"value"}`
-	var src interface{}
-	json.Unmarshal([]byte(srcJSON), &src)
-	output, _ := jsonpath.Retrieve(jsonPath, src)
-	outputJSON, _ := json.Marshal(output)
-	fmt.Println(string(outputJSON))
-	// Output:
-	// ["value"]
+  jsonPath, srcJSON := `$.key`, `{"key":"value"}`
+  var src interface{}
+  json.Unmarshal([]byte(srcJSON), &src)
+  output, _ := jsonpath.Retrieve(jsonPath, src)
+  outputJSON, _ := json.Marshal(output)
+  fmt.Println(string(outputJSON))
+  // Output:
+  // ["value"]
 }
 ```
 
@@ -79,11 +79,12 @@ These error types define the corresponding symptom, as listed below:
 
 #### Syntax analyze errors from `Retrieve`, `Parse`
 
-| Error type             | Message format                                     | Symptom                                                                                                       |
-|------------------------|----------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `ErrorInvalidSyntax`   | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath. The *reason* including in this message will tell you more about it. |
-| `ErrorInvalidArgument` | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath was treated as the invalid error in Go syntax.                         |
-| `ErrorNotSupported`    | `not supported (feature=%s, path=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                           |
+| Error type              | Message format                                     | Symptom                                                                                                       |
+|-------------------------|----------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath. The *reason* including in this message will tell you more about it. |
+| `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath was treated as the invalid error in Go syntax.                         |
+| `ErrorFunctionNotFound` | `function not found (function=%s)`                 | The function specified in the JSONPath is not found.                                                          |
+| `ErrorNotSupported`     | `not supported (feature=%s, path=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                           |
 
 #### Runtime errors from `Retrieve`, *`parser-functions`*
 
@@ -93,23 +94,78 @@ These error types define the corresponding symptom, as listed below:
 | `ErrorIndexOutOfRange` | `index out of range (path=%s)`                    | The array indexes specified in the JSONPath were out of range.                 |
 | `ErrorTypeUnmatched`   | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.      |
 | `ErrorNoneMatched`     | `none matched (path=%s)`                          | The retrieving child paths specified in the JSONPath resulted in empty output. |
+| `ErrorFunctionFailed`  | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                 |
 
 The type checking is convenient to recognize which error happened.
 
 ```go
-:
-_,err := jsonpath.Retrieve(jsonPath, srcJSON)
-if err != nil {
-  switch err.(type) {
-  case jsonpath.ErrorIndexOutOfRange:
-    fmt.printf(`retry with other srcJSON: %v`, err)
-    continue
-  case jsonpath.ErrorInvalidArgumentFormat:
-    return nil, fmt.errorf(`specified invalid argument: %v`, err)
-  }
   :
-}
+  _,err := jsonpath.Retrieve(jsonPath, srcJSON)
+  if err != nil {
+    switch err.(type) {
+    case jsonpath.ErrorIndexOutOfRange:
+      fmt.printf(`retry with other srcJSON: %v`, err)
+      continue
+    case jsonpath.ErrorInvalidArgumentFormat:
+      return nil, fmt.errorf(`specified invalid argument: %v`, err)
+    }
+    :
+  }
 ```
+
+### * Function syntax
+
+Function is a feature that allows you to format JSONPath results by using pre-registered user functions and the instruction syntaxes at the end of the JSONPath statement.
+
+There are two ways to use function:
+
+#### Filter function
+
+The filter function applies a user function to each values in the JSONPath result to get converted.
+
+```Go
+  config := Config{}
+  config.SetFilterFunction(`twice`, func(param interface{}) (interface{}, error) {
+    if floatParam, ok := param.(float64); ok {
+      return floatParam * 2, nil
+    }
+    return nil, fmt.Errorf(`type error`)
+  })
+  jsonPath, srcJSON := `$[*].twice()`, `[1,3]`
+  var src interface{}
+  json.Unmarshal([]byte(srcJSON), &src)
+  output, _ := jsonpath.Retrieve(jsonPath, src, config)
+  outputJSON, _ := json.Marshal(output)
+  fmt.Println(string(outputJSON))
+  // Output:
+  // [2,6]
+```
+
+#### Aggregate function
+
+Aggregate function converts all values in the JSONPath result into a single value by applying them to a user function.
+
+```Go
+  config := Config{}
+  config.SetAggregateFunction(`max`, func(param interface{}) (interface{}, error) {
+    var result float64
+    for _, value := range param {
+      if result < value.(float64) {
+        result = value.(float64)
+      }
+    }
+    return result, nil
+  })
+  jsonPath, srcJSON := `$[*].max()`, `[1,3]`
+  var src interface{}
+  json.Unmarshal([]byte(srcJSON), &src)
+  output, _ := jsonpath.Retrieve(jsonPath, src, config)
+  outputJSON, _ := json.Marshal(output)
+  fmt.Println(string(outputJSON))
+  // Output:
+  // [3]
+```
+
 
 ## Differences
 
@@ -238,6 +294,9 @@ BenchmarkParserFunc_filter_regex-4                          	  862663	      1411
       - [x] comparator
       - [x] JSONPath retrieve in filter
     - [ ] script
+  - Function
+    - [x] filter
+    - [x] aggregate
   - [x] Refer to the consensus behaviors
 - Archtecture
   - [x] PEG syntax analyzing
@@ -263,7 +322,6 @@ BenchmarkParserFunc_filter_regex-4                          	  862663	      1411
   - [ ] testing
   - [ ] documentation
 - Future ToDo
-  - [ ] Syntax expansion
   - [ ] Refer to the something standard
   - Go language affinity
     - [ ] retrieve with the object in struct unmarshal
