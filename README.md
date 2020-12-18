@@ -147,9 +147,9 @@ Aggregate function converts all values in the JSONPath result into a single valu
 
 ```Go
   config := Config{}
-  config.SetAggregateFunction(`max`, func(param interface{}) (interface{}, error) {
+  config.SetAggregateFunction(`max`, func(params []interface{}) (interface{}, error) {
     var result float64
-    for _, value := range param {
+    for _, value := range params {
       if result < value.(float64) {
         result = value.(float64)
       }
