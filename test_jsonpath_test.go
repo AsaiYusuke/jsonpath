@@ -10,7 +10,7 @@ import (
 )
 
 type TestGroup struct {
-	name      string
+	groupName string
 	testCases []TestCase
 }
 
@@ -61,7 +61,7 @@ func execTestRetrieveTestCases(t *testing.T, testGroups []TestGroup) {
 			jsonPath := testCase.jsonpath
 			srcJSON := testCase.inputJSON
 			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
+				fmt.Sprintf(`%s <%s> <%s>`, testGroup.groupName, jsonPath, srcJSON),
 				func(t *testing.T) {
 					var src interface{}
 					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
@@ -77,7 +77,7 @@ func execTestRetrieveTestCases(t *testing.T, testGroups []TestGroup) {
 func TestRetrieve_dotNotation(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `dot-notation`,
+			groupName: `dot-notation`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$`,
@@ -554,7 +554,7 @@ func TestRetrieve_dotNotation(t *testing.T) {
 func TestRetrieve_dotNotation_recursiveDescent(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `dot-notation-recursive-descent`,
+			groupName: `dot-notation-recursive-descent`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.a..b`,
@@ -618,7 +618,7 @@ func TestRetrieve_dotNotation_recursiveDescent(t *testing.T) {
 func TestRetrieve_dotNotation_asterisk(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `dot-notation-asterisk`,
+			groupName: `dot-notation-asterisk`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.*`,
@@ -710,7 +710,7 @@ func TestRetrieve_dotNotation_asterisk(t *testing.T) {
 func TestRetrieve_bracketNotation(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `bracket-notation`,
+			groupName: `bracket-notation`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$['a']`,
@@ -969,7 +969,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 func TestRetrieve_bracketNotation_asterisk(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `bracket-notation-asterisk`,
+			groupName: `bracket-notation-asterisk`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[*]`,
@@ -1028,7 +1028,7 @@ func TestRetrieve_bracketNotation_asterisk(t *testing.T) {
 func TestRetrieve_valueType(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Value type`,
+			groupName: `Value type`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.a`,
@@ -1125,7 +1125,7 @@ func TestRetrieve_valueType(t *testing.T) {
 func TestRetrieve_arrayIndex(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Array-index`,
+			groupName: `Array-index`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[0]`,
@@ -1249,7 +1249,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 func TestRetrieve_arrayUnion(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Array-union`,
+			groupName: `Array-union`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[0,0]`,
@@ -1316,7 +1316,7 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Array-slice-start-to-end`,
+			groupName: `Array-slice-start-to-end`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[0:0]`,
@@ -1513,7 +1513,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 func TestRetrieve_arraySlice_Step(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Array-slice-step`,
+			groupName: `Array-slice-step`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[0:2:1]`,
@@ -1704,7 +1704,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 func TestRetrieve_filterExist(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Filter-exist`,
+			groupName: `Filter-exist`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[?(@)]`,
@@ -1891,7 +1891,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 func TestRetrieve_filterCompare(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Filter-compare`,
+			groupName: `Filter-compare`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[?(@.a == 2.1)]`,
@@ -2363,7 +2363,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 func TestRetrieve_filterSubFilter(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Sub-filter`,
+			groupName: `Sub-filter`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[?(@.a[?(@.b>1)])]`,
@@ -2398,7 +2398,7 @@ func TestRetrieve_filterSubFilter(t *testing.T) {
 func TestRetrieve_filterRegex(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Regex`,
+			groupName: `Regex`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[?(@.a =~ /ab/)]`,
@@ -2483,7 +2483,7 @@ func TestRetrieve_filterRegex(t *testing.T) {
 func TestRetrieve_filterLogicalCombination(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Filter-logical-combination`,
+			groupName: `Filter-logical-combination`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[?(@.a || @.b)]`,
@@ -2545,7 +2545,7 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 func TestRetrieve_space(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Space`,
+			groupName: `Space`,
 			testCases: []TestCase{
 				{
 					jsonpath:     ` $.a `,
@@ -2633,7 +2633,7 @@ func TestRetrieve_space(t *testing.T) {
 func TestRetrieve_invalidSyntax(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Invalid syntax`,
+			groupName: `Invalid syntax`,
 			testCases: []TestCase{
 				{
 					jsonpath:     ``,
@@ -3376,7 +3376,7 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 func TestRetrieve_invalidArgument(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Invalid argument format`,
+			groupName: `Invalid argument format`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[10000000000000000000]`,
@@ -3442,7 +3442,7 @@ func TestRetrieve_invalidArgument(t *testing.T) {
 func TestRetrieve_notSupported(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `Not supported`,
+			groupName: `Not supported`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[(command)]`,
@@ -3460,7 +3460,7 @@ func TestRetrieve_notSupported(t *testing.T) {
 func TestRetrieve_jsonNumber(t *testing.T) {
 	testGroups := []TestGroup{
 		{
-			name: `filter`,
+			groupName: `filter`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$[?(@.a > 123)].a`,
@@ -3502,7 +3502,7 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 			jsonPath := testCase.jsonpath
 			srcJSON := testCase.inputJSON
 			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
+				fmt.Sprintf(`%s <%s> <%s>`, testGroup.groupName, jsonPath, srcJSON),
 				func(t *testing.T) {
 					var src interface{}
 					reader := strings.NewReader(srcJSON)
@@ -3558,7 +3558,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 
 	testGroups := []TestGroup{
 		{
-			name: `filter-function`,
+			groupName: `filter-function`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.*.twice()`,
@@ -3629,7 +3629,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			},
 		},
 		{
-			name: `aggregate-function`,
+			groupName: `aggregate-function`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.*.max()`,
@@ -3708,7 +3708,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			},
 		},
 		{
-			name: `aggregate-filter-mix`,
+			groupName: `aggregate-filter-mix`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.*.max().twice()`,
@@ -3735,7 +3735,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			},
 		},
 		{
-			name: `filter-error`,
+			groupName: `filter-error`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.errFilter()`,
@@ -3817,7 +3817,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			},
 		},
 		{
-			name: `aggregate-error`,
+			groupName: `aggregate-error`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.*.errAggregate()`,
@@ -3887,7 +3887,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			},
 		},
 		{
-			name: `function-syntax-check`,
+			groupName: `function-syntax-check`,
 			testCases: []TestCase{
 				{
 					jsonpath:     `$.*.TWICE()`,
@@ -3932,7 +3932,7 @@ func TestRetrieveConfigFunction(t *testing.T) {
 			aggregateFunctions := testCase.aggregates
 			expectedError := testCase.expectedErr
 			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
+				fmt.Sprintf(`%s <%s> <%s>`, testGroup.groupName, jsonPath, srcJSON),
 				func(t *testing.T) {
 					var src interface{}
 					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
