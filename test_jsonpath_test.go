@@ -55,7 +55,26 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) {
 	}
 }
 
-func TestRetrieve(t *testing.T) {
+func execTestRetrieveTestCases(t *testing.T, testGroups []TestGroup) {
+	for _, testGroup := range testGroups {
+		for _, testCase := range testGroup.testCases {
+			jsonPath := testCase.jsonpath
+			srcJSON := testCase.inputJSON
+			t.Run(
+				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
+				func(t *testing.T) {
+					var src interface{}
+					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
+						t.Errorf("%w", err)
+						return
+					}
+					execTestRetrieve(t, src, testCase)
+				})
+		}
+	}
+}
+
+func TestRetrieve_dotNotation(t *testing.T) {
 	testGroups := []TestGroup{
 		{
 			name: `dot-notation`,
@@ -527,6 +546,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_dotNotation_recursiveDescent(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `dot-notation-recursive-descent`,
 			testCases: []TestCase{
@@ -584,6 +610,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_dotNotation_asterisk(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `dot-notation-asterisk`,
 			testCases: []TestCase{
@@ -669,6 +702,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_bracketNotation(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `bracket-notation`,
 			testCases: []TestCase{
@@ -921,6 +961,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_bracketNotation_asterisk(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `bracket-notation-asterisk`,
 			testCases: []TestCase{
@@ -973,6 +1020,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_valueType(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Value type`,
 			testCases: []TestCase{
@@ -1063,6 +1117,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_arrayIndex(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Array-index`,
 			testCases: []TestCase{
@@ -1180,6 +1241,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_arrayUnion(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Array-union`,
 			testCases: []TestCase{
@@ -1240,6 +1308,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Array-slice-start-to-end`,
 			testCases: []TestCase{
@@ -1430,6 +1505,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_arraySlice_Step(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Array-slice-step`,
 			testCases: []TestCase{
@@ -1614,6 +1696,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_filterExist(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Filter-exist`,
 			testCases: []TestCase{
@@ -1794,6 +1883,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_filterCompare(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Filter-compare`,
 			testCases: []TestCase{
@@ -2259,6 +2355,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_filterSubFilter(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Sub-filter`,
 			testCases: []TestCase{
@@ -2287,6 +2390,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_filterRegex(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Regex`,
 			testCases: []TestCase{
@@ -2365,6 +2475,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_filterLogicalCombination(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Filter-logical-combination`,
 			testCases: []TestCase{
@@ -2420,6 +2537,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_space(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Space`,
 			testCases: []TestCase{
@@ -2501,6 +2625,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_invalidSyntax(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Invalid syntax`,
 			testCases: []TestCase{
@@ -3237,6 +3368,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_invalidArgument(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Invalid argument format`,
 			testCases: []TestCase{
@@ -3296,6 +3434,13 @@ func TestRetrieve(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	execTestRetrieveTestCases(t, testGroups)
+}
+
+func TestRetrieve_notSupported(t *testing.T) {
+	testGroups := []TestGroup{
 		{
 			name: `Not supported`,
 			testCases: []TestCase{
@@ -3309,22 +3454,7 @@ func TestRetrieve(t *testing.T) {
 		},
 	}
 
-	for _, testGroup := range testGroups {
-		for _, testCase := range testGroup.testCases {
-			jsonPath := testCase.jsonpath
-			srcJSON := testCase.inputJSON
-			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, testGroup.name, jsonPath, srcJSON),
-				func(t *testing.T) {
-					var src interface{}
-					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
-						t.Errorf("%w", err)
-						return
-					}
-					execTestRetrieve(t, src, testCase)
-				})
-		}
-	}
+	execTestRetrieveTestCases(t, testGroups)
 }
 
 func TestRetrieve_jsonNumber(t *testing.T) {
