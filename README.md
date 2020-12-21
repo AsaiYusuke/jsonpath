@@ -4,6 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AsaiYusuke/jsonpath)](https://goreportcard.com/report/github.com/AsaiYusuke/jsonpath)
 [![Coverage Status](https://coveralls.io/repos/github/AsaiYusuke/jsonpath/badge.svg?branch=main)](https://coveralls.io/github/AsaiYusuke/jsonpath?branch=main)
 [![Go Reference](https://pkg.go.dev/badge/github.com/AsaiYusuke/jsonpath.svg)](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is [Go](https://golang.org/) package providing the features that retrieves a part of the JSON objects according to the statement written in the JSONPath syntax.
 
@@ -124,7 +125,7 @@ There are two ways to use function:
 The filter function applies a user function to each values in the JSONPath result to get converted.
 
 ```Go
-  config := Config{}
+  config := jsonpath.Config{}
   config.SetFilterFunction(`twice`, func(param interface{}) (interface{}, error) {
     if floatParam, ok := param.(float64); ok {
       return floatParam * 2, nil
@@ -146,13 +147,17 @@ The filter function applies a user function to each values in the JSONPath resul
 Aggregate function converts all values in the JSONPath result into a single value by applying them to a user function.
 
 ```Go
-  config := Config{}
+  config := jsonpath.Config{}
   config.SetAggregateFunction(`max`, func(params []interface{}) (interface{}, error) {
     var result float64
-    for _, value := range params {
-      if result < value.(float64) {
-        result = value.(float64)
+    for _, param := range params {
+      if floatParam, ok := param.(float64); ok {
+        if result < floatParam {
+          result = floatParam
+        }
+        continue
       }
+      return nil, fmt.Errorf(`type error`)
     }
     return result, nil
   })
