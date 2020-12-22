@@ -229,6 +229,7 @@ On the other hand, in the case of the `existence check` in the filter qualifier,
 | Asterisk qualifier | `@[*]` |
 | Union in the qualifier | `@[0,1]` |
 | Filter qualifier | `@.a[?(@.b)]` |
+
 ## Benchmarks
 
 <details>
