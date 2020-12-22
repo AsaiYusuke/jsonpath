@@ -44,10 +44,10 @@ func (s *syntaxSliceNegativeStepSubscript) getLoopEnd(srcLength int) int {
 	if s.end.isOmitted {
 		loopEnd = -1
 	}
-	if loopEnd >= srcLength-1 {
+	if loopEnd > srcLength-1 {
 		loopEnd = loopEnd - srcLength
-		if loopEnd > srcLength {
-			loopEnd = srcLength
+		if loopEnd > srcLength-1 {
+			loopEnd = srcLength - 1
 		}
 	}
 	return loopEnd
