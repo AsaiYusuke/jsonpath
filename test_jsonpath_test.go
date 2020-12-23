@@ -4234,44 +4234,44 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 	}
 }
 
-func TestRetrieveConfigFunction(t *testing.T) {
-	twiceFunc := func(param interface{}) (interface{}, error) {
-		if input, ok := param.(float64); ok {
-			return input * 2, nil
+var twiceFunc = func(param interface{}) (interface{}, error) {
+	if input, ok := param.(float64); ok {
+		return input * 2, nil
+	}
+	return nil, fmt.Errorf(`type error`)
+}
+var quarterFunc = func(param interface{}) (interface{}, error) {
+	if input, ok := param.(float64); ok {
+		return input / 4, nil
+	}
+	return nil, fmt.Errorf(`type error`)
+}
+var maxFunc = func(param []interface{}) (interface{}, error) {
+	var result float64
+	for _, value := range param {
+		if result < value.(float64) {
+			result = value.(float64)
 		}
-		return nil, fmt.Errorf(`type error`)
 	}
-	quarterFunc := func(param interface{}) (interface{}, error) {
-		if input, ok := param.(float64); ok {
-			return input / 4, nil
+	return result, nil
+}
+var minFunc = func(param []interface{}) (interface{}, error) {
+	var result float64 = 999
+	for _, value := range param {
+		if result > value.(float64) {
+			result = value.(float64)
 		}
-		return nil, fmt.Errorf(`type error`)
 	}
-	maxFunc := func(param []interface{}) (interface{}, error) {
-		var result float64
-		for _, value := range param {
-			if result < value.(float64) {
-				result = value.(float64)
-			}
-		}
-		return result, nil
-	}
-	minFunc := func(param []interface{}) (interface{}, error) {
-		var result float64 = 999
-		for _, value := range param {
-			if result > value.(float64) {
-				result = value.(float64)
-			}
-		}
-		return result, nil
-	}
-	errAggregateFunc := func(param []interface{}) (interface{}, error) {
-		return nil, fmt.Errorf(`aggregate error`)
-	}
-	errFilterFunc := func(param interface{}) (interface{}, error) {
-		return nil, fmt.Errorf(`filter error`)
-	}
+	return result, nil
+}
+var errAggregateFunc = func(param []interface{}) (interface{}, error) {
+	return nil, fmt.Errorf(`aggregate error`)
+}
+var errFilterFunc = func(param interface{}) (interface{}, error) {
+	return nil, fmt.Errorf(`filter error`)
+}
 
+func TestRetrieve_configFunction(t *testing.T) {
 	testGroups := TestGroup{
 		`filter-function`: []TestCase{
 			{
