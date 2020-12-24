@@ -316,7 +316,7 @@ BenchmarkParserFunc_filter_regex-4                          	  862663	      1411
     - [x] syntax tests
     - [x] benchmark
     - [x] coverage >80%
-  - [ ] Examples
+  - [x] Examples
   - [x] CI automation
   - Documentation
     - [x] README
