@@ -315,6 +315,8 @@ BenchmarkParserFunc_filter_regex-4                          	  862663	      1411
 - Archtecture
   - [x] PEG syntax analyzing
   - [x] Error handling
+  - [x] Function
+  - [x] Accessing JSON
 - Go language manner
   - [x] retrieve with the object in interface unmarshal
   - [x] retrieve with the json.Number type
