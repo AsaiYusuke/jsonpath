@@ -27,6 +27,7 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 	if len(config) > 0 {
 		parser.filterFunctions = config[0].filterFunctions
 		parser.aggregateFunctions = config[0].aggregateFunctions
+		parser.accessorMode = config[0].accessorMode
 	}
 
 	parser.Init()

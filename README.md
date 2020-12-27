@@ -171,6 +171,14 @@ Aggregate function converts all values in the JSONPath result into a single valu
   // [3]
 ```
 
+### * Accessing JSON
+
+You can get a collection of accessors ( *Getters* / *Setters* ) to the input JSON instead of the retrieved values by giving `Config.SetAccessorMode()`.
+These accessors can be used to update the original nodes retrieved by JSONPath in the input JSON.
+See the Example for usage.
+
+#### Note:
+It is not possible to use *Setter* for some execution results, such as including function syntax.
 
 ## Differences
 

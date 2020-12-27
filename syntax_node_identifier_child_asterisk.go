@@ -20,12 +20,27 @@ func (i *syntaxChildAsteriskIdentifier) retrieve(current interface{}) error {
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			i.retrieveNext(srcMap[key])
+			localKey := key
+			i.retrieveNext(
+				func() interface{} {
+					return srcMap[localKey]
+				},
+				func(value interface{}) {
+					srcMap[localKey] = value
+				})
 		}
 
 	case []interface{}:
-		for _, value := range current.([]interface{}) {
-			i.retrieveNext(value)
+		srcArray := current.([]interface{})
+		for index := range srcArray {
+			localIndex := index
+			i.retrieveNext(
+				func() interface{} {
+					return srcArray[localIndex]
+				},
+				func(value interface{}) {
+					srcArray[localIndex] = value
+				})
 		}
 	}
 

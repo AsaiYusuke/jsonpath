@@ -15,6 +15,7 @@ type jsonPathParser struct {
 	unescapeRegex      *regexp.Regexp
 	filterFunctions    map[string]func(interface{}) (interface{}, error)
 	aggregateFunctions map[string]func([]interface{}) (interface{}, error)
+	accessorMode       bool
 }
 
 func (p *jsonPathParser) saveParams() {
@@ -73,6 +74,13 @@ func (p *jsonPathParser) updateResultPtr(checkNode syntaxNode, result **[]interf
 	}
 }
 
+func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
+	for checkNode != nil {
+		checkNode.setAccessorMode(mode)
+		checkNode = checkNode.getNext()
+	}
+}
+
 func (p *jsonPathParser) syntaxErr(pos int, reason string, buffer string) {
 	p.thisError = ErrorInvalidSyntax{pos, reason, buffer[pos:]}
 }
@@ -124,8 +132,9 @@ func (p *jsonPathParser) pushFunction(text string, funcName string) {
 	if function, ok := p.filterFunctions[funcName]; ok {
 		p.push(&syntaxFilterFunction{
 			syntaxBasicNode: &syntaxBasicNode{
-				text:   text,
-				result: &p.resultPtr,
+				text:         text,
+				accessorMode: p.accessorMode,
+				result:       &p.resultPtr,
 			},
 			function: function,
 		})
@@ -134,8 +143,9 @@ func (p *jsonPathParser) pushFunction(text string, funcName string) {
 	if function, ok := p.aggregateFunctions[funcName]; ok {
 		p.push(&syntaxAggregateFunction{
 			syntaxBasicNode: &syntaxBasicNode{
-				text:   text,
-				result: &p.resultPtr,
+				text:         text,
+				accessorMode: p.accessorMode,
+				result:       &p.resultPtr,
 			},
 			function: function,
 		})
@@ -150,8 +160,9 @@ func (p *jsonPathParser) pushFunction(text string, funcName string) {
 func (p *jsonPathParser) pushRootIdentifier() {
 	p.push(&syntaxRootIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:   `$`,
-			result: &p.resultPtr,
+			text:         `$`,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 		srcJSON: &p.srcJSON,
 	})
@@ -160,8 +171,9 @@ func (p *jsonPathParser) pushRootIdentifier() {
 func (p *jsonPathParser) pushCurrentRootIdentifier() {
 	p.push(&syntaxCurrentRootIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:   `@`,
-			result: &p.resultPtr,
+			text:         `@`,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -170,9 +182,10 @@ func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
 	p.push(&syntaxChildSingleIdentifier{
 		identifier: text,
 		syntaxBasicNode: &syntaxBasicNode{
-			text:       text,
-			multiValue: false,
-			result:     &p.resultPtr,
+			text:         text,
+			multiValue:   false,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -181,8 +194,9 @@ func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
 	p.push(&syntaxChildMultiIdentifier{
 		identifiers: identifiers,
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue: true,
-			result:     &p.resultPtr,
+			multiValue:   true,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -190,9 +204,10 @@ func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
 func (p *jsonPathParser) pushChildAsteriskIdentifier(text string) {
 	p.push(&syntaxChildAsteriskIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:       text,
-			multiValue: true,
-			result:     &p.resultPtr,
+			text:         text,
+			multiValue:   true,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -200,10 +215,11 @@ func (p *jsonPathParser) pushChildAsteriskIdentifier(text string) {
 func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 	p.push(&syntaxRecursiveChildIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:       `..`,
-			multiValue: true,
-			next:       node,
-			result:     &p.resultPtr,
+			text:         `..`,
+			multiValue:   true,
+			next:         node,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -211,8 +227,9 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
 	p.push(&syntaxUnionQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue: subscript.isMultiValue(),
-			result:     &p.resultPtr,
+			multiValue:   subscript.isMultiValue(),
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 		subscripts: []syntaxSubscript{subscript},
 	})
@@ -222,8 +239,9 @@ func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
 	p.push(&syntaxFilterQualifier{
 		query: query,
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue: true,
-			result:     &p.resultPtr,
+			multiValue:   true,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -232,8 +250,9 @@ func (p *jsonPathParser) pushScriptQualifier(text string) {
 	p.push(&syntaxScriptQualifier{
 		command: text,
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue: true,
-			result:     &p.resultPtr,
+			multiValue:   true,
+			accessorMode: p.accessorMode,
+			result:       &p.resultPtr,
 		},
 	})
 }
@@ -372,6 +391,7 @@ func (p *jsonPathParser) pushCompareParameterRoot(node syntaxNode) {
 		resultPtr: &[]interface{}{},
 	}
 	p.updateResultPtr(param.param, &param.resultPtr)
+	p.updateAccessorMode(param.param, false)
 	p.push(param)
 }
 
@@ -381,5 +401,6 @@ func (p *jsonPathParser) pushCompareParameterCurrentRoot(node syntaxNode) {
 		resultPtr: &[]interface{}{},
 	}
 	p.updateResultPtr(param.param, &param.resultPtr)
+	p.updateAccessorMode(param.param, false)
 	p.push(param)
 }

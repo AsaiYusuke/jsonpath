@@ -243,3 +243,35 @@ func ExampleConfig_SetAggregateFunction() {
 	// Output:
 	// [3]
 }
+
+func ExampleConfig_SetAccessorMode() {
+	config := jsonpath.Config{}
+	config.SetAccessorMode()
+	jsonPath, srcJSON := `$.a`, `{"a":1,"b":0}`
+	var src interface{}
+	json.Unmarshal([]byte(srcJSON), &src)
+	output, err := jsonpath.Retrieve(jsonPath, src, config)
+	if err != nil {
+		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		return
+	}
+	accessor := output[0].(jsonpath.Accessor)
+	srcMap := src.(map[string]interface{})
+
+	fmt.Printf("Get : %v\n", accessor.Get())
+
+	accessor.Set(2)
+	fmt.Printf("Set -> Src : %v\n", srcMap[`a`])
+
+	accessor.Set(3)
+	fmt.Printf("Set -> Get : %v\n", accessor.Get())
+
+	srcMap[`a`] = 4
+	fmt.Printf("Src -> Get : %v\n", accessor.Get())
+
+	// Output:
+	// Get : 1
+	// Set -> Src : 2
+	// Set -> Get : 3
+	// Src -> Get : 4
+}

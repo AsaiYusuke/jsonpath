@@ -12,44 +12,60 @@ import (
 type TestGroup map[string][]TestCase
 
 type TestCase struct {
-	jsonpath     string
-	inputJSON    string
-	expectedJSON string
-	expectedErr  error
-	filters      map[string]func(interface{}) (interface{}, error)
-	aggregates   map[string]func([]interface{}) (interface{}, error)
+	jsonpath        string
+	inputJSON       string
+	expectedJSON    string
+	expectedErr     error
+	unmarshalFunc   func(string, *interface{}) error
+	filters         map[string]func(interface{}) (interface{}, error)
+	aggregates      map[string]func([]interface{}) (interface{}, error)
+	accessorMode    bool
+	resultValidator func(interface{}, []interface{}) error
 }
 
-func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) {
+func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) []interface{} {
 	jsonPath := testCase.jsonpath
-	expectedOutputJSON := testCase.expectedJSON
+	hasConfig := false
+	config := Config{}
 	expectedError := testCase.expectedErr
-	actualObject, err := Retrieve(jsonPath, inputJSON)
+	var actualObject []interface{}
+	var err error
+	if len(testCase.filters) > 0 {
+		hasConfig = true
+		for id, function := range testCase.filters {
+			config.SetFilterFunction(id, function)
+		}
+	}
+	if len(testCase.aggregates) > 0 {
+		hasConfig = true
+		for id, function := range testCase.aggregates {
+			config.SetAggregateFunction(id, function)
+		}
+	}
+	if testCase.accessorMode {
+		hasConfig = true
+		config.SetAccessorMode()
+	}
+	if hasConfig {
+		actualObject, err = Retrieve(jsonPath, inputJSON, config)
+	} else {
+		actualObject, err = Retrieve(jsonPath, inputJSON)
+	}
 	if err != nil {
 		if reflect.TypeOf(expectedError) == reflect.TypeOf(err) &&
 			fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
-			return
+			return nil
 		}
 		t.Errorf("expected error<%s> != actual error<%s>\n",
 			expectedError, err)
-		return
+		return nil
 	}
 	if expectedError != nil {
 		t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
-		return
+		return nil
 	}
 
-	actualOutputJSON, err := json.Marshal(actualObject)
-	if err != nil {
-		t.Errorf("%w", err)
-		return
-	}
-
-	if string(actualOutputJSON) != expectedOutputJSON {
-		t.Errorf("expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
-			expectedOutputJSON, actualOutputJSON)
-		return
-	}
+	return actualObject
 }
 
 func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
@@ -57,15 +73,52 @@ func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
 		for _, testCase := range testCases {
 			jsonPath := testCase.jsonpath
 			srcJSON := testCase.inputJSON
+			expectedOutputJSON := testCase.expectedJSON
+
 			t.Run(
 				fmt.Sprintf(`%s <%s> <%s>`, testGroupName, jsonPath, srcJSON),
 				func(t *testing.T) {
 					var src interface{}
-					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
+					var err error
+					if testCase.unmarshalFunc != nil {
+						err = testCase.unmarshalFunc(srcJSON, &src)
+					} else {
+						err = json.Unmarshal([]byte(srcJSON), &src)
+					}
+					if err != nil {
 						t.Errorf("%w", err)
 						return
 					}
-					execTestRetrieve(t, src, testCase)
+
+					actualObject := execTestRetrieve(t, src, testCase)
+					if t.Failed() {
+						return
+					}
+
+					if actualObject == nil {
+						return
+					}
+
+					if testCase.resultValidator != nil {
+						err := testCase.resultValidator(src, actualObject)
+						if err != nil {
+							t.Errorf("%w", err)
+						}
+						return
+					}
+
+					actualOutputJSON, err := json.Marshal(actualObject)
+					if err != nil {
+						t.Errorf("%w", err)
+						return
+					}
+
+					if string(actualOutputJSON) != expectedOutputJSON {
+						t.Errorf("expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
+							expectedOutputJSON, actualOutputJSON)
+						return
+					}
+
 				})
 		}
 	}
@@ -4176,62 +4229,57 @@ func TestRetrieve_notSupported(t *testing.T) {
 	execTestRetrieveTestGroups(t, testGroups)
 }
 
+var useJSONNumberDecoderFunction = func(srcJSON string, src *interface{}) error {
+	reader := strings.NewReader(srcJSON)
+	decoder := json.NewDecoder(reader)
+	decoder.UseNumber()
+	return decoder.Decode(src)
+}
+
 func TestRetrieve_jsonNumber(t *testing.T) {
-	testGroup := TestGroup{
+	testGroups := TestGroup{
 		`filter`: []TestCase{
 			{
-				jsonpath:     `$[?(@.a > 123)].a`,
-				inputJSON:    `[{"a":123.456}]`,
-				expectedJSON: `[123.456]`,
+				jsonpath:      `$[?(@.a > 123)].a`,
+				inputJSON:     `[{"a":123.456}]`,
+				expectedJSON:  `[123.456]`,
+				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 			{
-				jsonpath:     `$[?(@.a > 123.46)].a`,
-				inputJSON:    `[{"a":123.456}]`,
-				expectedJSON: `[]`,
-				expectedErr:  ErrorNoneMatched{path: `[?(@.a > 123.46)].a`},
+				jsonpath:      `$[?(@.a > 123.46)].a`,
+				inputJSON:     `[{"a":123.456}]`,
+				expectedJSON:  `[]`,
+				expectedErr:   ErrorNoneMatched{path: `[?(@.a > 123.46)].a`},
+				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 			{
-				jsonpath:     `$[?(@.a > 122)].a`,
-				inputJSON:    `[{"a":123}]`,
-				expectedJSON: `[123]`,
+				jsonpath:      `$[?(@.a > 122)].a`,
+				inputJSON:     `[{"a":123}]`,
+				expectedJSON:  `[123]`,
+				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 			{
-				jsonpath:     `$[?(123 < @.a)].a`,
-				inputJSON:    `[{"a":123.456}]`,
-				expectedJSON: `[123.456]`,
+				jsonpath:      `$[?(123 < @.a)].a`,
+				inputJSON:     `[{"a":123.456}]`,
+				expectedJSON:  `[123.456]`,
+				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 			{
-				jsonpath:     `$[?(@.a==-0.123e2)]`,
-				inputJSON:    `[{"a":-12.3,"b":1},{"a":-0.123e2,"b":2},{"a":-0.123},{"a":-12},{"a":12.3},{"a":2},{"a":"-0.123e2"}]`,
-				expectedJSON: `[{"a":-12.3,"b":1},{"a":-0.123e2,"b":2}]`,
+				jsonpath:      `$[?(@.a==-0.123e2)]`,
+				inputJSON:     `[{"a":-12.3,"b":1},{"a":-0.123e2,"b":2},{"a":-0.123},{"a":-12},{"a":12.3},{"a":2},{"a":"-0.123e2"}]`,
+				expectedJSON:  `[{"a":-12.3,"b":1},{"a":-0.123e2,"b":2}]`,
+				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 			{
-				jsonpath:     `$[?(@.a==11)]`,
-				inputJSON:    `[{"a":10.999},{"a":11.00},{"a":11.10}]`,
-				expectedJSON: `[{"a":11.00}]`,
+				jsonpath:      `$[?(@.a==11)]`,
+				inputJSON:     `[{"a":10.999},{"a":11.00},{"a":11.10}]`,
+				expectedJSON:  `[{"a":11.00}]`,
+				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 		},
 	}
 
-	for groupName, testCases := range testGroup {
-		for _, testCase := range testCases {
-			jsonPath := testCase.jsonpath
-			srcJSON := testCase.inputJSON
-			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, groupName, jsonPath, srcJSON),
-				func(t *testing.T) {
-					var src interface{}
-					reader := strings.NewReader(srcJSON)
-					decoder := json.NewDecoder(reader)
-					decoder.UseNumber()
-					if err := decoder.Decode(&src); err != nil {
-						t.Errorf("%w", err)
-						return
-					}
-					execTestRetrieve(t, src, testCase)
-				})
-		}
-	}
+	execTestRetrieveTestGroups(t, testGroups)
 }
 
 var twiceFunc = func(param interface{}) (interface{}, error) {
@@ -4607,56 +4655,261 @@ func TestRetrieve_configFunction(t *testing.T) {
 		},
 	}
 
-	for groupName, testCase := range testGroups {
-		for _, testCase := range testCase {
-			jsonPath := testCase.jsonpath
-			srcJSON := testCase.inputJSON
-			expectedJSON := testCase.expectedJSON
-			filterFunctions := testCase.filters
-			aggregateFunctions := testCase.aggregates
-			expectedError := testCase.expectedErr
-			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, groupName, jsonPath, srcJSON),
-				func(t *testing.T) {
-					var src interface{}
-					if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
-						t.Errorf("%w", err)
-						return
-					}
-					config := Config{}
-					for id, function := range filterFunctions {
-						config.SetFilterFunction(id, function)
-					}
-					for id, function := range aggregateFunctions {
-						config.SetAggregateFunction(id, function)
-					}
-					actualObject, err := Retrieve(jsonPath, src, config)
-					if err != nil {
-						if reflect.TypeOf(expectedError) == reflect.TypeOf(err) &&
-							fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
-							return
-						}
-						t.Errorf("expected error<%s> != actual error<%s>\n",
-							expectedError, err)
-						return
-					}
-					if expectedError != nil {
-						t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
-						return
-					}
-					actualOutputJSON, err := json.Marshal(actualObject)
-					if err != nil {
-						t.Errorf("%w", err)
-						return
-					}
-					if string(expectedJSON) != string(actualOutputJSON) {
-						t.Errorf("expectedJSON<%s> == actualOutputJSON<%s>\n",
-							string(expectedJSON), string(actualOutputJSON))
-						return
-					}
-				})
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func createAccessorModeValidator(
+	resultIndex int,
+	expectedValue1, expectedValue2, expectedValue3 interface{},
+	srcGetter func(interface{}) interface{},
+	srcSetter func(interface{}, interface{})) func(interface{}, []interface{}) error {
+	return func(src interface{}, actualObject []interface{}) error {
+		accessor := actualObject[resultIndex].(Accessor)
+
+		getValue := accessor.Get()
+		if getValue != expectedValue1 {
+			return fmt.Errorf(`Get : expect<%f> != actual<%f>`, expectedValue1, getValue)
 		}
+
+		accessor.Set(expectedValue2)
+
+		newSrcValue := srcGetter(src)
+
+		if newSrcValue != expectedValue2 {
+			return fmt.Errorf(`Set : expect<%f> != actual<%f>`, expectedValue2, newSrcValue)
+		}
+
+		getValue = accessor.Get()
+		if getValue != expectedValue2 {
+			return fmt.Errorf(`Set -> Get : expect<%f> != actual<%f>`, expectedValue2, getValue)
+		}
+
+		srcSetter(src, expectedValue3)
+
+		getValue = accessor.Get()
+		if getValue != expectedValue3 {
+			return fmt.Errorf(`Src -> Get : expect<%f> != actual<%f>`, expectedValue3, getValue)
+		}
+
+		return nil
 	}
+}
+
+func TestRetrieve_configAccessorMode(t *testing.T) {
+	testGroups := TestGroup{
+		`getter-setter`: []TestCase{
+			{
+				jsonpath:     `$.b`,
+				inputJSON:    `{"a":11,"b":22,"c":33}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 22.0, 33.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`b`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`b`] = value
+					}),
+			},
+			{
+				jsonpath:     `$['b']`,
+				inputJSON:    `{"a":123,"b":456,"c":789}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 456.0, 246.0, 369.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`b`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`b`] = value
+					}),
+			},
+			{
+				jsonpath:     `b`,
+				inputJSON:    `{"a":11,"b":22,"c":33}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 22.0, 33.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`b`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`b`] = value
+					}),
+			},
+			{
+				jsonpath:     `$['a','b','c']`,
+				inputJSON:    `{"a":11,"b":22}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 22.0, 44.0, 55.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`b`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`b`] = value
+					}),
+			},
+			{
+				jsonpath:     `$.*`,
+				inputJSON:    `{"a":11,"b":22,"c":33}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 22.0, 33.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`b`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`b`] = value
+					}),
+			},
+			{
+				jsonpath:     `$.*`,
+				inputJSON:    `[11,22,33]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 22.0, 33.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[1]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[1] = value
+					}),
+			},
+			{
+				jsonpath:     `$..a`,
+				inputJSON:    `{"b":{"a":11}, "c":66, "a":77}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 11.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`b`].(map[string]interface{})[`a`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`b`].(map[string]interface{})[`a`] = value
+					}),
+			},
+			{
+				jsonpath:     `$[1]`,
+				inputJSON:    `[123.456,256,789]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 256.0, 512.0, 1024.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[1]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[1] = value
+					}),
+			},
+			{
+				jsonpath:     `$[2,1]`,
+				inputJSON:    `[123.456,256,789]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 256.0, 512.0, 1024.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[1]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[1] = value
+					}),
+			},
+			{
+				jsonpath:     `$[0:2]`,
+				inputJSON:    `[11,22,33,44]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 11.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[0]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[0] = value
+					}),
+			},
+			{
+				jsonpath:     `$[*]`,
+				inputJSON:    `[11,22]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 11.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[0]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[0] = value
+					}),
+			},
+			{
+				jsonpath:     `$[0:2].a`,
+				inputJSON:    `[{"a":11},{"a":22},{"a":33}]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 11.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[0].(map[string]interface{})[`a`]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[0].(map[string]interface{})[`a`] = value
+					}),
+			},
+			{
+				jsonpath:     `$[?(@==11||@==33)]`,
+				inputJSON:    `{"a":11,"b":22,"c":33}`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 33.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.(map[string]interface{})[`c`]
+					},
+					func(src, value interface{}) {
+						src.(map[string]interface{})[`c`] = value
+					}),
+			},
+			{
+				jsonpath:     `$[?(@==11||@==33)]`,
+				inputJSON:    `[11,22,33]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 33.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[2]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[2] = value
+					}),
+			},
+			{
+				jsonpath:     `$[?(@.a==11||@.a==33)].a`,
+				inputJSON:    `[{"a":11},{"a":22},{"a":33}]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					1, 33.0, 22.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[2].(map[string]interface{})[`a`]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[2].(map[string]interface{})[`a`] = value
+					}),
+			},
+			{
+				jsonpath:     `$[?(@==$[1])]`,
+				inputJSON:    `[11,22,33]`,
+				accessorMode: true,
+				resultValidator: createAccessorModeValidator(
+					0, 22.0, 33.0, 44.0,
+					func(src interface{}) interface{} {
+						return src.([]interface{})[1]
+					},
+					func(src, value interface{}) {
+						src.([]interface{})[1] = value
+					}),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
 }
 
 func TestParserFuncExecTwice(t *testing.T) {

@@ -26,5 +26,9 @@ func (f *syntaxAggregateFunction) retrieve(current interface{}) error {
 			err:      err,
 		}
 	}
-	return f.retrieveNext(filteredValue)
+	return f.retrieveNext(
+		func() interface{} {
+			return filteredValue
+		},
+		nil)
 }

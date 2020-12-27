@@ -28,9 +28,16 @@ func (f *syntaxFilterQualifier) retrieve(current interface{}) error {
 		computedMap := f.query.compute(argumentMap)
 
 		if len(computedMap) > 0 {
-			for index := range keys {
+			for index, key := range keys {
 				if _, ok := computedMap[index]; ok {
-					f.retrieveNext(argumentMap[index])
+					localKey := key
+					f.retrieveNext(
+						func() interface{} {
+							return srcMap[localKey]
+						},
+						func(value interface{}) {
+							srcMap[localKey] = value
+						})
 				}
 			}
 		}
@@ -46,9 +53,16 @@ func (f *syntaxFilterQualifier) retrieve(current interface{}) error {
 		computedMap := f.query.compute(argumentMap)
 
 		if len(computedMap) > 0 {
-			for index, entity := range srcList {
+			for index := range srcList {
 				if _, ok := computedMap[index]; ok {
-					f.retrieveNext(entity)
+					localIndex := index
+					f.retrieveNext(
+						func() interface{} {
+							return srcList[localIndex]
+						},
+						func(value interface{}) {
+							srcList[localIndex] = value
+						})
 				}
 			}
 		}

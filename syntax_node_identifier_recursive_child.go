@@ -12,7 +12,11 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(current interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
-		i.retrieveNext(srcMap)
+		i.retrieveNext(
+			func() interface{} {
+				return srcMap
+			},
+			nil)
 
 		index, keys := 0, make([]string, len(srcMap))
 		for key := range srcMap {
@@ -26,7 +30,11 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(current interface{}) error {
 
 	case []interface{}:
 		srcArray := current.([]interface{})
-		i.retrieveNext(srcArray)
+		i.retrieveNext(
+			func() interface{} {
+				return srcArray
+			},
+			nil)
 
 		for _, child := range srcArray {
 			i.retrieve(child)

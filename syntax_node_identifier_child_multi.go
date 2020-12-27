@@ -17,7 +17,14 @@ func (i *syntaxChildMultiIdentifier) retrieve(current interface{}) error {
 		srcMap := current.(map[string]interface{})
 		for _, key := range i.identifiers {
 			if _, ok := srcMap[key]; ok {
-				i.retrieveNext(srcMap[key])
+				localKey := key
+				i.retrieveNext(
+					func() interface{} {
+						return srcMap[localKey]
+					},
+					func(value interface{}) {
+						srcMap[localKey] = value
+					})
 			}
 		}
 

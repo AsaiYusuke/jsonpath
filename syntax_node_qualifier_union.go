@@ -44,7 +44,14 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 
 	if u.isMultiValue() {
 		for _, index := range indexes {
-			u.retrieveNext(srcArray[index])
+			localIndex := index
+			u.retrieveNext(
+				func() interface{} {
+					return srcArray[localIndex]
+				},
+				func(value interface{}) {
+					srcArray[localIndex] = value
+				})
 		}
 
 		if len(**u.result) == 0 {
@@ -58,7 +65,13 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 		return ErrorIndexOutOfRange{u.text}
 	}
 
-	return u.retrieveNext(srcArray[indexes[0]])
+	return u.retrieveNext(
+		func() interface{} {
+			return srcArray[indexes[0]]
+		},
+		func(value interface{}) {
+			srcArray[indexes[0]] = value
+		})
 }
 
 func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {

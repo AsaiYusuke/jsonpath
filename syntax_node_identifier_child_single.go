@@ -15,11 +15,17 @@ func (i *syntaxChildSingleIdentifier) retrieve(current interface{}) error {
 	switch current.(type) {
 	case map[string]interface{}:
 		srcMap := current.(map[string]interface{})
-		child, ok := srcMap[i.identifier]
+		_, ok := srcMap[i.identifier]
 		if !ok {
 			return ErrorMemberNotExist{i.text}
 		}
-		return i.retrieveNext(child)
+		return i.retrieveNext(
+			func() interface{} {
+				return srcMap[i.identifier]
+			},
+			func(value interface{}) {
+				srcMap[i.identifier] = value
+			})
 
 	case []interface{}:
 		return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}

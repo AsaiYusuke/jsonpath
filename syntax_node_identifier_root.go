@@ -7,5 +7,9 @@ type syntaxRootIdentifier struct {
 }
 
 func (i *syntaxRootIdentifier) retrieve(_ interface{}) error {
-	return i.retrieveNext(**i.srcJSON)
+	return i.retrieveNext(
+		func() interface{} {
+			return **i.srcJSON
+		},
+		nil)
 }

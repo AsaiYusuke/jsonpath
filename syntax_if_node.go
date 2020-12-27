@@ -9,6 +9,7 @@ type syntaxNode interface {
 	getConnectedText() string
 	setNext(next syntaxNode)
 	getNext() syntaxNode
-	retrieveNext(current interface{}) error
+	retrieveNext(getter func() interface{}, setter func(interface{})) error
 	setResultPtr(resultPtr **[]interface{})
+	setAccessorMode(mode bool)
 }
