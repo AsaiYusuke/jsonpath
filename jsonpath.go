@@ -21,18 +21,20 @@ func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}
 // Parse returns the parser function using the given JSONPath.
 func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interface{}, error), error) {
 	parseMutex.Lock()
-	defer parseMutex.Unlock()
+	defer func() {
+		parser.jsonPathParser = jsonPathParser{}
+		parseMutex.Unlock()
+	}()
 
 	parser.Buffer = jsonPath
-	parser.jsonPathParser = jsonPathParser{
-		unescapeRegex: unescapeRegex,
-	}
 
 	if parser.parse == nil {
 		parser.Init()
 	} else {
 		parser.Reset()
 	}
+
+	parser.jsonPathParser.unescapeRegex = unescapeRegex
 
 	if len(config) > 0 {
 		parser.jsonPathParser.filterFunctions = config[0].filterFunctions
