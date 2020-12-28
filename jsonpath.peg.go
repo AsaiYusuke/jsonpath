@@ -696,11 +696,11 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction42:
 
 			isLiteral := p.pop().(bool)
-			param := p.pop().(syntaxQueryParameter)
+			param := p.pop().(syntaxQueryJSONPathParameter)
 			if !p.hasErr() && param.isMultiValueParameter() {
 				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 			}
-			p.pushBasicCompareParameter(param, isLiteral)
+			p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
 
 		case ruleAction43:
 
@@ -4030,11 +4030,11 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		},
 		/* 97 Action42 <- <{
 		    isLiteral := p.pop().(bool)
-		    param := p.pop().(syntaxQueryParameter)
+		    param := p.pop().(syntaxQueryJSONPathParameter)
 		    if !p.hasErr() && param.isMultiValueParameter() {
 		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 		    }
-		    p.pushBasicCompareParameter(param, isLiteral)
+		    p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
 		}> */
 		func() bool {
 			{

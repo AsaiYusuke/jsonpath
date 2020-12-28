@@ -356,7 +356,7 @@ func (p *jsonPathParser) pushCompareRegex(
 }
 
 func (p *jsonPathParser) pushBasicCompareParameter(
-	parameter syntaxQueryParameter, isLiteral bool) {
+	parameter syntaxQuery, isLiteral bool) {
 	p.push(&syntaxBasicCompareParameter{
 		param:     parameter,
 		isLiteral: isLiteral,
