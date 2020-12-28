@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-var mutex sync.Mutex
+var parseMutex sync.Mutex
 var parser = pegJSONPathParser{}
 var unescapeRegex = regexp.MustCompile(`\\(.)`)
 
@@ -20,8 +20,8 @@ func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}
 
 // Parse returns the parser function using the given JSONPath.
 func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interface{}, error), error) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	parseMutex.Lock()
+	defer parseMutex.Unlock()
 
 	parser.Buffer = jsonPath
 	parser.jsonPathParser = jsonPathParser{
@@ -47,11 +47,15 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 		return nil, parser.thisError
 	}
 
+	var parserFuncMutex sync.Mutex
 	return func(src interface{}) ([]interface{}, error) {
+		parserFuncMutex.Lock()
+		defer parserFuncMutex.Unlock()
+
 		result := make([]interface{}, 0)
 		parser.jsonPathParser.srcJSON = &src
 		parser.jsonPathParser.resultPtr = &result
-		if err := parser.root.retrieve(src); err != nil {
+		if err := parser.jsonPathParser.root.retrieve(src); err != nil {
 			return nil, err
 		}
 		return result, nil
