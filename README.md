@@ -180,6 +180,9 @@ See the Example for usage.
 #### Note:
 It is not possible to use *Setter* for some execution results, such as including function syntax.
 
+Also, operations using accessors follow the map/slice manner of Go language, so if you use accessors after changing the structure of JSON, you need to pay attention to the behavior caused by the operation.
+If you want to handle it casually, you may want to retrieve the accessor again each time you change the structure of JSON.
+
 ## Differences
 
 Some behaviors that differ from the consensus exists in this package.
