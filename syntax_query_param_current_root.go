@@ -13,7 +13,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 
 	result := make(map[int]interface{}, len(currentMap))
 	for index, srcNode := range currentMap {
-		values := make([]interface{}, 0)
+		var values []interface{}
 		if err := e.param.retrieve(root, srcNode, &values); err != nil {
 			continue
 		}

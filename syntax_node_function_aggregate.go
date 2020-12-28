@@ -10,7 +10,7 @@ type syntaxAggregateFunction struct {
 func (f *syntaxAggregateFunction) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	values := make([]interface{}, 0)
+	var values []interface{}
 	if err := f.param.retrieve(root, current, &values); err != nil {
 		return err
 	}

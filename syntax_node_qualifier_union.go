@@ -37,8 +37,7 @@ func (u *syntaxUnionQualifier) retrieve(
 		return ErrorTypeUnmatched{`array`, foundType, u.text}
 	}
 
-	indexes := make([]int, 0)
-
+	var indexes []int
 	for _, subscript := range u.subscripts {
 		indexes = append(indexes, subscript.getIndexes(srcArray)...)
 	}
