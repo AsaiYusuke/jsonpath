@@ -3,22 +3,24 @@ package jsonpath
 type syntaxAggregateFunction struct {
 	*syntaxBasicNode
 
-	function  func([]interface{}) (interface{}, error)
-	param     syntaxNode
-	resultPtr *[]interface{}
+	function func([]interface{}) (interface{}, error)
+	param    syntaxNode
 }
 
-func (f *syntaxAggregateFunction) retrieve(current interface{}) error {
+func (f *syntaxAggregateFunction) retrieve(
+	root, current interface{}, result *[]interface{}) error {
+
 	values := make([]interface{}, 0)
-	f.resultPtr = &values
-	if err := f.param.retrieve(current); err != nil {
+	if err := f.param.retrieve(root, current, &values); err != nil {
 		return err
 	}
+
 	if !f.param.isMultiValue() {
 		if arrayParam, ok := values[0].([]interface{}); ok {
 			values = arrayParam
 		}
 	}
+
 	filteredValue, err := f.function(values)
 	if err != nil {
 		return ErrorFunctionFailed{
@@ -26,7 +28,9 @@ func (f *syntaxAggregateFunction) retrieve(current interface{}) error {
 			err:      err,
 		}
 	}
+
 	return f.retrieveNext(
+		root, result,
 		func() interface{} {
 			return filteredValue
 		},

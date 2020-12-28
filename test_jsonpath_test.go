@@ -71,6 +71,7 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) []
 func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
 	for testGroupName, testCases := range testGroup {
 		for _, testCase := range testCases {
+			testCase := testCase
 			jsonPath := testCase.jsonpath
 			srcJSON := testCase.inputJSON
 			expectedOutputJSON := testCase.expectedJSON
@@ -78,6 +79,8 @@ func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
 			t.Run(
 				fmt.Sprintf(`%s <%s> <%s>`, testGroupName, jsonPath, srcJSON),
 				func(t *testing.T) {
+					t.Parallel()
+
 					var src interface{}
 					var err error
 					if testCase.unmarshalFunc != nil {

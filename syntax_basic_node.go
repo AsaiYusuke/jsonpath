@@ -5,7 +5,6 @@ type syntaxBasicNode struct {
 	multiValue   bool
 	next         syntaxNode
 	accessorMode bool
-	result       **[]interface{}
 }
 
 func (i *syntaxBasicNode) setText(text string) {
@@ -39,20 +38,20 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 	return i.next
 }
 
-func (i *syntaxBasicNode) retrieveNext(getter func() interface{}, setter func(interface{})) error {
-	if i.next != nil {
-		return i.next.retrieve(getter())
-	}
-	if i.accessorMode {
-		**i.result = append(**i.result, Accessor{Get: getter, Set: setter})
-	} else {
-		**i.result = append(**i.result, getter())
-	}
-	return nil
-}
+func (i *syntaxBasicNode) retrieveNext(
+	root interface{}, result *[]interface{}, getter func() interface{}, setter func(interface{})) error {
 
-func (i *syntaxBasicNode) setResultPtr(resultPtr **[]interface{}) {
-	i.result = resultPtr
+	if i.next != nil {
+		return i.next.retrieve(root, getter(), result)
+	}
+
+	if i.accessorMode {
+		*result = append(*result, Accessor{Get: getter, Set: setter})
+	} else {
+		*result = append(*result, getter())
+	}
+
+	return nil
 }
 
 func (i *syntaxBasicNode) setAccessorMode(mode bool) {

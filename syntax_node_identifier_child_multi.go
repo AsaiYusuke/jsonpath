@@ -10,7 +10,8 @@ type syntaxChildMultiIdentifier struct {
 	identifiers []string
 }
 
-func (i *syntaxChildMultiIdentifier) retrieve(current interface{}) error {
+func (i *syntaxChildMultiIdentifier) retrieve(
+	root, current interface{}, result *[]interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:
@@ -19,6 +20,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(current interface{}) error {
 			if _, ok := srcMap[key]; ok {
 				localKey := key
 				i.retrieveNext(
+					root, result,
 					func() interface{} {
 						return srcMap[localKey]
 					},
@@ -32,7 +34,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(current interface{}) error {
 		return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}
 	}
 
-	if len(**i.result) == 0 {
+	if len(*result) == 0 {
 		return ErrorNoneMatched{i.getConnectedText()}
 	}
 

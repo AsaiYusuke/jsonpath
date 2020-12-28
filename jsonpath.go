@@ -47,17 +47,10 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 		return nil, parser.thisError
 	}
 
-	var parserFuncMutex sync.Mutex
+	root := parser.jsonPathParser.root
 	return func(src interface{}) ([]interface{}, error) {
-		parserFuncMutex.Lock()
-		defer parserFuncMutex.Unlock()
-
 		result := make([]interface{}, 0)
-		parser.jsonPathParser.srcJSON = &src
-		parser.jsonPathParser.resultPtr = &result
-		if err := parser.jsonPathParser.root.retrieve(src); err != nil {
-			return nil, err
-		}
-		return result, nil
+		err := root.retrieve(src, src, &result)
+		return result, err
 	}, nil
 }

@@ -8,7 +8,9 @@ type syntaxUnionQualifier struct {
 	subscripts []syntaxSubscript
 }
 
-func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
+func (u *syntaxUnionQualifier) retrieve(
+	root, current interface{}, result *[]interface{}) error {
+
 	if _, ok := current.(map[string]interface{}); ok {
 		if len(u.subscripts) == 1 {
 			if _, ok := u.subscripts[0].(*syntaxAsteriskSubscript); ok {
@@ -17,12 +19,11 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 				// specifying the Asterisk subscript
 				asteriskIdentifier := syntaxChildAsteriskIdentifier{
 					syntaxBasicNode: &syntaxBasicNode{
-						text:   u.text,
-						next:   u.next,
-						result: u.result,
+						text: u.text,
+						next: u.next,
 					},
 				}
-				return asteriskIdentifier.retrieve(current)
+				return asteriskIdentifier.retrieve(root, current, result)
 			}
 		}
 	}
@@ -46,6 +47,7 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 		for _, index := range indexes {
 			localIndex := index
 			u.retrieveNext(
+				root, result,
 				func() interface{} {
 					return srcArray[localIndex]
 				},
@@ -54,7 +56,7 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 				})
 		}
 
-		if len(**u.result) == 0 {
+		if len(*result) == 0 {
 			return ErrorNoneMatched{u.getConnectedText()}
 		}
 
@@ -66,6 +68,7 @@ func (u *syntaxUnionQualifier) retrieve(current interface{}) error {
 	}
 
 	return u.retrieveNext(
+		root, result,
 		func() interface{} {
 			return srcArray[indexes[0]]
 		},

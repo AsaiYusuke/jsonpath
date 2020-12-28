@@ -10,7 +10,8 @@ type syntaxChildSingleIdentifier struct {
 	identifier string
 }
 
-func (i *syntaxChildSingleIdentifier) retrieve(current interface{}) error {
+func (i *syntaxChildSingleIdentifier) retrieve(
+	root, current interface{}, result *[]interface{}) error {
 
 	switch current.(type) {
 	case map[string]interface{}:
@@ -20,6 +21,7 @@ func (i *syntaxChildSingleIdentifier) retrieve(current interface{}) error {
 			return ErrorMemberNotExist{i.text}
 		}
 		return i.retrieveNext(
+			root, result,
 			func() interface{} {
 				return srcMap[i.identifier]
 			},
@@ -35,5 +37,6 @@ func (i *syntaxChildSingleIdentifier) retrieve(current interface{}) error {
 	if current != nil {
 		foundType = reflect.TypeOf(current).String()
 	}
+
 	return ErrorTypeUnmatched{`object/array`, foundType, i.text}
 }

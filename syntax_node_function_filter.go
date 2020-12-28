@@ -6,7 +6,9 @@ type syntaxFilterFunction struct {
 	function func(interface{}) (interface{}, error)
 }
 
-func (f *syntaxFilterFunction) retrieve(current interface{}) error {
+func (f *syntaxFilterFunction) retrieve(
+	root, current interface{}, result *[]interface{}) error {
+
 	filteredValue, err := f.function(current)
 	if err != nil {
 		return ErrorFunctionFailed{
@@ -14,7 +16,9 @@ func (f *syntaxFilterFunction) retrieve(current interface{}) error {
 			err:      err,
 		}
 	}
+
 	return f.retrieveNext(
+		root, result,
 		func() interface{} {
 			return filteredValue
 		},

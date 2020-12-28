@@ -18,5 +18,6 @@ func (i *syntaxIndexSubscript) getIndexes(src []interface{}) []int {
 	if index < 0 || index >= srcLength {
 		return []int{}
 	}
+
 	return []int{index}
 }

@@ -6,8 +6,10 @@ type syntaxBasicCompareQuery struct {
 	comparator syntaxComparator
 }
 
-func (q *syntaxBasicCompareQuery) compute(currentMap map[int]interface{}) map[int]interface{} {
-	leftValues := q.leftParam.get(currentMap)
+func (q *syntaxBasicCompareQuery) compute(
+	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+
+	leftValues := q.leftParam.get(root, currentMap)
 	for index, value := range leftValues {
 		if cast, ok := q.comparator.typeCast(value); ok {
 			leftValues[index] = cast
@@ -16,7 +18,7 @@ func (q *syntaxBasicCompareQuery) compute(currentMap map[int]interface{}) map[in
 		}
 	}
 
-	rightValues := q.rightParam.get(currentMap)
+	rightValues := q.rightParam.get(root, currentMap)
 	for index, value := range rightValues {
 		if cast, ok := q.comparator.typeCast(value); ok {
 			rightValues[index] = cast
@@ -46,8 +48,10 @@ func (q *syntaxBasicCompareQuery) compute(currentMap map[int]interface{}) map[in
 	if !q.leftParam.isLiteral && len(rightValues) > 0 {
 		return leftValues
 	}
+
 	if !q.rightParam.isLiteral && len(leftValues) > 0 {
 		return rightValues
 	}
+
 	return nil
 }

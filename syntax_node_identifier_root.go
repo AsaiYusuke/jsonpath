@@ -2,14 +2,15 @@ package jsonpath
 
 type syntaxRootIdentifier struct {
 	*syntaxBasicNode
-
-	srcJSON **interface{}
 }
 
-func (i *syntaxRootIdentifier) retrieve(_ interface{}) error {
+func (i *syntaxRootIdentifier) retrieve(
+	root, _ interface{}, result *[]interface{}) error {
+
 	return i.retrieveNext(
+		root, result,
 		func() interface{} {
-			return **i.srcJSON
+			return root
 		},
 		nil)
 }
