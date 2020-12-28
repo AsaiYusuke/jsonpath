@@ -2,7 +2,12 @@ package jsonpath
 
 import (
 	"regexp"
+	"sync"
 )
+
+var mutex sync.Mutex
+var parser = pegJSONPathParser{}
+var unescapeRegex = regexp.MustCompile(`\\(.)`)
 
 // Retrieve returns the retrieved JSON using the given JSONPath.
 func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}, error) {
@@ -15,22 +20,26 @@ func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}
 
 // Parse returns the parser function using the given JSONPath.
 func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interface{}, error), error) {
-	parser := pegJSONPathParser{
-		Buffer: jsonPath,
-		jsonPathParser: jsonPathParser{
-			resultPtr: &[]interface{}{},
-		},
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	parser.Buffer = jsonPath
+	parser.jsonPathParser = jsonPathParser{
+		unescapeRegex: unescapeRegex,
 	}
 
-	parser.unescapeRegex, _ = regexp.Compile(`\\(.)`)
+	if parser.parse == nil {
+		parser.Init()
+	} else {
+		parser.Reset()
+	}
 
 	if len(config) > 0 {
-		parser.filterFunctions = config[0].filterFunctions
-		parser.aggregateFunctions = config[0].aggregateFunctions
-		parser.accessorMode = config[0].accessorMode
+		parser.jsonPathParser.filterFunctions = config[0].filterFunctions
+		parser.jsonPathParser.aggregateFunctions = config[0].aggregateFunctions
+		parser.jsonPathParser.accessorMode = config[0].accessorMode
 	}
 
-	parser.Init()
 	parser.Parse()
 	parser.Execute()
 
@@ -40,8 +49,8 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 
 	return func(src interface{}) ([]interface{}, error) {
 		result := make([]interface{}, 0)
-		parser.srcJSON = &src
-		parser.resultPtr = &result
+		parser.jsonPathParser.srcJSON = &src
+		parser.jsonPathParser.resultPtr = &result
 		if err := parser.root.retrieve(src); err != nil {
 			return nil, err
 		}
