@@ -2408,6 +2408,23 @@ func TestRetrieve_filterExist(t *testing.T) {
 				expectedJSON: `[{"a":2},{"a":3}]`,
 			},
 		},
+		`filter-chain`: []TestCase{
+			{
+				jsonpath:     `$[?(@)][?(@)]`,
+				inputJSON:    `[1,[21,[221,[222]]]]`,
+				expectedJSON: `[21,[221,[222]]]`,
+			},
+			{
+				jsonpath:     `$[?(@)][?(@)][?(@)]`,
+				inputJSON:    `[1,[21,[221,[222]]]]`,
+				expectedJSON: `[221,[222]]`,
+			},
+			{
+				jsonpath:     `$[?(@)][?(@)][?(@)][?(@)]`,
+				inputJSON:    `[1,[21,[221,[222]]]]`,
+				expectedJSON: `[222]`,
+			},
+		},
 	}
 
 	execTestRetrieveTestGroups(t, testGroups)
@@ -3016,6 +3033,28 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				jsonpath:     `$[?(@[1]=="b")]`,
 				inputJSON:    `{"a":["a","b"],"b":["b"]}`,
 				expectedJSON: `[["a","b"]]`,
+			},
+		},
+		`filter-chain`: []TestCase{
+			{
+				jsonpath:     `$[?(@[1][0]>1)]`,
+				inputJSON:    `[1,[21,[221,[222]]]]`,
+				expectedJSON: `[[21,[221,[222]]]]`,
+			},
+			{
+				jsonpath:     `$[?(@[1][0]>1)][?(@[1][0]>1)]`,
+				inputJSON:    `[1,[21,[221,[222]]]]`,
+				expectedJSON: `[[221,[222]]]`,
+			},
+			{
+				jsonpath:     `$[?(@[1][0]>1)][?(@[1][0]>1)][?(@[0]>1)]`,
+				inputJSON:    `[1,[21,[221,[222]]]]`,
+				expectedJSON: `[[222]]`,
+			},
+			{
+				jsonpath:    `$[?(@[1][0]>1)][?(@[1][0]>1)][?(@[1]>1)]`,
+				inputJSON:   `[1,[21,[221,[222]]]]`,
+				expectedErr: ErrorNoneMatched{path: `[?(@[1][0]>1)][?(@[1][0]>1)][?(@[1]>1)]`},
 			},
 		},
 	}
