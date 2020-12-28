@@ -4963,7 +4963,7 @@ func TestParserFuncExecTwice(t *testing.T) {
 	}
 }
 
-func TestParserExecuteFunctions(t *testing.T) {
+func TestPegParserExecuteFunctions(t *testing.T) {
 	stdoutBackup := os.Stdout
 	os.Stdout = nil
 
@@ -4972,17 +4972,23 @@ func TestParserExecuteFunctions(t *testing.T) {
 	parser.Parse()
 	parser.Execute()
 
-	parser.AST().isZero()
 	parser.Print()
-	parser.PreOrder()
-	parser.PrintSyntax()
+	parser.Reset()
 	parser.PrintSyntaxTree()
-	parser.Error()
-	parser.Expand(10)
-	parser.Highlighter()
+	parser.SprintSyntaxTree()
 
 	err := parseError{p: &parser}
 	_ = err.Error()
+
+	parser.Parse(1)
+
+	Pretty(true)(&parser)
+	parser.PrintSyntaxTree()
+	Size(10)(&parser)
+
+	parser.Init(func(p *pegJSONPathParser) error {
+		return fmt.Errorf(`test error`)
+	})
 
 	os.Stdout = stdoutBackup
 }
