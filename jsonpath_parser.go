@@ -340,13 +340,18 @@ func (p *jsonPathParser) pushCompareLT(
 
 func (p *jsonPathParser) pushCompareRegex(
 	leftParam *syntaxBasicCompareParameter, regex string) {
+	regexParam, err := regexp.Compile(regex)
+	if err != nil {
+		p.thisError = ErrorInvalidArgument{regex, err}
+	}
+
 	p.push(p._createBasicCompareQuery(
 		leftParam, &syntaxBasicCompareParameter{
 			param:     &syntaxQueryParamLiteral{literal: `regex`},
 			isLiteral: true,
 		},
 		&syntaxCompareRegex{
-			regex: regexp.MustCompile(regex),
+			regex: regexParam,
 		}))
 }
 

@@ -3082,6 +3082,11 @@ func TestRetrieve_filterRegex(t *testing.T) {
 				inputJSON:    `[{"a":"case"},{"a":"CASE"},{"a":"Case"},{"a":"abc"}]`,
 				expectedJSON: `[{"a":"case"},{"a":"CASE"},{"a":"Case"}]`,
 			},
+			{
+				jsonpath:    `$[?(@.a=~/(?x)CASE/)]`,
+				inputJSON:   `[{"a":"case"},{"a":"CASE"},{"a":"Case"},{"a":"abc"}]`,
+				expectedErr: ErrorInvalidArgument{argument: `(?x)CASE`, err: fmt.Errorf("error parsing regexp: invalid or unsupported Perl syntax: `(?x`")},
+			},
 		},
 		`jsonpath::index-qualifier`: []TestCase{
 			{
