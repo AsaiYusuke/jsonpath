@@ -1,15 +1,15 @@
 package jsonpath
 
 type syntaxLogicalOr struct {
-	leftParam  syntaxQuery
-	rightParam syntaxQuery
+	leftQuery  syntaxQuery
+	rightQuery syntaxQuery
 }
 
 func (l *syntaxLogicalOr) compute(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
-	leftComputedMap := l.leftParam.compute(root, currentMap)
-	rightComputedMap := l.rightParam.compute(root, currentMap)
+	leftComputedMap := l.leftQuery.compute(root, currentMap)
+	rightComputedMap := l.rightQuery.compute(root, currentMap)
 	for index := range rightComputedMap {
 		if _, ok := leftComputedMap[index]; !ok {
 			leftComputedMap[index] = 1

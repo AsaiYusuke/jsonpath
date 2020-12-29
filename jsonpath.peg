@@ -96,15 +96,18 @@ bracketChildIdentifier <-
     }
 
 bracketNodeIdentifiers <-
-    ( singleQuotedNodeIdentifier / doubleQuotedNodeIdentifier ) {
-        p.push([]string{p.pop().(string)})
-    } (
-        sepBracketIdentifier bracketNodeIdentifiers {
+    bracketNodeIdentifier (
+        sepBracketIdentifier bracketNodeIdentifier {
             identifier2 := p.pop().([]string)
             identifier1 := p.pop().([]string)
             p.push(append(identifier1, identifier2...))
         }
-    )?
+    )*
+
+bracketNodeIdentifier <-
+    ( singleQuotedNodeIdentifier / doubleQuotedNodeIdentifier ) {
+        p.push([]string{p.pop().(string)})
+    }
 
 singleQuotedNodeIdentifier <-
     '\'' < ( '\\' '\\' / '\\' '\'' / [^\\'] )* > '\'' {
@@ -121,42 +124,43 @@ sepBracketIdentifier <- space ',' space
 qualifier <- union / script / filter
 
 union <-
-    index {
-        subscript := p.pop().(syntaxSubscript)
-        p.pushUnionQualifier(subscript)
-    } (
-        sepUnion union {
+    index (
+        sepUnion index {
             childIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion.merge(childIndexUnion)
             parentIndexUnion.setMultiValue()
             p.push(parentIndexUnion)
         }
-    )?
+    )*
 
 index <-
-    slice {
-        step  := p.pop().(*syntaxIndexSubscript)
-        end   := p.pop().(*syntaxIndexSubscript)
-        start := p.pop().(*syntaxIndexSubscript)
+    (
+        slice {
+            step  := p.pop().(*syntaxIndexSubscript)
+            end   := p.pop().(*syntaxIndexSubscript)
+            start := p.pop().(*syntaxIndexSubscript)
 
-        if step.isOmitted || step.number == 0 {
-            step.number = 1
+            if step.isOmitted || step.number == 0 {
+                step.number = 1
+            }
+
+            if step.number > 0 {
+                p.pushSlicePositiveStepSubscript(start, end, step)
+            } else {
+                p.pushSliceNegativeStepSubscript(start, end, step)
+            }
+        } /
+
+        < indexNumber > {
+            p.pushIndexSubscript(text)
+        } /
+
+        '*' {
+            p.pushAsteriskSubscript()
         }
-
-        if step.number > 0 {
-            p.pushSlicePositiveStepSubscript(start, end, step)
-        } else {
-            p.pushSliceNegativeStepSubscript(start, end, step)
-        }
-    } /
-
-    < indexNumber > {
-        p.pushIndexSubscript(text)
-    } /
-
-    '*' {
-        p.pushAsteriskSubscript()
+    ) {
+        p.pushUnionQualifier(p.pop().(syntaxSubscript))
     }
 
 slice <-
@@ -168,7 +172,7 @@ slice <-
     )
 
 anyIndex <-
-    < ( indexNumber )? > {
+    < indexNumber? > {
         if len(text) > 0 {
             p.pushIndexSubscript(text)
         } else {
@@ -195,32 +199,32 @@ filter <-
 
 query <-
     andQuery (
-        logicOr query {
-            childQuery := p.pop().(syntaxQuery)
-            parentQuery := p.pop().(syntaxQuery)
-            p.pushLogicalOr(parentQuery, childQuery)
+        logicOr andQuery {
+            rightQuery := p.pop().(syntaxQuery)
+            leftQuery := p.pop().(syntaxQuery)
+            p.pushLogicalOr(leftQuery, rightQuery)
         }
-    )?
+    )*
 
 andQuery <-
-    subQueryStart query subQueryEnd /
-    
     basicQuery (
-        logicAnd andQuery {
-            childQuery := p.pop().(syntaxQuery)
-            parentQuery := p.pop().(syntaxQuery)
-            p.pushLogicalAnd(parentQuery, childQuery)
+        logicAnd basicQuery {
+            rightQuery := p.pop().(syntaxQuery)
+            leftQuery := p.pop().(syntaxQuery)
+            p.pushLogicalAnd(leftQuery, rightQuery)
         }
-    )?
+    )*
 
 basicQuery <-
+    subQueryStart query subQueryEnd /
+    
     < comparator > {
         if !p.hasErr() {
             query := p.pop().(syntaxQuery)
             p.push(query)
 
 			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
-				query = (*logicalNot).param
+				query = (*logicalNot).query
 			}
             if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
                 _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
@@ -232,7 +236,7 @@ basicQuery <-
         }
     } /
     
-    < ( logicNot )? > {
+    < logicNot? > {
         p.push(len(text) > 0 && text[0:1] == `!`)
     } jsonpathFilter {
         _ = p.pop().(bool)

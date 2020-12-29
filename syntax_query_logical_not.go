@@ -1,13 +1,13 @@
 package jsonpath
 
 type syntaxLogicalNot struct {
-	param syntaxQuery
+	query syntaxQuery
 }
 
 func (l *syntaxLogicalNot) compute(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
-	computedMap := l.param.compute(root, currentMap)
+	computedMap := l.query.compute(root, currentMap)
 	resultMap := make(map[int]interface{}, 0)
 	for index, value := range currentMap {
 		if _, ok := computedMap[index]; !ok {

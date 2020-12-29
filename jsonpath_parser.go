@@ -165,22 +165,22 @@ func (p *jsonPathParser) pushCurrentRootIdentifier() {
 
 func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
 	p.push(&syntaxChildSingleIdentifier{
-		identifier: text,
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         text,
 			multiValue:   false,
 			accessorMode: p.accessorMode,
 		},
+		identifier: text,
 	})
 }
 
 func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
 	p.push(&syntaxChildMultiIdentifier{
-		identifiers: identifiers,
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue:   true,
 			accessorMode: p.accessorMode,
 		},
+		identifiers: identifiers,
 	})
 }
 
@@ -217,21 +217,21 @@ func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
 
 func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
 	p.push(&syntaxFilterQualifier{
-		query: query,
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue:   true,
 			accessorMode: p.accessorMode,
 		},
+		query: query,
 	})
 }
 
 func (p *jsonPathParser) pushScriptQualifier(text string) {
 	p.push(&syntaxScriptQualifier{
-		command: text,
 		syntaxBasicNode: &syntaxBasicNode{
 			multiValue:   true,
 			accessorMode: p.accessorMode,
 		},
+		command: text,
 	})
 }
 
@@ -283,16 +283,22 @@ func (p *jsonPathParser) pushAsteriskSubscript() {
 	})
 }
 
-func (p *jsonPathParser) pushLogicalOr(query1, query2 syntaxQuery) {
-	p.push(&syntaxLogicalOr{query1, query2})
+func (p *jsonPathParser) pushLogicalOr(leftQuery, rightQuery syntaxQuery) {
+	p.push(&syntaxLogicalOr{
+		leftQuery:  leftQuery,
+		rightQuery: rightQuery,
+	})
 }
 
-func (p *jsonPathParser) pushLogicalAnd(query1, query2 syntaxQuery) {
-	p.push(&syntaxLogicalAnd{query1, query2})
+func (p *jsonPathParser) pushLogicalAnd(leftQuery, rightQuery syntaxQuery) {
+	p.push(&syntaxLogicalAnd{
+		leftQuery:  leftQuery,
+		rightQuery: rightQuery,
+	})
 }
 
-func (p *jsonPathParser) pushLogicalNot(jsonpathFilter syntaxQuery) {
-	p.push(&syntaxLogicalNot{param: jsonpathFilter})
+func (p *jsonPathParser) pushLogicalNot(query syntaxQuery) {
+	p.push(&syntaxLogicalNot{query: query})
 }
 
 func (p *jsonPathParser) _createBasicCompareQuery(
@@ -314,7 +320,7 @@ func (p *jsonPathParser) pushCompareEQ(
 func (p *jsonPathParser) pushCompareNE(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
 	p.push(&syntaxLogicalNot{
-		param: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
+		query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
 	})
 }
 
