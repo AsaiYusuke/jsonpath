@@ -10,3 +10,7 @@ before_install:
 script:
   - go test -race
   - $GOPATH/bin/goveralls -service=travis-ci # coveralls.io
+
+after_script:
+  - curl -d "repo=github.com/AsaiYusuke/jsonpath" https://goreportcard.com/checks
+  
