@@ -45,8 +45,8 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 	parser.Parse()
 	parser.Execute()
 
-	if parser.thisError != nil {
-		return nil, parser.thisError
+	if parser.jsonPathParser.thisError != nil {
+		return nil, parser.jsonPathParser.thisError
 	}
 
 	root := parser.jsonPathParser.root
