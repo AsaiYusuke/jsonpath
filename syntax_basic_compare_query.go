@@ -10,8 +10,8 @@ func (q *syntaxBasicCompareQuery) compute(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
 	leftValues := q.leftParam.get(root, currentMap)
-	for index, value := range leftValues {
-		if cast, ok := q.comparator.typeCast(value); ok {
+	for index := range leftValues {
+		if cast, ok := q.comparator.typeCast(leftValues[index]); ok {
 			leftValues[index] = cast
 		} else {
 			delete(leftValues, index)
@@ -19,19 +19,17 @@ func (q *syntaxBasicCompareQuery) compute(
 	}
 
 	rightValues := q.rightParam.get(root, currentMap)
-	for index, value := range rightValues {
-		if cast, ok := q.comparator.typeCast(value); ok {
+	for index := range rightValues {
+		if cast, ok := q.comparator.typeCast(rightValues[index]); ok {
 			rightValues[index] = cast
 		} else {
 			delete(rightValues, index)
 		}
 	}
 
-	var leftIndex, rightIndex int
-	var leftValue, rightValue interface{}
-	for leftIndex, leftValue = range leftValues {
-		for rightIndex, rightValue = range rightValues {
-			if q.comparator.comparator(leftValue, rightValue) {
+	for leftIndex := range leftValues {
+		for rightIndex := range rightValues {
+			if q.comparator.comparator(leftValues[leftIndex], rightValues[rightIndex]) {
 				if q.leftParam.isLiteral && q.rightParam.isLiteral {
 					return currentMap
 				}

@@ -11,7 +11,7 @@ type syntaxChildAsteriskIdentifier struct {
 func (i *syntaxChildAsteriskIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	childErrorMap := make(map[error]bool, 1)
+	childErrorMap := make(map[error]struct{}, 1)
 	var lastError error
 
 	switch current.(type) {
@@ -41,18 +41,18 @@ func (i *syntaxChildAsteriskIdentifier) retrieve(
 
 func (i *syntaxChildAsteriskIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, result *[]interface{},
-	childErrorMap map[error]bool) error {
+	childErrorMap map[error]struct{}) error {
 
 	var lastError error
 
-	index, keys := 0, make([]string, len(srcMap))
+	index, keys := 0, make(sort.StringSlice, len(srcMap))
 	for key := range srcMap {
 		keys[index] = key
 		index++
 	}
-	sort.Strings(keys)
-	for _, key := range keys {
-		localKey := key
+	keys.Sort()
+	for index := range keys {
+		localKey := keys[index]
 		err := i.retrieveNext(
 			root, result,
 			func() interface{} {
@@ -62,7 +62,7 @@ func (i *syntaxChildAsteriskIdentifier) retrieveMap(
 				srcMap[localKey] = value
 			})
 		if err != nil {
-			childErrorMap[err] = true
+			childErrorMap[err] = struct{}{}
 			lastError = err
 		}
 	}
@@ -72,7 +72,7 @@ func (i *syntaxChildAsteriskIdentifier) retrieveMap(
 
 func (i *syntaxChildAsteriskIdentifier) retrieveList(
 	root interface{}, srcList []interface{}, result *[]interface{},
-	childErrorMap map[error]bool) error {
+	childErrorMap map[error]struct{}) error {
 
 	var lastError error
 
@@ -87,7 +87,7 @@ func (i *syntaxChildAsteriskIdentifier) retrieveList(
 				srcList[localIndex] = value
 			})
 		if err != nil {
-			childErrorMap[err] = true
+			childErrorMap[err] = struct{}{}
 			lastError = err
 		}
 	}

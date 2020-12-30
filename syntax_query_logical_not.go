@@ -9,9 +9,9 @@ func (l *syntaxLogicalNot) compute(
 
 	computedMap := l.query.compute(root, currentMap)
 	resultMap := make(map[int]interface{}, 0)
-	for index, value := range currentMap {
+	for index := range currentMap {
 		if _, ok := computedMap[index]; !ok {
-			resultMap[index] = value
+			resultMap[index] = currentMap[index]
 		}
 	}
 

@@ -13,7 +13,7 @@ type syntaxFilterQualifier struct {
 func (f *syntaxFilterQualifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	childErrorMap := make(map[error]bool, 1)
+	childErrorMap := make(map[error]struct{}, 1)
 	var lastError error
 
 	switch current.(type) {
@@ -43,27 +43,27 @@ func (f *syntaxFilterQualifier) retrieve(
 
 func (f *syntaxFilterQualifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, result *[]interface{},
-	childErrorMap map[error]bool) error {
+	childErrorMap map[error]struct{}) error {
 
 	var lastError error
 
-	index, keys := 0, make([]string, len(srcMap))
+	index, keys := 0, make(sort.StringSlice, len(srcMap))
 	for key := range srcMap {
 		keys[index] = key
 		index++
 	}
-	sort.Strings(keys)
+	keys.Sort()
 	argumentMap := make(map[int]interface{}, len(keys))
-	for index, key := range keys {
-		argumentMap[index] = srcMap[key]
+	for index := range keys {
+		argumentMap[index] = srcMap[keys[index]]
 	}
 
 	computedMap := f.query.compute(root, argumentMap)
 
 	if len(computedMap) > 0 {
-		for index, key := range keys {
+		for index := range keys {
 			if _, ok := computedMap[index]; ok {
-				localKey := key
+				localKey := keys[index]
 				err := f.retrieveNext(
 					root, result,
 					func() interface{} {
@@ -73,7 +73,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 						srcMap[localKey] = value
 					})
 				if err != nil {
-					childErrorMap[err] = true
+					childErrorMap[err] = struct{}{}
 					lastError = err
 				}
 			}
@@ -85,13 +85,13 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 func (f *syntaxFilterQualifier) retrieveList(
 	root interface{}, srcList []interface{}, result *[]interface{},
-	childErrorMap map[error]bool) error {
+	childErrorMap map[error]struct{}) error {
 
 	var lastError error
 
 	argumentMap := make(map[int]interface{}, len(srcList))
-	for index, entity := range srcList {
-		argumentMap[index] = entity
+	for index := range srcList {
+		argumentMap[index] = srcList[index]
 	}
 
 	computedMap := f.query.compute(root, argumentMap)
@@ -109,7 +109,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 						srcList[localIndex] = value
 					})
 				if err != nil {
-					childErrorMap[err] = true
+					childErrorMap[err] = struct{}{}
 					lastError = err
 				}
 			}

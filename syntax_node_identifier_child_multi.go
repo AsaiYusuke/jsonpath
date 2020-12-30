@@ -13,7 +13,7 @@ type syntaxChildMultiIdentifier struct {
 func (i *syntaxChildMultiIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	childErrorMap := make(map[error]bool, 1)
+	childErrorMap := make(map[error]struct{}, 1)
 	var lastError error
 
 	switch current.(type) {
@@ -45,13 +45,13 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, result *[]interface{},
-	childErrorMap map[error]bool) error {
+	childErrorMap map[error]struct{}) error {
 
 	var lastError error
 
-	for _, key := range i.identifiers {
-		if _, ok := srcMap[key]; ok {
-			localKey := key
+	for index := range i.identifiers {
+		if _, ok := srcMap[i.identifiers[index]]; ok {
+			localKey := i.identifiers[index]
 			err := i.retrieveNext(
 				root, result,
 				func() interface{} {
@@ -61,7 +61,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 					srcMap[localKey] = value
 				})
 			if err != nil {
-				childErrorMap[err] = true
+				childErrorMap[err] = struct{}{}
 				lastError = err
 			}
 		}

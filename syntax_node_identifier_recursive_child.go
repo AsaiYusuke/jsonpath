@@ -1,8 +1,6 @@
 package jsonpath
 
-import (
-	"sort"
-)
+import "sort"
 
 type syntaxRecursiveChildIdentifier struct {
 	*syntaxBasicNode
@@ -21,14 +19,14 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			},
 			nil)
 
-		index, keys := 0, make([]string, len(srcMap))
+		index, keys := 0, make(sort.StringSlice, len(srcMap))
 		for key := range srcMap {
 			keys[index] = key
 			index++
 		}
-		sort.Strings(keys)
-		for _, key := range keys {
-			i.retrieve(root, srcMap[key], result)
+		keys.Sort()
+		for index := range keys {
+			i.retrieve(root, srcMap[keys[index]], result)
 		}
 
 	case []interface{}:

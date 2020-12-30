@@ -41,16 +41,16 @@ func (u *syntaxUnionQualifier) retrieve(
 		}
 	}
 
-	var indexes []int
-	for _, subscript := range u.subscripts {
-		indexes = append(indexes, subscript.getIndexes(srcArray)...)
+	var resultIndexes []int
+	for index := range u.subscripts {
+		resultIndexes = append(resultIndexes, u.subscripts[index].getIndexes(srcArray)...)
 	}
 
 	if u.isMultiValue() {
-		childErrorMap := make(map[error]bool, 1)
+		childErrorMap := make(map[error]struct{}, 1)
 		var lastError error
-		for _, index := range indexes {
-			localIndex := index
+		for index := range resultIndexes {
+			localIndex := resultIndexes[index]
 			err := u.retrieveNext(
 				root, result,
 				func() interface{} {
@@ -60,7 +60,7 @@ func (u *syntaxUnionQualifier) retrieve(
 					srcArray[localIndex] = value
 				})
 			if err != nil {
-				childErrorMap[err] = true
+				childErrorMap[err] = struct{}{}
 				lastError = err
 			}
 		}
@@ -79,17 +79,17 @@ func (u *syntaxUnionQualifier) retrieve(
 		return nil
 	}
 
-	if len(indexes) == 0 {
+	if len(resultIndexes) == 0 {
 		return ErrorIndexOutOfRange{u.text}
 	}
 
 	return u.retrieveNext(
 		root, result,
 		func() interface{} {
-			return srcArray[indexes[0]]
+			return srcArray[resultIndexes[0]]
 		},
 		func(value interface{}) {
-			srcArray[indexes[0]] = value
+			srcArray[resultIndexes[0]] = value
 		})
 }
 
