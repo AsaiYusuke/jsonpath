@@ -34,7 +34,11 @@ func (u *syntaxUnionQualifier) retrieve(
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
-		return ErrorTypeUnmatched{`array`, foundType, u.text}
+		return ErrorTypeUnmatched{
+			expectedType: `array`,
+			foundType:    foundType,
+			path:         u.text,
+		}
 	}
 
 	var indexes []int
@@ -43,9 +47,11 @@ func (u *syntaxUnionQualifier) retrieve(
 	}
 
 	if u.isMultiValue() {
+		childErrorMap := make(map[error]bool, 1)
+		var lastError error
 		for _, index := range indexes {
 			localIndex := index
-			u.retrieveNext(
+			err := u.retrieveNext(
 				root, result,
 				func() interface{} {
 					return srcArray[localIndex]
@@ -53,10 +59,21 @@ func (u *syntaxUnionQualifier) retrieve(
 				func(value interface{}) {
 					srcArray[localIndex] = value
 				})
+			if err != nil {
+				childErrorMap[err] = true
+				lastError = err
+			}
 		}
 
 		if len(*result) == 0 {
-			return ErrorNoneMatched{u.getConnectedText()}
+			switch len(childErrorMap) {
+			case 0:
+				return ErrorNoneMatched{path: u.text}
+			case 1:
+				return lastError
+			default:
+				return ErrorNoneMatched{u.next.getConnectedText()}
+			}
 		}
 
 		return nil
