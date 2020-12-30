@@ -85,17 +85,15 @@ func (p *jsonPathParser) setNodeChain() {
 		root := p.params[0].(syntaxNode)
 		last := root
 		for _, next := range p.params[1:] {
-			switch next.(type) {
-			case *syntaxAggregateFunction:
-				funcNode := next.(*syntaxAggregateFunction)
+			if funcNode, ok := next.(*syntaxAggregateFunction); ok {
 				funcNode.param = root
 				root = funcNode
 				last = root
-			default:
-				nextNode := next.(syntaxNode)
-				last.setNext(nextNode)
-				last = nextNode
+				continue
 			}
+			nextNode := next.(syntaxNode)
+			last.setNext(nextNode)
+			last = nextNode
 		}
 		p.params = []interface{}{root}
 	}
