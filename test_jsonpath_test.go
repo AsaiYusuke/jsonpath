@@ -868,7 +868,17 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedErr: ErrorMemberNotExist{path: `['d']`},
 			},
 		},
-		`character-type::encoded-JSONPath`: []TestCase{
+		`character-type::single-quoted`: []TestCase{
+			{
+				jsonpath:     `$['ab']`,
+				inputJSON:    `{"ab":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\\b']`,
+				inputJSON:    `{"a\\b":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
 			{
 				jsonpath:     `$['a\'b']`,
 				inputJSON:    `{"a'b":1,"b":2}`,
@@ -885,9 +895,51 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a\c']`},
 			},
 			{
-				jsonpath:    `$["a\c"]`,
+				jsonpath:    `$['a'c']`,
 				inputJSON:   `{"ac":1,"b":2}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["a\c"]`},
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a'c']`},
+			},
+			{
+				jsonpath:     `$['a"c']`,
+				inputJSON:    `{"a\"c":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+		},
+		`character-type::double-quoted`: []TestCase{
+			{
+				jsonpath:     `$["ab"]`,
+				inputJSON:    `{"ab":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\\b"]`,
+				inputJSON:    `{"a\\b":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\"b"]`,
+				inputJSON:    `{"a\"b":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["ab\"c"]`,
+				inputJSON:    `{"ab\"c":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:    `$["a\b"]`,
+				inputJSON:   `{"ab":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["a\b"]`},
+			},
+			{
+				jsonpath:    `$["a"b"]`,
+				inputJSON:   `{"ab":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["a"b"]`},
+			},
+			{
+				jsonpath:     `$["a'b"]`,
+				inputJSON:    `{"a'b":1}`,
+				expectedJSON: `[1]`,
 			},
 		},
 		`character-types-like-the-prohibited-dot-notation`: []TestCase{
@@ -1000,14 +1052,38 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['']`},
 			},
 		},
-		`syntax-check::double-quoted`: []TestCase{
+		`mixing-bracket-and-dot-notation`: []TestCase{
 			{
-				jsonpath:     `$["a"]`,
-				inputJSON:    `{"a":1}`,
+				jsonpath:     `$['a'].b`,
+				inputJSON:    `{"b":2,"a":{"b":1}}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$.a['b']`,
+				inputJSON:    `{"b":2,"a":{"b":1}}`,
 				expectedJSON: `[1]`,
 			},
 		},
-		`multi-identifier`: []TestCase{
+		`empty-input`: []TestCase{
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `[]`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['a']`},
+			},
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorMemberNotExist{path: `['a']`},
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
+	testGroups := TestGroup{
+		`identifier-order`: []TestCase{
 			{
 				jsonpath:     `$['a','b']`,
 				inputJSON:    `{"a":1, "b":2}`,
@@ -1029,14 +1105,34 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[1,2]`,
 			},
 		},
-		`multi-identifier::mixing-qualifier-error`: []TestCase{
+		`mixing-qualifier-error`: []TestCase{
 			{
 				jsonpath:    `$['a','b',0]`,
 				inputJSON:   `{"b":2,"a":1,"c":3}`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',0]`},
 			},
+			{
+				jsonpath:    `$['a','b',0:1]`,
+				inputJSON:   `{"b":2,"a":1,"c":3}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',0:1]`},
+			},
+			{
+				jsonpath:    `$['a','b',*]`,
+				inputJSON:   `{"b":2,"a":1,"c":3}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',*]`},
+			},
+			{
+				jsonpath:    `$['a','b',(command)]`,
+				inputJSON:   `{"b":2,"a":1,"c":3}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',(command)]`},
+			},
+			{
+				jsonpath:    `$['a','b',?(@)]`,
+				inputJSON:   `{"b":2,"a":1,"c":3}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',?(@)]`},
+			},
 		},
-		`multi-identifier::connecting-child`: []TestCase{
+		`connecting-child`: []TestCase{
 			{
 				jsonpath:     `$['a','b'].a`,
 				inputJSON:    `{"a":{"a":1}, "b":{"c":2}}`,
@@ -1048,7 +1144,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[1]`,
 			},
 		},
-		`multi-identifier::partial-found`: []TestCase{
+		`partial-found`: []TestCase{
 			{
 				jsonpath:     `$['a','c']`,
 				inputJSON:    `{"a":1,"b":2}`,
@@ -1075,7 +1171,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedErr: ErrorNoneMatched{path: `['c','d']`},
 			},
 		},
-		`multi-identifier::two-level-multi-identifiers`: []TestCase{
+		`two-level-multi-identifiers`: []TestCase{
 			{
 				jsonpath:     `$['a','b']['a','b']`,
 				inputJSON:    `{"a":{"a":1},"b":{"b":2}}`,
@@ -1127,7 +1223,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedErr: ErrorNoneMatched{path: `['c','d'].e`},
 			},
 		},
-		`multi-identifier::same-identifiers`: []TestCase{
+		`same-identifiers`: []TestCase{
 			{
 				jsonpath:     `$['a','a']`,
 				inputJSON:    `{"b":2,"a":1}`,
@@ -1139,7 +1235,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[1,1,2,2]`,
 			},
 		},
-		`multi-identifier::child`: []TestCase{
+		`child`: []TestCase{
 			{
 				jsonpath:     `$[0]['a','b']`,
 				inputJSON:    `[{"a":1,"b":2},{"a":3,"b":4},{"a":5,"b":6}]`,
@@ -1156,28 +1252,33 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[2,1,4,3]`,
 			},
 		},
-		`mixing-bracket-and-dot-notation`: []TestCase{
-			{
-				jsonpath:     `$['a'].b`,
-				inputJSON:    `{"b":2,"a":{"b":1}}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a['b']`,
-				inputJSON:    `{"b":2,"a":{"b":1}}`,
-				expectedJSON: `[1]`,
-			},
-		},
 		`empty-input`: []TestCase{
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorNoneMatched{path: `['a','b']`},
+			},
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `[]`,
 				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['a','b']`},
 			},
+		},
+		`child-error`: []TestCase{
 			{
-				jsonpath:    `$['a','b']`,
-				inputJSON:   `{}`,
+				jsonpath:    `$['a','b'].a.b`,
+				inputJSON:   `{"c":{"b":1}}`,
 				expectedErr: ErrorNoneMatched{path: `['a','b']`},
+			},
+			{
+				jsonpath:    `$['a','b'].a.b`,
+				inputJSON:   `{"a":{"b":1}}`,
+				expectedErr: ErrorMemberNotExist{path: `.a`},
+			},
+			{
+				jsonpath:    `$['a','b'].a.b.c`,
+				inputJSON:   `{"a":{"b":1},"b":{"a":2}}`,
+				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
 			},
 		},
 	}
