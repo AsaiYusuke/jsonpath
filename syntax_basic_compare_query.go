@@ -10,22 +10,10 @@ func (q *syntaxBasicCompareQuery) compute(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
 	leftValues := q.leftParam.get(root, currentMap)
-	for index := range leftValues {
-		if cast, ok := q.comparator.typeCast(leftValues[index]); ok {
-			leftValues[index] = cast
-		} else {
-			delete(leftValues, index)
-		}
-	}
+	q.comparator.typeCast(leftValues)
 
 	rightValues := q.rightParam.get(root, currentMap)
-	for index := range rightValues {
-		if cast, ok := q.comparator.typeCast(rightValues[index]); ok {
-			rightValues[index] = cast
-		} else {
-			delete(rightValues, index)
-		}
-	}
+	q.comparator.typeCast(rightValues)
 
 	for leftIndex := range leftValues {
 		for rightIndex := range rightValues {
