@@ -15,7 +15,7 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 	case map[string]interface{}:
 		_, ok := typedNodes[i.identifier]
 		if !ok {
-			return ErrorMemberNotExist{i.text}
+			return ErrorMemberNotExist{path: i.text}
 		}
 		return i.retrieveNext(
 			root, result,
@@ -39,5 +39,9 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 		foundType = reflect.TypeOf(current).String()
 	}
 
-	return ErrorTypeUnmatched{`object/array`, foundType, i.text}
+	return ErrorTypeUnmatched{
+		expectedType: `object/array`,
+		foundType:    foundType,
+		path:         i.text,
+	}
 }

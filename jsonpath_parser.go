@@ -43,7 +43,10 @@ func (p *jsonPathParser) pop() interface{} {
 func (p *jsonPathParser) toInt(text string) int {
 	value, err := strconv.Atoi(text)
 	if err != nil {
-		p.thisError = ErrorInvalidArgument{text, err}
+		p.thisError = ErrorInvalidArgument{
+			argument: text,
+			err:      err,
+		}
 		return 0
 	}
 	return value
@@ -52,7 +55,10 @@ func (p *jsonPathParser) toInt(text string) int {
 func (p *jsonPathParser) toFloat(text string) float64 {
 	value, err := strconv.ParseFloat(text, 64)
 	if err != nil {
-		p.thisError = ErrorInvalidArgument{text, err}
+		p.thisError = ErrorInvalidArgument{
+			argument: text,
+			err:      err,
+		}
 		return 0
 	}
 	return value
@@ -73,7 +79,11 @@ func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
 }
 
 func (p *jsonPathParser) syntaxErr(pos int, reason string, buffer string) {
-	p.thisError = ErrorInvalidSyntax{pos, reason, buffer[pos:]}
+	p.thisError = ErrorInvalidSyntax{
+		position: pos,
+		reason:   reason,
+		near:     buffer[pos:],
+	}
 }
 
 func (p *jsonPathParser) hasErr() bool {
@@ -346,7 +356,10 @@ func (p *jsonPathParser) pushCompareRegex(
 	leftParam *syntaxBasicCompareParameter, regex string) {
 	regexParam, err := regexp.Compile(regex)
 	if err != nil {
-		p.thisError = ErrorInvalidArgument{regex, err}
+		p.thisError = ErrorInvalidArgument{
+			argument: regex,
+			err:      err,
+		}
 	}
 
 	p.push(p._createBasicCompareQuery(

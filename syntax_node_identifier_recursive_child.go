@@ -42,7 +42,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	}
 
 	if len(*result) == 0 {
-		return ErrorNoneMatched{i.getConnectedText()}
+		return ErrorNoneMatched{path: i.getConnectedText()}
 	}
 
 	return nil

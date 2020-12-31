@@ -7,5 +7,8 @@ type syntaxScriptQualifier struct {
 }
 
 func (s *syntaxScriptQualifier) retrieve(_, _ interface{}, _ *[]interface{}) error {
-	return ErrorNotSupported{`script`, s.text}
+	return ErrorNotSupported{
+		feature: `script`,
+		path:    s.text,
+	}
 }

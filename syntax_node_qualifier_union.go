@@ -72,7 +72,7 @@ func (u *syntaxUnionQualifier) retrieve(
 			case 1:
 				return lastError
 			default:
-				return ErrorNoneMatched{u.next.getConnectedText()}
+				return ErrorNoneMatched{path: u.next.getConnectedText()}
 			}
 		}
 
@@ -80,7 +80,7 @@ func (u *syntaxUnionQualifier) retrieve(
 	}
 
 	if len(resultIndexes) == 0 {
-		return ErrorIndexOutOfRange{u.text}
+		return ErrorIndexOutOfRange{path: u.text}
 	}
 
 	return u.retrieveNext(
