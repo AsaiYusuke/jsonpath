@@ -759,7 +759,7 @@ func TestRetrieve_dotNotation_asterisk(t *testing.T) {
 				expectedJSON: `[1]`,
 			},
 		},
-		`empty`: []TestCase{
+		`empty-input`: []TestCase{
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `{}`,
@@ -817,16 +817,11 @@ func TestRetrieve_dotNotation_asterisk(t *testing.T) {
 
 func TestRetrieve_bracketNotation(t *testing.T) {
 	testGroups := TestGroup{
-		`bracket-notation`: []TestCase{
+		`child`: []TestCase{
 			{
 				jsonpath:     `$['a']`,
 				inputJSON:    `{"a":"b","c":{"d":"e"}}`,
 				expectedJSON: `["b"]`,
-			},
-			{
-				jsonpath:    `$['d']`,
-				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
-				expectedErr: ErrorMemberNotExist{path: `['d']`},
 			},
 			{
 				jsonpath:     `$[0]['a']`,
@@ -853,11 +848,27 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:    `{"a":{"a1":"1","a2":"2"},"b":{"b1":"3"}}`,
 				expectedJSON: `["2"]`,
 			},
+		},
+		`number-identifier`: []TestCase{
 			{
 				jsonpath:     `$['0']`,
 				inputJSON:    `{"0":1,"a":2}`,
 				expectedJSON: `[1]`,
 			},
+			{
+				jsonpath:     `$['1']`,
+				inputJSON:    `{"1":"a","a":2}`,
+				expectedJSON: `["a"]`,
+			},
+		},
+		`not-exist`: []TestCase{
+			{
+				jsonpath:    `$['d']`,
+				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
+				expectedErr: ErrorMemberNotExist{path: `['d']`},
+			},
+		},
+		`character-type::encoded-JSONPath`: []TestCase{
 			{
 				jsonpath:     `$['a\'b']`,
 				inputJSON:    `{"a'b":1,"b":2}`,
@@ -878,14 +889,11 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:   `{"ac":1,"b":2}`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["a\c"]`},
 			},
+		},
+		`character-types-like-the-prohibited-dot-notation`: []TestCase{
 			{
 				jsonpath:     `$['a.b']`,
 				inputJSON:    `{"a.b":1,"a":{"b":2}}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$["a"]`,
-				inputJSON:    `{"a":1}`,
 				expectedJSON: `[1]`,
 			},
 			{
@@ -973,6 +981,8 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:    `{":@.\"$,*'\\": 1}`,
 				expectedJSON: `[1]`,
 			},
+		},
+		`empty-identifier`: []TestCase{
 			{
 				jsonpath:     `$['']`,
 				inputJSON:    `{"":1, "''":2}`,
@@ -989,6 +999,15 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[1]`,
 				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['']`},
 			},
+		},
+		`syntax-check::double-quoted`: []TestCase{
+			{
+				jsonpath:     `$["a"]`,
+				inputJSON:    `{"a":1}`,
+				expectedJSON: `[1]`,
+			},
+		},
+		`multi-identifier`: []TestCase{
 			{
 				jsonpath:     `$['a','b']`,
 				inputJSON:    `{"a":1, "b":2}`,
@@ -1009,11 +1028,15 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:    `{"b":2,"a":1}`,
 				expectedJSON: `[1,2]`,
 			},
+		},
+		`multi-identifier::mixing-qualifier-error`: []TestCase{
 			{
 				jsonpath:    `$['a','b',0]`,
 				inputJSON:   `{"b":2,"a":1,"c":3}`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',0]`},
 			},
+		},
+		`multi-identifier::connecting-child`: []TestCase{
 			{
 				jsonpath:     `$['a','b'].a`,
 				inputJSON:    `{"a":{"a":1}, "b":{"c":2}}`,
@@ -1024,16 +1047,35 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:    `{"a":{"a":1}, "b":{"c":2}}`,
 				expectedJSON: `[1]`,
 			},
+		},
+		`multi-identifier::partial-found`: []TestCase{
+			{
+				jsonpath:     `$['a','c']`,
+				inputJSON:    `{"a":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['b','c']`,
+				inputJSON:    `{"a":1,"b":2}`,
+				expectedJSON: `[2]`,
+			},
+			{
+				jsonpath:     `$['c','a']`,
+				inputJSON:    `{"a":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['c','b']`,
+				inputJSON:    `{"a":1,"b":2}`,
+				expectedJSON: `[2]`,
+			},
 			{
 				jsonpath:    `$['c','d']`,
 				inputJSON:   `{"a":1,"b":2}`,
 				expectedErr: ErrorNoneMatched{path: `['c','d']`},
 			},
-			{
-				jsonpath:     `$['a','d']`,
-				inputJSON:    `{"a":1,"b":2}`,
-				expectedJSON: `[1]`,
-			},
+		},
+		`multi-identifier::two-level-multi-identifiers`: []TestCase{
 			{
 				jsonpath:     `$['a','b']['a','b']`,
 				inputJSON:    `{"a":{"a":1},"b":{"b":2}}`,
@@ -1084,6 +1126,8 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:   `{"a":{"a":1},"b":{"c":2}}`,
 				expectedErr: ErrorNoneMatched{path: `['c','d'].e`},
 			},
+		},
+		`multi-identifier::same-identifiers`: []TestCase{
 			{
 				jsonpath:     `$['a','a']`,
 				inputJSON:    `{"b":2,"a":1}`,
@@ -1094,25 +1138,46 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:    `{"b":2,"a":1}`,
 				expectedJSON: `[1,1,2,2]`,
 			},
+		},
+		`multi-identifier::child`: []TestCase{
 			{
 				jsonpath:     `$[0]['a','b']`,
 				inputJSON:    `[{"a":1,"b":2},{"a":3,"b":4},{"a":5,"b":6}]`,
 				expectedJSON: `[1,2]`,
 			},
 			{
+				jsonpath:     `$[0]['b','a']`,
+				inputJSON:    `[{"a":1,"b":2},{"a":3,"b":4},{"a":5,"b":6}]`,
+				expectedJSON: `[2,1]`,
+			},
+			{
 				jsonpath:     `$[0:2]['b','a']`,
 				inputJSON:    `[{"a":1,"b":2},{"a":3,"b":4},{"a":5,"b":6}]`,
 				expectedJSON: `[2,1,4,3]`,
 			},
+		},
+		`mixing-bracket-and-dot-notation`: []TestCase{
 			{
 				jsonpath:     `$['a'].b`,
 				inputJSON:    `{"b":2,"a":{"b":1}}`,
 				expectedJSON: `[1]`,
 			},
 			{
+				jsonpath:     `$.a['b']`,
+				inputJSON:    `{"b":2,"a":{"b":1}}`,
+				expectedJSON: `[1]`,
+			},
+		},
+		`empty-input`: []TestCase{
+			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `[]`,
 				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['a','b']`},
+			},
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorNoneMatched{path: `['a','b']`},
 			},
 		},
 	}
@@ -1136,7 +1201,7 @@ func TestRetrieve_bracketNotation_asterisk(t *testing.T) {
 				expectedJSON: `[[1],[2,3]]`,
 			},
 		},
-		`empty`: []TestCase{
+		`empty-input`: []TestCase{
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `[]`,
@@ -1394,7 +1459,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 				expectedJSON: `["d"]`,
 			},
 		},
-		`empty`: []TestCase{
+		`empty-input`: []TestCase{
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `[]`,
