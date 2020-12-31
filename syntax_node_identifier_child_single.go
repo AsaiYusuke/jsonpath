@@ -1,8 +1,6 @@
 package jsonpath
 
-import (
-	"reflect"
-)
+import "reflect"
 
 type syntaxChildSingleIdentifier struct {
 	*syntaxBasicNode

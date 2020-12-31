@@ -1,8 +1,6 @@
 package jsonpath
 
-import (
-	"sort"
-)
+import "sort"
 
 type syntaxFilterQualifier struct {
 	*syntaxBasicNode
