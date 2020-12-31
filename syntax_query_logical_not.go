@@ -11,7 +11,7 @@ func (l *syntaxLogicalNot) compute(
 	resultMap := make(map[int]interface{}, 0)
 	for index := range currentMap {
 		if _, ok := computedMap[index]; !ok {
-			resultMap[index] = currentMap[index]
+			resultMap[index] = struct{}{}
 		}
 	}
 

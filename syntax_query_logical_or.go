@@ -12,7 +12,7 @@ func (l *syntaxLogicalOr) compute(
 	rightComputedMap := l.rightQuery.compute(root, currentMap)
 	for index := range rightComputedMap {
 		if _, ok := leftComputedMap[index]; !ok {
-			leftComputedMap[index] = 1
+			leftComputedMap[index] = struct{}{}
 		}
 	}
 
