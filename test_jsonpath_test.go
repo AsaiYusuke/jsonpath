@@ -5390,15 +5390,25 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	err := parseError{p: &parser}
 	_ = err.Error()
 
+	parser.buffer = []rune{'\n'}
+	_ = err.Error()
+
 	parser.Parse(1)
+	parser.Parse(3)
 
 	Pretty(true)(&parser)
 	parser.PrintSyntaxTree()
+
+	_ = err.Error()
+
 	Size(10)(&parser)
 
 	parser.Init(func(p *pegJSONPathParser) error {
 		return fmt.Errorf(`test error`)
 	})
+
+	parser.Buffer = ``
+	parser.PrintSyntaxTree()
 
 	os.Stdout = stdoutBackup
 }
