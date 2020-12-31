@@ -217,7 +217,7 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.length`,
 				inputJSON:   `["length",1,2]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.length`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.length`},
 			},
 		},
 		`character-type::Non-ASCII-syntax-accepted-in-JSON`: []TestCase{
@@ -534,12 +534,12 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.2`,
 				inputJSON:   `["a","b",{"2":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.2`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.2`},
 			},
 			{
 				jsonpath:    `$.-1`,
 				inputJSON:   `["a","b",{"2":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.-1`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.-1`},
 			},
 			{
 				jsonpath:    `$.a.d`,
@@ -564,12 +564,12 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.a`,
 				inputJSON:   `[1,2]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.a`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.a`},
 			},
 			{
 				jsonpath:    `$.a`,
 				inputJSON:   `[{"a":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.a`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.a`},
 			},
 		},
 	}
@@ -987,7 +987,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				jsonpath:     `$[''][0]`,
 				inputJSON:    `[1,2,3]`,
 				expectedJSON: `[1]`,
-				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['']`},
+				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['']`},
 			},
 			{
 				jsonpath:     `$['a','b']`,
@@ -1108,6 +1108,11 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				jsonpath:     `$['a'].b`,
 				inputJSON:    `{"b":2,"a":{"b":1}}`,
 				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `[]`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['a','b']`},
 			},
 		},
 	}

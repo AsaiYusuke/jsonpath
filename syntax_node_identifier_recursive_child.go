@@ -9,37 +9,35 @@ type syntaxRecursiveChildIdentifier struct {
 func (i *syntaxRecursiveChildIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	switch current.(type) {
+	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		srcMap := current.(map[string]interface{})
 		i.retrieveNext(
 			root, result,
 			func() interface{} {
-				return srcMap
+				return typedNodes
 			},
 			nil)
 
-		index, keys := 0, make(sort.StringSlice, len(srcMap))
-		for key := range srcMap {
+		index, keys := 0, make(sort.StringSlice, len(typedNodes))
+		for key := range typedNodes {
 			keys[index] = key
 			index++
 		}
 		keys.Sort()
 		for index := range keys {
-			i.retrieve(root, srcMap[keys[index]], result)
+			i.retrieve(root, typedNodes[keys[index]], result)
 		}
 
 	case []interface{}:
-		srcArray := current.([]interface{})
 		i.retrieveNext(
 			root, result,
 			func() interface{} {
-				return srcArray
+				return typedNodes
 			},
 			nil)
 
-		for index := range srcArray {
-			i.retrieve(root, srcArray[index], result)
+		for index := range typedNodes {
+			i.retrieve(root, typedNodes[index], result)
 		}
 	}
 

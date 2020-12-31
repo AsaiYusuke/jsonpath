@@ -1,9 +1,5 @@
 package jsonpath
 
-import (
-	"reflect"
-)
-
 type syntaxChildMultiIdentifier struct {
 	*syntaxBasicNode
 
@@ -16,15 +12,14 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 	childErrorMap := make(map[error]struct{}, 1)
 	var lastError error
 
-	switch current.(type) {
+	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		lastError = i.retrieveMap(
-			root, current.(map[string]interface{}), result, childErrorMap)
+		lastError = i.retrieveMap(root, typedNodes, result, childErrorMap)
 
 	case []interface{}:
 		return ErrorTypeUnmatched{
 			expectedType: `object`,
-			foundType:    reflect.TypeOf(current).String(),
+			foundType:    `array`,
 			path:         i.text,
 		}
 	}

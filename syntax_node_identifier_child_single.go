@@ -13,24 +13,27 @@ type syntaxChildSingleIdentifier struct {
 func (i *syntaxChildSingleIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	switch current.(type) {
+	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		srcMap := current.(map[string]interface{})
-		_, ok := srcMap[i.identifier]
+		_, ok := typedNodes[i.identifier]
 		if !ok {
 			return ErrorMemberNotExist{i.text}
 		}
 		return i.retrieveNext(
 			root, result,
 			func() interface{} {
-				return srcMap[i.identifier]
+				return typedNodes[i.identifier]
 			},
 			func(value interface{}) {
-				srcMap[i.identifier] = value
+				typedNodes[i.identifier] = value
 			})
 
 	case []interface{}:
-		return ErrorTypeUnmatched{`object`, reflect.TypeOf(current).String(), i.text}
+		return ErrorTypeUnmatched{
+			expectedType: `object`,
+			foundType:    `array`,
+			path:         i.text,
+		}
 	}
 
 	foundType := `null`

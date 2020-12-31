@@ -16,14 +16,12 @@ func (f *syntaxFilterQualifier) retrieve(
 	childErrorMap := make(map[error]struct{}, 1)
 	var lastError error
 
-	switch current.(type) {
+	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		lastError = f.retrieveMap(
-			root, current.(map[string]interface{}), result, childErrorMap)
+		lastError = f.retrieveMap(root, typedNodes, result, childErrorMap)
 
 	case []interface{}:
-		lastError = f.retrieveList(
-			root, current.([]interface{}), result, childErrorMap)
+		lastError = f.retrieveList(root, typedNodes, result, childErrorMap)
 
 	}
 

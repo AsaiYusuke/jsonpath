@@ -14,14 +14,12 @@ func (i *syntaxChildAsteriskIdentifier) retrieve(
 	childErrorMap := make(map[error]struct{}, 1)
 	var lastError error
 
-	switch current.(type) {
+	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		lastError = i.retrieveMap(
-			root, current.(map[string]interface{}), result, childErrorMap)
+		lastError = i.retrieveMap(root, typedNodes, result, childErrorMap)
 
 	case []interface{}:
-		lastError = i.retrieveList(
-			root, current.([]interface{}), result, childErrorMap)
+		lastError = i.retrieveList(root, typedNodes, result, childErrorMap)
 
 	}
 
