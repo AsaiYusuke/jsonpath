@@ -512,7 +512,7 @@ func (p *pegJSONPathParser) Execute() {
 
 			unescapedText := p.unescape(text)
 			if unescapedText == `*` {
-				p.pushChildAsteriskIdentifier(unescapedText)
+				p.pushChildWildcardIdentifier(unescapedText)
 			} else {
 				p.pushChildSingleIdentifier(unescapedText)
 			}
@@ -574,7 +574,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction22:
 
-			p.pushAsteriskSubscript()
+			p.pushWildcardSubscript()
 
 		case ruleAction23:
 
@@ -3711,7 +3711,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 69 Action13 <- <{
 		    unescapedText := p.unescape(text)
 		    if unescapedText == `*` {
-		        p.pushChildAsteriskIdentifier(unescapedText)
+		        p.pushChildWildcardIdentifier(unescapedText)
 		    } else {
 		        p.pushChildSingleIdentifier(unescapedText)
 		    }
@@ -3818,7 +3818,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 78 Action22 <- <{
-		    p.pushAsteriskSubscript()
+		    p.pushWildcardSubscript()
 		}> */
 		func() bool {
 			{

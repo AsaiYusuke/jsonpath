@@ -79,7 +79,7 @@ dotChildIdentifier <-
     < ( '\\' '\\' / '\\' [.[()=!><\t\r\n ] / [^\\.[()=!><\t\r\n ] )+ > !'()' {
         unescapedText := p.unescape(text)
         if unescapedText == `*` {
-            p.pushChildAsteriskIdentifier(unescapedText)
+            p.pushChildWildcardIdentifier(unescapedText)
         } else {
             p.pushChildSingleIdentifier(unescapedText)
         }
@@ -157,7 +157,7 @@ index <-
         } /
 
         '*' {
-            p.pushAsteriskSubscript()
+            p.pushWildcardSubscript()
         }
     ) {
         p.pushUnionQualifier(p.pop().(syntaxSubscript))

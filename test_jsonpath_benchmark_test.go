@@ -56,13 +56,13 @@ func BenchmarkRetrieve_bracketNotation(b *testing.B) {
 	execRetrieve(jsonPath, srcJSON, b)
 }
 
-func BenchmarkRetrieve_asterisk_identifier_dotNotation(b *testing.B) {
+func BenchmarkRetrieve_wildcard_identifier_dotNotation(b *testing.B) {
 	jsonPath := `$.*`
 	srcJSON := `{"a":123.456}`
 	execRetrieve(jsonPath, srcJSON, b)
 }
 
-func BenchmarkRetrieve_asterisk_identifier_bracketNotation(b *testing.B) {
+func BenchmarkRetrieve_wildcard_identifier_bracketNotation(b *testing.B) {
 	jsonPath := `$[*]`
 	srcJSON := `{"a":123.456}`
 	execRetrieve(jsonPath, srcJSON, b)
@@ -86,7 +86,7 @@ func BenchmarkRetrieve_qualifier_slice(b *testing.B) {
 	execRetrieve(jsonPath, srcJSON, b)
 }
 
-func BenchmarkRetrieve_qualifier_asterisk(b *testing.B) {
+func BenchmarkRetrieve_qualifier_wildcard(b *testing.B) {
 	jsonPath := `$[*]`
 	srcJSON := `[{"a":123.456}]`
 	execRetrieve(jsonPath, srcJSON, b)
@@ -179,13 +179,13 @@ func BenchmarkParserFunc_bracketNotation(b *testing.B) {
 	execParserFunc(jsonPath, srcJSON, b)
 }
 
-func BenchmarkParserFunc_asterisk_identifier_dotNotation(b *testing.B) {
+func BenchmarkParserFunc_wildcard_identifier_dotNotation(b *testing.B) {
 	jsonPath := `$.*`
 	srcJSON := `{"a":123.456}`
 	execParserFunc(jsonPath, srcJSON, b)
 }
 
-func BenchmarkParserFunc_asterisk_identifier_bracketNotation(b *testing.B) {
+func BenchmarkParserFunc_wildcard_identifier_bracketNotation(b *testing.B) {
 	jsonPath := `$[*]`
 	srcJSON := `{"a":123.456}`
 	execParserFunc(jsonPath, srcJSON, b)
@@ -209,7 +209,7 @@ func BenchmarkParserFunc_qualifier_slice(b *testing.B) {
 	execParserFunc(jsonPath, srcJSON, b)
 }
 
-func BenchmarkParserFunc_qualifier_asterisk(b *testing.B) {
+func BenchmarkParserFunc_qualifier_wildcard(b *testing.B) {
 	jsonPath := `$[*]`
 	srcJSON := `[{"a":123.456}]`
 	execParserFunc(jsonPath, srcJSON, b)

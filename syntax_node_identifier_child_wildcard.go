@@ -2,11 +2,11 @@ package jsonpath
 
 import "sort"
 
-type syntaxChildAsteriskIdentifier struct {
+type syntaxChildWildcardIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i *syntaxChildAsteriskIdentifier) retrieve(
+func (i *syntaxChildWildcardIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
 	childErrorMap := make(map[error]struct{}, 1)
@@ -35,7 +35,7 @@ func (i *syntaxChildAsteriskIdentifier) retrieve(
 	return nil
 }
 
-func (i *syntaxChildAsteriskIdentifier) retrieveMap(
+func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, result *[]interface{},
 	childErrorMap map[error]struct{}) error {
 
@@ -66,7 +66,7 @@ func (i *syntaxChildAsteriskIdentifier) retrieveMap(
 	return lastError
 }
 
-func (i *syntaxChildAsteriskIdentifier) retrieveList(
+func (i *syntaxChildWildcardIdentifier) retrieveList(
 	root interface{}, srcList []interface{}, result *[]interface{},
 	childErrorMap map[error]struct{}) error {
 

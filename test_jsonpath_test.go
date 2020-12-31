@@ -701,7 +701,7 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 	execTestRetrieveTestGroups(t, testGroups)
 }
 
-func TestRetrieve_dotNotation_asterisk(t *testing.T) {
+func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 	testGroups := TestGroup{
 		`array`: []TestCase{
 			{
@@ -747,7 +747,7 @@ func TestRetrieve_dotNotation_asterisk(t *testing.T) {
 				expectedJSON: `[1,[2,3],{"d":"e","f":[4,5]},2,3,"e",[4,5],4,5]`,
 			},
 		},
-		`two-asterisks`: []TestCase{
+		`two-wildcards`: []TestCase{
 			{
 				jsonpath:     `$.*.*`,
 				inputJSON:    `[[1,2,3],[4,5,6]]`,
@@ -1286,7 +1286,7 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 	execTestRetrieveTestGroups(t, testGroups)
 }
 
-func TestRetrieve_bracketNotation_asterisk(t *testing.T) {
+func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 	testGroups := TestGroup{
 		`array`: []TestCase{
 			{
@@ -1321,7 +1321,7 @@ func TestRetrieve_bracketNotation_asterisk(t *testing.T) {
 				expectedJSON: `[1,2,3,4]`,
 			},
 		},
-		`child-after-asterisk`: []TestCase{
+		`child-after-wildcard`: []TestCase{
 			{
 				jsonpath:     `$[*].a`,
 				inputJSON:    `[{"a":1},{"b":2}]`,
@@ -1650,7 +1650,7 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 				expectedJSON: `["third","first","second"]`,
 			},
 		},
-		`asterisk`: []TestCase{
+		`wildcard`: []TestCase{
 			{
 				jsonpath:     `$[*,0]`,
 				inputJSON:    `["first","second","third"]`,
@@ -2637,7 +2637,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 				expectedJSON: `[[],[2],4]`,
 			},
 		},
-		`asterisk-identifier`: []TestCase{
+		`wildcard-identifier`: []TestCase{
 			{
 				jsonpath:     `$.*[?(@.a)]`,
 				inputJSON:    `[[{"a":1},{"b":2}],[{"c":1},{"d":2}]]`,
@@ -2688,7 +2688,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 				expectedErr: ErrorNoneMatched{path: `[?(@['c','d'])]`},
 			},
 		},
-		`current-asterisk`: []TestCase{
+		`current-wildcard`: []TestCase{
 			{
 				jsonpath:     `$[?(@.*)]`,
 				inputJSON:    `[{"a":1},{"b":2}]`,
@@ -2700,7 +2700,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 				expectedErr: ErrorNoneMatched{path: `[?(@.*)]`},
 			},
 		},
-		`asterisk-qualifier`: []TestCase{
+		`wildcard-qualifier`: []TestCase{
 			{
 				jsonpath:     `$[?(@[*])]`,
 				inputJSON:    `[[{"a":1}],[]]`,
@@ -3278,7 +3278,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[0:2]==1)]`},
 			},
 		},
-		`value-group-jsonpath::asterisk-qualifier`: []TestCase{
+		`value-group-jsonpath::wildcard-qualifier`: []TestCase{
 			{
 				jsonpath:    `$[?(@[*]==1)]`,
 				inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
@@ -3361,7 +3361,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a']['a','b']==123)]`},
 			},
 		},
-		`value-group-jsonpath::asterisk-dot-child-identifier`: []TestCase{
+		`value-group-jsonpath::wildcard-dot-child-identifier`: []TestCase{
 			{
 				jsonpath:    `$[?(@.*==2)]`,
 				inputJSON:   `[[1,2],[2,3],[1],[2],[1,2,3],1,2,3]`,
@@ -3565,7 +3565,7 @@ func TestRetrieve_filterRegex(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[0:2]=~/123/)]`},
 			},
 		},
-		`value-group-jsonpath::asterisk-qualifier`: []TestCase{
+		`value-group-jsonpath::wildcard-qualifier`: []TestCase{
 			{
 				jsonpath:    `$[?(@[*]=~/123/)]`,
 				inputJSON:   `[{"b":"123"},{"a":"123"}]`,
@@ -3648,7 +3648,7 @@ func TestRetrieve_filterRegex(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a']['a','b']=~/123/)]`},
 			},
 		},
-		`value-group-jsonpath::asterisk-dot-child-identifier`: []TestCase{
+		`value-group-jsonpath::wildcard-dot-child-identifier`: []TestCase{
 			{
 				jsonpath:    `$[?(@.*=~/123/)]`,
 				inputJSON:   `[{"b":"123"},{"a":"123"}]`,

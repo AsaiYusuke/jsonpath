@@ -192,8 +192,8 @@ func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
 	})
 }
 
-func (p *jsonPathParser) pushChildAsteriskIdentifier(text string) {
-	p.push(&syntaxChildAsteriskIdentifier{
+func (p *jsonPathParser) pushChildWildcardIdentifier(text string) {
+	p.push(&syntaxChildWildcardIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         text,
 			multiValue:   true,
@@ -283,8 +283,8 @@ func (p *jsonPathParser) pushOmittedIndexSubscript(text string) {
 	p._pushIndexSubscript(text, true)
 }
 
-func (p *jsonPathParser) pushAsteriskSubscript() {
-	p.push(&syntaxAsteriskSubscript{
+func (p *jsonPathParser) pushWildcardSubscript() {
+	p.push(&syntaxWildcardSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
 			multiValue: true,
 		},

@@ -205,9 +205,9 @@ srcJSON  : {"abc.def":1}
 Output   : 1
 ```
 
-### Asterisk in qualifier
+### Wildcard in qualifier
 
-The asterisk in qualifier can be specified mixed with other subscript syntaxes.
+The wildcard in qualifier can be specified mixed with other subscript syntaxes.
 
 ```text
 JSONPath : $[0,1:3,*]
@@ -235,9 +235,9 @@ On the other hand, in the case of the `existence check` in the filter qualifier,
 | :------- | :------ |
 | Recursive descent | `@..a` |
 | Multiple identifier  | `@['a','b']` |
-| Asterisk identifier | `@.*` |
+| Wildcard identifier | `@.*` |
 | Slice qualifier | `@[0:1]` |
-| Asterisk qualifier | `@[*]` |
+| Wildcard qualifier | `@[*]` |
 | Union in the qualifier | `@[0,1]` |
 | Filter qualifier | `@.a[?(@.b)]` |
 
@@ -250,46 +250,46 @@ On the other hand, in the case of the `existence check` in the filter qualifier,
 goos: windows
 goarch: amd64
 pkg: github.com/AsaiYusuke/jsonpath
-BenchmarkRetrieve_dotNotation-4                             	  889417	      1365 ns/op	     440 B/op	      18 allocs/op
-BenchmarkRetrieve_bracketNotation-4                         	  800169	      1551 ns/op	     520 B/op	      21 allocs/op
-BenchmarkRetrieve_asterisk_identifier_dotNotation-4         	  800986	      1442 ns/op	     464 B/op	      20 allocs/op
-BenchmarkRetrieve_asterisk_identifier_bracketNotation-4     	  749656	      1625 ns/op	     512 B/op	      21 allocs/op
-BenchmarkRetrieve_multi_identifier-4                        	  480747	      2428 ns/op	     864 B/op	      33 allocs/op
-BenchmarkRetrieve_qualifier_index-4                         	  725833	      1642 ns/op	     576 B/op	      22 allocs/op
-BenchmarkRetrieve_qualifier_slice-4                         	  571996	      2108 ns/op	     696 B/op	      29 allocs/op
-BenchmarkRetrieve_qualifier_asterisk-4                      	  800175	      1544 ns/op	     512 B/op	      21 allocs/op
-BenchmarkRetrieve_qualifier_union-4                         	  500564	      2554 ns/op	     928 B/op	      34 allocs/op
-BenchmarkRetrieve_filter_logicalOR-4                        	  198552	      5753 ns/op	    1989 B/op	      47 allocs/op
-BenchmarkRetrieve_filter_logicalAND-4                       	  214718	      5707 ns/op	    1989 B/op	      47 allocs/op
-BenchmarkRetrieve_filter_nodeFilter-4                       	  260708	      4638 ns/op	    1576 B/op	      42 allocs/op
-BenchmarkRetrieve_filter_logicalNOT-4                       	  261366	      4797 ns/op	    1928 B/op	      48 allocs/op
-BenchmarkRetrieve_filter_compareEQ-4                        	  231926	      5371 ns/op	    2080 B/op	      52 allocs/op
-BenchmarkRetrieve_filter_compareNE-4                        	  187755	      6798 ns/op	    2352 B/op	      55 allocs/op
-BenchmarkRetrieve_filter_compareGE-4                        	  228984	      5440 ns/op	    2080 B/op	      52 allocs/op
-BenchmarkRetrieve_filter_compareGT-4                        	  226922	      5343 ns/op	    1968 B/op	      51 allocs/op
-BenchmarkRetrieve_filter_compareLE-4                        	  215439	      5362 ns/op	    2064 B/op	      51 allocs/op
-BenchmarkRetrieve_filter_compareLT-4                        	  232552	      5276 ns/op	    1968 B/op	      50 allocs/op
-BenchmarkRetrieve_filter_regex-4                            	  164743	      7533 ns/op	    2926 B/op	      63 allocs/op
-BenchmarkParserFunc_dotNotation-4                           	 4183525	       282 ns/op	     144 B/op	       6 allocs/op
-BenchmarkParserFunc_bracketNotation-4                       	 4191128	       284 ns/op	     144 B/op	       6 allocs/op
-BenchmarkParserFunc_asterisk_identifier_dotNotation-4       	 2783234	       426 ns/op	     192 B/op	       8 allocs/op
-BenchmarkParserFunc_asterisk_identifier_bracketNotation-4   	 2698326	       434 ns/op	     192 B/op	       8 allocs/op
-BenchmarkParserFunc_multi_identifier-4                      	 2512260	       485 ns/op	     240 B/op	       9 allocs/op
-BenchmarkParserFunc_qualifier_index-4                       	 3274550	       357 ns/op	     224 B/op	       8 allocs/op
-BenchmarkParserFunc_qualifier_slice-4                       	 3342894	       355 ns/op	     192 B/op	       8 allocs/op
-BenchmarkParserFunc_qualifier_asterisk-4                    	 3392336	       357 ns/op	     192 B/op	       8 allocs/op
-BenchmarkParserFunc_qualifier_union-4                       	 1928816	       618 ns/op	     344 B/op	      13 allocs/op
-BenchmarkParserFunc_filter_logicalOR-4                      	  859549	      1436 ns/op	    1104 B/op	      18 allocs/op
-BenchmarkParserFunc_filter_logicalAND-4                     	  924142	      1418 ns/op	    1104 B/op	      18 allocs/op
-BenchmarkParserFunc_filter_nodeFilter-4                     	  999824	      1047 ns/op	     832 B/op	      15 allocs/op
-BenchmarkParserFunc_filter_logicalNOT-4                     	  802180	      1551 ns/op	    1168 B/op	      20 allocs/op
-BenchmarkParserFunc_filter_compareEQ-4                      	  709693	      1638 ns/op	    1088 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_compareNE-4                      	  633304	      1918 ns/op	    1344 B/op	      19 allocs/op
-BenchmarkParserFunc_filter_compareGE-4                      	  800367	      1551 ns/op	    1088 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_compareGT-4                      	  859352	      1552 ns/op	    1088 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_compareLE-4                      	  750492	      1567 ns/op	    1088 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_compareLT-4                      	  800217	      1560 ns/op	    1088 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_regex-4                          	  669060	      1704 ns/op	    1096 B/op	      17 allocs/op
+BenchmarkRetrieve_dotNotation-4                             	  802390	      1282 ns/op	     432 B/op	      18 allocs/op
+BenchmarkRetrieve_bracketNotation-4                         	  801190	      1578 ns/op	     512 B/op	      21 allocs/op
+BenchmarkRetrieve_wildcard_identifier_dotNotation-4         	  856964	      1420 ns/op	     456 B/op	      20 allocs/op
+BenchmarkRetrieve_wildcard_identifier_bracketNotation-4     	  707596	      1614 ns/op	     504 B/op	      21 allocs/op
+BenchmarkRetrieve_multi_identifier-4                        	  480096	      2443 ns/op	     856 B/op	      33 allocs/op
+BenchmarkRetrieve_qualifier_index-4                         	  750308	      1621 ns/op	     568 B/op	      22 allocs/op
+BenchmarkRetrieve_qualifier_slice-4                         	  600488	      2106 ns/op	     688 B/op	      29 allocs/op
+BenchmarkRetrieve_qualifier_wildcard-4                      	  800319	      1550 ns/op	     504 B/op	      21 allocs/op
+BenchmarkRetrieve_qualifier_union-4                         	  462747	      2539 ns/op	     904 B/op	      34 allocs/op
+BenchmarkRetrieve_filter_logicalOR-4                        	  218623	      5463 ns/op	    1853 B/op	      45 allocs/op
+BenchmarkRetrieve_filter_logicalAND-4                       	  226866	      5465 ns/op	    1853 B/op	      45 allocs/op
+BenchmarkRetrieve_filter_nodeFilter-4                       	  260784	      4746 ns/op	    1488 B/op	      41 allocs/op
+BenchmarkRetrieve_filter_logicalNOT-4                       	  261564	      4606 ns/op	    1840 B/op	      47 allocs/op
+BenchmarkRetrieve_filter_compareEQ-4                        	  227083	      5236 ns/op	    1992 B/op	      51 allocs/op
+BenchmarkRetrieve_filter_compareNE-4                        	  221324	      5512 ns/op	    2264 B/op	      54 allocs/op
+BenchmarkRetrieve_filter_compareGE-4                        	  231394	      5343 ns/op	    1992 B/op	      51 allocs/op
+BenchmarkRetrieve_filter_compareGT-4                        	  237956	      5232 ns/op	    1880 B/op	      50 allocs/op
+BenchmarkRetrieve_filter_compareLE-4                        	  231217	      5232 ns/op	    1976 B/op	      50 allocs/op
+BenchmarkRetrieve_filter_compareLT-4                        	  227025	      5219 ns/op	    1880 B/op	      49 allocs/op
+BenchmarkRetrieve_filter_regex-4                            	  168806	      7237 ns/op	    2833 B/op	      62 allocs/op
+BenchmarkParserFunc_dotNotation-4                           	 4852603	       248 ns/op	     144 B/op	       5 allocs/op
+BenchmarkParserFunc_bracketNotation-4                       	 4877554	       247 ns/op	     144 B/op	       5 allocs/op
+BenchmarkParserFunc_wildcard_identifier_dotNotation-4       	 3003252	       399 ns/op	     192 B/op	       7 allocs/op
+BenchmarkParserFunc_wildcard_identifier_bracketNotation-4   	 2943961	       408 ns/op	     192 B/op	       7 allocs/op
+BenchmarkParserFunc_multi_identifier-4                      	 2593132	       456 ns/op	     240 B/op	       8 allocs/op
+BenchmarkParserFunc_qualifier_index-4                       	 3682868	       326 ns/op	     224 B/op	       7 allocs/op
+BenchmarkParserFunc_qualifier_slice-4                       	 3730786	       330 ns/op	     192 B/op	       7 allocs/op
+BenchmarkParserFunc_qualifier_wildcard-4                    	 3702061	       321 ns/op	     192 B/op	       7 allocs/op
+BenchmarkParserFunc_qualifier_union-4                       	 2053358	       587 ns/op	     344 B/op	      12 allocs/op
+BenchmarkParserFunc_filter_logicalOR-4                      	  816764	      1380 ns/op	    1104 B/op	      17 allocs/op
+BenchmarkParserFunc_filter_logicalAND-4                     	  925590	      1375 ns/op	    1104 B/op	      17 allocs/op
+BenchmarkParserFunc_filter_nodeFilter-4                     	 1000000	      1009 ns/op	     832 B/op	      14 allocs/op
+BenchmarkParserFunc_filter_logicalNOT-4                     	  857142	      1533 ns/op	    1168 B/op	      19 allocs/op
+BenchmarkParserFunc_filter_compareEQ-4                      	  750130	      1575 ns/op	    1088 B/op	      16 allocs/op
+BenchmarkParserFunc_filter_compareNE-4                      	  667159	      1823 ns/op	    1344 B/op	      18 allocs/op
+BenchmarkParserFunc_filter_compareGE-4                      	  858307	      1471 ns/op	    1088 B/op	      16 allocs/op
+BenchmarkParserFunc_filter_compareGT-4                      	  802525	      1477 ns/op	    1088 B/op	      16 allocs/op
+BenchmarkParserFunc_filter_compareLE-4                      	  833859	      1482 ns/op	    1088 B/op	      16 allocs/op
+BenchmarkParserFunc_filter_compareLT-4                      	  707726	      1497 ns/op	    1088 B/op	      16 allocs/op
+BenchmarkParserFunc_filter_regex-4                          	  799903	      1633 ns/op	    1095 B/op	      16 allocs/op
 ```
 </details>
 
@@ -299,13 +299,13 @@ BenchmarkParserFunc_filter_regex-4                          	  669060	      1704
   - Identifier
     - [x] identifier in dot notations
     - [x] identifier in bracket notations
-    - [x] asterisk identifier
+    - [x] wildcard
     - [x] multiple-identifier in bracket
     - [x] recursive retrieve
   - Qualifier
     - [x] index
     - [x] slice
-    - [x] asterisk
+    - [x] wildcard
     - Filter
       - [x] logical operation
       - [x] comparator
