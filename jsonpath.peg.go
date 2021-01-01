@@ -122,7 +122,6 @@ const (
 	ruleAction46
 	ruleAction47
 	ruleAction48
-	ruleAction49
 )
 
 var rul3s = [...]string{
@@ -231,7 +230,6 @@ var rul3s = [...]string{
 	"Action46",
 	"Action47",
 	"Action48",
-	"Action49",
 }
 
 type token32 struct {
@@ -348,7 +346,7 @@ type pegJSONPathParser struct {
 
 	Buffer string
 	buffer []rune
-	rules  [106]func() bool
+	rules  [105]func() bool
 	parse  func(rule ...int) error
 	reset  func()
 	Pretty bool
@@ -632,69 +630,64 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction31:
 
-			p.push(len(text) > 0 && text[0:1] == `!`)
-
-		case ruleAction32:
-
 			_ = p.pop().(bool)
 			jsonpathFilter := p.pop().(syntaxQuery)
-			isLogicalNot := p.pop().(bool)
-			if isLogicalNot {
+			if text[0:1] == `!` {
 				p.pushLogicalNot(jsonpathFilter)
 			} else {
 				p.push(jsonpathFilter)
 			}
 
-		case ruleAction33:
+		case ruleAction32:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareEQ(leftParam, rightParam)
 
-		case ruleAction34:
+		case ruleAction33:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareNE(leftParam, rightParam)
 
-		case ruleAction35:
+		case ruleAction34:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareGE(leftParam, rightParam)
 
-		case ruleAction36:
+		case ruleAction35:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareGT(leftParam, rightParam)
 
-		case ruleAction37:
+		case ruleAction36:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareLE(leftParam, rightParam)
 
-		case ruleAction38:
+		case ruleAction37:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareLT(leftParam, rightParam)
 
-		case ruleAction39:
+		case ruleAction38:
 
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
 			p.pushCompareRegex(leftParam, text)
+
+		case ruleAction39:
+
+			p.pushCompareParameterLiteral(p.pop())
 
 		case ruleAction40:
 
 			p.pushCompareParameterLiteral(p.pop())
 
 		case ruleAction41:
-
-			p.pushCompareParameterLiteral(p.pop())
-
-		case ruleAction42:
 
 			isLiteral := p.pop().(bool)
 			param := p.pop().(syntaxQueryJSONPathParameter)
@@ -703,7 +696,7 @@ func (p *pegJSONPathParser) Execute() {
 			}
 			p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
 
-		case ruleAction43:
+		case ruleAction42:
 
 			node := p.pop().(syntaxNode)
 			checkNode := node
@@ -723,27 +716,27 @@ func (p *pegJSONPathParser) Execute() {
 				p.push(true)
 			}
 
-		case ruleAction44:
+		case ruleAction43:
 
 			p.push(p.toFloat(text))
 
-		case ruleAction45:
+		case ruleAction44:
 
 			p.push(true)
 
-		case ruleAction46:
+		case ruleAction45:
 
 			p.push(false)
 
-		case ruleAction47:
+		case ruleAction46:
 
 			p.push(p.unescape(text))
 
-		case ruleAction48:
+		case ruleAction47:
 			// '
 			p.push(p.unescape(text))
 
-		case ruleAction49:
+		case ruleAction48:
 
 			p.push(nil)
 
@@ -2431,7 +2424,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position209, tokenIndex209
 			return false
 		},
-		/* 30 basicQuery <- <((subQueryStart query subQueryEnd) / (<comparator> Action30) / (<logicNot?> Action31 jsonpathFilter Action32))> */
+		/* 30 basicQuery <- <((subQueryStart query subQueryEnd) / (<comparator> Action30) / (<(logicNot? jsonpathFilter)> Action31))> */
 		func() bool {
 			position213, tokenIndex213 := position, tokenIndex
 			{
@@ -2475,15 +2468,12 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 							position, tokenIndex = position220, tokenIndex220
 						}
 					l221:
+						if !_rules[rulejsonpathFilter]() {
+							goto l213
+						}
 						add(rulePegText, position219)
 					}
 					if !_rules[ruleAction31]() {
-						goto l213
-					}
-					if !_rules[rulejsonpathFilter]() {
-						goto l213
-					}
-					if !_rules[ruleAction32]() {
 						goto l213
 					}
 				}
@@ -2566,7 +2556,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position226, tokenIndex226
 			return false
 		},
-		/* 34 comparator <- <((qParam space (('=' '=' space qParam Action33) / ('!' '=' space qParam Action34))) / (qNumericParam space (('<' '=' space qNumericParam Action35) / ('<' space qNumericParam Action36) / ('>' '=' space qNumericParam Action37) / ('>' space qNumericParam Action38))) / (singleJsonpathFilter space ('=' '~') space '/' <regex> '/' Action39))> */
+		/* 34 comparator <- <((qParam space (('=' '=' space qParam Action32) / ('!' '=' space qParam Action33))) / (qNumericParam space (('<' '=' space qNumericParam Action34) / ('<' space qNumericParam Action35) / ('>' '=' space qNumericParam Action36) / ('>' space qNumericParam Action37))) / (singleJsonpathFilter space ('=' '~') space '/' <regex> '/' Action38))> */
 		func() bool {
 			position228, tokenIndex228 := position, tokenIndex
 			{
@@ -2595,7 +2585,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						if !_rules[ruleqParam]() {
 							goto l233
 						}
-						if !_rules[ruleAction33]() {
+						if !_rules[ruleAction32]() {
 							goto l233
 						}
 						goto l232
@@ -2615,7 +2605,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						if !_rules[ruleqParam]() {
 							goto l231
 						}
-						if !_rules[ruleAction34]() {
+						if !_rules[ruleAction33]() {
 							goto l231
 						}
 					}
@@ -2645,7 +2635,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						if !_rules[ruleqNumericParam]() {
 							goto l236
 						}
-						if !_rules[ruleAction35]() {
+						if !_rules[ruleAction34]() {
 							goto l236
 						}
 						goto l235
@@ -2661,7 +2651,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						if !_rules[ruleqNumericParam]() {
 							goto l237
 						}
-						if !_rules[ruleAction36]() {
+						if !_rules[ruleAction35]() {
 							goto l237
 						}
 						goto l235
@@ -2681,7 +2671,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						if !_rules[ruleqNumericParam]() {
 							goto l238
 						}
-						if !_rules[ruleAction37]() {
+						if !_rules[ruleAction36]() {
 							goto l238
 						}
 						goto l235
@@ -2697,7 +2687,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						if !_rules[ruleqNumericParam]() {
 							goto l234
 						}
-						if !_rules[ruleAction38]() {
+						if !_rules[ruleAction37]() {
 							goto l234
 						}
 					}
@@ -2737,7 +2727,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						goto l228
 					}
 					position++
-					if !_rules[ruleAction39]() {
+					if !_rules[ruleAction38]() {
 						goto l228
 					}
 				}
@@ -2749,7 +2739,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position228, tokenIndex228
 			return false
 		},
-		/* 35 qParam <- <((qLiteral Action40) / singleJsonpathFilter)> */
+		/* 35 qParam <- <((qLiteral Action39) / singleJsonpathFilter)> */
 		func() bool {
 			position240, tokenIndex240 := position, tokenIndex
 			{
@@ -2759,7 +2749,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 					if !_rules[ruleqLiteral]() {
 						goto l243
 					}
-					if !_rules[ruleAction40]() {
+					if !_rules[ruleAction39]() {
 						goto l243
 					}
 					goto l242
@@ -2777,7 +2767,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position240, tokenIndex240
 			return false
 		},
-		/* 36 qNumericParam <- <((lNumber Action41) / singleJsonpathFilter)> */
+		/* 36 qNumericParam <- <((lNumber Action40) / singleJsonpathFilter)> */
 		func() bool {
 			position244, tokenIndex244 := position, tokenIndex
 			{
@@ -2787,7 +2777,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 					if !_rules[rulelNumber]() {
 						goto l247
 					}
-					if !_rules[ruleAction41]() {
+					if !_rules[ruleAction40]() {
 						goto l247
 					}
 					goto l246
@@ -2842,7 +2832,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position248, tokenIndex248
 			return false
 		},
-		/* 38 singleJsonpathFilter <- <(jsonpathFilter Action42)> */
+		/* 38 singleJsonpathFilter <- <(jsonpathFilter Action41)> */
 		func() bool {
 			position254, tokenIndex254 := position, tokenIndex
 			{
@@ -2850,7 +2840,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 				if !_rules[rulejsonpathFilter]() {
 					goto l254
 				}
-				if !_rules[ruleAction42]() {
+				if !_rules[ruleAction41]() {
 					goto l254
 				}
 				add(rulesingleJsonpathFilter, position255)
@@ -2860,7 +2850,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position254, tokenIndex254
 			return false
 		},
-		/* 39 jsonpathFilter <- <(<jsonpath> Action43)> */
+		/* 39 jsonpathFilter <- <(<jsonpath> Action42)> */
 		func() bool {
 			position256, tokenIndex256 := position, tokenIndex
 			{
@@ -2872,7 +2862,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 					}
 					add(rulePegText, position258)
 				}
-				if !_rules[ruleAction43]() {
+				if !_rules[ruleAction42]() {
 					goto l256
 				}
 				add(rulejsonpathFilter, position257)
@@ -2882,7 +2872,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position256, tokenIndex256
 			return false
 		},
-		/* 40 lNumber <- <(<(('-' / '+')? [0-9] ('-' / '+' / '.' / [0-9] / [a-z] / [A-Z])*)> Action44)> */
+		/* 40 lNumber <- <(<(('-' / '+')? [0-9] ('-' / '+' / '.' / [0-9] / [a-z] / [A-Z])*)> Action43)> */
 		func() bool {
 			position259, tokenIndex259 := position, tokenIndex
 			{
@@ -2967,7 +2957,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 					}
 					add(rulePegText, position261)
 				}
-				if !_rules[ruleAction44]() {
+				if !_rules[ruleAction43]() {
 					goto l259
 				}
 				add(rulelNumber, position260)
@@ -2977,7 +2967,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position259, tokenIndex259
 			return false
 		},
-		/* 41 lBool <- <(((('t' 'r' 'u' 'e') / ('T' 'r' 'u' 'e') / ('T' 'R' 'U' 'E')) Action45) / ((('f' 'a' 'l' 's' 'e') / ('F' 'a' 'l' 's' 'e') / ('F' 'A' 'L' 'S' 'E')) Action46))> */
+		/* 41 lBool <- <(((('t' 'r' 'u' 'e') / ('T' 'r' 'u' 'e') / ('T' 'R' 'U' 'E')) Action44) / ((('f' 'a' 'l' 's' 'e') / ('F' 'a' 'l' 's' 'e') / ('F' 'A' 'L' 'S' 'E')) Action45))> */
 		func() bool {
 			position274, tokenIndex274 := position, tokenIndex
 			{
@@ -3042,7 +3032,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						position++
 					}
 				l278:
-					if !_rules[ruleAction45]() {
+					if !_rules[ruleAction44]() {
 						goto l277
 					}
 					goto l276
@@ -3118,7 +3108,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						position++
 					}
 				l281:
-					if !_rules[ruleAction46]() {
+					if !_rules[ruleAction45]() {
 						goto l274
 					}
 				}
@@ -3130,7 +3120,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position274, tokenIndex274
 			return false
 		},
-		/* 42 lString <- <(('\'' <(('\\' '\\') / ('\\' '\'') / (!'\'' .))*> '\'' Action47) / ('"' <(('\\' '\\') / ('\\' '"') / (!'"' .))*> '"' Action48))> */
+		/* 42 lString <- <(('\'' <(('\\' '\\') / ('\\' '\'') / (!'\'' .))*> '\'' Action46) / ('"' <(('\\' '\\') / ('\\' '"') / (!'"' .))*> '"' Action47))> */
 		func() bool {
 			position284, tokenIndex284 := position, tokenIndex
 			{
@@ -3195,7 +3185,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						goto l287
 					}
 					position++
-					if !_rules[ruleAction47]() {
+					if !_rules[ruleAction46]() {
 						goto l287
 					}
 					goto l286
@@ -3259,7 +3249,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 						goto l284
 					}
 					position++
-					if !_rules[ruleAction48]() {
+					if !_rules[ruleAction47]() {
 						goto l284
 					}
 				}
@@ -3271,7 +3261,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position284, tokenIndex284
 			return false
 		},
-		/* 43 lNull <- <((('n' 'u' 'l' 'l') / ('N' 'u' 'l' 'l') / ('N' 'U' 'L' 'L')) Action49)> */
+		/* 43 lNull <- <((('n' 'u' 'l' 'l') / ('N' 'u' 'l' 'l') / ('N' 'U' 'L' 'L')) Action48)> */
 		func() bool {
 			position302, tokenIndex302 := position, tokenIndex
 			{
@@ -3334,7 +3324,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 					position++
 				}
 			l304:
-				if !_rules[ruleAction49]() {
+				if !_rules[ruleAction48]() {
 					goto l302
 				}
 				add(rulelNull, position303)
@@ -3921,7 +3911,13 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 87 Action31 <- <{
-		    p.push(len(text) > 0 && text[0:1] == `!`)
+		    _ = p.pop().(bool)
+		    jsonpathFilter := p.pop().(syntaxQuery)
+		    if text[0:1] == `!` {
+		        p.pushLogicalNot(jsonpathFilter)
+		    } else {
+		        p.push(jsonpathFilter)
+		    }
 		}> */
 		func() bool {
 			{
@@ -3930,14 +3926,9 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 88 Action32 <- <{
-		    _ = p.pop().(bool)
-		    jsonpathFilter := p.pop().(syntaxQuery)
-		    isLogicalNot := p.pop().(bool)
-		    if isLogicalNot {
-		        p.pushLogicalNot(jsonpathFilter)
-		    } else {
-		        p.push(jsonpathFilter)
-		    }
+		    rightParam := p.pop().(*syntaxBasicCompareParameter)
+		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		    p.pushCompareEQ(leftParam, rightParam)
 		}> */
 		func() bool {
 			{
@@ -3948,7 +3939,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 89 Action33 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareEQ(leftParam, rightParam)
+		    p.pushCompareNE(leftParam, rightParam)
 		}> */
 		func() bool {
 			{
@@ -3959,7 +3950,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 90 Action34 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareNE(leftParam, rightParam)
+		    p.pushCompareGE(leftParam, rightParam)
 		}> */
 		func() bool {
 			{
@@ -3970,7 +3961,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 91 Action35 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareGE(leftParam, rightParam)
+		    p.pushCompareGT(leftParam, rightParam)
 		}> */
 		func() bool {
 			{
@@ -3981,7 +3972,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 92 Action36 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareGT(leftParam, rightParam)
+		    p.pushCompareLE(leftParam, rightParam)
 		}> */
 		func() bool {
 			{
@@ -3992,7 +3983,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 93 Action37 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareLE(leftParam, rightParam)
+		    p.pushCompareLT(leftParam, rightParam)
 		}> */
 		func() bool {
 			{
@@ -4001,9 +3992,8 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 94 Action38 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareLT(leftParam, rightParam)
+		    p.pushCompareRegex(leftParam, text)
 		}> */
 		func() bool {
 			{
@@ -4012,8 +4002,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 95 Action39 <- <{
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    p.pushCompareRegex(leftParam, text)
+		    p.pushCompareParameterLiteral(p.pop())
 		}> */
 		func() bool {
 			{
@@ -4031,15 +4020,6 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 97 Action41 <- <{
-		    p.pushCompareParameterLiteral(p.pop())
-		}> */
-		func() bool {
-			{
-				add(ruleAction41, position)
-			}
-			return true
-		},
-		/* 98 Action42 <- <{
 		    isLiteral := p.pop().(bool)
 		    param := p.pop().(syntaxQueryJSONPathParameter)
 		    if !p.hasErr() && param.isValueGroupParameter() {
@@ -4049,11 +4029,11 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		}> */
 		func() bool {
 			{
-				add(ruleAction42, position)
+				add(ruleAction41, position)
 			}
 			return true
 		},
-		/* 99 Action43 <- <{
+		/* 98 Action42 <- <{
 		    node := p.pop().(syntaxNode)
 		    checkNode := node
 		    if aggregateFunction, ok := node.(*syntaxAggregateFunction); ok {
@@ -4074,12 +4054,21 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		}> */
 		func() bool {
 			{
+				add(ruleAction42, position)
+			}
+			return true
+		},
+		/* 99 Action43 <- <{
+		    p.push(p.toFloat(text))
+		}> */
+		func() bool {
+			{
 				add(ruleAction43, position)
 			}
 			return true
 		},
 		/* 100 Action44 <- <{
-		    p.push(p.toFloat(text))
+		    p.push(true)
 		}> */
 		func() bool {
 			{
@@ -4088,7 +4077,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 101 Action45 <- <{
-		    p.push(true)
+		    p.push(false)
 		}> */
 		func() bool {
 			{
@@ -4097,7 +4086,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 102 Action46 <- <{
-		    p.push(false)
+		    p.push(p.unescape(text))
 		}> */
 		func() bool {
 			{
@@ -4105,7 +4094,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			}
 			return true
 		},
-		/* 103 Action47 <- <{
+		/* 103 Action47 <- <{ // '
 		    p.push(p.unescape(text))
 		}> */
 		func() bool {
@@ -4114,21 +4103,12 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			}
 			return true
 		},
-		/* 104 Action48 <- <{ // '
-		    p.push(p.unescape(text))
-		}> */
-		func() bool {
-			{
-				add(ruleAction48, position)
-			}
-			return true
-		},
-		/* 105 Action49 <- <{
+		/* 104 Action48 <- <{
 		    p.push(nil)
 		}> */
 		func() bool {
 			{
-				add(ruleAction49, position)
+				add(ruleAction48, position)
 			}
 			return true
 		},

@@ -236,13 +236,10 @@ basicQuery <-
         }
     } /
     
-    < logicNot? > {
-        p.push(len(text) > 0 && text[0:1] == `!`)
-    } jsonpathFilter {
+    < logicNot? jsonpathFilter > {
         _ = p.pop().(bool)
         jsonpathFilter := p.pop().(syntaxQuery)
-        isLogicalNot := p.pop().(bool)
-        if isLogicalNot {
+        if text[0:1] == `!` {
             p.pushLogicalNot(jsonpathFilter)
         } else {
             p.push(jsonpathFilter)
