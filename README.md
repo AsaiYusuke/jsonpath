@@ -11,7 +11,7 @@ This is [Go](https://golang.org/) package providing the features that retrieves 
 The core syntaxes of the JSONPath on which this package is based:  [JSONPath - XPath for JSON](https://goessner.net/articles/JsonPath/).
 
 #### Note:
-The unstated syntaxes found in "JSONPath - XPath for JSON" are implemented with reference to the test cases written in [cburmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
+The unstated syntaxes found in "JSONPath - XPath for JSON" are implemented with reference to the test cases written in [cburgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
 Please check [my compare result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html) to know which responses are adapted.
 Unfortunately, the proposals that is also discussing in "json-path-comparison" were not finalized at the start of development and were not adopted outright.
 
@@ -49,7 +49,7 @@ func main() {
 
 - [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
 - The error specification allows package users to handle errors appropriately.
-- Adopted more of the consensus behavior from the [cburmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
+- Adopted more of the consensus behavior from the [cburgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
   Adapted my own behavior to the other part of the such consensus behavior that found difficult to use.
 - Equipped with numerous unit tests and tried to eliminate the bugs that return strange result.
 
