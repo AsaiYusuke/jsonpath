@@ -5544,6 +5544,23 @@ func TestParserFuncExecTwice(t *testing.T) {
 	}
 }
 
+type UnsupportedStruct struct {
+	A string
+	B int
+}
+
+func TestRetrieve_unsupportedStruct(t *testing.T) {
+	inputJSON := UnsupportedStruct{A: `test`, B: 123}
+	jsonpath := `$.A`
+	expectedError := ErrorTypeUnmatched{expectedType: `object/array`, foundType: `jsonpath.UnsupportedStruct`, path: `.A`}
+	_, err := Retrieve(jsonpath, inputJSON)
+
+	if reflect.TypeOf(expectedError) != reflect.TypeOf(err) {
+		t.Errorf("expected error<%s> != actual error<%s>\n",
+			expectedError, err)
+	}
+}
+
 func TestPegParserExecuteFunctions(t *testing.T) {
 	stdoutBackup := os.Stdout
 	os.Stdout = nil
