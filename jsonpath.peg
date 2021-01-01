@@ -20,7 +20,7 @@ jsonpath <-
         p.saveParams()
     } rootNode childNode* function* space {
         p.setNodeChain()
-        p.setRecursiveMultiValue()
+        p.updateRootValueGroup()
         p.loadParams()
     }
 
@@ -129,7 +129,7 @@ union <-
             childIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion.merge(childIndexUnion)
-            parentIndexUnion.setMultiValue()
+            parentIndexUnion.setValueGroup()
             p.push(parentIndexUnion)
         }
     )*
@@ -319,7 +319,7 @@ singleJsonpathFilter <-
     jsonpathFilter {
         isLiteral := p.pop().(bool)
         param := p.pop().(syntaxQueryJSONPathParameter)
-        if !p.hasErr() && param.isMultiValueParameter() {
+        if !p.hasErr() && param.isValueGroupParameter() {
             p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
         }
         p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)

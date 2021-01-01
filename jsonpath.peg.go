@@ -465,7 +465,7 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction3:
 
 			p.setNodeChain()
-			p.setRecursiveMultiValue()
+			p.updateRootValueGroup()
 			p.loadParams()
 
 		case ruleAction4:
@@ -549,7 +549,7 @@ func (p *pegJSONPathParser) Execute() {
 			childIndexUnion := p.pop().(*syntaxUnionQualifier)
 			parentIndexUnion := p.pop().(*syntaxUnionQualifier)
 			parentIndexUnion.merge(childIndexUnion)
-			parentIndexUnion.setMultiValue()
+			parentIndexUnion.setValueGroup()
 			p.push(parentIndexUnion)
 
 		case ruleAction20:
@@ -698,7 +698,7 @@ func (p *pegJSONPathParser) Execute() {
 
 			isLiteral := p.pop().(bool)
 			param := p.pop().(syntaxQueryJSONPathParameter)
-			if !p.hasErr() && param.isMultiValueParameter() {
+			if !p.hasErr() && param.isValueGroupParameter() {
 				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 			}
 			p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
@@ -3614,7 +3614,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		},
 		/* 59 Action3 <- <{
 		    p.setNodeChain()
-		    p.setRecursiveMultiValue()
+		    p.updateRootValueGroup()
 		    p.loadParams()
 		}> */
 		func() bool {
@@ -3778,7 +3778,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		    childIndexUnion := p.pop().(*syntaxUnionQualifier)
 		    parentIndexUnion := p.pop().(*syntaxUnionQualifier)
 		    parentIndexUnion.merge(childIndexUnion)
-		    parentIndexUnion.setMultiValue()
+		    parentIndexUnion.setValueGroup()
 		    p.push(parentIndexUnion)
 		}> */
 		func() bool {
@@ -4042,7 +4042,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 98 Action42 <- <{
 		    isLiteral := p.pop().(bool)
 		    param := p.pop().(syntaxQueryJSONPathParameter)
-		    if !p.hasErr() && param.isMultiValueParameter() {
+		    if !p.hasErr() && param.isValueGroupParameter() {
 		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
 		    }
 		    p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)

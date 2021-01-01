@@ -46,7 +46,7 @@ func (u *syntaxUnionQualifier) retrieve(
 		resultIndexes = append(resultIndexes, u.subscripts[index].getIndexes(srcArray)...)
 	}
 
-	if u.isMultiValue() {
+	if u.isValueGroup() {
 		childErrorMap := make(map[error]struct{}, 1)
 		var lastError error
 		for index := range resultIndexes {

@@ -114,12 +114,12 @@ func (p *jsonPathParser) setLastNodeText(text string) {
 	node.setText(text)
 }
 
-func (p *jsonPathParser) setRecursiveMultiValue() {
-	node := p.params[0].(syntaxNode)
-	checkNode := node
+func (p *jsonPathParser) updateRootValueGroup() {
+	rootNode := p.params[0].(syntaxNode)
+	checkNode := rootNode
 	for checkNode != nil {
-		if checkNode.isMultiValue() {
-			node.setMultiValue()
+		if checkNode.isValueGroup() {
+			rootNode.setValueGroup()
 			break
 		}
 		checkNode = checkNode.getNext()
@@ -175,7 +175,7 @@ func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
 	p.push(&syntaxChildSingleIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         text,
-			multiValue:   false,
+			valueGroup:   false,
 			accessorMode: p.accessorMode,
 		},
 		identifier: text,
@@ -185,7 +185,7 @@ func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
 func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
 	p.push(&syntaxChildMultiIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue:   true,
+			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
 		identifiers: identifiers,
@@ -196,7 +196,7 @@ func (p *jsonPathParser) pushChildWildcardIdentifier(text string) {
 	p.push(&syntaxChildWildcardIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         text,
-			multiValue:   true,
+			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
 	})
@@ -206,7 +206,7 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 	p.push(&syntaxRecursiveChildIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         `..`,
-			multiValue:   true,
+			valueGroup:   true,
 			next:         node,
 			accessorMode: p.accessorMode,
 		},
@@ -216,7 +216,7 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
 	p.push(&syntaxUnionQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue:   subscript.isMultiValue(),
+			valueGroup:   subscript.isValueGroup(),
 			accessorMode: p.accessorMode,
 		},
 		subscripts: []syntaxSubscript{subscript},
@@ -226,7 +226,7 @@ func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
 func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
 	p.push(&syntaxFilterQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue:   true,
+			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
 		query: query,
@@ -236,7 +236,7 @@ func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
 func (p *jsonPathParser) pushScriptQualifier(text string) {
 	p.push(&syntaxScriptQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			multiValue:   true,
+			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
 		command: text,
@@ -246,7 +246,7 @@ func (p *jsonPathParser) pushScriptQualifier(text string) {
 func (p *jsonPathParser) pushSlicePositiveStepSubscript(start, end, step *syntaxIndexSubscript) {
 	p.push(&syntaxSlicePositiveStepSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
-			multiValue: true,
+			valueGroup: true,
 		},
 		start: start,
 		end:   end,
@@ -257,7 +257,7 @@ func (p *jsonPathParser) pushSlicePositiveStepSubscript(start, end, step *syntax
 func (p *jsonPathParser) pushSliceNegativeStepSubscript(start, end, step *syntaxIndexSubscript) {
 	p.push(&syntaxSliceNegativeStepSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
-			multiValue: true,
+			valueGroup: true,
 		},
 		start: start,
 		end:   end,
@@ -268,7 +268,7 @@ func (p *jsonPathParser) pushSliceNegativeStepSubscript(start, end, step *syntax
 func (p *jsonPathParser) _pushIndexSubscript(text string, isOmitted bool) {
 	p.push(&syntaxIndexSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
-			multiValue: false,
+			valueGroup: false,
 		},
 		number:    p.toInt(text),
 		isOmitted: isOmitted,
@@ -286,7 +286,7 @@ func (p *jsonPathParser) pushOmittedIndexSubscript(text string) {
 func (p *jsonPathParser) pushWildcardSubscript() {
 	p.push(&syntaxWildcardSubscript{
 		syntaxBasicSubscript: &syntaxBasicSubscript{
-			multiValue: true,
+			valueGroup: true,
 		},
 	})
 }

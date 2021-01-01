@@ -1,9 +1,9 @@
 package jsonpath
 
 type syntaxBasicSubscript struct {
-	multiValue bool
+	valueGroup bool
 }
 
-func (s *syntaxBasicSubscript) isMultiValue() bool {
-	return s.multiValue
+func (s *syntaxBasicSubscript) isValueGroup() bool {
+	return s.valueGroup
 }

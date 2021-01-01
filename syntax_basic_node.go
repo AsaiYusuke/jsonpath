@@ -2,7 +2,7 @@ package jsonpath
 
 type syntaxBasicNode struct {
 	text         string
-	multiValue   bool
+	valueGroup   bool
 	next         syntaxNode
 	accessorMode bool
 }
@@ -11,12 +11,12 @@ func (i *syntaxBasicNode) setText(text string) {
 	i.text = text
 }
 
-func (i *syntaxBasicNode) setMultiValue() {
-	i.multiValue = true
+func (i *syntaxBasicNode) setValueGroup() {
+	i.valueGroup = true
 }
 
-func (i *syntaxBasicNode) isMultiValue() bool {
-	return i.multiValue
+func (i *syntaxBasicNode) isValueGroup() bool {
+	return i.valueGroup
 }
 
 func (i *syntaxBasicNode) getConnectedText() string {

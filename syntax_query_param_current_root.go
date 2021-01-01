@@ -4,8 +4,8 @@ type syntaxQueryParamCurrentRoot struct {
 	param syntaxNode
 }
 
-func (e *syntaxQueryParamCurrentRoot) isMultiValueParameter() bool {
-	return e.param.isMultiValue()
+func (e *syntaxQueryParamCurrentRoot) isValueGroupParameter() bool {
+	return e.param.isValueGroup()
 }
 
 func (e *syntaxQueryParamCurrentRoot) compute(
@@ -17,7 +17,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 		if err := e.param.retrieve(root, currentMap[index], &values); err != nil {
 			continue
 		}
-		if e.param.isMultiValue() {
+		if e.param.isValueGroup() {
 			result[index] = values
 		} else {
 			result[index] = values[0]

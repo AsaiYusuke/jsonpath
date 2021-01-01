@@ -1,5 +1,5 @@
 package jsonpath
 
 type syntaxQueryJSONPathParameter interface {
-	isMultiValueParameter() bool
+	isValueGroupParameter() bool
 }

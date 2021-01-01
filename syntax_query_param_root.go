@@ -4,8 +4,8 @@ type syntaxQueryParamRoot struct {
 	param syntaxNode
 }
 
-func (e *syntaxQueryParamRoot) isMultiValueParameter() bool {
-	return e.param.isMultiValue()
+func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
+	return e.param.isValueGroup()
 }
 
 func (e *syntaxQueryParamRoot) compute(
@@ -17,7 +17,7 @@ func (e *syntaxQueryParamRoot) compute(
 		return result
 	}
 
-	// e.param.isMultiValue() should always be false.
+	// e.param.isValueGroup() should always be false.
 	for index := range currentMap {
 		result[index] = values[0]
 	}
