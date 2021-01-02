@@ -8,7 +8,7 @@ before_install:
   - go get github.com/mattn/goveralls   # coveralls.io
 
 script:
-  - go test -race
+  - go test -race ./...
   - $GOPATH/bin/goveralls -service=travis-ci # coveralls.io
 
 after_script:
