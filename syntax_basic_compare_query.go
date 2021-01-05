@@ -9,10 +9,10 @@ type syntaxBasicCompareQuery struct {
 func (q *syntaxBasicCompareQuery) compute(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
-	leftValues := q.leftParam.get(root, currentMap)
+	leftValues := q.leftParam.compute(root, currentMap)
 	q.comparator.typeCast(leftValues)
 
-	rightValues := q.rightParam.get(root, currentMap)
+	rightValues := q.rightParam.compute(root, currentMap)
 	q.comparator.typeCast(rightValues)
 
 	for leftIndex := range leftValues {
