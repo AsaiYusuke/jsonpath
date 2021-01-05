@@ -15,29 +15,16 @@ expression <-
 
 END <- !.
 
-jsonpath <-
-    space {
-        p.saveParams()
-    } rootNode childNode* function* space {
+jsonpath          <- space rootNode          continuedJsonpath
+jsonpathParameter <- space parameterRootNode continuedJsonpath
+
+continuedJsonpath <- childNode* function* space {
         p.setNodeChain()
         p.updateRootValueGroup()
-        p.loadParams()
     }
 
-rootNode <-
-    rootIdentifier /
-
-    < currentRootIdentifier > {
-        if len(p.paramsList) == 0 {
-            p.syntaxErr(begin, msgErrorInvalidSyntaxUseBeginAtsign, buffer)
-        }
-    } /
-
-    < ( bracketNode / dotChildIdentifier ) > {
-        if len(p.paramsList) != 0 {
-            p.syntaxErr(begin, msgErrorInvalidSyntaxOmitDollar, buffer)
-        }
-    }
+rootNode          <- rootIdentifier / bracketNode / dotChildIdentifier
+parameterRootNode <- rootIdentifier / currentRootIdentifier
 
 childNode <-
     '..' ( bracketNode / dotChildIdentifier ) {
@@ -323,7 +310,11 @@ singleJsonpathFilter <-
     }
 
 jsonpathFilter <-
-    < jsonpath > {
+    {
+        p.saveParams()
+    } < jsonpathParameter > {
+        p.loadParams()
+
         node := p.pop().(syntaxNode)
         checkNode := node
         if aggregateFunction, ok := node.(*syntaxAggregateFunction); ok {
