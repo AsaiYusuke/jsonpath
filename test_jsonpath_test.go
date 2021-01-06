@@ -1657,19 +1657,19 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 		},
 		`wildcard`: []TestCase{
 			{
-				jsonpath:     `$[*,0]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["first","second","third","first"]`,
+				jsonpath:    `$[*,0]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[*,0]`},
 			},
 			{
-				jsonpath:     `$[*,1:2]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["first","second","third","second"]`,
+				jsonpath:    `$[*,1:2]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[*,1:2]`},
 			},
 			{
-				jsonpath:     `$[*,*]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["first","second","third","first","second","third"]`,
+				jsonpath:    `$[*,*]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[*,*]`},
 			},
 		},
 		`slice`: []TestCase{
@@ -3850,9 +3850,14 @@ func TestRetrieve_space(t *testing.T) {
 				expectedJSON: `[1,3]`,
 			},
 			{
-				jsonpath:     `$[ 0 , 2 : 4 , * ]`,
+				jsonpath:     `$[ * ]`,
+				inputJSON:    `{"a":1,"b":2,"c":3}`,
+				expectedJSON: `[1,2,3]`,
+			},
+			{
+				jsonpath:     `$[ 0 , 2 : 4 ]`,
 				inputJSON:    `[1,2,3,4,5]`,
-				expectedJSON: `[1,3,4,1,2,3,4,5]`,
+				expectedJSON: `[1,3,4]`,
 			},
 			{
 				jsonpath:     `$[ ?( @.a == 1 ) ]`,

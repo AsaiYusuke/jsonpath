@@ -27,11 +27,11 @@ rootNode          <- rootIdentifier / bracketNode / dotChildIdentifier
 parameterRootNode <- rootIdentifier / currentRootIdentifier
 
 childNode <-
-    '..' ( bracketNode / dotChildIdentifier ) {
+    '..' ( wildcard / bracketNode / dotChildIdentifier ) {
         p.pushRecursiveChildIdentifier(p.pop().(syntaxNode))
     } /
 
-    < '.' dotChildIdentifier > {
+    < '.' ( wildcard / dotChildIdentifier ) > {
         p.setLastNodeText(text)
     } /
 
@@ -48,7 +48,7 @@ functionName <-
     }
 
 bracketNode <-
-    < squareBracketStart ( bracketChildIdentifier / qualifier ) squareBracketEnd > {
+    < squareBracketStart ( wildcard / bracketChildIdentifier / qualifier ) squareBracketEnd > {
         p.setLastNodeText(text)
     }
 
@@ -62,14 +62,14 @@ currentRootIdentifier <-
         p.pushCurrentRootIdentifier()
     }
 
+wildcard <-
+    '*' {
+        p.pushChildWildcardIdentifier()
+    }
+
 dotChildIdentifier <-
     < ( '\\' '\\' / '\\' [.[()=!><\t\r\n ] / [^\\.[()=!><\t\r\n ] )+ > !'()' {
-        unescapedText := p.unescape(text)
-        if unescapedText == `*` {
-            p.pushChildWildcardIdentifier(unescapedText)
-        } else {
-            p.pushChildSingleIdentifier(unescapedText)
-        }
+        p.pushChildSingleIdentifier(p.unescape(text))
     }
 
 bracketChildIdentifier <-
@@ -141,10 +141,6 @@ index <-
 
         < indexNumber > {
             p.pushIndexSubscript(text)
-        } /
-
-        '*' {
-            p.pushWildcardSubscript()
         }
     ) {
         p.pushUnionQualifier(p.pop().(syntaxSubscript))
