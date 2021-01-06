@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Union with keys after recursive descent</h1>
@@ -18,27 +19,13 @@ Bash (JSONPath.sh)
 </h4>
 
 <pre><code>[
-  {
-    "c": "cc1",
-    "d": "dd1"
-  },
-  {
-    "c": "cc2",
-    "child": {
-      "d": "dd2"
-    }
-  },
-  {
-    "c": "cc3"
-  },
-  {
-    "child": {
-      "c": "cc5"
-    }
-  },
-  {
-    "d": "dd4"
-  }
+  "cc1",
+  "cc2",
+  "cc3",
+  "cc5",
+  "dd1",
+  "dd2",
+  "dd4"
 ]
 </code></pre>
 
@@ -53,6 +40,21 @@ C (json-glib)
 
 <h4 id="Cpp_jsoncons">
 Cpp (jsoncons)
+</h4>
+
+<pre><code>[
+  "cc1",
+  "cc2",
+  "cc3",
+  "cc5",
+  "dd1",
+  "dd2",
+  "dd4"
+]
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
 </h4>
 
 <pre><code>[
@@ -141,6 +143,21 @@ Golang (github.com-bhmj-jsonslice)
 <pre><code>[
   "cc1",
   "cc2"
+]
+</code></pre>
+
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<pre><code>[
+  "cc1",
+  "cc2",
+  "cc3",
+  "cc5",
+  "dd1",
+  "dd2",
+  "dd4"
 ]
 </code></pre>
 
@@ -459,6 +476,30 @@ dotNET (Json.NET)
 ]
 </code></pre>
 
+<h4 id="dotNET_JsonPath.Net">
+dotNET (JsonPath.Net)
+</h4>
+
+<pre><code>[
+  "cc1",
+  "cc1",
+  "cc2",
+  "cc2",
+  "cc3",
+  "cc3",
+  "cc5",
+  "cc5",
+  "cc5",
+  "dd1",
+  "dd1",
+  "dd2",
+  "dd2",
+  "dd2",
+  "dd4",
+  "dd4"
+]
+</code></pre>
+
 <h4 id="dotNET_JsonPathLib">
 dotNET (JsonPathLib)
 </h4>
@@ -514,13 +555,6 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>strconv.Atoi: parsing "'c'": invalid syntax
-</code></pre>
-
-<h4 id="dotNET_JsonPath.Net">
-dotNET (JsonPath.Net)
-</h4>
-
-<pre><code>'c' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 1.
 </code></pre>
 
 <h2>Footnotes</h2>

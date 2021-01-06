@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Filter expression with single equal</h1>
@@ -43,12 +44,8 @@ Bash (JSONPath.sh)
 </h4>
 
 <pre><code>[
-  {
-    "key": 42
-  },
-  {
-    "key": "42"
-  }
+  42,
+  "42"
 ]
 </code></pre>
 
@@ -278,13 +275,6 @@ Golang (github.com-spyzhov-ajson)
 </h4>
 
 <pre><code>wrong request: wrong request: ?(@.key=42)
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: $[?(@.key=42)]
 </code></pre>
 
 <h4 id="PHP_Goessner">

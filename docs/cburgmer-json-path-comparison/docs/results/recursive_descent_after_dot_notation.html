@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Recursive descent after dot notation</h1>
@@ -17,13 +18,11 @@
 Bash (JSONPath.sh)
 </h4>
 
-<pre><code>{
-  "complex": "string",
-  "primitives": [
-    0,
-    1
-  ]
-}
+<pre><code>[
+  "string",
+  0,
+  1
+]
 </code></pre>
 
 <h4 id="C_json-glib">
@@ -64,6 +63,25 @@ Cpp (jsoncons)
 <p>Not supported</p>
 
 <pre><code>Unexpected end of jsonpath input at line 1 and column 8
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<pre><code>[
+  [
+    0,
+    1
+  ],
+  {
+    "complex": "string",
+    "primitives": [
+      0,
+      1
+    ]
+  }
+]
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -129,6 +147,28 @@ Golang (github.com-PaesslerAG-jsonpath)
 <pre><code>parsing error: $.key..  :1:8 - 1:8 unexpected EOF while scanning JSON mapper expected "[", Ident or "*"
 </code></pre>
 
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<pre><code>[
+  "string",
+  0,
+  1,
+  [
+    0,
+    1
+  ],
+  {
+    "complex": "string",
+    "primitives": [
+      0,
+      1
+    ]
+  }
+]
+</code></pre>
+
 <h4 id="Golang_github.com-spyzhov-ajson">
 Golang (github.com-spyzhov-ajson)
 </h4>
@@ -190,6 +230,12 @@ JavaScript (Goessner)
   }
 ]
 </code></pre>
+
+<h4 id="JavaScript_brunerd">
+JavaScript (brunerd)
+</h4>
+
+<p>Not supported</p>
 
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
@@ -512,13 +558,6 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>expression don't support in filter
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: $.key..
 </code></pre>
 
 <h4 id="Java_com.github.jsurfer">

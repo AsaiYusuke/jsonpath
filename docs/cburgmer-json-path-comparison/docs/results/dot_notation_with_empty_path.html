@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot notation with empty path</h1>
@@ -17,6 +18,13 @@
 
 <h3>Other responses</h3>
 
+<h4 id="Bash_JSONPath.sh">
+Bash (JSONPath.sh)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
 <h4 id="Clojure_json-path">
 Clojure (json-path)
 ¹
@@ -27,6 +35,19 @@ Clojure (json-path)
   "''": "nice",
   "key": 42
 }
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<pre><code>[
+  {
+    "": 9001,
+    "''": "nice",
+    "key": 42
+  }
+]
 </code></pre>
 
 <h4 id="Elixir_jaxon">
@@ -182,26 +203,12 @@ dotNET (JsonPathLib)
 
 <h3>Errors</h3>
 
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
-</h4>
-
-<pre><code>Expecting value: line 3 column 1 (char 2)
-</code></pre>
-
 <h4 id="Golang_github.com-bhmj-jsonslice">
 Golang (github.com-bhmj-jsonslice)
 ¹
 </h4>
 
 <pre><code>path: unexpected end of path at 2
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: $.
 </code></pre>
 
 <h2>Footnotes</h2>

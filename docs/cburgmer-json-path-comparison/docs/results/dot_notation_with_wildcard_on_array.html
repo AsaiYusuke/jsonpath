@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot notation with wildcard on array</h1>
@@ -34,6 +35,19 @@
 </code></pre>
 
 <h3>Other responses</h3>
+
+<h4 id="Bash_JSONPath.sh">
+Bash (JSONPath.sh)
+</h4>
+
+<pre><code>[
+  "string",
+  42,
+  "value",
+  0,
+  1
+]
+</code></pre>
 
 <h4 id="C_json-glib">
 C (json-glib)
@@ -96,37 +110,12 @@ dotNET (Json.NET)
 
 <h3>Errors</h3>
 
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
-</h4>
-
-<pre><code>Extra data: line 4 column 6 (char 28)
-[
-    "string",
-    42
-    ],
-    {
-        "key":"value"
-    },
-        0,
-        1
-    }
-]
-</code></pre>
-
 <h4 id="Golang_github.com-oliveagle-jsonpath">
 Golang (github.com-oliveagle-jsonpath)
 ¹
 </h4>
 
 <pre><code>expression don't support in filter
-</code></pre>
-
-<h4 id="dotNET_JsonPath.Net">
-dotNET (JsonPath.Net)
-</h4>
-
-<pre><code>'s' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 1.
 </code></pre>
 
 <h2>Footnotes</h2>

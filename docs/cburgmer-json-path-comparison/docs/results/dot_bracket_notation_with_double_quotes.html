@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot bracket notation with double quotes</h1>
@@ -20,9 +21,9 @@
 Bash (JSONPath.sh)
 </h4>
 
-<pre><code>{
-  "key": "value"
-}
+<pre><code>[
+  "value"
+]
 </code></pre>
 
 <h4 id="C_json-glib">
@@ -41,6 +42,13 @@ Cpp (jsoncons)
 <p>Not supported</p>
 
 <pre><code>Expected a name or index following the dot at line 1 and column 3
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<pre><code>[]
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -106,6 +114,12 @@ Golang (github.com-bhmj-jsonslice)
 <pre><code>"value"
 </code></pre>
 
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<p>Not supported</p>
+
 <h4 id="Golang_github.com-spyzhov-ajson">
 Golang (github.com-spyzhov-ajson)
 </h4>
@@ -144,6 +158,12 @@ JavaScript (Goessner)
 
 <pre><code>jsonpath returned false, this might indicate an error
 </code></pre>
+
+<h4 id="JavaScript_brunerd">
+JavaScript (brunerd)
+</h4>
+
+<p>Not supported</p>
 
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
@@ -329,6 +349,21 @@ dotNET (Json.NET)
 <pre><code>Unexpected character while parsing path indexer: "
 </code></pre>
 
+<h4 id="dotNET_JsonPath.Net">
+dotNET (JsonPath.Net)
+</h4>
+
+<pre><code>[
+  "value",
+  [
+    {
+      "key": 42
+    }
+  ],
+  42
+]
+</code></pre>
+
 <h4 id="dotNET_JsonPathLib">
 dotNET (JsonPathLib)
 </h4>
@@ -381,20 +416,6 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>strconv.Atoi: parsing "\"key\"": invalid syntax
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: $.["key"]
-</code></pre>
-
-<h4 id="dotNET_JsonPath.Net">
-dotNET (JsonPath.Net)
-</h4>
-
-<pre><code>'v' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 1.
 </code></pre>
 
 <h2>Footnotes</h2>

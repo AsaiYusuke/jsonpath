@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Filter expression with equals object</h1>
@@ -58,6 +59,13 @@
 
 <h3>Other responses</h3>
 
+<h4 id="Bash_JSONPath.sh">
+Bash (JSONPath.sh)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
 <h4 id="C_json-glib">
 C (json-glib)
 </h4>
@@ -93,6 +101,15 @@ Cpp (jsoncons)
 ]
 </code></pre>
 
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>FormatException: Filter not found: "."
+</code></pre>
+
 <h4 id="Elixir_ExJsonPath">
 Elixir (ExJsonPath)
 </h4>
@@ -126,7 +143,7 @@ Golang (github.com-AsaiYusuke-jsonpath)
 
 <p>Not supported</p>
 
-<pre><code>invalid syntax (position=9, reason=the omission of '$' allowed only at the beginning, near={"k":"v"})])
+<pre><code>invalid syntax (position=1, reason=unrecognized input, near=[?(@.d=={"k":"v"})])
 </code></pre>
 
 <h4 id="Golang_github.com-PaesslerAG-jsonpath">
@@ -138,6 +155,12 @@ Golang (github.com-PaesslerAG-jsonpath)
 
 <pre><code>parsing error: $[?(@.d=={"k":"v"})] :1:10 - 1:11 unexpected "{" while scanning extensions
 </code></pre>
+
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<p>Not supported</p>
 
 <h4 id="Golang_github.com-oliveagle-jsonpath">
 Golang (github.com-oliveagle-jsonpath)
@@ -497,13 +520,6 @@ o 1:1-1:2 Start
 </code></pre>
 
 <h3>Errors</h3>
-
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
-</h4>
-
-<pre><code>Expecting value: line 3 column 1 (char 2)
-</code></pre>
 
 <h4 id="Erlang_ejsonpath">
 Erlang (ejsonpath)

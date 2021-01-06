@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Filter expression with different ungrouped operators</h1>
@@ -49,35 +50,19 @@ Bash (JSONPath.sh)
 </h4>
 
 <pre><code>[
-  {
-    "a": true,
-    "b": true
-  },
-  {
-    "a": true,
-    "b": true,
-    "c": true
-  },
-  {
-    "b": true,
-    "c": true
-  },
-  {
-    "a": true,
-    "c": true
-  },
-  {
-    "a": true
-  },
-  {
-    "b": true
-  },
-  {
-    "c": true
-  },
-  {
-    "d": true
-  }
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
 ]
 </code></pre>
 
@@ -120,6 +105,15 @@ Cpp (jsoncons)
     "c": true
   }
 ]
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>FormatException: Filter not found: "."
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -215,6 +209,34 @@ Golang (github.com-bhmj-jsonslice)
   {
     "a": true,
     "b": true,
+    "c": true
+  }
+]
+</code></pre>
+
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<pre><code>[
+  {
+    "a": true,
+    "b": true
+  },
+  {
+    "a": true,
+    "b": true,
+    "c": true
+  },
+  {
+    "b": true,
+    "c": true
+  },
+  {
+    "a": true,
+    "c": true
+  },
+  {
     "c": true
   }
 ]

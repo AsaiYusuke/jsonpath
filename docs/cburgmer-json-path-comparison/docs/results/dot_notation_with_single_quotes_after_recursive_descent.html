@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot notation with single quotes after recursive descent</h1>
@@ -28,22 +29,12 @@
 Bash (JSONPath.sh)
 </h4>
 
-<pre><code>{
-  "key": "top",
-  "object": {
-    "array": [
-      {
-        "key": "something"
-      },
-      {
-        "key": {
-          "key": "russian dolls"
-        }
-      }
-    ],
-    "key": "value"
-  }
-}
+<pre><code>[
+  "russian dolls",
+  "something",
+  "top",
+  "value"
+]
 </code></pre>
 
 <h4 id="C_json-glib">
@@ -87,6 +78,21 @@ Cpp (jsoncons)
   "value",
   {
     "key": "russian dolls"
+  }
+]
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<pre><code>[
+  0,
+  100,
+  42,
+  99,
+  {
+    "'key'": 99
   }
 ]
 </code></pre>
@@ -152,6 +158,12 @@ Golang (github.com-bhmj-jsonslice)
 ]
 </code></pre>
 
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<p>Not supported</p>
+
 <h4 id="Golang_github.com-spyzhov-ajson">
 Golang (github.com-spyzhov-ajson)
 </h4>
@@ -208,6 +220,12 @@ JavaScript (Goessner)
   }
 ]
 </code></pre>
+
+<h4 id="JavaScript_brunerd">
+JavaScript (brunerd)
+</h4>
+
+<p>Not supported</p>
 
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
@@ -569,13 +587,6 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>expression don't support in filter
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: $..'key'
 </code></pre>
 
 <h2>Footnotes</h2>

@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Filter expression with not equals</h1>
@@ -33,6 +34,13 @@
 <h2>Results</h2>
 
 <h3>Other responses</h3>
+
+<h4 id="Bash_JSONPath.sh">
+Bash (JSONPath.sh)
+</h4>
+
+<pre><code>[]
+</code></pre>
 
 <h4 id="C_json-glib">
 C (json-glib)
@@ -181,6 +189,15 @@ Cpp (jsoncons)
     }
   }
 ]
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>FormatException: Filter not found: "."
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -538,6 +555,77 @@ Golang (github.com-PaesslerAG-jsonpath)
     "key": {
       "some": 42
     }
+  }
+]
+</code></pre>
+
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<pre><code>[
+  {
+    "key": 0
+  },
+  {
+    "key": -1
+  },
+  {
+    "key": 1
+  },
+  {
+    "key": 41
+  },
+  {
+    "key": 43
+  },
+  {
+    "key": 42.0001
+  },
+  {
+    "key": 41.9999
+  },
+  {
+    "key": 100
+  },
+  {
+    "key": "some"
+  },
+  {
+    "key": "42"
+  },
+  {
+    "key": null
+  },
+  {
+    "key": 420
+  },
+  {
+    "key": ""
+  },
+  {
+    "key": {}
+  },
+  {
+    "key": []
+  },
+  {
+    "key": [
+      42
+    ]
+  },
+  {
+    "key": {
+      "key": 42
+    }
+  },
+  {
+    "key": {
+      "some": 42
+    }
+  },
+  {
+    "some": "value"
   }
 ]
 </code></pre>
@@ -1866,13 +1954,6 @@ Proposal (A)
 </code></pre>
 
 <h3>Errors</h3>
-
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
-</h4>
-
-<pre><code>Expecting value: line 3 column 1 (char 2)
-</code></pre>
 
 <h4 id="Golang_github.com-bhmj-jsonslice">
 Golang (github.com-bhmj-jsonslice)

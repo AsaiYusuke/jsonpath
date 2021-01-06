@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot notation without root</h1>
@@ -13,16 +14,23 @@
 
 <h2>Results</h2>
 
-<h3>Other responses</h3>
+<h3 id="consensus">Consensus</h3>
 
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
+<pre><code>[
+  "value"
+]
+</code></pre>
+
+<h4>
+Scalar consensus
 </h4>
 
-<pre><code>{
-  "key": "value"
-}
+<p>The scalar consensus applies for implementations which return a single value where only one match is possible (instead of an array of a single value).</p>
+
+<pre><code>"value"
 </code></pre>
+
+<h3>Other responses</h3>
 
 <h4 id="C_json-glib">
 C (json-glib)
@@ -48,15 +56,6 @@ Cpp (jsoncons)
 <p>Not supported</p>
 
 <pre><code>Unexpected end of jsonpath input at line 1 and column 4
-</code></pre>
-
-<h4 id="Elixir_ExJsonPath">
-Elixir (ExJsonPath)
-</h4>
-
-<pre><code>[
-  "value"
-]
 </code></pre>
 
 <h4 id="Elixir_jaxon">
@@ -85,24 +84,6 @@ Erlang (ejsonpath)
 <pre><code>syntax error before: &lt;&lt;"key"&gt;&gt;
 </code></pre>
 
-<h4 id="Golang_github.com-AsaiYusuke-jsonpath">
-Golang (github.com-AsaiYusuke-jsonpath)
-²
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="Golang_github.com-PaesslerAG-jsonpath">
-Golang (github.com-PaesslerAG-jsonpath)
-¹
-</h4>
-
-<pre><code>"value"
-</code></pre>
-
 <h4 id="Golang_github.com-spyzhov-ajson">
 Golang (github.com-spyzhov-ajson)
 </h4>
@@ -110,15 +91,6 @@ Golang (github.com-spyzhov-ajson)
 <p>Not supported</p>
 
 <pre><code>wrong symbol 'k' at 0
-</code></pre>
-
-<h4 id="Golang_github.com-vmware-labs-yaml-jsonpath">
-Golang (github.com-vmware-labs-yaml-jsonpath)
-</h4>
-
-<pre><code>[
-  "value"
-]
 </code></pre>
 
 <h4 id="Haskell_jsonpath">
@@ -132,33 +104,11 @@ Haskell (jsonpath)
  Error: searchBeginningWithSlice: string
 </code></pre>
 
-<h4 id="JavaScript_Goessner">
-JavaScript (Goessner)
-²
+<h4 id="JavaScript_brunerd">
+JavaScript (brunerd)
 </h4>
 
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="JavaScript_jsonpath">
-JavaScript (jsonpath)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="JavaScript_jsonpath-plus">
-JavaScript (jsonpath-plus)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
+<p>Not supported</p>
 
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
@@ -167,42 +117,6 @@ Java (com.github.jsurfer)
 <p>Not supported</p>
 
 <pre><code>org.antlr.v4.runtime.misc.ParseCancellationException
-</code></pre>
-
-<h4 id="Java_com.jayway.jsonpath">
-Java (com.jayway.jsonpath)
-¹
-³
-</h4>
-
-<pre><code>"value"
-</code></pre>
-
-<h4 id="Kotlin_com.nfeld.jsonpathkt">
-Kotlin (com.nfeld.jsonpathkt)
-¹
-</h4>
-
-<pre><code>"value"
-</code></pre>
-
-<h4 id="Objective-C_SMJJSONPath">
-Objective-C (SMJJSONPath)
-¹
-³
-</h4>
-
-<pre><code>"value"
-</code></pre>
-
-<h4 id="PHP_Goessner">
-PHP (Goessner)
-²
-</h4>
-
-<pre><code>[
-  "value"
-]
 </code></pre>
 
 <h4 id="PHP_galbar-jsonpath">
@@ -224,43 +138,6 @@ PHP (remorhaz-jsonpath)
 <pre><code>Error: 'Failed to build AST from JSONPath query: key'
 </code></pre>
 
-<h4 id="PHP_softcreatr-jsonpath">
-PHP (softcreatr-jsonpath)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="Perl_JSON-Path">
-Perl (JSON-Path)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="Python_jsonpath">
-Python (jsonpath)
-²
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="Python_jsonpath-rw">
-Python (jsonpath-rw)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
 <h4 id="Python_jsonpath2">
 Python (jsonpath2)
 </h4>
@@ -269,24 +146,6 @@ Python (jsonpath2)
 
 <pre><code>line 1:0 mismatched input 'key' expecting '$'
 ValueError("line 1:0 mismatched input 'key' expecting '$'")
-</code></pre>
-
-<h4 id="Raku_JSON-Path">
-Raku (JSON-Path)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
-<h4 id="Ruby_jsonpath">
-Ruby (jsonpath)
-</h4>
-
-<pre><code>[
-  "value"
-]
 </code></pre>
 
 <h4 id="Rust_jsonpath">
@@ -318,15 +177,6 @@ Scala (jsonpath)
 <pre><code>JPError('$' expected but 'k' found)
 </code></pre>
 
-<h4 id="dotNET_Json.NET">
-dotNET (Json.NET)
-</h4>
-
-<pre><code>[
-  "value"
-]
-</code></pre>
-
 <h4 id="dotNET_JsonPath.Net">
 dotNET (JsonPath.Net)
 </h4>
@@ -334,15 +184,6 @@ dotNET (JsonPath.Net)
 <p>Not supported</p>
 
 <pre><code>Could not identify selector
-</code></pre>
-
-<h4 id="dotNET_JsonPathLib">
-dotNET (JsonPathLib)
-</h4>
-
-<pre><code>[
-  "value"
-]
 </code></pre>
 
 <h4 id="dotNET_Manatee.Json">
@@ -381,13 +222,6 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>should start with '$'
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: key
 </code></pre>
 
 <h2>Footnotes</h2>

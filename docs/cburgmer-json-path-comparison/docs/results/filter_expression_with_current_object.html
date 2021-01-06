@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Filter expression with current object</h1>
@@ -24,6 +25,13 @@
 <h2>Results</h2>
 
 <h3>Other responses</h3>
+
+<h4 id="Bash_JSONPath.sh">
+Bash (JSONPath.sh)
+</h4>
+
+<pre><code>[]
+</code></pre>
 
 <h4 id="C_json-glib">
 C (json-glib)
@@ -70,6 +78,15 @@ Cpp (jsoncons)
   false,
   true
 ]
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>FormatException: Unexpected bracket expression
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -156,6 +173,12 @@ Golang (github.com-bhmj-jsonslice)
 
 <pre><code>[]
 </code></pre>
+
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<p>Not supported</p>
 
 <h4 id="Golang_github.com-oliveagle-jsonpath">
 Golang (github.com-oliveagle-jsonpath)
@@ -493,6 +516,25 @@ dotNET (Json.NET)
 ]
 </code></pre>
 
+<h4 id="dotNET_JsonPath.Net">
+dotNET (JsonPath.Net)
+</h4>
+
+<pre><code>[
+  "some value",
+  null,
+  "value",
+  0,
+  1,
+  -1,
+  "",
+  [],
+  {},
+  false,
+  true
+]
+</code></pre>
+
 <h4 id="dotNET_Manatee.Json">
 dotNET (Manatee.Json)
 </h4>
@@ -523,14 +565,6 @@ Proposal (A)
 
 <h3>Errors</h3>
 
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
-</h4>
-
-<pre><code>grep: Unmatched ( or \(
-Expecting value: line 3 column 1 (char 2)
-</code></pre>
-
 <h4 id="JavaScript_jsonpath-plus">
 JavaScript (jsonpath-plus)
 </h4>
@@ -558,13 +592,6 @@ Perl (JSON-Path)
 </h4>
 
 <pre><code>non-safe evaluation, died at main.pl line 11.
-</code></pre>
-
-<h4 id="dotNET_JsonPath.Net">
-dotNET (JsonPath.Net)
-</h4>
-
-<pre><code>'s' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 1.
 </code></pre>
 
 <h4 id="dotNET_JsonPathLib">

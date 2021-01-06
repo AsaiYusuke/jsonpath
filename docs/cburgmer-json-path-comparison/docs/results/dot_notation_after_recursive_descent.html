@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot notation after recursive descent</h1>
@@ -39,22 +40,12 @@
 Bash (JSONPath.sh)
 </h4>
 
-<pre><code>{
-  "key": "top",
-  "object": {
-    "array": [
-      {
-        "key": "something"
-      },
-      {
-        "key": {
-          "key": "russian dolls"
-        }
-      }
-    ],
-    "key": "value"
-  }
-}
+<pre><code>[
+  "russian dolls",
+  "something",
+  "top",
+  "value"
+]
 </code></pre>
 
 <h4 id="C_json-glib">
@@ -125,13 +116,6 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>expression don't support in filter
-</code></pre>
-
-<h4 id="dotNET_JsonPath.Net">
-dotNET (JsonPath.Net)
-</h4>
-
-<pre><code>'top,value,something,{"key": "russian dolls"},russian dolls]' is an invalid JSON literal. Expected the literal 'true'. LineNumber: 0 | BytePositionInLine: 2.
 </code></pre>
 
 <h2>Footnotes</h2>

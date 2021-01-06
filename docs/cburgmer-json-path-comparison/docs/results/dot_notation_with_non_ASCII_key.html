@@ -1,3 +1,4 @@
+<meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
 <h1>Dot notation with non ASCII key</h1>
@@ -31,6 +32,13 @@ Scalar consensus
 
 <h3>Other responses</h3>
 
+<h4 id="Bash_JSONPath.sh">
+Bash (JSONPath.sh)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
 <h4 id="Clojure_json-path">
 Clojure (json-path)
 ¹
@@ -39,6 +47,17 @@ Clojure (json-path)
 <pre><code>{
   "\u5c6c\u6027": "value"
 }
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<pre><code>[
+  {
+    "\u5c6c\u6027": "value"
+  }
+]
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -60,6 +79,12 @@ Haskell (jsonpath)
 <pre><code>Invalid JSONPath: $.屬性
  Error: searchBeginningWithSlice: string
 </code></pre>
+
+<h4 id="JavaScript_brunerd">
+JavaScript (brunerd)
+</h4>
+
+<p>Not supported</p>
 
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
@@ -116,32 +141,11 @@ Rust (jsonpath)
 
 <h3>Errors</h3>
 
-<h4 id="Bash_JSONPath.sh">
-Bash (JSONPath.sh)
-</h4>
-
-<pre><code>Expecting value: line 3 column 1 (char 2)
-</code></pre>
-
 <h4 id="Erlang_ejsonpath">
 Erlang (ejsonpath)
 </h4>
 
 <pre><code>Timeout
-</code></pre>
-
-<h4 id="JavaScript_brunerd">
-JavaScript (brunerd)
-</h4>
-
-<pre><code>Malformed path expression: $.屬性
-</code></pre>
-
-<h4 id="dotNET_JsonPath.Net">
-dotNET (JsonPath.Net)
-</h4>
-
-<pre><code>'v' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 1.
 </code></pre>
 
 <h2>Footnotes</h2>
