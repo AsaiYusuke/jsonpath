@@ -595,7 +595,7 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction27:
 
 			if !p.hasErr() {
-				query := p.pop().(syntaxQuery)
+				query := p.pop()
 				p.push(query)
 
 				if logicalNot, ok := query.(*syntaxLogicalNot); ok {
@@ -612,7 +612,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction28:
 
-			_ = p.pop().(bool)
+			_ = p.pop()
 			jsonpathFilter := p.pop().(syntaxQuery)
 			if text[0:1] == `!` {
 				p.pushLogicalNot(jsonpathFilter)
@@ -3908,7 +3908,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		},
 		/* 87 Action27 <- <{
 		        if !p.hasErr() {
-		            query := p.pop().(syntaxQuery)
+		            query := p.pop()
 		            p.push(query)
 
 					if logicalNot, ok := query.(*syntaxLogicalNot); ok {
@@ -3930,7 +3930,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 88 Action28 <- <{
-		    _ = p.pop().(bool)
+		    _ = p.pop()
 		    jsonpathFilter := p.pop().(syntaxQuery)
 		    if text[0:1] == `!` {
 		        p.pushLogicalNot(jsonpathFilter)

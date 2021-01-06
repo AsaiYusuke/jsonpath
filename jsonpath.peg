@@ -203,7 +203,7 @@ basicQuery <-
     
     < comparator > {
         if !p.hasErr() {
-            query := p.pop().(syntaxQuery)
+            query := p.pop()
             p.push(query)
 
 			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
@@ -220,7 +220,7 @@ basicQuery <-
     } /
     
     < logicNot? jsonpathFilter > {
-        _ = p.pop().(bool)
+        _ = p.pop()
         jsonpathFilter := p.pop().(syntaxQuery)
         if text[0:1] == `!` {
             p.pushLogicalNot(jsonpathFilter)
