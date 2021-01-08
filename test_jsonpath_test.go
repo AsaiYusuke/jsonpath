@@ -222,7 +222,7 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.length`,
 				inputJSON:   `["length",1,2]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.length`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.length`},
 			},
 		},
 		`character-type::Non-ASCII-syntax-accepted-in-JSON`: []TestCase{
@@ -539,42 +539,42 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.2`,
 				inputJSON:   `["a","b",{"2":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.2`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.2`},
 			},
 			{
 				jsonpath:    `$.-1`,
 				inputJSON:   `["a","b",{"2":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.-1`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.-1`},
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `string`, path: `.d`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `string`, path: `.d`},
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":123}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `float64`, path: `.d`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `.d`},
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":true}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `bool`, path: `.d`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `bool`, path: `.d`},
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":null}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `null`, path: `.d`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `null`, path: `.d`},
 			},
 			{
 				jsonpath:    `$.a`,
 				inputJSON:   `[1,2]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.a`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.a`},
 			},
 			{
 				jsonpath:    `$.a`,
 				inputJSON:   `[{"a":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `.a`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.a`},
 			},
 		},
 	}
@@ -1054,7 +1054,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				jsonpath:     `$[''][0]`,
 				inputJSON:    `[1,2,3]`,
 				expectedJSON: `[1]`,
-				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['']`},
+				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['']`},
 			},
 		},
 		`mixing-bracket-and-dot-notation`: []TestCase{
@@ -1073,12 +1073,39 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['a']`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a']`},
 			},
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `{}`,
 				expectedErr: ErrorMemberNotExist{path: `['a']`},
+			},
+		},
+		`type-unmatched`: []TestCase{
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `"abc"`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `string`, path: `['a']`},
+			},
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `123`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `['a']`},
+			},
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `true`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `bool`, path: `['a']`},
+			},
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `null`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `null`, path: `['a']`},
+			},
+			{
+				jsonpath:    `$['a']`,
+				inputJSON:   `[1,2,3]`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a']`},
 			},
 		},
 	}
@@ -1215,7 +1242,7 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 			{
 				jsonpath:    `$['a','b']['c','d'].e`,
 				inputJSON:   `{"a":{"c":1},"b":{"c":2}}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `float64`, path: `.e`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `.e`},
 			},
 			{
 				jsonpath:    `$['a','b']['c','d'].e`,
@@ -1266,7 +1293,34 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `array`, path: `['a','b']`},
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a','b']`},
+			},
+		},
+		`type-unmatched`: []TestCase{
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `"abc"`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `string`, path: `['a','b']`},
+			},
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `123`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `['a','b']`},
+			},
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `true`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `bool`, path: `['a','b']`},
+			},
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `null`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `null`, path: `['a','b']`},
+			},
+			{
+				jsonpath:    `$['a','b']`,
+				inputJSON:   `[1,2,3]`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a','b']`},
 			},
 		},
 		`child-error`: []TestCase{

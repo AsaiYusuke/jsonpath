@@ -156,7 +156,7 @@ func ExampleErrorTypeUnmatched() {
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// jsonpath.ErrorTypeUnmatched, type unmatched (expected=object, found=array, path=.a)
+	// jsonpath.ErrorTypeUnmatched, type unmatched (expected=object, found=[]interface {}, path=.a)
 }
 
 func ExampleErrorNoneMatched() {
