@@ -24,7 +24,7 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 		}
 	}
 
-	if _, ok = srcMap[i.identifier]; !ok {
+	if _, ok := srcMap[i.identifier]; !ok {
 		return ErrorMemberNotExist{path: i.text}
 	}
 
