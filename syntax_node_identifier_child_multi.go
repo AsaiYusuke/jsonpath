@@ -47,9 +47,11 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	childErrorMap map[error]struct{}) error {
 
 	var lastError error
+	var partialFound bool
 
 	for index := range i.identifiers {
 		if _, ok := srcMap[i.identifiers[index]]; ok {
+			partialFound = true
 			localKey := i.identifiers[index]
 			err := i.retrieveNext(
 				root, result,
@@ -64,6 +66,12 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 				lastError = err
 			}
 		}
+	}
+
+	if !partialFound {
+		err := ErrorMemberNotExist{path: i.text}
+		childErrorMap[err] = struct{}{}
+		lastError = err
 	}
 
 	return lastError

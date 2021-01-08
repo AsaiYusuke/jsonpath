@@ -42,6 +42,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	childErrorMap map[error]struct{}) error {
 
 	var lastError error
+	var partialFound bool
 
 	index, keys := 0, make(sort.StringSlice, len(srcMap))
 	for key := range srcMap {
@@ -59,6 +60,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	if len(computedMap) > 0 {
 		for index := range keys {
 			if _, ok := computedMap[index]; ok {
+				partialFound = true
 				localKey := keys[index]
 				err := f.retrieveNext(
 					root, result,
@@ -76,6 +78,12 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		}
 	}
 
+	if !partialFound {
+		err := ErrorMemberNotExist{path: f.text}
+		childErrorMap[err] = struct{}{}
+		lastError = err
+	}
+
 	return lastError
 }
 
@@ -84,6 +92,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 	childErrorMap map[error]struct{}) error {
 
 	var lastError error
+	var partialFound bool
 
 	argumentMap := make(map[int]interface{}, len(srcList))
 	for index := range srcList {
@@ -95,6 +104,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 	if len(computedMap) > 0 {
 		for index := range srcList {
 			if _, ok := computedMap[index]; ok {
+				partialFound = true
 				localIndex := index
 				err := f.retrieveNext(
 					root, result,
@@ -110,6 +120,12 @@ func (f *syntaxFilterQualifier) retrieveList(
 				}
 			}
 		}
+	}
+
+	if !partialFound {
+		err := ErrorMemberNotExist{path: f.text}
+		childErrorMap[err] = struct{}{}
+		lastError = err
 	}
 
 	return lastError
