@@ -209,10 +209,10 @@ func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
 	})
 }
 
-func (p *jsonPathParser) pushChildWildcardIdentifier() {
+func (p *jsonPathParser) pushChildWildcardIdentifier(text string) {
 	p.push(&syntaxChildWildcardIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:         `*`,
+			text:         text,
 			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
@@ -298,6 +298,14 @@ func (p *jsonPathParser) pushIndexSubscript(text string) {
 
 func (p *jsonPathParser) pushOmittedIndexSubscript(text string) {
 	p._pushIndexSubscript(text, true)
+}
+
+func (p *jsonPathParser) pushWildcardSubscript() {
+	p.push(&syntaxWildcardSubscript{
+		syntaxBasicSubscript: &syntaxBasicSubscript{
+			valueGroup: true,
+		},
+	})
 }
 
 func (p *jsonPathParser) pushLogicalOr(leftQuery, rightQuery syntaxQuery) {

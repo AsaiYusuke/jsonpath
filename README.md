@@ -205,6 +205,16 @@ srcJSON  : {"abc.def":1}
 Output   : 1
 ```
 
+### Wildcard in qualifier
+
+The wildcard in qualifier can be specified mixed with other subscript syntaxes.
+
+```text
+JSONPath : $[0,1:3,*]
+srcJSON  : [0,1,2,3,4,5]
+Output   : [0,1,2,0,1,2,3,4,5]
+```
+
 ### Regular expression
 
 The regular expression syntax works as a regular expression in Go lang.

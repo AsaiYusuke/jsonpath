@@ -11,6 +11,23 @@ type syntaxUnionQualifier struct {
 func (u *syntaxUnionQualifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
+	if _, ok := current.(map[string]interface{}); ok {
+		if len(u.subscripts) == 1 {
+			if _, ok := u.subscripts[0].(*syntaxWildcardSubscript); ok {
+				// Switch to the all node analysis mode,
+				// if "current" variable points the map structure and
+				// specifying the Wildcard subscript
+				wildcardIdentifier := syntaxChildWildcardIdentifier{
+					syntaxBasicNode: &syntaxBasicNode{
+						text: u.text,
+						next: u.next,
+					},
+				}
+				return wildcardIdentifier.retrieve(root, current, result)
+			}
+		}
+	}
+
 	srcArray, ok := current.([]interface{})
 	if !ok {
 		foundType := `null`
