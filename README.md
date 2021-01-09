@@ -75,7 +75,7 @@ output2, err2 := jsonPath(src2)
 
 ### * Error handling
 
-If there is a problem with the execution of the `Retrieve`, `Prepare` or prepared *parser-functions*, an error type is returned.
+If there is a problem with the execution of the `Retrieve`, `Parse` or prepared *parser-functions*, an error type is returned.
 These error types define the corresponding symptom, as listed below:
 
 #### Syntax analyze errors from `Retrieve`, `Parse`
