@@ -71,13 +71,6 @@ func (p *jsonPathParser) unescape(text string) string {
 	})
 }
 
-func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
-	for checkNode != nil {
-		checkNode.setAccessorMode(mode)
-		checkNode = checkNode.getNext()
-	}
-}
-
 func (p *jsonPathParser) syntaxErr(pos int, reason string, buffer string) {
 	p.thisError = ErrorInvalidSyntax{
 		position: pos,
@@ -109,11 +102,6 @@ func (p *jsonPathParser) setNodeChain() {
 	}
 }
 
-func (p *jsonPathParser) setLastNodeText(text string) {
-	node := p.params[len(p.params)-1].(syntaxNode)
-	node.setText(text)
-}
-
 func (p *jsonPathParser) updateRootValueGroup() {
 	rootNode := p.params[0].(syntaxNode)
 	checkNode := rootNode
@@ -122,6 +110,35 @@ func (p *jsonPathParser) updateRootValueGroup() {
 			rootNode.setValueGroup()
 			break
 		}
+		checkNode = checkNode.getNext()
+	}
+}
+
+func (p *jsonPathParser) deleteRootIdentifier(targetNode syntaxNode) syntaxNode {
+	_, isRootIdentifier := targetNode.(*syntaxRootIdentifier)
+	_, isCurrentRootIdentifier := targetNode.(*syntaxCurrentRootIdentifier)
+	if isRootIdentifier || isCurrentRootIdentifier {
+		if targetNode.getNext() != nil && targetNode.isValueGroup() {
+			targetNode.getNext().setValueGroup()
+		}
+		return targetNode.getNext()
+	}
+
+	if aggregateFunction, ok := targetNode.(*syntaxAggregateFunction); ok {
+		aggregateFunction.param = p.deleteRootIdentifier(aggregateFunction.param)
+	}
+
+	return targetNode
+}
+
+func (p *jsonPathParser) setLastNodeText(text string) {
+	node := p.params[len(p.params)-1].(syntaxNode)
+	node.setText(text)
+}
+
+func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
+	for checkNode != nil {
+		checkNode.setAccessorMode(mode)
 		checkNode = checkNode.getNext()
 	}
 }

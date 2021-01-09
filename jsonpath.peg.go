@@ -454,7 +454,7 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction0:
 
-			p.root = p.pop().(syntaxNode)
+			p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
 
 		case ruleAction1:
 
@@ -694,10 +694,10 @@ func (p *pegJSONPathParser) Execute() {
 
 			switch checkNode.(type) {
 			case *syntaxRootIdentifier:
-				p.pushCompareParameterRoot(node)
+				p.pushCompareParameterRoot(p.deleteRootIdentifier(node))
 				p.push(true)
 			case *syntaxCurrentRootIdentifier:
-				p.pushCompareParameterCurrentRoot(node)
+				p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
 				p.push(false)
 			default:
 				p.push(&syntaxQueryParamRoot{})
@@ -3631,7 +3631,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 59 Action0 <- <{
-		    p.root = p.pop().(syntaxNode)
+		    p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
 		}> */
 		func() bool {
 			{
@@ -4072,10 +4072,10 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 
 		    switch checkNode.(type) {
 		    case *syntaxRootIdentifier:
-		        p.pushCompareParameterRoot(node)
+		        p.pushCompareParameterRoot(p.deleteRootIdentifier(node))
 		        p.push(true)
 		    case *syntaxCurrentRootIdentifier:
-		        p.pushCompareParameterCurrentRoot(node)
+		        p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
 		        p.push(false)
 		    default:
 		        p.push(&syntaxQueryParamRoot{})

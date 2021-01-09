@@ -6,7 +6,7 @@ type pegJSONPathParser Peg {
 
 expression <-
     jsonpath END {
-        p.root = p.pop().(syntaxNode)
+        p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
     } /
 
     jsonpath? < .* > END {
@@ -319,10 +319,10 @@ jsonpathFilter <-
 
         switch checkNode.(type) {
         case *syntaxRootIdentifier:
-            p.pushCompareParameterRoot(node)
+            p.pushCompareParameterRoot(p.deleteRootIdentifier(node))
             p.push(true)
         case *syntaxCurrentRootIdentifier:
-            p.pushCompareParameterCurrentRoot(node)
+            p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
             p.push(false)
         default:
             p.push(&syntaxQueryParamRoot{})

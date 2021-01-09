@@ -11,13 +11,22 @@ func (f *syntaxAggregateFunction) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
 	var values []interface{}
-	if err := f.param.retrieve(root, current, &values); err != nil {
-		return err
-	}
 
-	if !f.param.isValueGroup() {
-		if arrayParam, ok := values[0].([]interface{}); ok {
+	if f.param == nil {
+		if arrayParam, ok := current.([]interface{}); ok {
 			values = arrayParam
+		} else {
+			values = []interface{}{current}
+		}
+	} else {
+		if err := f.param.retrieve(root, current, &values); err != nil {
+			return err
+		}
+
+		if !f.param.isValueGroup() {
+			if arrayParam, ok := values[0].([]interface{}); ok {
+				values = arrayParam
+			}
 		}
 	}
 

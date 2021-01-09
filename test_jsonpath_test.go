@@ -2720,6 +2720,11 @@ func TestRetrieve_filterExist(t *testing.T) {
 		},
 		`root`: []TestCase{
 			{
+				jsonpath:     `$[?($)]`,
+				inputJSON:    `[{"a":1},{"b":2}]`,
+				expectedJSON: `[{"a":1},{"b":2}]`,
+			},
+			{
 				jsonpath:     `$[?($[0].a)]`,
 				inputJSON:    `[{"a":1},{"b":2}]`,
 				expectedJSON: `[{"a":1},{"b":2}]`,
@@ -5658,4 +5663,12 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	parser.PrintSyntaxTree()
 
 	os.Stdout = stdoutBackup
+}
+
+func TestUnnecessaryCodes(t *testing.T) {
+	var identifier syntaxNode
+	identifier = &syntaxRootIdentifier{}
+	identifier.retrieve(nil, nil, nil)
+	identifier = &syntaxCurrentRootIdentifier{}
+	identifier.retrieve(nil, nil, nil)
 }
