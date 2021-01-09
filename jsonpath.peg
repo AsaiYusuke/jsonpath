@@ -63,13 +63,12 @@ currentRootIdentifier <-
     }
 
 dotChildIdentifier <-
+    '*' {
+        p.pushChildWildcardIdentifier()
+    } /
+
     < ( '\\' '\\' / '\\' [.[()=!><\t\r\n ] / [^\\.[()=!><\t\r\n ] )+ > !'()' {
-        unescapedText := p.unescape(text)
-        if unescapedText == `*` {
-            p.pushChildWildcardIdentifier(unescapedText)
-        } else {
-            p.pushChildSingleIdentifier(unescapedText)
-        }
+        p.pushChildSingleIdentifier(p.unescape(text))
     }
 
 bracketChildIdentifier <-
