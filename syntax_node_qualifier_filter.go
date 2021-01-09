@@ -55,22 +55,11 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		argumentMap[index] = srcMap[keys[index]]
 	}
 
-	computedMap := f.query.compute(root, argumentMap)
-
-	if len(computedMap) > 0 {
+	if computedMap := f.query.compute(root, argumentMap); len(computedMap) > 0 {
 		for index := range keys {
 			if _, ok := computedMap[index]; ok {
 				partialFound = true
-				localKey := keys[index]
-				err := f.retrieveNext(
-					root, result,
-					func() interface{} {
-						return srcMap[localKey]
-					},
-					func(value interface{}) {
-						srcMap[localKey] = value
-					})
-				if err != nil {
+				if err := f.retrieveMapNext(root, srcMap, keys[index], result); err != nil {
 					childErrorMap[err] = struct{}{}
 					lastError = err
 				}
@@ -99,22 +88,11 @@ func (f *syntaxFilterQualifier) retrieveList(
 		argumentMap[index] = srcList[index]
 	}
 
-	computedMap := f.query.compute(root, argumentMap)
-
-	if len(computedMap) > 0 {
+	if computedMap := f.query.compute(root, argumentMap); len(computedMap) > 0 {
 		for index := range srcList {
 			if _, ok := computedMap[index]; ok {
 				partialFound = true
-				localIndex := index
-				err := f.retrieveNext(
-					root, result,
-					func() interface{} {
-						return srcList[localIndex]
-					},
-					func(value interface{}) {
-						srcList[localIndex] = value
-					})
-				if err != nil {
+				if err := f.retrieveListNext(root, srcList, index, result); err != nil {
 					childErrorMap[err] = struct{}{}
 					lastError = err
 				}

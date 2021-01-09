@@ -28,12 +28,5 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 		return ErrorMemberNotExist{path: i.text}
 	}
 
-	return i.retrieveNext(
-		root, result,
-		func() interface{} {
-			return srcMap[i.identifier]
-		},
-		func(value interface{}) {
-			srcMap[i.identifier] = value
-		})
+	return i.retrieveMapNext(root, srcMap, i.identifier, result)
 }

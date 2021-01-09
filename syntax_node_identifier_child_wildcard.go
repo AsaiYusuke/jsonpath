@@ -48,16 +48,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	}
 	keys.Sort()
 	for index := range keys {
-		localKey := keys[index]
-		err := i.retrieveNext(
-			root, result,
-			func() interface{} {
-				return srcMap[localKey]
-			},
-			func(value interface{}) {
-				srcMap[localKey] = value
-			})
-		if err != nil {
+		if err := i.retrieveMapNext(root, srcMap, keys[index], result); err != nil {
 			childErrorMap[err] = struct{}{}
 			lastError = err
 		}
@@ -73,16 +64,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 	var lastError error
 
 	for index := range srcList {
-		localIndex := index
-		err := i.retrieveNext(
-			root, result,
-			func() interface{} {
-				return srcList[localIndex]
-			},
-			func(value interface{}) {
-				srcList[localIndex] = value
-			})
-		if err != nil {
+		if err := i.retrieveListNext(root, srcList, index, result); err != nil {
 			childErrorMap[err] = struct{}{}
 			lastError = err
 		}

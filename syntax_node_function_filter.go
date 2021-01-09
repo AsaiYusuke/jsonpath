@@ -17,10 +17,5 @@ func (f *syntaxFilterFunction) retrieve(
 		}
 	}
 
-	return f.retrieveNext(
-		root, result,
-		func() interface{} {
-			return filteredValue
-		},
-		nil)
+	return f.retrieveAnyValueNext(root, filteredValue, result)
 }

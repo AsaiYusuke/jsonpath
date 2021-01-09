@@ -7,10 +7,5 @@ type syntaxCurrentRootIdentifier struct {
 func (i *syntaxCurrentRootIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	return i.retrieveNext(
-		root, result,
-		func() interface{} {
-			return current
-		},
-		nil)
+	return i.retrieveAnyValueNext(root, current, result)
 }

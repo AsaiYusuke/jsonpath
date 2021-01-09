@@ -52,16 +52,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	for index := range i.identifiers {
 		if _, ok := srcMap[i.identifiers[index]]; ok {
 			partialFound = true
-			localKey := i.identifiers[index]
-			err := i.retrieveNext(
-				root, result,
-				func() interface{} {
-					return srcMap[localKey]
-				},
-				func(value interface{}) {
-					srcMap[localKey] = value
-				})
-			if err != nil {
+			if err := i.retrieveMapNext(root, srcMap, i.identifiers[index], result); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 			}

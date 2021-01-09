@@ -33,16 +33,7 @@ func (u *syntaxUnionQualifier) retrieve(
 		childErrorMap := make(map[error]struct{}, 1)
 		var lastError error
 		for index := range resultIndexes {
-			localIndex := resultIndexes[index]
-			err := u.retrieveNext(
-				root, result,
-				func() interface{} {
-					return srcArray[localIndex]
-				},
-				func(value interface{}) {
-					srcArray[localIndex] = value
-				})
-			if err != nil {
+			if err := u.retrieveListNext(root, srcArray, resultIndexes[index], result); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 			}
@@ -66,14 +57,7 @@ func (u *syntaxUnionQualifier) retrieve(
 		return ErrorIndexOutOfRange{path: u.text}
 	}
 
-	return u.retrieveNext(
-		root, result,
-		func() interface{} {
-			return srcArray[resultIndexes[0]]
-		},
-		func(value interface{}) {
-			srcArray[resultIndexes[0]] = value
-		})
+	return u.retrieveListNext(root, srcArray, resultIndexes[0], result)
 }
 
 func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {

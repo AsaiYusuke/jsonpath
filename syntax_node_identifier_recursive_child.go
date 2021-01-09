@@ -11,12 +11,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		i.retrieveNext(
-			root, result,
-			func() interface{} {
-				return typedNodes
-			},
-			nil)
+		i.retrieveAnyValueNext(root, typedNodes, result)
 
 		index, keys := 0, make(sort.StringSlice, len(typedNodes))
 		for key := range typedNodes {
@@ -29,12 +24,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		}
 
 	case []interface{}:
-		i.retrieveNext(
-			root, result,
-			func() interface{} {
-				return typedNodes
-			},
-			nil)
+		i.retrieveAnyValueNext(root, typedNodes, result)
 
 		for index := range typedNodes {
 			i.retrieve(root, typedNodes[index], result)

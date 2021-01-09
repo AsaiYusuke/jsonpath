@@ -6,11 +6,5 @@ type syntaxRootIdentifier struct {
 
 func (i *syntaxRootIdentifier) retrieve(
 	root, _ interface{}, result *[]interface{}) error {
-
-	return i.retrieveNext(
-		root, result,
-		func() interface{} {
-			return root
-		},
-		nil)
+	return i.retrieveAnyValueNext(root, root, result)
 }
