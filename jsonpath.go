@@ -52,10 +52,12 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 	root := parser.jsonPathParser.root
 	return func(src interface{}) ([]interface{}, error) {
 		var result []interface{}
-		var err error
-		if root != nil {
-			err = root.retrieve(src, src, &result)
+
+		if root == nil {
+			return append(result, src), nil
 		}
+
+		err := root.retrieve(src, src, &result)
 		return result, err
 	}, nil
 }

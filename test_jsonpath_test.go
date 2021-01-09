@@ -23,7 +23,7 @@ type TestCase struct {
 	resultValidator func(interface{}, []interface{}) error
 }
 
-func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) []interface{} {
+func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) ([]interface{}, error) {
 	jsonPath := testCase.jsonpath
 	hasConfig := false
 	config := Config{}
@@ -54,18 +54,18 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) []
 	if err != nil {
 		if reflect.TypeOf(expectedError) == reflect.TypeOf(err) &&
 			fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
-			return nil
+			return nil, err
 		}
 		t.Errorf("expected error<%s> != actual error<%s>\n",
 			expectedError, err)
-		return nil
+		return nil, err
 	}
 	if expectedError != nil {
 		t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
-		return nil
+		return nil, err
 	}
 
-	return actualObject
+	return actualObject, err
 }
 
 func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
@@ -93,12 +93,12 @@ func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
 						return
 					}
 
-					actualObject := execTestRetrieve(t, src, testCase)
+					actualObject, err := execTestRetrieve(t, src, testCase)
 					if t.Failed() {
 						return
 					}
 
-					if actualObject == nil {
+					if err != nil {
 						return
 					}
 
@@ -1465,6 +1465,11 @@ func TestRetrieve_valueType(t *testing.T) {
 				jsonpath:     `$`,
 				inputJSON:    `[]`,
 				expectedJSON: `[[]]`,
+			},
+			{
+				jsonpath:     `$`,
+				inputJSON:    `[1]`,
+				expectedJSON: `[[1]]`,
 			},
 		},
 		`child`: []TestCase{
