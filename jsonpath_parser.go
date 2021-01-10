@@ -90,6 +90,7 @@ func (p *jsonPathParser) setNodeChain() {
 		for _, next := range p.params[1:] {
 			if funcNode, ok := next.(*syntaxAggregateFunction); ok {
 				funcNode.param = root
+				p.updateAccessorMode(funcNode.param, false)
 				root = funcNode
 				last = root
 				continue

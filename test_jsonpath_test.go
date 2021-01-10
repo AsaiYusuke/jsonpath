@@ -5337,6 +5337,24 @@ func createAccessorModeValidator(
 	}
 }
 
+var getOnlyValidator = func(src interface{}, actualObject []interface{}) error {
+	accessor := actualObject[0].(Accessor)
+
+	if accessor.Set != nil {
+		return fmt.Errorf(`Set != nil`)
+	}
+
+	if !reflect.DeepEqual(accessor.Get(), src) {
+		return fmt.Errorf(`Get != src`)
+	}
+
+	return nil
+}
+
+var echoAggregateFunc = func(param []interface{}) (interface{}, error) {
+	return param, nil
+}
+
 var sliceStructChangedResultValidator = func(src interface{}, actualObject []interface{}) error {
 	srcArray := src.([]interface{})
 	accessor := actualObject[0].(Accessor)
@@ -5608,6 +5626,23 @@ func TestRetrieve_configAccessorMode(t *testing.T) {
 					func(src, value interface{}) {
 						src.([]interface{})[1] = value
 					}),
+			},
+		},
+		`get-only`: []TestCase{
+			{
+				jsonpath:        `$`,
+				inputJSON:       `[1,2,3]`,
+				accessorMode:    true,
+				resultValidator: getOnlyValidator,
+			},
+			{
+				jsonpath:     `$.echo()`,
+				inputJSON:    `[122.345,123.45,123.456]`,
+				accessorMode: true,
+				aggregates: map[string]func([]interface{}) (interface{}, error){
+					`echo`: echoAggregateFunc,
+				},
+				resultValidator: getOnlyValidator,
 			},
 		},
 		`convert-srcJSON`: []TestCase{
