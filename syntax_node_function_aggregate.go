@@ -16,7 +16,7 @@ func (f *syntaxAggregateFunction) retrieve(
 		return err
 	}
 
-	if f.param == nil || !f.param.isValueGroup() {
+	if !f.param.isValueGroup() {
 		if arrayParam, ok := values[0].([]interface{}); ok {
 			values = arrayParam
 		}
