@@ -72,37 +72,34 @@ dotChildIdentifier <-
     }
 
 bracketChildIdentifier <-
-    bracketNodeIdentifiers {
-        identifier := p.pop().([]string)
-        if len(identifier) > 1 {
-            p.pushChildMultiIdentifier(identifier)
-        } else {
-            p.pushChildSingleIdentifier(identifier[0])
-        }
-    }
-
-bracketNodeIdentifiers <-
     bracketNodeIdentifier (
         sepBracketIdentifier bracketNodeIdentifier {
-            identifier2 := p.pop().([]string)
-            identifier1 := p.pop().([]string)
-            p.push(append(identifier1, identifier2...))
+            identifier2 := p.pop().(syntaxNode)
+            identifier1 := p.pop().(syntaxNode)
+            p.pushChildMultiIdentifier(identifier1, identifier2)
         }
-    )*
+    )* !sepBracketIdentifier
 
 bracketNodeIdentifier <-
-    ( singleQuotedNodeIdentifier / doubleQuotedNodeIdentifier ) {
-        p.push([]string{p.pop().(string)})
+    (
+        bracketWildcardIdentifier /
+        singleQuotedNodeIdentifier /
+        doubleQuotedNodeIdentifier
+    )
+
+bracketWildcardIdentifier <-
+    < '*' > {
+        p.pushChildWildcardIdentifier()
     }
 
 singleQuotedNodeIdentifier <-
     '\'' < ( '\\' '\\' / '\\' '\'' / [^\\'] )* > '\'' {
-        p.push(p.unescape(text))
+        p.pushChildSingleIdentifier(p.unescape(text))
     }
 
 doubleQuotedNodeIdentifier <-
     '"' < ( '\\' '\\' / '\\' '"' / [^\\"] )* > '"' { // '
-        p.push(p.unescape(text))
+        p.pushChildSingleIdentifier(p.unescape(text))
     }
 
 sepBracketIdentifier <- space ',' space
@@ -118,7 +115,7 @@ union <-
             parentIndexUnion.setValueGroup()
             p.push(parentIndexUnion)
         }
-    )*
+    )* !sepUnion
 
 index <-
     (

@@ -1136,6 +1136,11 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 				inputJSON:    `{"b":2,"a":1}`,
 				expectedJSON: `[1,2]`,
 			},
+			{
+				jsonpath:     `$['a','b',*]`,
+				inputJSON:    `{"b":2,"a":1,"c":3}`,
+				expectedJSON: `[1,2,1,2,3]`,
+			},
 		},
 		`mixing-qualifier-error`: []TestCase{
 			{
@@ -1147,11 +1152,6 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 				jsonpath:    `$['a','b',0:1]`,
 				inputJSON:   `{"b":2,"a":1,"c":3}`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',0:1]`},
-			},
-			{
-				jsonpath:    `$['a','b',*]`,
-				inputJSON:   `{"b":2,"a":1,"c":3}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['a','b',*]`},
 			},
 			{
 				jsonpath:    `$['a','b',(command)]`,
@@ -1359,6 +1359,53 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 				jsonpath:     `$[*]`,
 				inputJSON:    `{"a":[1],"b":[2,3]}`,
 				expectedJSON: `[[1],[2,3]]`,
+			},
+		},
+		`identifier-union`: []TestCase{
+			{
+				jsonpath:     `$['a',*]`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[1],[2,3]]`,
+			},
+			{
+				jsonpath:     `$[*,'a']`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[2,3],[1]]`,
+			},
+			{
+				jsonpath:     `$['a',*,*]`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[1],[2,3],[1],[2,3]]`,
+			},
+			{
+				jsonpath:     `$[*,'a',*]`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[2,3],[1],[1],[2,3]]`,
+			},
+			{
+				jsonpath:     `$['a','a',*]`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[1],[1],[2,3]]`,
+			},
+			{
+				jsonpath:     `$[*,*,'a']`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[2,3],[1],[2,3],[1]]`,
+			},
+			{
+				jsonpath:     `$['a',*,'a']`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[1],[2,3],[1]]`,
+			},
+			{
+				jsonpath:     `$[*,'a','a']`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[2,3],[1],[1]]`,
+			},
+			{
+				jsonpath:     `$['a','a','a']`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[1],[1]]`,
 			},
 		},
 		`empty-input`: []TestCase{
@@ -1716,9 +1763,19 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 		},
 		`wildcard`: []TestCase{
 			{
+				jsonpath:     `$[0,*]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","first","second","third"]`,
+			},
+			{
 				jsonpath:     `$[*,0]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["first","second","third","first"]`,
+			},
+			{
+				jsonpath:     `$[1:2,*]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["second","first","second","third"]`,
 			},
 			{
 				jsonpath:     `$[*,1:2]`,
@@ -1729,6 +1786,41 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 				jsonpath:     `$[*,*]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["first","second","third","first","second","third"]`,
+			},
+			{
+				jsonpath:     `$[0,*,*]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","first","second","third","first","second","third"]`,
+			},
+			{
+				jsonpath:     `$[*,0,*]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","second","third","first","first","second","third"]`,
+			},
+			{
+				jsonpath:     `$[0,0,*]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","first","first","second","third"]`,
+			},
+			{
+				jsonpath:     `$[*,*,0]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","second","third","first","second","third","first"]`,
+			},
+			{
+				jsonpath:     `$[0,*,0]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","first","second","third","first"]`,
+			},
+			{
+				jsonpath:     `$[*,0,0]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","second","third","first","first"]`,
+			},
+			{
+				jsonpath:     `$[0,0,0]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","first","first"]`,
 			},
 		},
 		`slice`: []TestCase{
@@ -4000,9 +4092,19 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `a`},
 			},
 			{
+				jsonpath:    `.`,
+				inputJSON:   `{"a":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: `.`},
+			},
+			{
 				jsonpath:    `$.`,
 				inputJSON:   `{"a":1}`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.`},
+			},
+			{
+				jsonpath:    `..`,
+				inputJSON:   `{"a":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: `..`},
 			},
 			{
 				jsonpath:    `$..`,
@@ -4252,6 +4354,26 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				jsonpath:    `$.func(`,
 				inputJSON:   `{}`,
 				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(`},
+			},
+			{
+				jsonpath:    `$.func(a`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(a`},
+			},
+			{
+				jsonpath:    `$.func(a)`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(a)`},
+			},
+			{
+				jsonpath:    `$.func()(`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 8, reason: `unrecognized input`, near: `(`},
+			},
+			{
+				jsonpath:    `$.func(){}`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 8, reason: `unrecognized input`, near: `{}`},
 			},
 		},
 		`qualifier::big-number`: []TestCase{

@@ -94,8 +94,17 @@ func (p *jsonPathParser) setNodeChain() {
 				last = root
 				continue
 			}
+
 			nextNode := next.(syntaxNode)
+
+			if multiIdentifier, ok := last.(*syntaxChildMultiIdentifier); ok {
+				for _, singleIdentifier := range multiIdentifier.identifiers {
+					singleIdentifier.setNext(nextNode)
+				}
+			}
+
 			last.setNext(nextNode)
+
 			last = nextNode
 		}
 		p.params = []interface{}{root}
@@ -199,13 +208,24 @@ func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
 	})
 }
 
-func (p *jsonPathParser) pushChildMultiIdentifier(identifiers []string) {
+func (p *jsonPathParser) pushChildMultiIdentifier(
+	node syntaxNode, appendNode syntaxNode) {
+
+	if multiIdentifier, ok := node.(*syntaxChildMultiIdentifier); ok {
+		multiIdentifier.identifiers = append(multiIdentifier.identifiers, appendNode)
+		p.push(multiIdentifier)
+		return
+	}
+
 	p.push(&syntaxChildMultiIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
-		identifiers: identifiers,
+		identifiers: []syntaxNode{
+			node,
+			appendNode,
+		},
 	})
 }
 

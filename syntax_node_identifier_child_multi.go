@@ -5,11 +5,38 @@ import "reflect"
 type syntaxChildMultiIdentifier struct {
 	*syntaxBasicNode
 
-	identifiers []string
+	identifiers []syntaxNode
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
+
+	if _, ok := current.([]interface{}); ok {
+		wildcardSubscripts := make([]syntaxSubscript, 0, len(i.identifiers))
+		isAllWildcard := true
+		for index := range i.identifiers {
+			if _, ok := i.identifiers[index].(*syntaxChildWildcardIdentifier); !ok {
+				isAllWildcard = false
+				break
+			}
+			wildcardSubscripts = append(wildcardSubscripts, &syntaxWildcardSubscript{})
+		}
+		if len(i.identifiers) > 0 && isAllWildcard {
+			// If the "current" variable points to the array structure
+			// and only wildcards are specified for qualifier,
+			// then switch to syntaxUnionQualifier.
+			unionQualifier := syntaxUnionQualifier{
+				syntaxBasicNode: &syntaxBasicNode{
+					text:         i.text,
+					next:         i.next,
+					valueGroup:   true,
+					accessorMode: i.accessorMode,
+				},
+				subscripts: wildcardSubscripts,
+			}
+			return unionQualifier.retrieve(root, current, result)
+		}
+	}
 
 	srcMap, ok := current.(map[string]interface{})
 	if !ok {
@@ -30,8 +57,6 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 	if len(*result) == 0 {
 		switch len(childErrorMap) {
-		case 0:
-			return ErrorNoneMatched{path: i.text}
 		case 1:
 			return lastError
 		default:
@@ -50,11 +75,22 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	var partialFound bool
 
 	for index := range i.identifiers {
-		if _, ok := srcMap[i.identifiers[index]]; ok {
+		var found bool
+		switch typedNode := i.identifiers[index].(type) {
+		case *syntaxChildWildcardIdentifier:
+			found = true
+		case *syntaxChildSingleIdentifier:
+			if _, ok := srcMap[typedNode.identifier]; ok {
+				found = true
+			}
+		}
+
+		if found {
 			partialFound = true
-			if err := i.retrieveMapNext(root, srcMap, i.identifiers[index], result); err != nil {
+			if err := i.identifiers[index].retrieve(root, srcMap, result); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
+				continue
 			}
 		}
 	}
