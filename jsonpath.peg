@@ -63,9 +63,7 @@ currentRootIdentifier <-
     }
 
 dotChildIdentifier <-
-    '*' {
-        p.pushChildWildcardIdentifier()
-    } /
+    wildcardIdentifier /
 
     < ( '\\' '\\' / '\\' [.[()=!><\t\r\n ] / [^\\.[()=!><\t\r\n ] )+ > !'()' {
         p.pushChildSingleIdentifier(p.unescape(text))
@@ -73,22 +71,22 @@ dotChildIdentifier <-
 
 bracketChildIdentifier <-
     bracketNodeIdentifier (
-        sepBracketIdentifier bracketNodeIdentifier {
+        sep bracketNodeIdentifier {
             identifier2 := p.pop().(syntaxNode)
             identifier1 := p.pop().(syntaxNode)
             p.pushChildMultiIdentifier(identifier1, identifier2)
         }
-    )* !sepBracketIdentifier
+    )* !sep
 
 bracketNodeIdentifier <-
     (
-        bracketWildcardIdentifier /
+        wildcardIdentifier /
         singleQuotedNodeIdentifier /
         doubleQuotedNodeIdentifier
     )
 
-bracketWildcardIdentifier <-
-    < '*' > {
+wildcardIdentifier <-
+    '*' {
         p.pushChildWildcardIdentifier()
     }
 
@@ -102,20 +100,18 @@ doubleQuotedNodeIdentifier <-
         p.pushChildSingleIdentifier(p.unescape(text))
     }
 
-sepBracketIdentifier <- space ',' space
-
 qualifier <- union / script / filter
 
 union <-
     index (
-        sepUnion index {
+        sep index {
             childIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion.merge(childIndexUnion)
             parentIndexUnion.setValueGroup()
             p.push(parentIndexUnion)
         }
-    )* !sepUnion
+    )* !sep
 
 index <-
     (
@@ -165,7 +161,7 @@ anyIndex <-
 
 indexNumber <- [-+]? [0-9]+
 
-sepUnion <- space ',' space
+sep      <- space ',' space
 sepSlice <- space ':' space
 
 script <-
@@ -296,7 +292,7 @@ qNumericParam <-
 qLiteral <- lNumber / lBool / lString / lNull
 
 singleJsonpathFilter <-
-    jsonpathFilter {
+    < jsonpathFilter > {
         isLiteral := p.pop().(bool)
         param := p.pop().(syntaxQueryJSONPathParameter)
         if !p.hasErr() && param.isValueGroupParameter() {
@@ -308,7 +304,7 @@ singleJsonpathFilter <-
 jsonpathFilter <-
     {
         p.saveParams()
-    } < jsonpathParameter > {
+    } jsonpathParameter {
         p.loadParams()
 
         node := p.pop().(syntaxNode)
