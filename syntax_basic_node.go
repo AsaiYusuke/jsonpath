@@ -39,19 +39,19 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
-	root interface{}, current interface{}, result *[]interface{}) error {
+	root interface{}, nextSrc interface{}, result *[]interface{}) error {
 
 	if i.next != nil {
-		return i.next.retrieve(root, current, result)
+		return i.next.retrieve(root, nextSrc, result)
 	}
 
 	if i.accessorMode {
 		*result = append(*result, Accessor{
-			Get: func() interface{} { return current },
+			Get: func() interface{} { return nextSrc },
 			Set: nil,
 		})
 	} else {
-		*result = append(*result, current)
+		*result = append(*result, nextSrc)
 	}
 
 	return nil
