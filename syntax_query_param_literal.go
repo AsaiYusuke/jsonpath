@@ -1,11 +1,11 @@
 package jsonpath
 
 type syntaxQueryParamLiteral struct {
-	literal interface{}
+	literal map[int]interface{}
 }
 
 func (l *syntaxQueryParamLiteral) compute(
 	_ interface{}, _ map[int]interface{}) map[int]interface{} {
 
-	return map[int]interface{}{0: l.literal}
+	return l.literal
 }
