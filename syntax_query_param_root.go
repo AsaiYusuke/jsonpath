@@ -12,14 +12,6 @@ func (e *syntaxQueryParamRoot) compute(
 	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
 
 	result := make(map[int]interface{}, len(currentMap))
-
-	if e.param == nil {
-		for index := range currentMap {
-			result[index] = currentMap[index]
-		}
-		return result
-	}
-
 	values := make([]interface{}, 0, 1)
 
 	if err := e.param.retrieve(root, root, &values); err != nil {

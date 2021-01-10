@@ -4,6 +4,8 @@ type syntaxCurrentRootIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i *syntaxCurrentRootIdentifier) retrieve(_, _ interface{}, _ *[]interface{}) error {
-	return nil
+func (i *syntaxCurrentRootIdentifier) retrieve(
+	root, current interface{}, result *[]interface{}) error {
+
+	return i.retrieveAnyValueNext(root, current, result)
 }

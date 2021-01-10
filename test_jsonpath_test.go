@@ -5786,11 +5786,3 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 
 	os.Stdout = stdoutBackup
 }
-
-func TestUnnecessaryCodes(t *testing.T) {
-	var identifier syntaxNode
-	identifier = &syntaxRootIdentifier{}
-	identifier.retrieve(nil, nil, nil)
-	identifier = &syntaxCurrentRootIdentifier{}
-	identifier.retrieve(nil, nil, nil)
-}

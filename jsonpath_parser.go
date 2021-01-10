@@ -127,10 +127,14 @@ func (p *jsonPathParser) deleteRootIdentifier(targetNode syntaxNode) syntaxNode 
 	_, isRootIdentifier := targetNode.(*syntaxRootIdentifier)
 	_, isCurrentRootIdentifier := targetNode.(*syntaxCurrentRootIdentifier)
 	if isRootIdentifier || isCurrentRootIdentifier {
-		if targetNode.getNext() != nil && targetNode.isValueGroup() {
-			targetNode.getNext().setValueGroup()
+		if targetNode.getNext() != nil {
+			if targetNode.isValueGroup() {
+				targetNode.getNext().setValueGroup()
+			}
+			targetNode.setNext(nil)
+			targetNode = targetNode.getNext()
 		}
-		return targetNode.getNext()
+		return targetNode
 	}
 
 	if aggregateFunction, ok := targetNode.(*syntaxAggregateFunction); ok {

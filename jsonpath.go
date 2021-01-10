@@ -53,10 +53,6 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 	return func(src interface{}) ([]interface{}, error) {
 		var result []interface{}
 
-		if root == nil {
-			return append(result, src), nil
-		}
-
 		err := root.retrieve(src, src, &result)
 		return result, err
 	}, nil

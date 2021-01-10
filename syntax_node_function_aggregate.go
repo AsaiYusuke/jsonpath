@@ -12,12 +12,8 @@ func (f *syntaxAggregateFunction) retrieve(
 
 	var values []interface{}
 
-	if f.param == nil {
-		values = append(values, current)
-	} else {
-		if err := f.param.retrieve(root, current, &values); err != nil {
-			return err
-		}
+	if err := f.param.retrieve(root, current, &values); err != nil {
+		return err
 	}
 
 	if f.param == nil || !f.param.isValueGroup() {
