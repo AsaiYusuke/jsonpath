@@ -37,23 +37,16 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		switch err.(type) {
-		case jsonpath.ErrorInvalidArgument:
+		case jsonpath.ErrorInvalidArgument,
+			jsonpath.ErrorInvalidSyntax,
+			jsonpath.ErrorNotSupported,
+			jsonpath.ErrorFunctionNotFound:
 			os.Exit(2)
-		case jsonpath.ErrorInvalidSyntax:
-			os.Exit(2)
-		case jsonpath.ErrorNotSupported:
-			os.Exit(2)
-		case jsonpath.ErrorFunctionNotFound:
-			os.Exit(2)
-		case jsonpath.ErrorMemberNotExist:
-			os.Exit(3)
-		case jsonpath.ErrorIndexOutOfRange:
-			os.Exit(3)
-		case jsonpath.ErrorTypeUnmatched:
-			os.Exit(3)
-		case jsonpath.ErrorNoneMatched:
-			os.Exit(3)
-		case *jsonpath.ErrorFunctionFailed:
+		case jsonpath.ErrorMemberNotExist,
+			jsonpath.ErrorIndexOutOfRange,
+			jsonpath.ErrorTypeUnmatched,
+			jsonpath.ErrorNoneMatched,
+			jsonpath.ErrorFunctionFailed:
 			os.Exit(3)
 		}
 		os.Exit(1)
