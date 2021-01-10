@@ -9,32 +9,25 @@ type syntaxRecursiveChildIdentifier struct {
 func (i *syntaxRecursiveChildIdentifier) retrieve(
 	root, current interface{}, result *[]interface{}) error {
 
-	targetNodes := []interface{}{current}
+	switch typedNodes := current.(type) {
+	case map[string]interface{}:
+		i.retrieveAnyValueNext(root, typedNodes, result)
 
-	for len(targetNodes) > 0 {
-		currentNode := targetNodes[len(targetNodes)-1]
-		targetNodes = targetNodes[:len(targetNodes)-1]
+		index, keys := 0, make(sort.StringSlice, len(typedNodes))
+		for key := range typedNodes {
+			keys[index] = key
+			index++
+		}
+		keys.Sort()
+		for index := range keys {
+			i.retrieve(root, typedNodes[keys[index]], result)
+		}
 
-		switch typedNodes := currentNode.(type) {
-		case map[string]interface{}:
-			i.retrieveAnyValueNext(root, typedNodes, result)
+	case []interface{}:
+		i.retrieveAnyValueNext(root, typedNodes, result)
 
-			index, keys := 0, make(sort.StringSlice, len(typedNodes))
-			for key := range typedNodes {
-				keys[index] = key
-				index++
-			}
-			sort.Sort(sort.Reverse(keys))
-			for index := range keys {
-				targetNodes = append(targetNodes, typedNodes[keys[index]])
-			}
-
-		case []interface{}:
-			i.retrieveAnyValueNext(root, typedNodes, result)
-
-			for index := len(typedNodes) - 1; index >= 0; index-- {
-				targetNodes = append(targetNodes, typedNodes[index])
-			}
+		for index := range typedNodes {
+			i.retrieve(root, typedNodes[index], result)
 		}
 	}
 
