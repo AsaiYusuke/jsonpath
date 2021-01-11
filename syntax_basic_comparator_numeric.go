@@ -6,8 +6,8 @@ type syntaxBasicNumericComparator struct {
 }
 
 func (c *syntaxBasicNumericComparator) typeCast(values []interface{}) {
-	for index, value := range values {
-		switch typedValue := value.(type) {
+	for index := range values {
+		switch typedValue := values[index].(type) {
 		case float64:
 			continue
 		case json.Number:

@@ -47,8 +47,8 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 		index++
 	}
 	keys.Sort()
-	for index := range keys {
-		if err := i.retrieveMapNext(root, srcMap, keys[index], result); err != nil {
+	for _, key := range keys {
+		if err := i.retrieveMapNext(root, srcMap, key, result); err != nil {
 			childErrorMap[err] = struct{}{}
 			lastError = err
 		}

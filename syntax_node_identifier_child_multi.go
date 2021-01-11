@@ -14,8 +14,8 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 	if _, ok := current.([]interface{}); ok {
 		wildcardSubscripts := make([]syntaxSubscript, 0, len(i.identifiers))
 		isAllWildcard := true
-		for index := range i.identifiers {
-			if _, ok := i.identifiers[index].(*syntaxChildWildcardIdentifier); !ok {
+		for _, identifier := range i.identifiers {
+			if _, ok := identifier.(*syntaxChildWildcardIdentifier); !ok {
 				isAllWildcard = false
 				break
 			}
@@ -74,9 +74,9 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	var lastError error
 	var partialFound bool
 
-	for index := range i.identifiers {
+	for _, identifier := range i.identifiers {
 		var found bool
-		switch typedNode := i.identifiers[index].(type) {
+		switch typedNode := identifier.(type) {
 		case *syntaxChildWildcardIdentifier:
 			found = true
 		case *syntaxChildSingleIdentifier:
@@ -87,7 +87,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 
 		if found {
 			partialFound = true
-			if err := i.identifiers[index].retrieve(root, srcMap, result); err != nil {
+			if err := identifier.retrieve(root, srcMap, result); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 				continue

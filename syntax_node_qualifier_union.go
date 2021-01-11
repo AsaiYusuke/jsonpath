@@ -25,15 +25,15 @@ func (u *syntaxUnionQualifier) retrieve(
 	}
 
 	var resultIndexes []int
-	for index := range u.subscripts {
-		resultIndexes = append(resultIndexes, u.subscripts[index].getIndexes(srcArray)...)
+	for _, subscript := range u.subscripts {
+		resultIndexes = append(resultIndexes, subscript.getIndexes(srcArray)...)
 	}
 
 	if u.isValueGroup() {
 		childErrorMap := make(map[error]struct{}, 1)
 		var lastError error
-		for index := range resultIndexes {
-			if err := u.retrieveListNext(root, srcArray, resultIndexes[index], result); err != nil {
+		for _, indexes := range resultIndexes {
+			if err := u.retrieveListNext(root, srcArray, indexes, result); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 			}

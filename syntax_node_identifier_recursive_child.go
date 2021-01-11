@@ -19,15 +19,15 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			index++
 		}
 		keys.Sort()
-		for index := range keys {
-			i.retrieve(root, typedNodes[keys[index]], result)
+		for _, key := range keys {
+			i.retrieve(root, typedNodes[key], result)
 		}
 
 	case []interface{}:
 		i.retrieveAnyValueNext(root, typedNodes, result)
 
-		for index := range typedNodes {
-			i.retrieve(root, typedNodes[index], result)
+		for _, node := range typedNodes {
+			i.retrieve(root, node, result)
 		}
 	}
 
