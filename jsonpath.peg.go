@@ -452,7 +452,8 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction1:
 
-			p.syntaxErr(begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer)
+			panic(p.syntaxErr(
+				begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
 
 		case ruleAction2:
 
@@ -579,19 +580,18 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction26:
 
-			if !p.hasErr() {
-				query := p.pop()
-				p.push(query)
+			query := p.pop()
+			p.push(query)
 
-				if logicalNot, ok := query.(*syntaxLogicalNot); ok {
-					query = (*logicalNot).query
-				}
-				if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-					_, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
-					_, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
-					if leftIsCurrentRoot && rigthIsCurrentRoot {
-						p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
-					}
+			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+				query = (*logicalNot).query
+			}
+			if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+				_, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
+				_, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+				if leftIsCurrentRoot && rigthIsCurrentRoot {
+					panic(p.syntaxErr(
+						begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
 				}
 			}
 
@@ -658,8 +658,9 @@ func (p *pegJSONPathParser) Execute() {
 
 			isLiteral := p.pop().(bool)
 			param := p.pop().(syntaxQueryJSONPathParameter)
-			if !p.hasErr() && param.isValueGroupParameter() {
-				p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
+			if param.isValueGroupParameter() {
+				panic(p.syntaxErr(
+					begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
 			}
 			p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
 
@@ -3605,7 +3606,8 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		},
 		nil,
 		/* 59 Action1 <- <{
-		    p.syntaxErr(begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer)
+		    panic(p.syntaxErr(
+		        begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
 		}> */
 		func() bool {
 			{
@@ -3857,22 +3859,21 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			return true
 		},
 		/* 84 Action26 <- <{
-		        if !p.hasErr() {
-		            query := p.pop()
-		            p.push(query)
+		    query := p.pop()
+		    p.push(query)
 
-					if logicalNot, ok := query.(*syntaxLogicalNot); ok {
-						query = (*logicalNot).query
-					}
-		            if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-		                _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
-		                _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
-		                if leftIsCurrentRoot && rigthIsCurrentRoot {
-		                    p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
-		                }
-					}
+		    if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+		        query = (*logicalNot).query
+		    }
+		    if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+		        _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
+		        _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+		        if leftIsCurrentRoot && rigthIsCurrentRoot {
+		            panic(p.syntaxErr(
+		                begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
 		        }
-		    }> */
+		    }
+		}> */
 		func() bool {
 			{
 				add(ruleAction26, position)
@@ -3991,8 +3992,9 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 95 Action37 <- <{
 		    isLiteral := p.pop().(bool)
 		    param := p.pop().(syntaxQueryJSONPathParameter)
-		    if !p.hasErr() && param.isValueGroupParameter() {
-		        p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
+		    if param.isValueGroupParameter() {
+		        panic(p.syntaxErr(
+		            begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
 		    }
 		    p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
 		}> */

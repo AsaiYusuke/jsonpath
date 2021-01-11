@@ -10,7 +10,8 @@ expression <-
     } /
 
     jsonpath? < .* > END {
-        p.syntaxErr(begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer)
+        panic(p.syntaxErr(
+            begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
     }
 
 END <- !.
@@ -198,20 +199,19 @@ basicQuery <-
     subQueryStart query subQueryEnd /
     
     < comparator > {
-        if !p.hasErr() {
-            query := p.pop()
-            p.push(query)
+        query := p.pop()
+        p.push(query)
 
-			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
-				query = (*logicalNot).query
-			}
-            if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-                _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
-                _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
-                if leftIsCurrentRoot && rigthIsCurrentRoot {
-                    p.syntaxErr(begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer)
-                }
-			}
+        if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+            query = (*logicalNot).query
+        }
+        if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+            _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
+            _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+            if leftIsCurrentRoot && rigthIsCurrentRoot {
+                panic(p.syntaxErr(
+                    begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
+            }
         }
     } /
     
@@ -295,8 +295,9 @@ singleJsonpathFilter <-
     < jsonpathFilter > {
         isLiteral := p.pop().(bool)
         param := p.pop().(syntaxQueryJSONPathParameter)
-        if !p.hasErr() && param.isValueGroupParameter() {
-            p.syntaxErr(begin, msgErrorInvalidSyntaxFilterValueGroup, buffer)
+        if param.isValueGroupParameter() {
+            panic(p.syntaxErr(
+                begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
         }
         p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
     }

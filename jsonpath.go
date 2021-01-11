@@ -19,9 +19,17 @@ func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}
 }
 
 // Parse returns the parser function using the given JSONPath.
-func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interface{}, error), error) {
+func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interface{}, error), err error) {
 	parseMutex.Lock()
 	defer func() {
+		if exception := recover(); exception != nil {
+			switch typedException := exception.(type) {
+			case error:
+				err = typedException
+			default:
+				panic(typedException)
+			}
+		}
 		parser.jsonPathParser = jsonPathParser{}
 		parseMutex.Unlock()
 	}()
@@ -44,10 +52,6 @@ func Parse(jsonPath string, config ...Config) (func(src interface{}) ([]interfac
 
 	parser.Parse()
 	parser.Execute()
-
-	if parser.jsonPathParser.thisError != nil {
-		return nil, parser.jsonPathParser.thisError
-	}
 
 	root := parser.jsonPathParser.root
 	return func(src interface{}) ([]interface{}, error) {

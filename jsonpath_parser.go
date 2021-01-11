@@ -9,7 +9,6 @@ type jsonPathParser struct {
 	root               syntaxNode
 	paramsList         [][]interface{}
 	params             []interface{}
-	thisError          error
 	unescapeRegex      *regexp.Regexp
 	filterFunctions    map[string]func(interface{}) (interface{}, error)
 	aggregateFunctions map[string]func([]interface{}) (interface{}, error)
@@ -43,11 +42,10 @@ func (p *jsonPathParser) pop() interface{} {
 func (p *jsonPathParser) toInt(text string) int {
 	value, err := strconv.Atoi(text)
 	if err != nil {
-		p.thisError = ErrorInvalidArgument{
+		panic(ErrorInvalidArgument{
 			argument: text,
 			err:      err,
-		}
-		return 0
+		})
 	}
 	return value
 }
@@ -55,11 +53,10 @@ func (p *jsonPathParser) toInt(text string) int {
 func (p *jsonPathParser) toFloat(text string) float64 {
 	value, err := strconv.ParseFloat(text, 64)
 	if err != nil {
-		p.thisError = ErrorInvalidArgument{
+		panic(ErrorInvalidArgument{
 			argument: text,
 			err:      err,
-		}
-		return 0
+		})
 	}
 	return value
 }
@@ -71,16 +68,12 @@ func (p *jsonPathParser) unescape(text string) string {
 	})
 }
 
-func (p *jsonPathParser) syntaxErr(pos int, reason string, buffer string) {
-	p.thisError = ErrorInvalidSyntax{
+func (p *jsonPathParser) syntaxErr(pos int, reason string, buffer string) error {
+	return ErrorInvalidSyntax{
 		position: pos,
 		reason:   reason,
 		near:     buffer[pos:],
 	}
-}
-
-func (p *jsonPathParser) hasErr() bool {
-	return p.thisError != nil
 }
 
 func (p *jsonPathParser) setNodeChain() {
@@ -179,9 +172,9 @@ func (p *jsonPathParser) pushFunction(text string, funcName string) {
 		return
 	}
 
-	p.thisError = ErrorFunctionNotFound{
+	panic(ErrorFunctionNotFound{
 		function: text,
-	}
+	})
 }
 
 func (p *jsonPathParser) pushRootIdentifier() {
@@ -398,10 +391,10 @@ func (p *jsonPathParser) pushCompareRegex(
 	leftParam *syntaxBasicCompareParameter, regex string) {
 	regexParam, err := regexp.Compile(regex)
 	if err != nil {
-		p.thisError = ErrorInvalidArgument{
+		panic(ErrorInvalidArgument{
 			argument: regex,
 			err:      err,
-		}
+		})
 	}
 
 	p.push(p._createBasicCompareQuery(

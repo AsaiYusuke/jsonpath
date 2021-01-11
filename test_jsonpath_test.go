@@ -4350,31 +4350,6 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?((@.a>1`},
 			},
-			{
-				jsonpath:    `$.func(`,
-				inputJSON:   `{}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(`},
-			},
-			{
-				jsonpath:    `$.func(a`,
-				inputJSON:   `{}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(a`},
-			},
-			{
-				jsonpath:    `$.func(a)`,
-				inputJSON:   `{}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(a)`},
-			},
-			{
-				jsonpath:    `$.func()(`,
-				inputJSON:   `{}`,
-				expectedErr: ErrorInvalidSyntax{position: 8, reason: `unrecognized input`, near: `(`},
-			},
-			{
-				jsonpath:    `$.func(){}`,
-				inputJSON:   `{}`,
-				expectedErr: ErrorInvalidSyntax{position: 8, reason: `unrecognized input`, near: `{}`},
-			},
 		},
 		`qualifier::big-number`: []TestCase{
 			{
@@ -4791,6 +4766,33 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				jsonpath:    `$[?(a=~/123/)]`,
 				inputJSON:   `[{"a":"123"},{"a":123}]`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(a=~/123/)]`},
+			},
+		},
+		`function`: []TestCase{
+			{
+				jsonpath:    `$.func(`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(`},
+			},
+			{
+				jsonpath:    `$.func(a`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(a`},
+			},
+			{
+				jsonpath:    `$.func(a)`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(a)`},
+			},
+			{
+				jsonpath:    `$.func()(`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorFunctionNotFound{function: `.func()`},
+			},
+			{
+				jsonpath:    `$.func(){}`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorFunctionNotFound{function: `.func()`},
 			},
 		},
 	}
