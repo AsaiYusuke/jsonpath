@@ -9,13 +9,14 @@ func (e *syntaxQueryParamCurrentRoot) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamCurrentRoot) compute(
-	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
-	result := make(map[int]interface{}, len(currentMap))
+	result := make([]interface{}, len(currentList))
 
-	for index := range currentMap {
+	for index := range currentList {
 		var values []interface{}
-		if err := e.param.retrieve(root, currentMap[index], &values); err != nil {
+		if err := e.param.retrieve(root, currentList[index], &values); err != nil {
+			result[index] = struct{}{}
 			continue
 		}
 		if e.param.isValueGroup() {

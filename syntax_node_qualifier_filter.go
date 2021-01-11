@@ -50,19 +50,18 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		index++
 	}
 	keys.Sort()
-	argumentMap := make(map[int]interface{}, len(keys))
+	valueList := make([]interface{}, len(keys))
 	for index := range keys {
-		argumentMap[index] = srcMap[keys[index]]
+		valueList[index] = srcMap[keys[index]]
 	}
 
-	if computedMap := f.query.compute(root, argumentMap); len(computedMap) > 0 {
-		for index := range keys {
-			if _, ok := computedMap[index]; ok {
-				partialFound = true
-				if err := f.retrieveMapNext(root, srcMap, keys[index], result); err != nil {
-					childErrorMap[err] = struct{}{}
-					lastError = err
-				}
+	valueList = f.query.compute(root, valueList)
+	for index := range valueList {
+		if _, ok := valueList[index].(struct{}); !ok {
+			partialFound = true
+			if err := f.retrieveMapNext(root, srcMap, keys[index], result); err != nil {
+				childErrorMap[err] = struct{}{}
+				lastError = err
 			}
 		}
 	}
@@ -83,19 +82,20 @@ func (f *syntaxFilterQualifier) retrieveList(
 	var lastError error
 	var partialFound bool
 
-	argumentMap := make(map[int]interface{}, len(srcList))
-	for index := range srcList {
-		argumentMap[index] = srcList[index]
-	}
+	valueList := f.query.compute(root, srcList)
 
-	if computedMap := f.query.compute(root, argumentMap); len(computedMap) > 0 {
-		for index := range srcList {
-			if _, ok := computedMap[index]; ok {
-				partialFound = true
-				if err := f.retrieveListNext(root, srcList, index, result); err != nil {
-					childErrorMap[err] = struct{}{}
-					lastError = err
-				}
+	for index := range srcList {
+		var nodeNotFound bool
+		if len(valueList) == 1 {
+			_, nodeNotFound = valueList[0].(struct{})
+		} else {
+			_, nodeNotFound = valueList[index].(struct{})
+		}
+		if !nodeNotFound {
+			partialFound = true
+			if err := f.retrieveListNext(root, srcList, index, result); err != nil {
+				childErrorMap[err] = struct{}{}
+				lastError = err
 			}
 		}
 	}

@@ -3389,13 +3389,13 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`filter-after-recursive`: []TestCase{
 			{
 				jsonpath:     `$..[?(@.a==2)]`,
-				inputJSON:    `{"a":2,"more":[{"a":2},{"b":{"a":2}},{"a":{"a":2}},[{"a":2}]]}`,
+				inputJSON:    `{"a":2,"x":[{"a":2},{"b":{"a":2}},{"a":{"a":2}},[{"a":2}]]}`,
 				expectedJSON: `[{"a":2},{"a":2},{"a":2},{"a":2}]`,
 			},
 			{
-				jsonpath:     `$..*[?(@.id>2)]`,
-				inputJSON:    `[{"complexity":{"one":[{"name":"first","id":1},{"name":"next","id":2},{"name":"another","id":3},{"name":"more","id":4}],"more":{"name":"next to last","id":5}}},{"name":"last","id":6}]`,
-				expectedJSON: `[{"id":5,"name":"next to last"},{"id":3,"name":"another"},{"id":4,"name":"more"}]`,
+				jsonpath:     `$..*[?(@.a>2)]`,
+				inputJSON:    `[{"x":{"y":[{"b":"1","a":1},{"b":"2","a":2},{"b":"3","a":3}],"z":{"b":"4","a":4}}},{"b":"5","a":5}]`,
+				expectedJSON: `[{"a":4,"b":"4"},{"a":3,"b":"3"}]`,
 			},
 		},
 		`both-number`: []TestCase{

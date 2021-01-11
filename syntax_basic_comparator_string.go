@@ -3,10 +3,10 @@ package jsonpath
 type syntaxBasicStringComparator struct {
 }
 
-func (c *syntaxBasicStringComparator) typeCast(values map[int]interface{}) {
+func (c *syntaxBasicStringComparator) typeCast(values []interface{}) {
 	for index := range values {
 		if _, ok := values[index].(string); !ok {
-			delete(values, index)
+			values[index] = struct{}{}
 		}
 	}
 }

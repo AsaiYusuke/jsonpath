@@ -6,15 +6,15 @@ type syntaxLogicalOr struct {
 }
 
 func (l *syntaxLogicalOr) compute(
-	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
-	leftComputedMap := l.leftQuery.compute(root, currentMap)
-	rightComputedMap := l.rightQuery.compute(root, currentMap)
-	for index := range rightComputedMap {
-		if _, ok := leftComputedMap[index]; !ok {
-			leftComputedMap[index] = struct{}{}
+	leftComputedList := l.leftQuery.compute(root, currentList)
+	rightComputedList := l.rightQuery.compute(root, currentList)
+	for index := range rightComputedList {
+		if _, ok := leftComputedList[index].(struct{}); ok {
+			leftComputedList[index] = rightComputedList[index]
 		}
 	}
 
-	return leftComputedMap
+	return leftComputedList
 }

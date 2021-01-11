@@ -400,7 +400,7 @@ func (p *jsonPathParser) pushCompareRegex(
 	p.push(p._createBasicCompareQuery(
 		leftParam, &syntaxBasicCompareParameter{
 			param: &syntaxQueryParamLiteral{
-				literal: map[int]interface{}{0: `regex`},
+				literal: []interface{}{`regex`},
 			},
 			isLiteral: true,
 		},
@@ -420,7 +420,7 @@ func (p *jsonPathParser) pushBasicCompareParameter(
 func (p *jsonPathParser) pushCompareParameterLiteral(text interface{}) {
 	p.pushBasicCompareParameter(
 		&syntaxQueryParamLiteral{
-			literal: map[int]interface{}{0: text},
+			literal: []interface{}{text},
 		}, true)
 }
 

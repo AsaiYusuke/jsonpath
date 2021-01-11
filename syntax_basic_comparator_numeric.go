@@ -5,7 +5,7 @@ import "encoding/json"
 type syntaxBasicNumericComparator struct {
 }
 
-func (c *syntaxBasicNumericComparator) typeCast(values map[int]interface{}) {
+func (c *syntaxBasicNumericComparator) typeCast(values []interface{}) {
 	for index, value := range values {
 		switch typedValue := value.(type) {
 		case float64:
@@ -15,7 +15,7 @@ func (c *syntaxBasicNumericComparator) typeCast(values map[int]interface{}) {
 				values[index] = floatNumber
 			}
 		default:
-			delete(values, index)
+			values[index] = struct{}{}
 		}
 	}
 }

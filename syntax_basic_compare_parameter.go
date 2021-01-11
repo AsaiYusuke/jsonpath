@@ -6,11 +6,11 @@ type syntaxBasicCompareParameter struct {
 }
 
 func (p *syntaxBasicCompareParameter) compute(
-	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
 	if _, ok := p.param.(*syntaxQueryParamRoot); ok {
-		currentMap = map[int]interface{}{0: root}
+		currentList = []interface{}{root}
 	}
 
-	return p.param.compute(root, currentMap)
+	return p.param.compute(root, currentList)
 }

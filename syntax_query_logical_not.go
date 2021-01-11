@@ -5,15 +5,16 @@ type syntaxLogicalNot struct {
 }
 
 func (l *syntaxLogicalNot) compute(
-	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
-	computedMap := l.query.compute(root, currentMap)
-	resultMap := make(map[int]interface{}, 0)
-	for index := range currentMap {
-		if _, ok := computedMap[index]; !ok {
-			resultMap[index] = struct{}{}
+	computedList := l.query.compute(root, currentList)
+	for index := range computedList {
+		if _, ok := computedList[index].(struct{}); ok {
+			computedList[index] = true
+		} else {
+			computedList[index] = struct{}{}
 		}
 	}
 
-	return resultMap
+	return computedList
 }

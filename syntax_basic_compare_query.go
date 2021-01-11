@@ -7,37 +7,59 @@ type syntaxBasicCompareQuery struct {
 }
 
 func (q *syntaxBasicCompareQuery) compute(
-	root interface{}, currentMap map[int]interface{}) map[int]interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
-	leftValues := q.leftParam.compute(root, currentMap)
+	leftValues := q.leftParam.compute(root, currentList)
 	q.comparator.typeCast(leftValues)
 
-	rightValues := q.rightParam.compute(root, currentMap)
+	rightValues := q.rightParam.compute(root, currentList)
 	q.comparator.typeCast(rightValues)
 
+	var leftPartialFound bool
+	var rightPartialFound bool
 	for leftIndex := range leftValues {
+		if _, ok := leftValues[leftIndex].(struct{}); ok {
+			continue
+		}
+		leftPartialFound = true
+
 		for rightIndex := range rightValues {
+			if _, ok := rightValues[rightIndex].(struct{}); ok {
+				continue
+			}
+			rightPartialFound = true
+
 			if q.comparator.comparator(leftValues[leftIndex], rightValues[rightIndex]) {
 				if q.leftParam.isLiteral && q.rightParam.isLiteral {
-					return currentMap
+					return leftValues
 				}
-			} else {
-				if !q.leftParam.isLiteral {
-					delete(leftValues, leftIndex)
-				} else {
-					delete(rightValues, rightIndex)
-				}
+				continue
 			}
+
+			if !q.leftParam.isLiteral {
+				leftValues[leftIndex] = struct{}{}
+				break
+			} else if !q.rightParam.isLiteral {
+				rightValues[rightIndex] = struct{}{}
+			} else {
+				return []interface{}{struct{}{}}
+			}
+		}
+
+		if !rightPartialFound && !q.leftParam.isLiteral {
+			leftValues[leftIndex] = struct{}{}
 		}
 	}
 
-	if !q.leftParam.isLiteral && len(rightValues) > 0 {
+	if !leftPartialFound && !q.rightParam.isLiteral {
+		for rightIndex := range rightValues {
+			rightValues[rightIndex] = struct{}{}
+		}
+	}
+
+	if !q.leftParam.isLiteral {
 		return leftValues
 	}
 
-	if !q.rightParam.isLiteral && len(leftValues) > 0 {
-		return rightValues
-	}
-
-	return nil
+	return rightValues
 }
