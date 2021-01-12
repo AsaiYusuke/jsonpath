@@ -49,7 +49,9 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		keys[index] = key
 		index++
 	}
-	keys.Sort()
+	if len(keys) > 1 {
+		keys.Sort()
+	}
 	valueList := make([]interface{}, len(keys))
 	for index := range keys {
 		valueList[index] = srcMap[keys[index]]

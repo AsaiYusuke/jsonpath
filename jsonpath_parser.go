@@ -238,6 +238,16 @@ func (p *jsonPathParser) pushChildWildcardIdentifier() {
 }
 
 func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
+	var nextMapRequired, nextListRequired bool
+	switch node.(type) {
+	case *syntaxChildWildcardIdentifier, *syntaxChildMultiIdentifier, *syntaxFilterQualifier:
+		nextMapRequired = true
+		nextListRequired = true
+	case *syntaxChildSingleIdentifier:
+		nextMapRequired = true
+	case *syntaxUnionQualifier:
+		nextListRequired = true
+	}
 	p.push(&syntaxRecursiveChildIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         `..`,
@@ -245,6 +255,8 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 			next:         node,
 			accessorMode: p.accessorMode,
 		},
+		nextMapRequired:  nextMapRequired,
+		nextListRequired: nextListRequired,
 	})
 }
 
@@ -269,12 +281,9 @@ func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
 }
 
 func (p *jsonPathParser) pushScriptQualifier(text string) {
-	p.push(&syntaxScriptQualifier{
-		syntaxBasicNode: &syntaxBasicNode{
-			valueGroup:   true,
-			accessorMode: p.accessorMode,
-		},
-		command: text,
+	panic(ErrorNotSupported{
+		feature: `script`,
+		path:    `[(` + text + `)]`,
 	})
 }
 
