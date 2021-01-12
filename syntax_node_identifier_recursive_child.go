@@ -15,7 +15,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	targetNodes := make([]interface{}, 1, 5)
 	targetNodes[0] = current
 
-	keys := make(sort.StringSlice, 0, 2)
+	keys := make(sort.StringSlice, 2)
 
 	for len(targetNodes) > 0 {
 		currentNode := targetNodes[len(targetNodes)-1]
@@ -25,10 +25,18 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			if i.nextMapRequired {
 				i.retrieveAnyValueNext(root, typedNodes, result)
 			}
-			keys = keys[:0]
-			for key := range typedNodes {
-				keys = append(keys, key)
+
+			if cap(keys) < len(typedNodes) {
+				keys = make(sort.StringSlice, len(typedNodes))
 			}
+			keys = keys[:len(typedNodes)]
+
+			index := 0
+			for key := range typedNodes {
+				keys[index] = key
+				index++
+			}
+
 			if len(keys) > 1 {
 				keys.Sort()
 			}
