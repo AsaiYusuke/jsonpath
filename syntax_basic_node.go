@@ -1,14 +1,19 @@
 package jsonpath
 
 type syntaxBasicNode struct {
-	text         string
-	valueGroup   bool
-	next         syntaxNode
-	accessorMode bool
+	text          string
+	connectedText string
+	valueGroup    bool
+	next          syntaxNode
+	accessorMode  bool
 }
 
 func (i *syntaxBasicNode) setText(text string) {
 	i.text = text
+}
+
+func (i *syntaxBasicNode) getText() string {
+	return i.text
 }
 
 func (i *syntaxBasicNode) setValueGroup() {
@@ -19,11 +24,12 @@ func (i *syntaxBasicNode) isValueGroup() bool {
 	return i.valueGroup
 }
 
+func (i *syntaxBasicNode) setConnectedText(text string) {
+	i.connectedText = text
+}
+
 func (i *syntaxBasicNode) getConnectedText() string {
-	if i.next != nil {
-		return i.text + i.next.getConnectedText()
-	}
-	return i.text
+	return i.connectedText
 }
 
 func (i *syntaxBasicNode) setNext(next syntaxNode) {

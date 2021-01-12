@@ -449,6 +449,7 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction0:
 
 			p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
+			p.setConnectedText(p.root)
 
 		case ruleAction1:
 
@@ -3597,6 +3598,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		},
 		/* 57 Action0 <- <{
 		    p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
+		    p.setConnectedText(p.root)
 		}> */
 		func() bool {
 			{

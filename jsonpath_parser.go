@@ -105,6 +105,15 @@ func (p *jsonPathParser) setNodeChain() {
 	}
 }
 
+func (p *jsonPathParser) setConnectedText(targetNode syntaxNode) {
+	childText := ``
+	if targetNode.getNext() != nil {
+		p.setConnectedText(targetNode.getNext())
+		childText = targetNode.getNext().getConnectedText()
+	}
+	targetNode.setConnectedText(targetNode.getText() + childText)
+}
+
 func (p *jsonPathParser) updateRootValueGroup() {
 	rootNode := p.params[0].(syntaxNode)
 	checkNode := rootNode

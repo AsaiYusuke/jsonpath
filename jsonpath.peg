@@ -7,6 +7,7 @@ type pegJSONPathParser Peg {
 expression <-
     jsonpath END {
         p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
+        p.setConnectedText(p.root)
     } /
 
     jsonpath? < .* > END {
