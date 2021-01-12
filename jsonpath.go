@@ -55,9 +55,14 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 
 	root := parser.jsonPathParser.root
 	return func(src interface{}) ([]interface{}, error) {
-		var result []interface{}
+		container := bufferContainer{}
 
-		err := root.retrieve(src, src, &result)
-		return result, err
+		defer func() {
+			container.putSortSlice()
+		}()
+
+		err := root.retrieve(src, src, &container)
+		return container.result, err
+
 	}, nil
 }

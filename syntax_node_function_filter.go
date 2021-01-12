@@ -7,7 +7,7 @@ type syntaxFilterFunction struct {
 }
 
 func (f *syntaxFilterFunction) retrieve(
-	root, current interface{}, result *[]interface{}) error {
+	root, current interface{}, container *bufferContainer) error {
 
 	filteredValue, err := f.function(current)
 	if err != nil {
@@ -17,5 +17,5 @@ func (f *syntaxFilterFunction) retrieve(
 		}
 	}
 
-	return f.retrieveAnyValueNext(root, filteredValue, result)
+	return f.retrieveAnyValueNext(root, filteredValue, container)
 }

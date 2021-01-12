@@ -9,7 +9,7 @@ type syntaxUnionQualifier struct {
 }
 
 func (u *syntaxUnionQualifier) retrieve(
-	root, current interface{}, result *[]interface{}) error {
+	root, current interface{}, container *bufferContainer) error {
 
 	srcArray, ok := current.([]interface{})
 	if !ok {
@@ -33,13 +33,13 @@ func (u *syntaxUnionQualifier) retrieve(
 		childErrorMap := make(map[error]struct{}, 1)
 		var lastError error
 		for _, indexes := range resultIndexes {
-			if err := u.retrieveListNext(root, srcArray, indexes, result); err != nil {
+			if err := u.retrieveListNext(root, srcArray, indexes, container); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 			}
 		}
 
-		if len(*result) == 0 {
+		if len(container.result) == 0 {
 			switch len(childErrorMap) {
 			case 0:
 				return ErrorNoneMatched{path: u.text}
@@ -57,7 +57,7 @@ func (u *syntaxUnionQualifier) retrieve(
 		return ErrorIndexOutOfRange{path: u.text}
 	}
 
-	return u.retrieveListNext(root, srcArray, resultIndexes[0], result)
+	return u.retrieveListNext(root, srcArray, resultIndexes[0], container)
 }
 
 func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {

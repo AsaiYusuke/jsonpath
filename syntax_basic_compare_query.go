@@ -7,12 +7,12 @@ type syntaxBasicCompareQuery struct {
 }
 
 func (q *syntaxBasicCompareQuery) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
 
-	leftValues := q.leftParam.compute(root, currentList)
+	leftValues := q.leftParam.compute(root, currentList, container)
 	q.comparator.typeCast(leftValues)
 
-	rightValues := q.rightParam.compute(root, currentList)
+	rightValues := q.rightParam.compute(root, currentList, container)
 	q.comparator.typeCast(rightValues)
 
 	var leftPartialFound bool

@@ -5,9 +5,9 @@ type syntaxLogicalNot struct {
 }
 
 func (l *syntaxLogicalNot) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
 
-	computedList := l.query.compute(root, currentList)
+	computedList := l.query.compute(root, currentList, container)
 	for index := range computedList {
 		if _, ok := computedList[index].(struct{}); ok {
 			computedList[index] = true

@@ -95,6 +95,9 @@ func (p *jsonPathParser) setNodeChain() {
 				for _, singleIdentifier := range multiIdentifier.identifiers {
 					singleIdentifier.setNext(nextNode)
 				}
+				if multiIdentifier.isAllWildcard {
+					multiIdentifier.unionQualifier.setNext(nextNode)
+				}
 			}
 
 			last.setNext(nextNode)
@@ -112,6 +115,12 @@ func (p *jsonPathParser) setConnectedText(targetNode syntaxNode) {
 		childText = targetNode.getNext().getConnectedText()
 	}
 	targetNode.setConnectedText(targetNode.getText() + childText)
+
+	if multiIdentifier, ok := targetNode.(*syntaxChildMultiIdentifier); ok {
+		if multiIdentifier.isAllWildcard {
+			multiIdentifier.unionQualifier.setConnectedText(targetNode.getConnectedText())
+		}
+	}
 }
 
 func (p *jsonPathParser) updateRootValueGroup() {
@@ -150,6 +159,12 @@ func (p *jsonPathParser) deleteRootIdentifier(targetNode syntaxNode) syntaxNode 
 func (p *jsonPathParser) setLastNodeText(text string) {
 	node := p.params[len(p.params)-1].(syntaxNode)
 	node.setText(text)
+
+	if multiIdentifier, ok := node.(*syntaxChildMultiIdentifier); ok {
+		if multiIdentifier.isAllWildcard {
+			multiIdentifier.unionQualifier.setText(text)
+		}
+	}
 }
 
 func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
@@ -220,11 +235,27 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 
 	if multiIdentifier, ok := node.(*syntaxChildMultiIdentifier); ok {
 		multiIdentifier.identifiers = append(multiIdentifier.identifiers, appendNode)
+
+		_, isWildcard := appendNode.(*syntaxChildWildcardIdentifier)
+		multiIdentifier.isAllWildcard = multiIdentifier.isAllWildcard && isWildcard
+
+		if multiIdentifier.isAllWildcard {
+			multiIdentifier.unionQualifier.subscripts = append(
+				multiIdentifier.unionQualifier.subscripts,
+				&syntaxWildcardSubscript{},
+			)
+		} else {
+			multiIdentifier.unionQualifier = syntaxUnionQualifier{}
+		}
+
 		p.push(multiIdentifier)
 		return
 	}
 
-	p.push(&syntaxChildMultiIdentifier{
+	_, isNodeWildcard := node.(*syntaxChildWildcardIdentifier)
+	_, isAppendNodeWildcard := appendNode.(*syntaxChildWildcardIdentifier)
+
+	identifier := syntaxChildMultiIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			valueGroup:   true,
 			accessorMode: p.accessorMode,
@@ -233,7 +264,23 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 			node,
 			appendNode,
 		},
-	})
+		isAllWildcard: isNodeWildcard && isAppendNodeWildcard,
+	}
+
+	if identifier.isAllWildcard {
+		identifier.unionQualifier = syntaxUnionQualifier{
+			syntaxBasicNode: &syntaxBasicNode{
+				valueGroup:   true,
+				accessorMode: p.accessorMode,
+			},
+			subscripts: []syntaxSubscript{
+				&syntaxWildcardSubscript{},
+				&syntaxWildcardSubscript{},
+			},
+		}
+	}
+
+	p.push(&identifier)
 }
 
 func (p *jsonPathParser) pushChildWildcardIdentifier() {

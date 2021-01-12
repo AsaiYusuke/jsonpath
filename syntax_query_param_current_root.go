@@ -9,20 +9,23 @@ func (e *syntaxQueryParamCurrentRoot) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamCurrentRoot) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
 
 	result := make([]interface{}, len(currentList))
 
 	for index := range currentList {
-		var values []interface{}
+		values := bufferContainer{
+			sortKeys: container.sortKeys,
+		}
+
 		if err := e.param.retrieve(root, currentList[index], &values); err != nil {
 			result[index] = struct{}{}
 			continue
 		}
 		if e.param.isValueGroup() {
-			result[index] = values
+			result[index] = values.result
 		} else {
-			result[index] = values[0]
+			result[index] = values.result[0]
 		}
 	}
 

@@ -1373,6 +1373,11 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 				expectedJSON: `[[1],[2,3],[1]]`,
 			},
 			{
+				jsonpath:     `$[*,*,*]`,
+				inputJSON:    `{"a":[1],"b":[2,3]}`,
+				expectedJSON: `[[1],[2,3],[1],[2,3],[1],[2,3]]`,
+			},
+			{
 				jsonpath:     `$['a',*,*]`,
 				inputJSON:    `{"a":[1],"b":[2,3]}`,
 				expectedJSON: `[[1],[1],[2,3],[1],[2,3]]`,
@@ -1788,6 +1793,11 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 				expectedJSON: `["first","second","third","first","second","third"]`,
 			},
 			{
+				jsonpath:     `$[*,*,*]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["first","second","third","first","second","third","first","second","third"]`,
+			},
+			{
 				jsonpath:     `$[0,*,*]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["first","first","second","third","first","second","third"]`,
@@ -1821,6 +1831,11 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 				jsonpath:     `$[0,0,0]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["first","first","first"]`,
+			},
+			{
+				jsonpath:     `$[*,*].a`,
+				inputJSON:    `[{"a":1},{"b":2}]`,
+				expectedJSON: `[1,1]`,
 			},
 		},
 		`slice`: []TestCase{

@@ -45,57 +45,57 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
-	root interface{}, nextSrc interface{}, result *[]interface{}) error {
+	root interface{}, nextSrc interface{}, container *bufferContainer) error {
 
 	if i.next != nil {
-		return i.next.retrieve(root, nextSrc, result)
+		return i.next.retrieve(root, nextSrc, container)
 	}
 
 	if i.accessorMode {
-		*result = append(*result, Accessor{
+		container.result = append(container.result, Accessor{
 			Get: func() interface{} { return nextSrc },
 			Set: nil,
 		})
 	} else {
-		*result = append(*result, nextSrc)
+		container.result = append(container.result, nextSrc)
 	}
 
 	return nil
 }
 
 func (i *syntaxBasicNode) retrieveMapNext(
-	root interface{}, currentMap map[string]interface{}, key string, result *[]interface{}) error {
+	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) error {
 
 	if i.next != nil {
-		return i.next.retrieve(root, currentMap[key], result)
+		return i.next.retrieve(root, currentMap[key], container)
 	}
 
 	if i.accessorMode {
-		*result = append(*result, Accessor{
+		container.result = append(container.result, Accessor{
 			Get: func() interface{} { return currentMap[key] },
 			Set: func(value interface{}) { currentMap[key] = value },
 		})
 	} else {
-		*result = append(*result, currentMap[key])
+		container.result = append(container.result, currentMap[key])
 	}
 
 	return nil
 }
 
 func (i *syntaxBasicNode) retrieveListNext(
-	root interface{}, currentList []interface{}, index int, result *[]interface{}) error {
+	root interface{}, currentList []interface{}, index int, container *bufferContainer) error {
 
 	if i.next != nil {
-		return i.next.retrieve(root, currentList[index], result)
+		return i.next.retrieve(root, currentList[index], container)
 	}
 
 	if i.accessorMode {
-		*result = append(*result, Accessor{
+		container.result = append(container.result, Accessor{
 			Get: func() interface{} { return currentList[index] },
 			Set: func(value interface{}) { currentList[index] = value },
 		})
 	} else {
-		*result = append(*result, currentList[index])
+		container.result = append(container.result, currentList[index])
 	}
 
 	return nil

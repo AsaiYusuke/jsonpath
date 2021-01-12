@@ -9,15 +9,17 @@ func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamRoot) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
 
-	values := make([]interface{}, 0, 1)
+	values := bufferContainer{
+		sortKeys: container.sortKeys,
+	}
 
 	if err := e.param.retrieve(root, root, &values); err != nil {
-		return values[:0]
+		return values.result[:0]
 	}
 
 	// e.param.isValueGroup() should always be false.
 
-	return values[:1]
+	return values.result[:1]
 }

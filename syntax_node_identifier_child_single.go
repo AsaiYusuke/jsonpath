@@ -9,7 +9,7 @@ type syntaxChildSingleIdentifier struct {
 }
 
 func (i *syntaxChildSingleIdentifier) retrieve(
-	root, current interface{}, result *[]interface{}) error {
+	root, current interface{}, container *bufferContainer) error {
 
 	srcMap, ok := current.(map[string]interface{})
 	if !ok {
@@ -28,5 +28,5 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 		return ErrorMemberNotExist{path: i.text}
 	}
 
-	return i.retrieveMapNext(root, srcMap, i.identifier, result)
+	return i.retrieveMapNext(root, srcMap, i.identifier, container)
 }

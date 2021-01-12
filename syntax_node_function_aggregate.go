@@ -8,21 +8,23 @@ type syntaxAggregateFunction struct {
 }
 
 func (f *syntaxAggregateFunction) retrieve(
-	root, current interface{}, result *[]interface{}) error {
+	root, current interface{}, container *bufferContainer) error {
 
-	var values []interface{}
+	values := bufferContainer{
+		sortKeys: container.sortKeys,
+	}
 
 	if err := f.param.retrieve(root, current, &values); err != nil {
 		return err
 	}
 
 	if !f.param.isValueGroup() {
-		if arrayParam, ok := values[0].([]interface{}); ok {
-			values = arrayParam
+		if arrayParam, ok := values.result[0].([]interface{}); ok {
+			values.result = arrayParam
 		}
 	}
 
-	filteredValue, err := f.function(values)
+	filteredValue, err := f.function(values.result)
 	if err != nil {
 		return ErrorFunctionFailed{
 			function: f.text,
@@ -30,5 +32,5 @@ func (f *syntaxAggregateFunction) retrieve(
 		}
 	}
 
-	return f.retrieveAnyValueNext(root, filteredValue, result)
+	return f.retrieveAnyValueNext(root, filteredValue, container)
 }

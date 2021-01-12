@@ -5,36 +5,20 @@ import "reflect"
 type syntaxChildMultiIdentifier struct {
 	*syntaxBasicNode
 
-	identifiers []syntaxNode
+	identifiers    []syntaxNode
+	isAllWildcard  bool
+	unionQualifier syntaxUnionQualifier
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
-	root, current interface{}, result *[]interface{}) error {
+	root, current interface{}, container *bufferContainer) error {
 
 	if _, ok := current.([]interface{}); ok {
-		wildcardSubscripts := make([]syntaxSubscript, 0, len(i.identifiers))
-		isAllWildcard := true
-		for _, identifier := range i.identifiers {
-			if _, ok := identifier.(*syntaxChildWildcardIdentifier); !ok {
-				isAllWildcard = false
-				break
-			}
-			wildcardSubscripts = append(wildcardSubscripts, &syntaxWildcardSubscript{})
-		}
-		if len(i.identifiers) > 0 && isAllWildcard {
+		if i.isAllWildcard {
 			// If the "current" variable points to the array structure
 			// and only wildcards are specified for qualifier,
 			// then switch to syntaxUnionQualifier.
-			unionQualifier := syntaxUnionQualifier{
-				syntaxBasicNode: &syntaxBasicNode{
-					text:         i.text,
-					next:         i.next,
-					valueGroup:   true,
-					accessorMode: i.accessorMode,
-				},
-				subscripts: wildcardSubscripts,
-			}
-			return unionQualifier.retrieve(root, current, result)
+			return i.unionQualifier.retrieve(root, current, container)
 		}
 	}
 
@@ -53,9 +37,9 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 	childErrorMap := make(map[error]struct{}, 1)
 
-	lastError := i.retrieveMap(root, srcMap, result, childErrorMap)
+	lastError := i.retrieveMap(root, srcMap, container, childErrorMap)
 
-	if len(*result) == 0 {
+	if len(container.result) == 0 {
 		switch len(childErrorMap) {
 		case 0:
 			return ErrorMemberNotExist{path: i.text}
@@ -70,7 +54,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, result *[]interface{},
+	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
 	childErrorMap map[error]struct{}) error {
 
 	var lastError error
@@ -87,7 +71,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 		}
 
 		if found {
-			if err := identifier.retrieve(root, srcMap, result); err != nil {
+			if err := identifier.retrieve(root, srcMap, container); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 				continue
