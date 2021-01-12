@@ -56,8 +56,15 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	}
 
 	valueList = f.query.compute(root, valueList)
-	for index := range valueList {
-		if _, ok := valueList[index].(struct{}); !ok {
+
+	for index := range keys {
+		var nodeNotFound bool
+		if len(valueList) == 1 {
+			_, nodeNotFound = valueList[0].(struct{})
+		} else {
+			_, nodeNotFound = valueList[index].(struct{})
+		}
+		if !nodeNotFound {
 			partialFound = true
 			if err := f.retrieveMapNext(root, srcMap, keys[index], result); err != nil {
 				childErrorMap[err] = struct{}{}

@@ -2725,9 +2725,21 @@ func TestRetrieve_filterExist(t *testing.T) {
 		},
 		`object::root`: []TestCase{
 			{
+				jsonpath:     `$[?($)]`,
+				inputJSON:    `{"a":1,"b":2}`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$[?(!$)]`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorMemberNotExist{path: `[?(!$)]`},
+			},
+		},
+		`object::current-root`: []TestCase{
+			{
 				jsonpath:     `$[?(@)]`,
-				inputJSON:    `{"a":1}`,
-				expectedJSON: `[1]`,
+				inputJSON:    `{"a":1,"b":2}`,
+				expectedJSON: `[1,2]`,
 			},
 			{
 				jsonpath:    `$[?(!@)]`,
