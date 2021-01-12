@@ -42,7 +42,8 @@ func (q *syntaxBasicCompareQuery) compute(
 			} else if !q.rightParam.isLiteral {
 				rightValues[rightIndex] = struct{}{}
 			} else {
-				return []interface{}{struct{}{}}
+				leftValues[0] = struct{}{}
+				return leftValues[:1]
 			}
 		}
 
