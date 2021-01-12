@@ -24,7 +24,7 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 	if len(*result) == 0 {
 		switch len(childErrorMap) {
 		case 0:
-			return ErrorNoneMatched{path: i.text}
+			return ErrorMemberNotExist{path: i.text}
 		case 1:
 			return lastError
 		default:

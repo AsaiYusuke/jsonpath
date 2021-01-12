@@ -768,12 +768,12 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorNoneMatched{path: `.*`},
+				expectedErr: ErrorMemberNotExist{path: `.*`},
 			},
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorNoneMatched{path: `.*`},
+				expectedErr: ErrorMemberNotExist{path: `.*`},
 			},
 		},
 		`recursive`: []TestCase{
@@ -1412,12 +1412,12 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorNoneMatched{path: `[*]`},
+				expectedErr: ErrorMemberNotExist{path: `[*]`},
 			},
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorNoneMatched{path: `[*]`},
+				expectedErr: ErrorMemberNotExist{path: `[*]`},
 			},
 		},
 		`apply-to-value-group`: []TestCase{

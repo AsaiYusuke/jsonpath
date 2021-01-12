@@ -89,13 +89,13 @@ These error types define the corresponding symptom, as listed below:
 
 #### Runtime errors from `Retrieve`, *`parser-functions`*
 
-| Error type             | Message format                                    | Symptom                                                                        |
-|------------------------|---------------------------------------------------|--------------------------------------------------------------------------------|
-| `ErrorMemberNotExist`  | `member did not exist (path=%s)`                  | The object member specified in the JSONPath did not exist in the JSON object.  |
-| `ErrorIndexOutOfRange` | `index out of range (path=%s)`                    | The array indexes specified in the JSONPath were out of range.                 |
-| `ErrorTypeUnmatched`   | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.      |
-| `ErrorNoneMatched`     | `none matched (path=%s)`                          | The retrieving child paths specified in the JSONPath resulted in empty output. |
-| `ErrorFunctionFailed`  | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                 |
+| Error type             | Message format                                    | Symptom                                                                             |
+|------------------------|---------------------------------------------------|-------------------------------------------------------------------------------------|
+| `ErrorMemberNotExist`  | `member did not exist (path=%s)`                  | The object/array member specified in the JSONPath did not exist in the JSON object. |
+| `ErrorIndexOutOfRange` | `index out of range (path=%s)`                    | The array indexes specified in the JSONPath were out of range.                      |
+| `ErrorTypeUnmatched`   | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.           |
+| `ErrorNoneMatched`     | `none matched (path=%s)`                          | The retrieving child paths specified in the JSONPath resulted in empty output.      |
+| `ErrorFunctionFailed`  | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                      |
 
 The type checking is convenient to recognize which error happened.
 

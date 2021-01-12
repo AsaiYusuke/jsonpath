@@ -57,6 +57,8 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 	if len(*result) == 0 {
 		switch len(childErrorMap) {
+		case 0:
+			return ErrorMemberNotExist{path: i.text}
 		case 1:
 			return lastError
 		default:
@@ -72,7 +74,6 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	childErrorMap map[error]struct{}) error {
 
 	var lastError error
-	var partialFound bool
 
 	for _, identifier := range i.identifiers {
 		var found bool
@@ -86,19 +87,12 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 		}
 
 		if found {
-			partialFound = true
 			if err := identifier.retrieve(root, srcMap, result); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 				continue
 			}
 		}
-	}
-
-	if !partialFound {
-		err := ErrorMemberNotExist{path: i.text}
-		childErrorMap[err] = struct{}{}
-		lastError = err
 	}
 
 	return lastError
