@@ -57,10 +57,6 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 	return func(src interface{}) ([]interface{}, error) {
 		container := bufferContainer{}
 
-		defer func() {
-			container.putSortSlice()
-		}()
-
 		err := root.retrieve(src, src, &container)
 		return container.result, err
 

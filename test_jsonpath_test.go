@@ -3503,9 +3503,24 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedJSON: `[{"a":2},{"a":2},{"a":2},{"a":2}]`,
 			},
 			{
+				jsonpath:    `$..*[?(@.a>2)]`,
+				inputJSON:   `[{"b":"1","a":1},{"c":"2","a":2},{"d":"3","a":3}]`,
+				expectedErr: ErrorNoneMatched{path: `..*[?(@.a>2)]`},
+			},
+			{
 				jsonpath:     `$..*[?(@.a>2)]`,
-				inputJSON:    `[{"x":{"y":[{"b":"1","a":1},{"b":"2","a":2},{"b":"3","a":3}],"z":{"b":"4","a":4}}},{"b":"5","a":5}]`,
-				expectedJSON: `[{"a":4,"b":"4"},{"a":3,"b":"3"}]`,
+				inputJSON:    `{"z":[{"d":"1","a":1},{"c":"2","a":2},{"b":"3","a":3}],"y":{"b":"4","a":4}}`,
+				expectedJSON: `[{"a":3,"b":"3"}]`,
+			},
+			{
+				jsonpath:     `$..*[?(@.a>2)]`,
+				inputJSON:    `{"x":{"z":[{"x":"1","a":1},{"z":"2","a":2},{"y":"3","a":3}],"y":{"b":"4","a":4}}}`,
+				expectedJSON: `[{"a":4,"b":"4"},{"a":3,"y":"3"}]`,
+			},
+			{
+				jsonpath:     `$..*[?(@.a>2)]`,
+				inputJSON:    `[{"x":{"z":[{"b":"1","a":1},{"b":"2","a":2},{"b":"3","a":3},{"b":"6","a":6}],"y":{"b":"4","a":4}}},{"b":"5","a":5}]`,
+				expectedJSON: `[{"a":4,"b":"4"},{"a":3,"b":"3"},{"a":6,"b":"6"}]`,
 			},
 		},
 		`both-number`: []TestCase{

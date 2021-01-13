@@ -10,9 +10,7 @@ type syntaxAggregateFunction struct {
 func (f *syntaxAggregateFunction) retrieve(
 	root, current interface{}, container *bufferContainer) error {
 
-	values := bufferContainer{
-		sortKeys: container.sortKeys,
-	}
+	values := bufferContainer{}
 
 	if err := f.param.retrieve(root, current, &values); err != nil {
 		return err

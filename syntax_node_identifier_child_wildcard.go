@@ -39,17 +39,21 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 
 	var lastError error
 
-	container.expandSortSlice(len(srcMap))
+	sortKeys := container.getSortSlice(len(srcMap))
+
+	defer func() {
+		container.putSortSlice(sortKeys)
+	}()
 
 	index := 0
 	for key := range srcMap {
-		(*container.sortKeys)[index] = key
+		(*sortKeys)[index] = key
 		index++
 	}
-	if len(*container.sortKeys) > 1 {
-		container.sortKeys.Sort()
+	if len(*sortKeys) > 1 {
+		sortKeys.Sort()
 	}
-	for _, key := range *container.sortKeys {
+	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
 			childErrorMap[err] = struct{}{}
 			lastError = err

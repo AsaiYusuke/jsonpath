@@ -41,24 +41,28 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 	var lastError error
 
-	container.expandSortSlice(len(srcMap))
+	sortKeys := container.getSortSlice(len(srcMap))
+
+	defer func() {
+		container.putSortSlice(sortKeys)
+	}()
 
 	index := 0
 	for key := range srcMap {
-		(*container.sortKeys)[index] = key
+		(*sortKeys)[index] = key
 		index++
 	}
-	if len(*container.sortKeys) > 1 {
-		container.sortKeys.Sort()
+	if len(*sortKeys) > 1 {
+		sortKeys.Sort()
 	}
-	valueList := make([]interface{}, len(*container.sortKeys))
-	for index := range *container.sortKeys {
-		valueList[index] = srcMap[(*container.sortKeys)[index]]
+	valueList := make([]interface{}, len(*sortKeys))
+	for index := range *sortKeys {
+		valueList[index] = srcMap[(*sortKeys)[index]]
 	}
 
 	valueList = f.query.compute(root, valueList, container)
 
-	for index := range *container.sortKeys {
+	for index := range *sortKeys {
 		var nodeNotFound bool
 		if len(valueList) == 1 {
 			_, nodeNotFound = valueList[0].(struct{})
@@ -66,7 +70,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 			_, nodeNotFound = valueList[index].(struct{})
 		}
 		if !nodeNotFound {
-			if err := f.retrieveMapNext(root, srcMap, (*container.sortKeys)[index], container); err != nil {
+			if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); err != nil {
 				childErrorMap[err] = struct{}{}
 				lastError = err
 			}

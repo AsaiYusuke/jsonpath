@@ -11,9 +11,7 @@ func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
 func (e *syntaxQueryParamRoot) compute(
 	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
 
-	values := bufferContainer{
-		sortKeys: container.sortKeys,
-	}
+	values := bufferContainer{}
 
 	if err := e.param.retrieve(root, root, &values); err != nil {
 		return values.result[:0]

@@ -14,9 +14,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 	result := make([]interface{}, len(currentList))
 
 	for index := range currentList {
-		values := bufferContainer{
-			sortKeys: container.sortKeys,
-		}
+		values := bufferContainer{}
 
 		if err := e.param.retrieve(root, currentList[index], &values); err != nil {
 			result[index] = struct{}{}
