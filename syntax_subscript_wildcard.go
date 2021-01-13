@@ -5,10 +5,9 @@ type syntaxWildcardSubscript struct {
 }
 
 func (*syntaxWildcardSubscript) getIndexes(src []interface{}) []int {
-	index, result := 0, make([]int, len(src))
-	for i := range src {
-		result[index] = i
-		index++
+	result := make([]int, len(src))
+	for index := range src {
+		result[index] = index
 	}
 	return result
 }
