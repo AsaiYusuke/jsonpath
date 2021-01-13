@@ -24,18 +24,15 @@ func (u *syntaxUnionQualifier) retrieve(
 		}
 	}
 
-	var resultIndexes []int
-	for _, subscript := range u.subscripts {
-		resultIndexes = append(resultIndexes, subscript.getIndexes(srcArray)...)
-	}
-
 	if u.isValueGroup() {
 		childErrorMap := make(map[error]struct{}, 1)
 		var lastError error
-		for _, indexes := range resultIndexes {
-			if err := u.retrieveListNext(root, srcArray, indexes, container); err != nil {
-				childErrorMap[err] = struct{}{}
-				lastError = err
+		for _, subscript := range u.subscripts {
+			for _, index := range subscript.getIndexes(srcArray) {
+				if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
+					childErrorMap[err] = struct{}{}
+					lastError = err
+				}
 			}
 		}
 
@@ -53,11 +50,12 @@ func (u *syntaxUnionQualifier) retrieve(
 		return nil
 	}
 
-	if len(resultIndexes) == 0 {
+	indexes := u.subscripts[0].getIndexes(srcArray)
+	if len(indexes) == 0 {
 		return ErrorIndexOutOfRange{path: u.text}
 	}
 
-	return u.retrieveListNext(root, srcArray, resultIndexes[0], container)
+	return u.retrieveListNext(root, srcArray, indexes[0], container)
 }
 
 func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {
