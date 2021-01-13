@@ -196,13 +196,14 @@ These behaviors will be changed in the future if appropriate ones are found.
 
 The character types that can be used for identifiers in dot child notation are as follows:
 
-| Character type                   | Availabe | Escape |
-|----------------------------------|----------|--------|
-| Control code (0x00 - 0x1F, 0x7F) | No       | -      |
-| `- _`                            | Yes      | No     |
+| Character type                             | Availabe | Escape |
+|--------------------------------------------|----------|--------|
+| Control code character (0x00 - 0x1F, 0x7F) | No       | -      |
+| `- _`                                      | Yes      | No     |
 | ``Space ! " # $ % & ' ( ) * + , . / : ; < = > ? @ [ \ ] ^ ` { \| } ~`` | Yes | Yes |
+| non-ASCII Unicode character (0x80 - 0x10FFFF) | Yes       | No      |
 
-The character types that can be used for the proposal (hyphen, underscore) can be used without escape, and other printable symbols can be used by escaping them.
+Character types of printable symbols other than hyphens and underscores can be used by escaping them.
 
 ```text
 JSONPath : $.abc\.def
