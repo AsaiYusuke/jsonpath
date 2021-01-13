@@ -6,14 +6,17 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/AsaiYusuke/jsonpath.svg)](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This is [Go](https://golang.org/) package providing the features that retrieves a part of the JSON objects according to the statement written in the JSONPath syntax.
+This is [Go](https://golang.org/) package providing the features that retrieves a part of the JSON objects according to the query written in the JSONPath syntax.
 
-The core syntaxes of the JSONPath on which this package is based:  [JSONPath - XPath for JSON](https://goessner.net/articles/JsonPath/).
+The core syntaxes of the JSONPath on which this package is based:
+
+- [Stefan Gössner's JSONPath - XPath for JSON](https://goessner.net/articles/JsonPath/)
+- [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison)
+- [JSONPath Internet Draft Development](https://github.com/ietf-wg-jsonpath/draft-ietf-jsonpath-jsonpath)
 
 #### Note:
-The unstated syntaxes found in "JSONPath - XPath for JSON" are implemented with reference to the test cases written in [cburgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
 Please check [my compare result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html) to know which responses are adapted.
-Unfortunately, the proposals that is also discussing in "json-path-comparison" were not finalized at the start of development and were not adopted outright.
+Unfortunately, the proposals that is also discussing in "json-path-comparison"  and the draft of the Internet Draft were not finalized at the start of development and are not adopted outright.
 
 ## Getting started
 
@@ -49,7 +52,7 @@ func main() {
 
 - [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
 - The error specification allows package users to handle errors appropriately.
-- Adopted more of the consensus behavior from the [cburgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
+- Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
   Adapted my own behavior to the other part of the such consensus behavior that found difficult to use.
 - Equipped with numerous unit tests and tried to eliminate the bugs that return strange result.
 
@@ -191,13 +194,15 @@ These behaviors will be changed in the future if appropriate ones are found.
 
 ### Character types
 
-The character types that can not be used for the identifiers in the dot notation are as follows :
+The character types that can be used for identifiers in dot child notation are as follows:
 
-```text
-. [ ( ) = ! > < \t \r \n *SPACE*
-```
+| Character type                   | Availabe | Escape |
+|----------------------------------|----------|--------|
+| Control code (0x00 - 0x1F, 0x7F) | No       | -      |
+| `- _`                            | Yes      | No     |
+| ``Space ! " # $ % & ' ( ) * + , . / : ; < = > ? @ [ \ ] ^ ` { \| } ~`` | Yes | Yes |
 
-You have to encode these characters when you enter them :
+The character types that can be used for the proposal (hyphen, underscore) can be used without escape, and other printable symbols can be used by escaping them.
 
 ```text
 JSONPath : $.abc\.def

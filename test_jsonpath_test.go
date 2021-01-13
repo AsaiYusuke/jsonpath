@@ -141,9 +141,14 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				expectedJSON: `["b"]`,
 			},
 			{
+				jsonpath:     `\@`,
+				inputJSON:    `{"@":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
 				jsonpath:    `@`,
-				inputJSON:   `{"a":1}`,
-				expectedErr: ErrorMemberNotExist{path: `@`},
+				inputJSON:   `{"@":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: `@`},
 			},
 		},
 		`child`: []TestCase{
@@ -225,113 +230,30 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.length`},
 			},
 		},
-		`character-type::Non-alphabet-accepted-in-JSON`: []TestCase{
-			{
-				jsonpath:     `$.a-b`,
-				inputJSON:    `{"a-b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a:b`,
-				inputJSON:    `{"a:b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.$`,
-				inputJSON:    `{"$":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.@`,
-				inputJSON:    `{"@":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.'a'`,
-				inputJSON:    `{"'a'":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$."a"`,
-				inputJSON:    `{"\"a\"":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.'a.b'`,
-				inputJSON:    `{"'a.b'":1,"a":{"b":2},"'a'":{"'b'":3},"'a":{"b'":4}}`,
-				expectedJSON: `[4]`,
-			},
-		},
 		`character-type::encoded-JSONPath`: []TestCase{
 			{
-				jsonpath:     `$.'a\.b'`,
-				inputJSON:    `{"'a.b'":1,"a":{"b":2},"'a'":{"'b'":3},"'a":{"b'":4}}`,
+				// 0x20 - 0x2C, 0x2E - 0x2F
+				jsonpath:     `$.\ \!\"\#\$\%\&\'\(\)\*\+\,\.\/`,
+				inputJSON:    `{" !\"#$%&'()*+,./":1}`,
 				expectedJSON: `[1]`,
 			},
 			{
-				jsonpath:     `$.\\`,
-				inputJSON:    `{"\\":1}`,
+				// 0x3A - 0x40, 0x5B - 0x5E
+				jsonpath:     `$.\:\;\<\=\>\?\@\[\\\]\^`,
+				inputJSON:    `{":;<=>?@[\\]^":1}`,
 				expectedJSON: `[1]`,
 			},
 			{
-				jsonpath:     `$.\.`,
-				inputJSON:    `{".":1}`,
+				// 0x60
+				jsonpath:     "$.\\`",
+				inputJSON:    "{\"`\":1}",
 				expectedJSON: `[1]`,
 			},
 			{
-				jsonpath:     `$.\[`,
-				inputJSON:    `{"[":1}`,
+				// 0x7B - 0x7E
+				jsonpath:     `$.\{\|\}\~`,
+				inputJSON:    `{"{|}~":1}`,
 				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\(`,
-				inputJSON:    `{"(":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\)`,
-				inputJSON:    `{")":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\=`,
-				inputJSON:    `{"=":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\!`,
-				inputJSON:    `{"!":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\>`,
-				inputJSON:    `{">":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\<`,
-				inputJSON:    `{"<":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.\ `,
-				inputJSON:    `{" ":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:    `$.\` + "\t",
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorMemberNotExist{path: `.\` + "\t"},
-			},
-			{
-				jsonpath:    `$.\` + "\r",
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorMemberNotExist{path: `.\` + "\r"},
-			},
-			{
-				jsonpath:    `$.\` + "\n",
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorMemberNotExist{path: `.\` + "\n"},
 			},
 			{
 				jsonpath:    `$.\a`,
@@ -339,81 +261,71 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\a`},
 			},
 			{
-				jsonpath:     `$.a\\b`,
-				inputJSON:    `{"a\\b":1}`,
+				jsonpath:    `$.a\b`,
+				inputJSON:   `{"ab":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `\b`},
+			},
+			{
+				jsonpath:    `$.\-`,
+				inputJSON:   `{"-":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\-`},
+			},
+			{
+				jsonpath:    `$.\_`,
+				inputJSON:   `{"_":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\_`},
+			},
+			{
+				jsonpath:     `$.\'a\.b\'`,
+				inputJSON:    `{"'a.b'":1,"a":{"b":2},"'a'":{"'b'":3},"'a":{"b'":4}}`,
 				expectedJSON: `[1]`,
 			},
 			{
-				jsonpath:     `$.a\.b`,
-				inputJSON:    `{"a.b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\[b`,
-				inputJSON:    `{"a[b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\(b`,
-				inputJSON:    `{"a(b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\)b`,
-				inputJSON:    `{"a)b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\=b`,
-				inputJSON:    `{"a=b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\!b`,
-				inputJSON:    `{"a!b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\>b`,
-				inputJSON:    `{"a>b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\<b`,
-				inputJSON:    `{"a<b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$.a\ b`,
-				inputJSON:    `{"a b":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:    `$.a\` + "\t" + `b`,
-				inputJSON:   `{"ab":123}`,
-				expectedErr: ErrorMemberNotExist{path: `.a\` + "\t" + `b`},
-			},
-			{
-				jsonpath:    `$.a\` + "\r" + `b`,
-				inputJSON:   `{"ab":123}`,
-				expectedErr: ErrorMemberNotExist{path: `.a\` + "\r" + `b`},
-			},
-			{
-				jsonpath:    `$.a\` + "\n" + `b`,
-				inputJSON:   `{"ab":123}`,
-				expectedErr: ErrorMemberNotExist{path: `.a\` + "\n" + `b`},
-			},
-			{
-				jsonpath:    `$.a\a`,
-				inputJSON:   `{"aa":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `\a`},
+				jsonpath:    `$.'a\.b'`,
+				inputJSON:   `{"'a.b'":1,"a":{"b":2},"'a'":{"'b'":3},"'a":{"b'":4}}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.'a\.b'`},
 			},
 		},
 		`character-type::not-encoded-error`: []TestCase{
 			{
-				jsonpath:    `$.\`,
-				inputJSON:   `{"\\":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\`},
+				jsonpath:    `$. `,
+				inputJSON:   `{" ":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `. `},
+			},
+			{
+				jsonpath:    `$.!`,
+				inputJSON:   `{"!":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.!`},
+			},
+			{
+				jsonpath:    `$."`,
+				inputJSON:   `{"\"":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `."`},
+			},
+			{
+				jsonpath:    `$.#`,
+				inputJSON:   `{"#":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.#`},
+			},
+			{
+				jsonpath:    `$.$`,
+				inputJSON:   `{"$":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.$`},
+			},
+			{
+				jsonpath:    `$.%`,
+				inputJSON:   `{"%":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.%`},
+			},
+			{
+				jsonpath:    `$.&`,
+				inputJSON:   `{"&":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.&`},
+			},
+			{
+				jsonpath:    `$.'`,
+				inputJSON:   `{"'":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.'`},
 			},
 			{
 				jsonpath:    `$.(`,
@@ -426,19 +338,29 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.)`},
 			},
 			{
-				jsonpath:    `$.=`,
-				inputJSON:   `{"=":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.=`},
+				jsonpath:    `$.+`,
+				inputJSON:   `{"+":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.+`},
 			},
 			{
-				jsonpath:    `$.!`,
-				inputJSON:   `{"!":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.!`},
+				jsonpath:    `$.,`,
+				inputJSON:   `{",":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.,`},
 			},
 			{
-				jsonpath:    `$.>`,
-				inputJSON:   `{">":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.>`},
+				jsonpath:    `$./`,
+				inputJSON:   `{"/":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `./`},
+			},
+			{
+				jsonpath:    `$.:`,
+				inputJSON:   `{":":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.:`},
+			},
+			{
+				jsonpath:    `$.;`,
+				inputJSON:   `{";":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.;`},
 			},
 			{
 				jsonpath:    `$.<`,
@@ -446,79 +368,110 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.<`},
 			},
 			{
-				jsonpath:    `$. `,
-				inputJSON:   `{" ":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `. `},
-			},
-			{
-				jsonpath:    `$.` + "\t",
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\t"},
-			},
-			{
-				jsonpath:    `$.` + "\r",
-				inputJSON:   `{"":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\r"},
-			},
-			{
-				jsonpath:    `$.` + "\n",
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\n"},
-			},
-			{
-				jsonpath:    `$.a\b`,
-				inputJSON:   `{"a\\b":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `\b`},
-			},
-			{
-				jsonpath:    `$.a(b`,
-				inputJSON:   `{"(":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `(b`},
-			},
-			{
-				jsonpath:    `$.a)b`,
-				inputJSON:   `{")":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `)b`},
-			},
-			{
-				jsonpath:    `$.a=b`,
+				jsonpath:    `$.=`,
 				inputJSON:   `{"=":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `=b`},
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.=`},
 			},
 			{
-				jsonpath:    `$.a!b`,
-				inputJSON:   `{"!":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `!b`},
-			},
-			{
-				jsonpath:    `$.a>b`,
+				jsonpath:    `$.>`,
 				inputJSON:   `{">":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `>b`},
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.>`},
 			},
 			{
-				jsonpath:    `$.a<b`,
-				inputJSON:   `{"<":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: `<b`},
+				jsonpath:    `$.?`,
+				inputJSON:   `{"?":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.?`},
 			},
 			{
-				jsonpath:    `$.a b`,
-				inputJSON:   `{" ":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 4, reason: `unrecognized input`, near: `b`},
+				jsonpath:    `$.@`,
+				inputJSON:   `{"@":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.@`},
 			},
 			{
-				jsonpath:    `$.a` + "\t" + `b`,
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorInvalidSyntax{position: 4, reason: `unrecognized input`, near: `b`},
+				jsonpath:    `$.\`,
+				inputJSON:   `{"\\":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\`},
 			},
 			{
-				jsonpath:    `$.a` + "\r" + `b`,
-				inputJSON:   `{"":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: "\r" + `b`},
+				jsonpath:    `$.]`,
+				inputJSON:   `{"]":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.]`},
 			},
 			{
-				jsonpath:    `$.a` + "\n" + `b`,
-				inputJSON:   `{"":123}`,
-				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: "\n" + `b`},
+				jsonpath:    `$.^`,
+				inputJSON:   `{"^":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.^`},
+			},
+			{
+				jsonpath:    "$.`",
+				inputJSON:   "{\"`\":1}",
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: ".`"},
+			},
+			{
+				jsonpath:    `$.{`,
+				inputJSON:   `{"{":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.{`},
+			},
+			{
+				jsonpath:    `$.|`,
+				inputJSON:   `{"|":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.|`},
+			},
+			{
+				jsonpath:    `$.}`,
+				inputJSON:   `{"}":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.}`},
+			},
+			{
+				jsonpath:    `$.~`,
+				inputJSON:   `{"~":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.~`},
+			},
+		},
+		`character-type::control-ascii`: []TestCase{
+			{
+				// TAB
+				jsonpath:    `$.` + "\x09",
+				inputJSON:   `{"\t":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x09"},
+			},
+			{
+				// TAB
+				jsonpath:    `$.\` + "\x09",
+				inputJSON:   `{"\t":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\` + "\x09"},
+			},
+			{
+				// CR
+				jsonpath:    `$.` + "\x0d",
+				inputJSON:   `{"\n":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x0d"},
+			},
+			{
+				// CR
+				jsonpath:    `$.\` + "\x0d",
+				inputJSON:   `{"\n":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\` + "\x0d"},
+			},
+			{
+				jsonpath:    `$.` + "\x1f",
+				inputJSON:   `{"a":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x1f"},
+			},
+			{
+				jsonpath:    `$.` + "\x7F",
+				inputJSON:   `{"` + "\x7F" + `":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x7F"},
+			},
+			{
+				jsonpath:    `$.\` + "\x7F",
+				inputJSON:   `{"` + "\x7F" + `":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\` + "\x7F"},
+			},
+			{
+				jsonpath:    `$.a` + "\x7F",
+				inputJSON:   `{"a` + "\x7F" + `":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: "\x7F"},
 			},
 		},
 		`character-type::unicode-character`: []TestCase{
@@ -675,14 +628,14 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 				expectedErr: ErrorMemberNotExist{path: `.x`},
 			},
 		},
-		`character-type::Non-ASCII-syntax-accepted-in-JSON`: []TestCase{
+		`character-type::Non-alphabet-accepted-in-JSON`: []TestCase{
 			{
-				jsonpath:     `$..'a'`,
+				jsonpath:     `$..\'a\'`,
 				inputJSON:    `{"'a'":1,"b":{"'a'":2},"c":["'a'",{"d":{"'a'":{"'a'":3}}}]}`,
 				expectedJSON: `[1,2,{"'a'":3},3]`,
 			},
 			{
-				jsonpath:     `$.."a"`,
+				jsonpath:     `$..\"a\"`,
 				inputJSON:    `{"\"a\"":1,"b":{"\"a\"":2},"c":["\"a\"",{"d":{"\"a\"":{"\"a\"":3}}}]}`,
 				expectedJSON: `[1,2,{"\"a\"":3},3]`,
 			},
@@ -3432,7 +3385,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		},
 		`syntax-check::jsonpath`: []TestCase{
 			{
-				jsonpath:     `$[?(@.a+10==20)]`,
+				jsonpath:     `$[?(@.a\+10==20)]`,
 				inputJSON:    `[{"a":10},{"a":20},{"a":30},{"a+10":20}]`,
 				expectedJSON: `[{"a+10":20}]`,
 			},
@@ -3443,12 +3396,12 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			},
 			{
 				// The number 11.0 is converted to 11 using Go's json.Marshal().
-				jsonpath:     `$[?(@.a*2==11)]`,
+				jsonpath:     `$[?(@.a\*2==11)]`,
 				inputJSON:    `[{"a":6},{"a":5},{"a":5.5},{"a":-5},{"a*2":10.999},{"a*2":11.0},{"a*2":11.1},{"a*2":5},{"a*2":"11"}]`,
 				expectedJSON: `[{"a*2":11}]`,
 			},
 			{
-				jsonpath:     `$[?(@.a/10==5)]`,
+				jsonpath:     `$[?(@.a\/10==5)]`,
 				inputJSON:    `[{"a":60},{"a":50},{"a":51},{"a":-50},{"a/10":5},{"a/10":"5"}]`,
 				expectedJSON: `[{"a/10":5}]`,
 			},
@@ -4148,9 +4101,9 @@ func TestRetrieve_space(t *testing.T) {
 				expectedJSON: `[123]`,
 			},
 			{
-				jsonpath:     "\t" + `$.a` + "\t",
-				inputJSON:    `{"a":123}`,
-				expectedJSON: `[123]`,
+				jsonpath:    "\t" + `$.a` + "\t",
+				inputJSON:   `{"a":123}`,
+				expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: "\t" + `$.a` + "\t"},
 			},
 			{
 				jsonpath:    `$.a` + "\n",

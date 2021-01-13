@@ -67,9 +67,11 @@ currentRootIdentifier <-
 dotChildIdentifier <-
     wildcardIdentifier /
 
-    < ( '\\' '\\' / '\\' [.[()=!><\t\r\n ] / [^\\.[()=!><\t\r\n ] )+ > !'()' {
+    < ( '\\' signsWithoutHyphenUnderscore / ![\0x00-\0x1F\0x7F] !signsWithoutHyphenUnderscore . )+ > !'()' { //`
         p.pushChildSingleIdentifier(p.unescape(text))
     }
+
+signsWithoutHyphenUnderscore <- [ -,./:-@[-^`{-~]
 
 bracketChildIdentifier <-
     bracketNodeIdentifier (
@@ -93,14 +95,17 @@ wildcardIdentifier <-
     }
 
 singleQuotedNodeIdentifier <-
-    '\'' < ( '\\' ['/\\bfnrt] / '\\u' [[0-9A-F]][[0-9A-F]][[0-9A-F]][[0-9A-F]] / [^'\\] )* > '\'' {
+    '\'' < ( '\\' ( ['/\\bfnrt] / hexDigits ) / [^'\\] )* > '\'' {
         p.pushChildSingleIdentifier(p.unescapeSingleQuotedString(text))
     }
 
 doubleQuotedNodeIdentifier <-
-    '"' < ( '\\' ["/\\bfnrt] / '\\u' [[0-9A-F]][[0-9A-F]][[0-9A-F]][[0-9A-F]] / [^"\\] )* > '"' { // '
+    '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' { // '
         p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
     }
+
+hexDigits <- 'u' hexDigit hexDigit hexDigit hexDigit
+hexDigit  <- [a-fA-F0-9]
 
 qualifier <- union / script / filter
 
@@ -368,4 +373,4 @@ filterEnd   <- space ')'
 subQueryStart <- '(' space
 subQueryEnd   <- space ')'
 
-space <- ( ' ' / '\t' )*
+space <- ' ' *
