@@ -225,7 +225,7 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.length`},
 			},
 		},
-		`character-type::Non-ASCII-syntax-accepted-in-JSON`: []TestCase{
+		`character-type::Non-alphabet-accepted-in-JSON`: []TestCase{
 			{
 				jsonpath:     `$.a-b`,
 				inputJSON:    `{"a-b":1}`,
@@ -880,11 +880,6 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[1]`,
 			},
 			{
-				jsonpath:     `$['a\\b']`,
-				inputJSON:    `{"a\\b":1,"b":2}`,
-				expectedJSON: `[1]`,
-			},
-			{
 				jsonpath:     `$['a\'b']`,
 				inputJSON:    `{"a'b":1,"b":2}`,
 				expectedJSON: `[1]`,
@@ -892,6 +887,41 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 			{
 				jsonpath:     `$['ab\'c']`,
 				inputJSON:    `{"ab'c":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\/b']`,
+				inputJSON:    `{"a\/b":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\\b']`,
+				inputJSON:    `{"a\\b":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\bb']`,
+				inputJSON:    `{"a\bb":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\fb']`,
+				inputJSON:    `{"a\fb":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\nb']`,
+				inputJSON:    `{"a\nb":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\rb']`,
+				inputJSON:    `{"a\rb":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\tb']`,
+				inputJSON:    `{"a\tb":1,"b":2}`,
 				expectedJSON: `[1]`,
 			},
 			{
@@ -909,16 +939,56 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				inputJSON:    `{"a\"c":1,"b":2}`,
 				expectedJSON: `[1]`,
 			},
+			{
+				jsonpath:     `$['a\uD834\uDD1Ec']`,
+				inputJSON:    `{"a\uD834\uDD1Ec":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['a\ud834\udd1ec']`,
+				inputJSON:    `{"a\uD834\uDD1Ec":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['\u0000']`,
+				inputJSON:    `{"\u0000":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['\uabcd']`,
+				inputJSON:    `{"\uabcd":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$['\uABCD']`,
+				inputJSON:    `{"\uabcd":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:    `$['\uX000']`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['\uX000']`},
+			},
+			{
+				jsonpath:    `$['\u0X00']`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['\u0X00']`},
+			},
+			{
+				jsonpath:    `$['\u00X0']`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['\u00X0']`},
+			},
+			{
+				jsonpath:    `$['\u000X']`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `['\u000X']`},
+			},
 		},
 		`character-type::double-quoted`: []TestCase{
 			{
 				jsonpath:     `$["ab"]`,
 				inputJSON:    `{"ab":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$["a\\b"]`,
-				inputJSON:    `{"a\\b":1}`,
 				expectedJSON: `[1]`,
 			},
 			{
@@ -932,9 +1002,44 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				expectedJSON: `[1]`,
 			},
 			{
-				jsonpath:    `$["a\b"]`,
-				inputJSON:   `{"ab":1}`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["a\b"]`},
+				jsonpath:     `$["a\/b"]`,
+				inputJSON:    `{"a\/b":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\\b"]`,
+				inputJSON:    `{"a\\b":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\bb"]`,
+				inputJSON:    `{"a\bb":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\fb"]`,
+				inputJSON:    `{"a\fb":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\nb"]`,
+				inputJSON:    `{"a\nb":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\rb"]`,
+				inputJSON:    `{"a\rb":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\tb"]`,
+				inputJSON:    `{"a\tb":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:    `$["a\c"]`,
+				inputJSON:   `{"ac":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["a\c"]`},
 			},
 			{
 				jsonpath:    `$["a"b"]`,
@@ -945,6 +1050,51 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				jsonpath:     `$["a'b"]`,
 				inputJSON:    `{"a'b":1}`,
 				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\uD834\uDD1Ec"]`,
+				inputJSON:    `{"a\uD834\uDD1Ec":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["a\ud834\udd1ec"]`,
+				inputJSON:    `{"a\uD834\uDD1Ec":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["\u0000"]`,
+				inputJSON:    `{"\u0000":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["\uabcd"]`,
+				inputJSON:    `{"\uabcd":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$["\uABCD"]`,
+				inputJSON:    `{"\uabcd":1,"b":2}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:    `$["\uX000"]`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["\uX000"]`},
+			},
+			{
+				jsonpath:    `$["\u0X00"]`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["\u0X00"]`},
+			},
+			{
+				jsonpath:    `$["\u00X0"]`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["\u00X0"]`},
+			},
+			{
+				jsonpath:    `$["\u000X"]`,
+				inputJSON:   `{"a":1,"b":2}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `["\u000X"]`},
 			},
 		},
 		`character-types-like-the-prohibited-dot-notation`: []TestCase{
@@ -1011,26 +1161,6 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 			{
 				jsonpath:     `$["'"]`,
 				inputJSON:    `{"'":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$['\'']`,
-				inputJSON:    `{"'":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$["\""]`,
-				inputJSON:    `{"\"":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$['\\']`,
-				inputJSON:    `{"\\":1}`,
-				expectedJSON: `[1]`,
-			},
-			{
-				jsonpath:     `$["\\"]`,
-				inputJSON:    `{"\\":1}`,
 				expectedJSON: `[1]`,
 			},
 			{

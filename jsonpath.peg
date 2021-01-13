@@ -93,13 +93,13 @@ wildcardIdentifier <-
     }
 
 singleQuotedNodeIdentifier <-
-    '\'' < ( '\\' '\\' / '\\' '\'' / [^\\'] )* > '\'' {
-        p.pushChildSingleIdentifier(p.unescape(text))
+    '\'' < ( '\\' ['/\\bfnrt] / '\\u' [[0-9A-F]][[0-9A-F]][[0-9A-F]][[0-9A-F]] / [^'\\] )* > '\'' {
+        p.pushChildSingleIdentifier(p.unescapeSingleQuotedString(text))
     }
 
 doubleQuotedNodeIdentifier <-
-    '"' < ( '\\' '\\' / '\\' '"' / [^\\"] )* > '"' { // '
-        p.pushChildSingleIdentifier(p.unescape(text))
+    '"' < ( '\\' ["/\\bfnrt] / '\\u' [[0-9A-F]][[0-9A-F]][[0-9A-F]][[0-9A-F]] / [^"\\] )* > '"' { // '
+        p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
     }
 
 qualifier <- union / script / filter

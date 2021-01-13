@@ -1,6 +1,7 @@
 package jsonpath
 
 import (
+	"encoding/json"
 	"regexp"
 	"strconv"
 )
@@ -66,6 +67,77 @@ func (p *jsonPathParser) unescape(text string) string {
 		varBlockSet := p.unescapeRegex.FindStringSubmatch(block)
 		return varBlockSet[1]
 	})
+}
+
+func (p *jsonPathParser) unescapeSingleQuotedString(text string) string {
+	srcBytes := []byte(text)
+	inputBytes := make([]byte, 0, 2+len(text))
+
+	inputBytes = append(inputBytes, 0x22) // "
+
+	var foundEscape bool
+	for index := range srcBytes {
+		switch srcBytes[index] {
+		case 0x22: // "
+			// " -> /"
+			inputBytes = append(inputBytes, 0x5c, srcBytes[index])
+		case 0x27: // '
+			// \' -> '
+			inputBytes = append(inputBytes, srcBytes[index])
+			foundEscape = false
+		case 0x5c: // \
+			if foundEscape {
+				inputBytes = append(inputBytes, 0x5c, 0x5c)
+				foundEscape = false
+			} else {
+				foundEscape = true
+			}
+		default:
+			if foundEscape {
+				inputBytes = append(inputBytes, 0x5c, srcBytes[index])
+				foundEscape = false
+			} else {
+				inputBytes = append(inputBytes, srcBytes[index])
+			}
+		}
+	}
+
+	inputBytes = append(inputBytes, 0x22) // "
+
+	unescapedText, err := p._unescapeJSONString(inputBytes)
+
+	if err != nil {
+		panic(ErrorInvalidArgument{
+			argument: text,
+			err:      err,
+		})
+	}
+
+	return unescapedText
+}
+
+func (p *jsonPathParser) unescapeDoubleQuotedString(text string) string {
+	inputBytes := make([]byte, 0, 2+len(text))
+	inputBytes = append(inputBytes, 0x22)
+	inputBytes = append(inputBytes, []byte(text)...)
+	inputBytes = append(inputBytes, 0x22)
+
+	unescapedText, err := p._unescapeJSONString(inputBytes)
+
+	if err != nil {
+		panic(ErrorInvalidArgument{
+			argument: text,
+			err:      err,
+		})
+	}
+
+	return unescapedText
+}
+
+func (p *jsonPathParser) _unescapeJSONString(input []byte) (string, error) {
+	var unescapedText string
+	err := json.Unmarshal(input, &unescapedText)
+	return unescapedText, err
 }
 
 func (p *jsonPathParser) syntaxErr(pos int, reason string, buffer string) error {
