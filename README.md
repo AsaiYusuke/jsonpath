@@ -243,54 +243,97 @@ On the other hand, in the case of the `existence check` in the filter qualifier,
 
 ## Benchmarks
 
+I benchmarked three JSONPaths using several libraries for the Go language.
+There was a difference in execution performance between the libraries, but if the number of queries using JSONPaths is little, I don't think there will be a big difference between any of them.
+
 <details>
 <summary>Show results</summary>
 
+- [BenchmarkAsaiYusukeJSONPath](https://github.com/AsaiYusuke/jsonpath)
+- [BenchmarkOhler55Ojg](https://github.com/ohler55/ojg/jp)
+- [BenchmarkBhmjJSONSlice](https://github.com/bhmj/jsonslice)
+- [BenchmarkPaesslerAGJSONPath](https://github.com/PaesslerAG/jsonpath)
+- [BenchmarkOliveagleJsonpath](https://github.com/oliveagle/jsonpath)
+- [BenchmarkSpyzhovAjson](https://github.com/spyzhov/ajson)
+
 ```text
-goos: windows
-goarch: amd64
-pkg: github.com/AsaiYusuke/jsonpath
-BenchmarkRetrieve_dotNotation-4                             	  802390	      1282 ns/op	     432 B/op	      18 allocs/op
-BenchmarkRetrieve_bracketNotation-4                         	  801190	      1578 ns/op	     512 B/op	      21 allocs/op
-BenchmarkRetrieve_wildcard_identifier_dotNotation-4         	  856964	      1420 ns/op	     456 B/op	      20 allocs/op
-BenchmarkRetrieve_wildcard_identifier_bracketNotation-4     	  707596	      1614 ns/op	     504 B/op	      21 allocs/op
-BenchmarkRetrieve_multi_identifier-4                        	  480096	      2443 ns/op	     856 B/op	      33 allocs/op
-BenchmarkRetrieve_qualifier_index-4                         	  750308	      1621 ns/op	     568 B/op	      22 allocs/op
-BenchmarkRetrieve_qualifier_slice-4                         	  600488	      2106 ns/op	     688 B/op	      29 allocs/op
-BenchmarkRetrieve_qualifier_wildcard-4                      	  800319	      1550 ns/op	     504 B/op	      21 allocs/op
-BenchmarkRetrieve_qualifier_union-4                         	  462747	      2539 ns/op	     904 B/op	      34 allocs/op
-BenchmarkRetrieve_filter_logicalOR-4                        	  218623	      5463 ns/op	    1853 B/op	      45 allocs/op
-BenchmarkRetrieve_filter_logicalAND-4                       	  226866	      5465 ns/op	    1853 B/op	      45 allocs/op
-BenchmarkRetrieve_filter_nodeFilter-4                       	  260784	      4746 ns/op	    1488 B/op	      41 allocs/op
-BenchmarkRetrieve_filter_logicalNOT-4                       	  261564	      4606 ns/op	    1840 B/op	      47 allocs/op
-BenchmarkRetrieve_filter_compareEQ-4                        	  227083	      5236 ns/op	    1992 B/op	      51 allocs/op
-BenchmarkRetrieve_filter_compareNE-4                        	  221324	      5512 ns/op	    2264 B/op	      54 allocs/op
-BenchmarkRetrieve_filter_compareGE-4                        	  231394	      5343 ns/op	    1992 B/op	      51 allocs/op
-BenchmarkRetrieve_filter_compareGT-4                        	  237956	      5232 ns/op	    1880 B/op	      50 allocs/op
-BenchmarkRetrieve_filter_compareLE-4                        	  231217	      5232 ns/op	    1976 B/op	      50 allocs/op
-BenchmarkRetrieve_filter_compareLT-4                        	  227025	      5219 ns/op	    1880 B/op	      49 allocs/op
-BenchmarkRetrieve_filter_regex-4                            	  168806	      7237 ns/op	    2833 B/op	      62 allocs/op
-BenchmarkParserFunc_dotNotation-4                           	 4852603	       248 ns/op	     144 B/op	       5 allocs/op
-BenchmarkParserFunc_bracketNotation-4                       	 4877554	       247 ns/op	     144 B/op	       5 allocs/op
-BenchmarkParserFunc_wildcard_identifier_dotNotation-4       	 3003252	       399 ns/op	     192 B/op	       7 allocs/op
-BenchmarkParserFunc_wildcard_identifier_bracketNotation-4   	 2943961	       408 ns/op	     192 B/op	       7 allocs/op
-BenchmarkParserFunc_multi_identifier-4                      	 2593132	       456 ns/op	     240 B/op	       8 allocs/op
-BenchmarkParserFunc_qualifier_index-4                       	 3682868	       326 ns/op	     224 B/op	       7 allocs/op
-BenchmarkParserFunc_qualifier_slice-4                       	 3730786	       330 ns/op	     192 B/op	       7 allocs/op
-BenchmarkParserFunc_qualifier_wildcard-4                    	 3702061	       321 ns/op	     192 B/op	       7 allocs/op
-BenchmarkParserFunc_qualifier_union-4                       	 2053358	       587 ns/op	     344 B/op	      12 allocs/op
-BenchmarkParserFunc_filter_logicalOR-4                      	  816764	      1380 ns/op	    1104 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_logicalAND-4                     	  925590	      1375 ns/op	    1104 B/op	      17 allocs/op
-BenchmarkParserFunc_filter_nodeFilter-4                     	 1000000	      1009 ns/op	     832 B/op	      14 allocs/op
-BenchmarkParserFunc_filter_logicalNOT-4                     	  857142	      1533 ns/op	    1168 B/op	      19 allocs/op
-BenchmarkParserFunc_filter_compareEQ-4                      	  750130	      1575 ns/op	    1088 B/op	      16 allocs/op
-BenchmarkParserFunc_filter_compareNE-4                      	  667159	      1823 ns/op	    1344 B/op	      18 allocs/op
-BenchmarkParserFunc_filter_compareGE-4                      	  858307	      1471 ns/op	    1088 B/op	      16 allocs/op
-BenchmarkParserFunc_filter_compareGT-4                      	  802525	      1477 ns/op	    1088 B/op	      16 allocs/op
-BenchmarkParserFunc_filter_compareLE-4                      	  833859	      1482 ns/op	    1088 B/op	      16 allocs/op
-BenchmarkParserFunc_filter_compareLT-4                      	  707726	      1497 ns/op	    1088 B/op	      16 allocs/op
-BenchmarkParserFunc_filter_regex-4                          	  799903	      1633 ns/op	    1095 B/op	      16 allocs/op
+JSONPath : $.store.book[0].price
+
+BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4          4557238       265 ns/op      64 B/op       4 allocs/op
+BenchmarkOhler55Ojg_threeLevelsWithIndex-4                  1711050       716 ns/op    1040 B/op       2 allocs/op
+BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4                601647      2087 ns/op      32 B/op       1 allocs/op
+BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4          1814469       651 ns/op     208 B/op       7 allocs/op
+BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          12950515        90.3 ns/op     0 B/op       0 allocs/op
+BenchmarkSpyzhovAjson                                      not supported
 ```
+
+```text
+JSONPath : $.store..price
+
+BenchmarkAsaiYusukeJSONPath_recursiveDescent-4               429724      2716 ns/op     640 B/op      13 allocs/op
+BenchmarkOhler55Ojg_recursiveDescent-4                       481300      2513 ns/op    1368 B/op      18 allocs/op
+BenchmarkBhmjJSONSlice_recursiveDescent-4                    129428      9289 ns/op     688 B/op      27 allocs/op
+BenchmarkPaesslerAGJSONPath_recursiveDescent-4                42361     28190 ns/op   12167 B/op     397 allocs/op
+BenchmarkOliveagleJsonpath                                 not supported
+BenchmarkSpyzhovAjson_recursiveDescent-4                     158319      7473 ns/op    2280 B/op      72 allocs/op
+```
+
+```text
+JSONPath : $..book[?(@.price > $.store.bicycle.price)]
+
+BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4     331218      3572 ns/op     816 B/op      27 allocs/op
+BenchmarkOhler55Ojg_recursiveDescentWithFilter-4             222663      5361 ns/op    5240 B/op      20 allocs/op
+BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4           55168     26743 ns/op    3032 B/op      57 allocs/op
+BenchmarkPaesslerAGJSONPath                                not supported
+BenchmarkOliveagleJsonpath                                 not supported
+BenchmarkSpyzhovAjson                                      not supported
+```
+
+JSON used for the benchmark measurement
+
+```text
+{ "store": {
+  "book": [ 
+    { "category": "reference",
+    "author": "Nigel Rees",
+    "title": "Sayings of the Century",
+    "price": 8.95
+    },
+    { "category": "fiction",
+    "author": "Evelyn Waugh",
+    "title": "Sword of Honour",
+    "price": 12.99
+    },
+    { "category": "fiction",
+    "author": "Herman Melville",
+    "title": "Moby Dick",
+    "isbn": "0-553-21311-3",
+    "price": 8.99
+    },
+    { "category": "fiction",
+    "author": "J. R. R. Tolkien",
+    "title": "The Lord of the Rings",
+    "isbn": "0-395-19395-8",
+    "price": 22.99
+    }
+  ],
+  "bicycle": {
+    "color": "red",
+    "price": 19.95
+  }
+  }
+}
+```
+
+Environment
+
+```text
+Processor  : Intel Core i5-6267U 2.90GHz
+Memory     : 16.0 GB
+OS         : Windows 10
+Go version : go1.15.6 windows/amd64
+```
+
 </details>
 
 ## Project progress
