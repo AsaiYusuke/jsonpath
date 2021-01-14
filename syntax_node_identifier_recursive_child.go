@@ -23,7 +23,6 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			}
 
 			sortKeys := container.getSortedKeys(typedNodes)
-			defer func() { container.putSortSlice(sortKeys) }()
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
 				node := typedNodes[(*sortKeys)[index]]
@@ -33,6 +32,8 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 					targetNodes = append(targetNodes, node)
 				}
 			}
+
+			container.putSortSlice(sortKeys)
 
 		case []interface{}:
 			if i.nextListRequired {

@@ -40,7 +40,6 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	var lastError error
 
 	sortKeys := container.getSortedKeys(srcMap)
-	defer func() { container.putSortSlice(sortKeys) }()
 
 	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
@@ -48,6 +47,8 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 			lastError = err
 		}
 	}
+
+	container.putSortSlice(sortKeys)
 
 	return lastError
 }

@@ -42,7 +42,6 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	var lastError error
 
 	sortKeys := container.getSortedKeys(srcMap)
-	defer func() { container.putSortSlice(sortKeys) }()
 
 	valueList := make([]interface{}, len(*sortKeys))
 	for index := range *sortKeys {
@@ -65,6 +64,8 @@ func (f *syntaxFilterQualifier) retrieveMap(
 			}
 		}
 	}
+
+	container.putSortSlice(sortKeys)
 
 	return lastError
 }
