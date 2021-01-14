@@ -19,7 +19,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		switch typedNodes := currentNode.(type) {
 		case map[string]interface{}:
 			if i.nextMapRequired {
-				i.retrieveAnyValueNext(root, typedNodes, container)
+				i.next.retrieve(root, typedNodes, container)
 			}
 
 			sortKeys := container.getSortedKeys(typedNodes)
@@ -36,7 +36,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 		case []interface{}:
 			if i.nextListRequired {
-				i.retrieveAnyValueNext(root, typedNodes, container)
+				i.next.retrieve(root, typedNodes, container)
 			}
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
