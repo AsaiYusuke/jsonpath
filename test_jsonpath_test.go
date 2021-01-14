@@ -2455,9 +2455,14 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 		},
 		`zero`: []TestCase{
 			{
-				jsonpath:     `$[0:2:0]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["first","second"]`,
+				jsonpath:    `$[0:2:0]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[0:2:0]`},
+			},
+			{
+				jsonpath:    `$[2:0:0]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[2:0:0]`},
 			},
 		},
 		`minus::start-variation`: []TestCase{

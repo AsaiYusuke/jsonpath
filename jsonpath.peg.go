@@ -531,11 +531,11 @@ func (p *pegJSONPathParser) Execute() {
 			end := p.pop().(*syntaxIndexSubscript)
 			start := p.pop().(*syntaxIndexSubscript)
 
-			if step.isOmitted || step.number == 0 {
+			if step.isOmitted {
 				step.number = 1
 			}
 
-			if step.number > 0 {
+			if step.number >= 0 {
 				p.pushSlicePositiveStepSubscript(start, end, step)
 			} else {
 				p.pushSliceNegativeStepSubscript(start, end, step)
@@ -3645,11 +3645,11 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		    end   := p.pop().(*syntaxIndexSubscript)
 		    start := p.pop().(*syntaxIndexSubscript)
 
-		    if step.isOmitted || step.number == 0 {
+		    if step.isOmitted {
 		        step.number = 1
 		    }
 
-		    if step.number > 0 {
+		    if step.number >= 0 {
 		        p.pushSlicePositiveStepSubscript(start, end, step)
 		    } else {
 		        p.pushSliceNegativeStepSubscript(start, end, step)

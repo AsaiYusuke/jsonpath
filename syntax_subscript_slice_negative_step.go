@@ -14,12 +14,14 @@ func (s *syntaxSliceNegativeStepSubscript) getIndexes(src []interface{}) []int {
 	loopEnd := s.getLoopEnd(srcLength)
 
 	index, result := 0, make([]int, srcLength)
-	for i := loopStart; i > loopEnd; i += s.step.number {
-		if i < 0 || i >= srcLength {
-			break
+	if s.step.number < 0 {
+		for i := loopStart; i > loopEnd; i += s.step.number {
+			if i < 0 || i >= srcLength {
+				break
+			}
+			result[index] = i
+			index++
 		}
-		result[index] = i
-		index++
 	}
 
 	return result[:index]
