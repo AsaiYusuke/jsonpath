@@ -198,10 +198,11 @@ The following character types can be available for identifiers in dot-child nota
 
 | Character type                                 | Availabe | Escape |
 |------------------------------------------------|----------|--------|
-| ~~Control code character (0x00 - 0x1F, 0x7F)~~ | No       | -      |
+| ASCII character ( `0-9`, `A-Z`, `a-z` )        | Yes      | No     |
 | Hyphens and underscores (`-` `_` )             | Yes      | No     |
 | Other symbols ( ``Space ! " # $ % & ' ( ) * + , . / : ; < = > ? @ [ \ ] ^ ` { \| } ~`` ) | Yes | Yes |
 | Non-ASCII Unicode character (0x80 - 0x10FFFF) | Yes       | No      |
+| ~~Control code character (0x00 - 0x1F, 0x7F)~~ | No       | -      |
 
 Character types of printable symbols other than hyphens and underscores can be used by escaping them.
 
