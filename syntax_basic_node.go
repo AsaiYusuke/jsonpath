@@ -66,8 +66,13 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 func (i *syntaxBasicNode) retrieveMapNext(
 	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) error {
 
+	nextNode, ok := currentMap[key]
+	if !ok {
+		return ErrorMemberNotExist{path: i.text}
+	}
+
 	if i.next != nil {
-		return i.next.retrieve(root, currentMap[key], container)
+		return i.next.retrieve(root, nextNode, container)
 	}
 
 	if i.accessorMode {
@@ -76,7 +81,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 			Set: func(value interface{}) { currentMap[key] = value },
 		})
 	} else {
-		container.result = append(container.result, currentMap[key])
+		container.result = append(container.result, nextNode)
 	}
 
 	return nil

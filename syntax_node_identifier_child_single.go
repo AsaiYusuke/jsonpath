@@ -24,9 +24,5 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 		}
 	}
 
-	if _, ok := srcMap[i.identifier]; !ok {
-		return ErrorMemberNotExist{path: i.text}
-	}
-
 	return i.retrieveMapNext(root, srcMap, i.identifier, container)
 }
