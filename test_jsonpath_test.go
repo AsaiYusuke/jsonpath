@@ -654,6 +654,28 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 				expectedJSON: `[1,2,3,4,5,6,7,8]`,
 			},
 		},
+		`type-unmatched`: []TestCase{
+			{
+				jsonpath:    `$..a`,
+				inputJSON:   `null`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `null`, path: `..`},
+			},
+			{
+				jsonpath:    `$..a`,
+				inputJSON:   `true`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `bool`, path: `..`},
+			},
+			{
+				jsonpath:    `$..a`,
+				inputJSON:   `"abc"`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `string`, path: `..`},
+			},
+			{
+				jsonpath:    `$..a`,
+				inputJSON:   `123`,
+				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `float64`, path: `..`},
+			},
+		},
 	}
 
 	execTestRetrieveTestGroups(t, testGroups)
@@ -732,18 +754,53 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 		`recursive`: []TestCase{
 			{
 				jsonpath:    `$..*`,
-				inputJSON:   `"a"`,
+				inputJSON:   `{}`,
 				expectedErr: ErrorNoneMatched{path: `..*`},
 			},
 			{
 				jsonpath:    `$..*`,
-				inputJSON:   `true`,
+				inputJSON:   `[]`,
 				expectedErr: ErrorNoneMatched{path: `..*`},
 			},
 			{
-				jsonpath:    `$..*`,
-				inputJSON:   `1`,
-				expectedErr: ErrorNoneMatched{path: `..*`},
+				jsonpath:     `$..*`,
+				inputJSON:    `{"a":1}`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `{"b":2,"a":1}`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `{"a":{"b":2}}`,
+				expectedJSON: `[{"b":2},2]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `{"a":{"c":3,"b":2}}`,
+				expectedJSON: `[{"b":2,"c":3},2,3]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `[1]`,
+				expectedJSON: `[1]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `[2,1]`,
+				expectedJSON: `[2,1]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `[{"a":1}]`,
+				expectedJSON: `[{"a":1},1]`,
+			},
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `[{"b":2,"a":1}]`,
+				expectedJSON: `[{"a":1,"b":2},1,2]`,
 			},
 		},
 		`child-error`: []TestCase{

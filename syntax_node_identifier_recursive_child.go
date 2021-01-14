@@ -1,5 +1,9 @@
 package jsonpath
 
+import (
+	"reflect"
+)
+
 type syntaxRecursiveChildIdentifier struct {
 	*syntaxBasicNode
 
@@ -9,6 +13,20 @@ type syntaxRecursiveChildIdentifier struct {
 
 func (i *syntaxRecursiveChildIdentifier) retrieve(
 	root, current interface{}, container *bufferContainer) error {
+
+	_, isMap := current.(map[string]interface{})
+	_, isList := current.([]interface{})
+	if !isMap && !isList {
+		foundType := `null`
+		if current != nil {
+			foundType = reflect.TypeOf(current).String()
+		}
+		return ErrorTypeUnmatched{
+			expectedType: `object/array`,
+			foundType:    foundType,
+			path:         i.text,
+		}
+	}
 
 	targetNodes := make([]interface{}, 1, 5)
 	targetNodes[0] = current
