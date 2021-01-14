@@ -13,8 +13,8 @@ type syntaxChildMultiIdentifier struct {
 func (i *syntaxChildMultiIdentifier) retrieve(
 	root, current interface{}, container *bufferContainer) error {
 
-	if _, ok := current.([]interface{}); ok {
-		if i.isAllWildcard {
+	if i.isAllWildcard {
+		if _, ok := current.([]interface{}); ok {
 			// If the "current" variable points to the array structure
 			// and only wildcards are specified for qualifier,
 			// then switch to syntaxUnionQualifier.
