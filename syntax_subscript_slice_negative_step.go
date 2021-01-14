@@ -16,9 +16,6 @@ func (s *syntaxSliceNegativeStepSubscript) getIndexes(src []interface{}) []int {
 	index, result := 0, make([]int, srcLength)
 	if s.step.number < 0 {
 		for i := loopStart; i > loopEnd; i += s.step.number {
-			if i < 0 || i >= srcLength {
-				break
-			}
 			result[index] = i
 			index++
 		}
@@ -32,25 +29,26 @@ func (s *syntaxSliceNegativeStepSubscript) getLoopStart(srcLength int) int {
 	if s.start.isOmitted {
 		loopStart = srcLength - 1
 	}
-	if loopStart > srcLength-1 {
-		loopStart = loopStart - srcLength
-		if loopStart > srcLength-1 {
-			loopStart = srcLength - 1
-		}
-	}
-	return loopStart
+	return s.getNormalizedValue(loopStart, srcLength)
 }
 
 func (s *syntaxSliceNegativeStepSubscript) getLoopEnd(srcLength int) int {
 	loopEnd := s.end.number
 	if s.end.isOmitted {
-		loopEnd = -1
+		loopEnd = -srcLength - 1
 	}
-	if loopEnd > srcLength-1 {
-		loopEnd = loopEnd - srcLength
-		if loopEnd > srcLength-1 {
-			loopEnd = srcLength - 1
+	return s.getNormalizedValue(loopEnd, srcLength)
+}
+
+func (s *syntaxSliceNegativeStepSubscript) getNormalizedValue(value int, srcLength int) int {
+	if value < 0 {
+		value += srcLength
+		if value < -1 {
+			value = -1
 		}
 	}
-	return loopEnd
+	if value > srcLength-1 {
+		value = srcLength - 1
+	}
+	return value
 }

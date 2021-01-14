@@ -2467,6 +2467,21 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 		},
 		`minus::start-variation`: []TestCase{
 			{
+				jsonpath:    `$[-3:1:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[-3:1:-1]`},
+			},
+			{
+				jsonpath:    `$[-2:1:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[-2:1:-1]`},
+			},
+			{
+				jsonpath:     `$[-1:1:-1]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["third"]`,
+			},
+			{
 				jsonpath:    `$[0:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
 				expectedErr: ErrorNoneMatched{path: `[0:1:-1]`},
@@ -2482,36 +2497,26 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 				expectedJSON: `["third"]`,
 			},
 			{
-				jsonpath:    `$[3:1:-1]`,
-				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[3:1:-1]`},
-			},
-			{
-				jsonpath:    `$[4:1:-1]`,
-				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[4:1:-1]`},
-			},
-			{
-				jsonpath:     `$[5:1:-1]`,
+				jsonpath:     `$[3:1:-1]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["third"]`,
 			},
 			{
-				jsonpath:     `$[6:1:-1]`,
+				jsonpath:     `$[4:1:-1]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["third"]`,
 			},
 		},
-		`minus::end-variation::start-0`: []TestCase{
+		`minus::end-variation::start0`: []TestCase{
 			{
-				jsonpath:     `$[0:-2:-1]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["first"]`,
+				jsonpath:    `$[0:-2:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[0:-2:-1]`},
 			},
 			{
-				jsonpath:     `$[0:-1:-1]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["first"]`,
+				jsonpath:    `$[0:-1:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[0:-1:-1]`},
 			},
 			{
 				jsonpath:    `$[0:0:-1]`,
@@ -2539,16 +2544,31 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 				expectedErr: ErrorNoneMatched{path: `[0:4:-1]`},
 			},
 		},
-		`minus::end-variation::start-1`: []TestCase{
+		`minus::end-variation::start1`: []TestCase{
 			{
-				jsonpath:     `$[1:-2:-1]`,
+				jsonpath:     `$[1:-5:-1]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["second","first"]`,
 			},
 			{
-				jsonpath:     `$[1:-1:-1]`,
+				jsonpath:     `$[1:-4:-1]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["second","first"]`,
+			},
+			{
+				jsonpath:     `$[1:-3:-1]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["second"]`,
+			},
+			{
+				jsonpath:    `$[1:-2:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[1:-2:-1]`},
+			},
+			{
+				jsonpath:    `$[1:-1:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[1:-1:-1]`},
 			},
 			{
 				jsonpath:     `$[1:0:-1]`,
@@ -2567,31 +2587,36 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 				expectedErr:  ErrorNoneMatched{path: `[1:2:-1]`},
 			},
 			{
-				jsonpath:     `$[1:3:-1]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["second"]`,
-			},
-			{
-				jsonpath:    `$[1:4:-1]`,
+				jsonpath:    `$[1:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:4:-1]`},
-			},
-			{
-				jsonpath:    `$[1:5:-1]`,
-				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:5:-1]`},
+				expectedErr: ErrorNoneMatched{path: `[1:3:-1]`},
 			},
 		},
-		`minus::end-variation::start-2`: []TestCase{
+		`minus::end-variation::start2`: []TestCase{
+			{
+				jsonpath:     `$[2:-5:-1]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["third","second","first"]`,
+			},
+			{
+				jsonpath:     `$[2:-4:-1]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["third","second","first"]`,
+			},
+			{
+				jsonpath:     `$[2:-3:-1]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["third","second"]`,
+			},
 			{
 				jsonpath:     `$[2:-2:-1]`,
 				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["third","second","first"]`,
+				expectedJSON: `["third"]`,
 			},
 			{
-				jsonpath:     `$[2:-1:-1]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["third","second","first"]`,
+				jsonpath:    `$[2:-1:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[2:-1:-1]`},
 			},
 			{
 				jsonpath:     `$[2:0:-1]`,
@@ -2609,24 +2634,19 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 				expectedErr: ErrorNoneMatched{path: `[2:2:-1]`},
 			},
 			{
-				jsonpath:     `$[2:3:-1]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["third","second"]`,
+				jsonpath:    `$[2:3:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[2:3:-1]`},
 			},
 			{
-				jsonpath:     `$[2:4:-1]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["third"]`,
+				jsonpath:    `$[2:4:-1]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[2:4:-1]`},
 			},
 			{
 				jsonpath:    `$[2:5:-1]`,
 				inputJSON:   `["first","second","third"]`,
 				expectedErr: ErrorNoneMatched{path: `[2:5:-1]`},
-			},
-			{
-				jsonpath:    `$[2:6:-1]`,
-				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:6:-1]`},
 			},
 		},
 		`minus::step-variation`: []TestCase{
@@ -2648,14 +2668,14 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 		},
 		`minus::start-end-variation`: []TestCase{
 			{
-				jsonpath:     `$[2:-1:-2]`,
-				inputJSON:    `["first","second","third"]`,
-				expectedJSON: `["third","first"]`,
+				jsonpath:    `$[2:-1:-2]`,
+				inputJSON:   `["first","second","third"]`,
+				expectedErr: ErrorNoneMatched{path: `[2:-1:-2]`},
 			},
 			{
-				jsonpath:    `$[-1:0:-1]`,
-				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:0:-1]`},
+				jsonpath:     `$[-1:0:-1]`,
+				inputJSON:    `["first","second","third"]`,
+				expectedJSON: `["third","second"]`,
 			},
 		},
 		`omitted-number`: []TestCase{
@@ -2783,22 +2803,22 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 		},
 		`child-error`: []TestCase{
 			{
-				jsonpath:    `$[-1:-2:-1].a.b`,
+				jsonpath:    `$[-1:-1:-1].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:-2:-1]`},
+				expectedErr: ErrorNoneMatched{path: `[-1:-1:-1]`},
 			},
 			{
-				jsonpath:    `$[0:-1:-1].a.b`,
+				jsonpath:    `$[0:-2:-1].a.b`,
 				inputJSON:   `[{"b":1}]`,
 				expectedErr: ErrorMemberNotExist{path: `.a`},
 			},
 			{
-				jsonpath:    `$[1:-1:-1].a.b`,
+				jsonpath:    `$[1:-3:-1].a.b`,
 				inputJSON:   `[{"b":1},{"c":2}]`,
 				expectedErr: ErrorMemberNotExist{path: `.a`},
 			},
 			{
-				jsonpath:    `$[1:-1:-1].a.b.c`,
+				jsonpath:    `$[1:-3:-1].a.b.c`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
 				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
 			},
