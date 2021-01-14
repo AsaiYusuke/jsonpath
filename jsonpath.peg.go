@@ -692,9 +692,6 @@ func (p *pegJSONPathParser) Execute() {
 			case *syntaxCurrentRootIdentifier:
 				p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
 				p.push(false)
-			default:
-				p.push(&syntaxQueryParamRoot{})
-				p.push(true)
 			}
 
 		case ruleAction40:
@@ -3924,9 +3921,6 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		    case *syntaxCurrentRootIdentifier:
 		        p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
 		        p.push(false)
-		    default:
-		        p.push(&syntaxQueryParamRoot{})
-		        p.push(true)
 		    }
 		}> */
 		func() bool {

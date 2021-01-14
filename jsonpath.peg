@@ -327,9 +327,6 @@ jsonpathFilter <-
         case *syntaxCurrentRootIdentifier:
             p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
             p.push(false)
-        default:
-            p.push(&syntaxQueryParamRoot{})
-            p.push(true)
         }
     }
 
