@@ -26,15 +26,26 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			defer func() { container.putSortSlice(sortKeys) }()
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
-				targetNodes = append(targetNodes, typedNodes[(*sortKeys)[index]])
+				node := typedNodes[(*sortKeys)[index]]
+				_, isMap := node.(map[string]interface{})
+				_, isList := node.([]interface{})
+				if isMap || isList {
+					targetNodes = append(targetNodes, node)
+				}
 			}
 
 		case []interface{}:
 			if i.nextListRequired {
 				i.retrieveAnyValueNext(root, typedNodes, container)
 			}
+
 			for index := len(typedNodes) - 1; index >= 0; index-- {
-				targetNodes = append(targetNodes, typedNodes[index])
+				node := typedNodes[index]
+				_, isMap := node.(map[string]interface{})
+				_, isList := node.([]interface{})
+				if isMap || isList {
+					targetNodes = append(targetNodes, node)
+				}
 			}
 		}
 	}
