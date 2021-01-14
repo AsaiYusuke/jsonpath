@@ -22,21 +22,9 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 				i.retrieveAnyValueNext(root, typedNodes, container)
 			}
 
-			sortKeys := container.getSortSlice(len(typedNodes))
+			sortKeys := container.getSortedKeys(typedNodes)
+			defer func() { container.putSortSlice(sortKeys) }()
 
-			defer func() {
-				container.putSortSlice(sortKeys)
-			}()
-
-			index := 0
-			for key := range typedNodes {
-				(*sortKeys)[index] = key
-				index++
-			}
-
-			if len(*sortKeys) > 1 {
-				sortKeys.Sort()
-			}
 			for index := len(typedNodes) - 1; index >= 0; index-- {
 				targetNodes = append(targetNodes, typedNodes[(*sortKeys)[index]])
 			}
