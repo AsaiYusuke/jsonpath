@@ -250,53 +250,50 @@ On the other hand, in the case of the `existence check` in the filter qualifier,
 
 ## Benchmarks
 
-I benchmarked three JSONPaths using several libraries for the Go language.
+I benchmarked two JSONPaths using several libraries for the Go language.
+What is being measured is the cost per job for a job that loops a lot after all the prep work is done.
 There was a difference in execution performance between the libraries, but if the number of queries using JSONPaths is little, I don't think there will be a big difference between any of them.
-
-<details>
-<summary>Show results</summary>
 
 - [BenchmarkAsaiYusukeJSONPath](https://github.com/AsaiYusuke/jsonpath)
 - [BenchmarkOhler55Ojg](https://github.com/ohler55/ojg/jp)
 - [BenchmarkBhmjJSONSlice](https://github.com/bhmj/jsonslice)
 - [BenchmarkPaesslerAGJSONPath](https://github.com/PaesslerAG/jsonpath)
 - [BenchmarkOliveagleJsonpath](https://github.com/oliveagle/jsonpath)
-- [BenchmarkSpyzhovAjson](https://github.com/spyzhov/ajson)
+
+### JSONPath for comparison with more libraries
+
+This is the result of a JSONPath that all libraries were able to process.
+The fastest library was oliveagle/jsonpath, and the JSONPath in this example gave the most ideal score.
 
 ```text
 JSONPath : $.store.book[0].price
 
-BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4          4557238       265 ns/op      64 B/op       4 allocs/op
-BenchmarkOhler55Ojg_threeLevelsWithIndex-4                  1711050       716 ns/op    1040 B/op       2 allocs/op
-BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4                601647      2087 ns/op      32 B/op       1 allocs/op
-BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4          1814469       651 ns/op     208 B/op       7 allocs/op
-BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          12950515        90.3 ns/op     0 B/op       0 allocs/op
-BenchmarkSpyzhovAjson                                      not supported
+BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4         	 5674974	       207 ns/op	      56 B/op	       3 allocs/op
+BenchmarkOhler55Ojg_threeLevelsWithIndex-4                 	 1728166	       683 ns/op	    1040 B/op	       2 allocs/op
+BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4              	  546034	      2213 ns/op	      32 B/op	       1 allocs/op
+BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4         	 1875916	       648 ns/op	     208 B/op	       7 allocs/op
+BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13331599	        90.3 ns/op	       0 B/op	       0 allocs/op
 ```
 
-```text
-JSONPath : $.store..price
+### A slightly complex JSONPath
 
-BenchmarkAsaiYusukeJSONPath_recursiveDescent-4               429724      2716 ns/op     640 B/op      13 allocs/op
-BenchmarkOhler55Ojg_recursiveDescent-4                       481300      2513 ns/op    1368 B/op      18 allocs/op
-BenchmarkBhmjJSONSlice_recursiveDescent-4                    129428      9289 ns/op     688 B/op      27 allocs/op
-BenchmarkPaesslerAGJSONPath_recursiveDescent-4                42361     28190 ns/op   12167 B/op     397 allocs/op
-BenchmarkOliveagleJsonpath                                 not supported
-BenchmarkSpyzhovAjson_recursiveDescent-4                     158319      7473 ns/op    2280 B/op      72 allocs/op
-```
+Libraries that can handle complex syntax are limited to a few.
+Among these libraries, my library is the fastest at the moment.
 
 ```text
 JSONPath : $..book[?(@.price > $.store.bicycle.price)]
 
-BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4     331218      3572 ns/op     816 B/op      27 allocs/op
-BenchmarkOhler55Ojg_recursiveDescentWithFilter-4             222663      5361 ns/op    5240 B/op      20 allocs/op
-BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4           55168     26743 ns/op    3032 B/op      57 allocs/op
-BenchmarkPaesslerAGJSONPath                                not supported
-BenchmarkOliveagleJsonpath                                 not supported
-BenchmarkSpyzhovAjson                                      not supported
+BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4   	  387717	      3325 ns/op	     656 B/op	      26 allocs/op
+BenchmarkOhler55Ojg_recursiveDescentWithFilter-4           	  231213	      5237 ns/op	    5240 B/op	      20 allocs/op
+BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4        	   52902	     22661 ns/op	    3032 B/op	      57 allocs/op
+BenchmarkPaesslerAGJSONPath                                	  not supported
+BenchmarkOliveagleJsonpath                                 	  not supported
 ```
 
-JSON used for the benchmark measurement
+##### JSON used for the benchmark measurement:
+
+<details>
+<summary>Show results</summary>
 
 ```text
 { "store": {
@@ -332,7 +329,12 @@ JSON used for the benchmark measurement
 }
 ```
 
-Environment
+</details>
+
+##### Benchmark environment:
+
+<details>
+<summary>Show results</summary>
 
 ```text
 Processor  : Intel Core i5-6267U 2.90GHz
@@ -340,7 +342,6 @@ Memory     : 16.0 GB
 OS         : Windows 10
 Go version : go1.15.6 windows/amd64
 ```
-
 </details>
 
 ## Project progress
