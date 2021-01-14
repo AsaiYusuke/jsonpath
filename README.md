@@ -254,6 +254,8 @@ I benchmarked two JSONPaths using several libraries for the Go language.
 What is being measured is the cost per job for a job that loops a lot after all the prep work is done.
 There was a difference in execution performance between the libraries, but if the number of queries using JSONPaths is little, I don't think there will be a big difference between any of them.
 
+Also, the combination of the JSON and JSONPath syntax input to the library will yield drastically different results, so this benchmark is for informational purposes only and should be re-measured at every opportunity.
+
 - [BenchmarkAsaiYusukeJSONPath](https://github.com/AsaiYusuke/jsonpath)
 - [BenchmarkOhler55Ojg](https://github.com/ohler55/ojg/jp)
 - [BenchmarkBhmjJSONSlice](https://github.com/bhmj/jsonslice)
