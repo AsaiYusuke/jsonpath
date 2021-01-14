@@ -194,14 +194,14 @@ These behaviors will be changed in the future if appropriate ones are found.
 
 ### Character types
 
-The character types that can be used for identifiers in dot child notation are as follows:
+The following character types can be available for identifiers in dot-child notation.
 
-| Character type                             | Availabe | Escape |
-|--------------------------------------------|----------|--------|
-| Control code character (0x00 - 0x1F, 0x7F) | No       | -      |
-| `- _`                                      | Yes      | No     |
-| ``Space ! " # $ % & ' ( ) * + , . / : ; < = > ? @ [ \ ] ^ ` { \| } ~`` | Yes | Yes |
-| non-ASCII Unicode character (0x80 - 0x10FFFF) | Yes       | No      |
+| Character type                                 | Availabe | Escape |
+|------------------------------------------------|----------|--------|
+| ~~Control code character (0x00 - 0x1F, 0x7F)~~ | No       | -      |
+| Hyphens and underscores (`-` `_` )             | Yes      | No     |
+| Other symbols ( ``Space ! " # $ % & ' ( ) * + , . / : ; < = > ? @ [ \ ] ^ ` { \| } ~`` ) | Yes | Yes |
+| Non-ASCII Unicode character (0x80 - 0x10FFFF) | Yes       | No      |
 
 Character types of printable symbols other than hyphens and underscores can be used by escaping them.
 
