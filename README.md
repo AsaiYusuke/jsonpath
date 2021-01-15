@@ -196,13 +196,12 @@ These behaviors will be changed in the future if appropriate ones are found.
 
 The following character types can be available for identifiers in dot-child notation.
 
-| Character type                                 | Availabe | Escape |
-|------------------------------------------------|----------|--------|
-| ASCII character ( `0-9`, `A-Z`, `a-z` )        | Yes      | No     |
-| Hyphens and underscores (`-` `_` )             | Yes      | No     |
-| Other symbols ( ``Space ! " # $ % & ' ( ) * + , . / : ; < = > ? @ [ \ ] ^ ` { \| } ~`` ) | Yes | Yes |
-| Non-ASCII Unicode character (0x80 - 0x10FFFF) | Yes       | No      |
-| ~~Control code character (0x00 - 0x1F, 0x7F)~~ | No       | -      |
+| Character type                                                                                                                           | Availabe | Escape |
+|------------------------------------------------------------------------------------------------------------------------------------------|----------|--------|
+| * Numbers and alphabets (`0-9` `A-Z` `a-z`)<br> * Hyphen and underscore (`-` `_`)<br> * Non-ASCII Unicode characters (`0x80 - 0x10FFFF`) | Yes      | No     |
+| ^                                                                                                                                        | ^        | ^      |
+| * Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` ``|`` `}` `~`) | ^ | Yes |
+| * ~~Control code characters~~ (`0x00 - 0x1F`, `0x7F`) | No       | -      |
 
 Character types of printable symbols other than hyphens and underscores can be used by escaping them.
 
@@ -235,18 +234,42 @@ Output   : ["Case"]
 
 ### JSONPaths in the filter-qualifier
 
-In the case of the `comparators` and `regular expressions` in the filter qualifier, the following JSONPaths that return a value group cannot be specified.
-On the other hand, in the case of the `existence check` in the filter qualifier, it can be specified.
+Use with the `comparator` syntax or `regular expression` syntax in the filter qualifier, the following JSONPaths that return a value group cannot be specified.
+On the other hand, use with the `existence check` syntax in the filter qualifier, it can be specified.
 
-| JSONPaths that return a value group | example |
-| :------- | :------ |
-| Recursive descent | `@..a` |
-| Multiple identifier  | `@['a','b']` |
-| Wildcard identifier | `@.*` |
-| Slice qualifier | `@[0:1]` |
-| Wildcard qualifier | `@[*]` |
-| Union in the qualifier | `@[0,1]` |
-| Filter qualifier | `@.a[?(@.b)]` |
+| JSONPaths that return a value group | example       |
+|-------------------------------------|---------------|
+| Recursive descent                   | `@..a`        |
+| Multiple identifier                 | `@['a','b']`  |
+| Wildcard identifier                 | `@.*`         |
+| Slice qualifier                     | `@[0:1]`      |
+| Wildcard qualifier                  | `@[*]`        |
+| Union in the qualifier              | `@[0,1]`      |
+| Filter qualifier                    | `@.a[?(@.b)]` |
+
+- comparator example (error)
+
+```text
+JSONPath : $[?(@..x == "hello world")]
+srcJSON  : [{"a":1},{"b":{"x":"hello world"}}]
+Error    : ErrorInvalidSyntax
+```
+
+- regular expression example (error)
+
+```text
+JSONPath : $[?(@..x=~/hello/)]
+srcJSON  : [{"a":1},{"b":{"x":"hello world"}}]
+Error    : ErrorInvalidSyntax
+```
+
+- existence check example
+
+```text
+JSONPath : $[?(@..x)]
+srcJSON  : [{"a":1},{"b":{"x":"hello world"}}]
+Output   : [{"b":{"x":"hello world"}}]
+```
 
 ## Benchmarks
 
