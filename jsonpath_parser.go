@@ -208,9 +208,8 @@ func (p *jsonPathParser) updateRootValueGroup() {
 }
 
 func (p *jsonPathParser) deleteRootIdentifier(targetNode syntaxNode) syntaxNode {
-	_, isRootIdentifier := targetNode.(*syntaxRootIdentifier)
-	_, isCurrentRootIdentifier := targetNode.(*syntaxCurrentRootIdentifier)
-	if isRootIdentifier || isCurrentRootIdentifier {
+	switch targetNode.(type) {
+	case *syntaxRootIdentifier, *syntaxCurrentRootIdentifier:
 		if targetNode.getNext() != nil {
 			if targetNode.isValueGroup() {
 				targetNode.getNext().setValueGroup()

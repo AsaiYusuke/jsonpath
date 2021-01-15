@@ -14,9 +14,9 @@ type syntaxRecursiveChildIdentifier struct {
 func (i *syntaxRecursiveChildIdentifier) retrieve(
 	root, current interface{}, container *bufferContainer) error {
 
-	_, isMap := current.(map[string]interface{})
-	_, isList := current.([]interface{})
-	if !isMap && !isList {
+	switch current.(type) {
+	case map[string]interface{}, []interface{}:
+	default:
 		foundType := `null`
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
@@ -44,9 +44,8 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
 				node := typedNodes[(*sortKeys)[index]]
-				_, isMap := node.(map[string]interface{})
-				_, isList := node.([]interface{})
-				if isMap || isList {
+				switch node.(type) {
+				case map[string]interface{}, []interface{}:
 					targetNodes = append(targetNodes, node)
 				}
 			}
@@ -60,9 +59,8 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
 				node := typedNodes[index]
-				_, isMap := node.(map[string]interface{})
-				_, isList := node.([]interface{})
-				if isMap || isList {
+				switch node.(type) {
+				case map[string]interface{}, []interface{}:
 					targetNodes = append(targetNodes, node)
 				}
 			}
