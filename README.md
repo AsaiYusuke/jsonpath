@@ -6,9 +6,9 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/AsaiYusuke/jsonpath.svg)](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This is [Go](https://golang.org/) package providing the features that retrieves a part of the JSON objects according to the query written in the JSONPath syntax.
+This is [Go](https://golang.org/) library providing the features that retrieves a part of the JSON object according to the query written in the JSONPath syntax.
 
-The core syntaxes of the JSONPath on which this package is based:
+The core JSONPath syntax on which this library based:
 
 - [Stefan Gössner's JSONPath - XPath for JSON](https://goessner.net/articles/JsonPath/)
 - [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison)
@@ -16,7 +16,6 @@ The core syntaxes of the JSONPath on which this package is based:
 
 #### Note:
 Please check [my compare result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html) to know which responses are adapted.
-Unfortunately, the proposals that is also discussing in "json-path-comparison"  and the draft of the Internet Draft were not finalized at the start of development and are not adopted outright.
 
 ## Getting started
 
@@ -51,23 +50,23 @@ func main() {
 ## Basic design
 
 - [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
-- The error specification allows package users to handle errors appropriately.
+- The error specification enables the package user to handle errors correctly.
 - Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
   Adapted my own behavior to the other part of the such consensus behavior that found difficult to use.
-- Equipped with numerous unit tests and tried to eliminate the bugs that return strange result.
+- Equipped with a large number of unit tests to avoid bugs that lead to unexpected results.
 
 ## How to use
 
-### * Retrieve one-time, or successively
+### * Retrieve one-time or repeated
 
-The `Retrieve` function returns a retrieved JSON object by a one-time sequential operation (analyzing syntax and retrieving objects) using the given JSONPath and the source JSON object :
+The `Retrieve` function returns retrieved result using JSONPath and JSON object:
 
 ```go
 output, err := jsonpath.Retrieve(jsonPath, src)
 ```
 
-The `Parse` function returns a *parser-function* that completed to analyze the JSONPath syntax.
-By using this returned *parser-function* it can be performed successively a retrieve with the same JSONPath syntax :
+The `Parse` function returns a *parser-function* that completed to check JSONPath syntax.
+By using *parser-function*, it can repeat to retrieve with the same JSONPath :
 
 ```go
 jsonPath, err := jsonpath.Parse(jsonPath)
@@ -78,15 +77,15 @@ output2, err2 := jsonPath(src2)
 
 ### * Error handling
 
-If there is a problem with the execution of the `Retrieve`, `Parse` or prepared *parser-functions*, an error type is returned.
+If there is a problem with the execution of *APIs*, an error type returned.
 These error types define the corresponding symptom, as listed below:
 
-#### Syntax analyze errors from `Retrieve`, `Parse`
+#### Syntax check errors from `Retrieve`, `Parse`
 
 | Error type              | Message format                                     | Symptom                                                                                                       |
 |-------------------------|----------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath. The *reason* including in this message will tell you more about it. |
-| `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath was treated as the invalid error in Go syntax.                         |
+| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath.<br>The *reason* including in this message will tell you more about it. |
+| `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath treated as the invalid error in Go syntax.                         |
 | `ErrorFunctionNotFound` | `function not found (function=%s)`                 | The function specified in the JSONPath is not found.                                                          |
 | `ErrorNotSupported`     | `not supported (feature=%s, path=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                           |
 
@@ -119,78 +118,46 @@ The type checking is convenient to recognize which error happened.
 
 ### * Function syntax
 
-Function is a feature that allows you to format JSONPath results by using pre-registered user functions and the instruction syntaxes at the end of the JSONPath statement.
+Function enables to format results by using user defined functions.
+The function syntax comes after the JSONPath.
 
 There are two ways to use function:
 
 #### Filter function
 
-The filter function applies a user function to each values in the JSONPath result to get converted.
+The filter function applies a user function to each values in the result to get converted.
 
-```Go
-  config := jsonpath.Config{}
-  config.SetFilterFunction(`twice`, func(param interface{}) (interface{}, error) {
-    if floatParam, ok := param.(float64); ok {
-      return floatParam * 2, nil
-    }
-    return nil, fmt.Errorf(`type error`)
-  })
-  jsonPath, srcJSON := `$[*].twice()`, `[1,3]`
-  var src interface{}
-  json.Unmarshal([]byte(srcJSON), &src)
-  output, _ := jsonpath.Retrieve(jsonPath, src, config)
-  outputJSON, _ := json.Marshal(output)
-  fmt.Println(string(outputJSON))
-  // Output:
-  // [2,6]
-```
+[Check the example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetFilterFunction)
+
 
 #### Aggregate function
 
-Aggregate function converts all values in the JSONPath result into a single value by applying them to a user function.
+The aggregate function converts all values in the result into a single value.
 
-```Go
-  config := jsonpath.Config{}
-  config.SetAggregateFunction(`max`, func(params []interface{}) (interface{}, error) {
-    var result float64
-    for _, param := range params {
-      if floatParam, ok := param.(float64); ok {
-        if result < floatParam {
-          result = floatParam
-        }
-        continue
-      }
-      return nil, fmt.Errorf(`type error`)
-    }
-    return result, nil
-  })
-  jsonPath, srcJSON := `$[*].max()`, `[1,3]`
-  var src interface{}
-  json.Unmarshal([]byte(srcJSON), &src)
-  output, _ := jsonpath.Retrieve(jsonPath, src, config)
-  outputJSON, _ := json.Marshal(output)
-  fmt.Println(string(outputJSON))
-  // Output:
-  // [3]
-```
+[Check the example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAggregateFunction)
 
 ### * Accessing JSON
 
-You can get a collection of accessors ( *Getters* / *Setters* ) to the input JSON instead of the retrieved values by giving `Config.SetAccessorMode()`.
-These accessors can be used to update the original nodes retrieved by JSONPath in the input JSON.
-See the Example for usage.
+You can get the accessors ( *Getters / Setters* ) of the input JSON instead of the retrieved values.
+These accessors can use to update for the input JSON.
+
+This feature can get enabled by giving `Config.SetAccessorMode()`.
+
+[Check the example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAccessorMode)
 
 #### Note:
-It is not possible to use *Setter* for some execution results, such as including function syntax.
+It is not possible to use *Setter* for some results, such as for JSONPath including function syntax.
 
-Also, operations using accessors follow the map/slice manner of Go language, so if you use accessors after changing the structure of JSON, you need to pay attention to the behavior caused by the operation.
-If you want to handle it casually, you may want to retrieve the accessor again each time you change the structure of JSON.
+Also, operations using accessors follow the map/slice manner of Go language.
+If you use accessors after changing the structure of JSON, you need to pay attention to the behavior.
+If you don't want to worry about it, get the accessor again every time you change the structure.
 
 ## Differences
 
 Some behaviors that differ from the consensus exists in this package.
-For the entire comparisons, please check [this result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html) to see which responses are different.
-These behaviors will be changed in the future if appropriate ones are found.
+For the entire comparisons, please check [this result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html).
+
+These behaviors will change in the future if appropriate ones found.
 
 ### Character types
 
@@ -203,7 +170,7 @@ The following character types can be available for identifiers in dot-child nota
 | * Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` ``|`` `}` `~`) | ^ | Yes |
 | * ~~Control code characters~~ (`0x00 - 0x1F`, `0x7F`) | No       | -      |
 
-Character types of printable symbols other than hyphens and underscores can be used by escaping them.
+The printable symbols except hyphen and underscore can use by escaping them.
 
 ```text
 JSONPath : $.abc\.def
@@ -213,7 +180,7 @@ Output   : 1
 
 ### Wildcard in qualifier
 
-The wildcard in qualifier can be specified mixed with other subscript syntaxes.
+The wildcards in qualifier can specify as a union of subscripts.
 
 ```text
 JSONPath : $[0,1:3,*]
@@ -234,8 +201,9 @@ Output   : ["Case"]
 
 ### JSONPaths in the filter-qualifier
 
-Use with the `comparator` syntax or `regular expression` syntax in the filter qualifier, the following JSONPaths that return a value group cannot be specified.
-On the other hand, use with the `existence check` syntax in the filter qualifier, it can be specified.
+JSONPaths that returns value group cannot specify with `comparator` or `regular expression`.
+But, `existence check` can use these.
+
 
 | JSONPaths that return a value group | example       |
 |-------------------------------------|---------------|
@@ -274,10 +242,13 @@ Output   : [{"b":{"x":"hello world"}}]
 ## Benchmarks
 
 I benchmarked two JSONPaths using several libraries for the Go language.
-What is being measured is the cost per job for a job that loops a lot after all the prep work is done.
-There was a difference in execution performance between the libraries, but if the number of queries using JSONPaths is little, I don't think there will be a big difference between any of them.
+What is being measured is the cost per job for a job that loops a lot after all the prep work done.
 
-Also, the combination of the JSON and JSONPath syntax input to the library will yield drastically different results, so this benchmark is for informational purposes only and should be re-measured at every opportunity.
+There was a performance differences.
+But if the number of queries is little, there will not be a big difference between any of them.
+
+Also, the results will vary depending on the data entered.
+So this benchmark is for information only and should be re-measured at every time.
 
 - [BenchmarkAsaiYusukeJSONPath](https://github.com/AsaiYusuke/jsonpath)
 - [BenchmarkOhler55Ojg](https://github.com/ohler55/ojg/jp)
@@ -288,7 +259,7 @@ Also, the combination of the JSON and JSONPath syntax input to the library will 
 ### JSONPath for comparison with more libraries
 
 This is the result of a JSONPath that all libraries were able to process.
-The fastest library was oliveagle/jsonpath, and the JSONPath in this example gave the most ideal score.
+Oliveagle/jsonpath is fastest.
 
 ```text
 JSONPath : $.store.book[0].price
@@ -302,7 +273,7 @@ BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13331599	        90.
 
 ### A slightly complex JSONPath
 
-Libraries that can handle complex syntax are limited to a few.
+Libraries that can handle complex syntax limited to a few.
 Among these libraries, my library is the fastest at the moment.
 
 ```text
@@ -322,7 +293,7 @@ BenchmarkOliveagleJsonpath                                 	  not supported
 
 ```text
 { "store": {
-  "book": [ 
+  "book": [
     { "category": "reference",
     "author": "Nigel Rees",
     "title": "Sayings of the Century",
