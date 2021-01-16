@@ -166,7 +166,7 @@ The following character types can be available for identifiers in dot-child nota
 | Character type                                                                                                                           | Availabe | Escape |
 |------------------------------------------------------------------------------------------------------------------------------------------|----------|--------|
 | * Numbers and alphabets (`0-9` `A-Z` `a-z`)<br> * Hyphen and underscore (`-` `_`)<br> * Non-ASCII Unicode characters (`0x80 - 0x10FFFF`) | Yes      | No     |
-| * Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` <code>&#124;</code> `}` `~`) | ^^  | Yes |
+| * Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` <code>&#124;</code> `}` `~`) | Yes | Yes |
 | * ~~Control code characters~~ (`0x00 - 0x1F`, `0x7F`) | No       | -      |
 
 The printable symbols except hyphen and underscore can use by escaping them.
