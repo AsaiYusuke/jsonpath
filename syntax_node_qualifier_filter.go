@@ -50,18 +50,26 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 	valueList = f.query.compute(root, valueList, container)
 
+	isEachResult := len(valueList) == len(srcMap)
+
+	var nodeNotFound bool
+	if !isEachResult {
+		_, nodeNotFound = valueList[0].(struct{})
+		if nodeNotFound {
+			return nil
+		}
+	}
+
 	for index := range *sortKeys {
-		var nodeNotFound bool
-		if len(valueList) == 1 {
-			_, nodeNotFound = valueList[0].(struct{})
-		} else {
+		if isEachResult {
 			_, nodeNotFound = valueList[index].(struct{})
 		}
-		if !nodeNotFound {
-			if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); err != nil {
-				childErrorMap[err] = struct{}{}
-				lastError = err
-			}
+		if nodeNotFound {
+			continue
+		}
+		if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); err != nil {
+			childErrorMap[err] = struct{}{}
+			lastError = err
 		}
 	}
 
@@ -78,18 +86,26 @@ func (f *syntaxFilterQualifier) retrieveList(
 
 	valueList := f.query.compute(root, srcList, container)
 
+	isEachResult := len(valueList) == len(srcList)
+
+	var nodeNotFound bool
+	if !isEachResult {
+		_, nodeNotFound = valueList[0].(struct{})
+		if nodeNotFound {
+			return nil
+		}
+	}
+
 	for index := range srcList {
-		var nodeNotFound bool
-		if len(valueList) == 1 {
-			_, nodeNotFound = valueList[0].(struct{})
-		} else {
+		if isEachResult {
 			_, nodeNotFound = valueList[index].(struct{})
 		}
-		if !nodeNotFound {
-			if err := f.retrieveListNext(root, srcList, index, container); err != nil {
-				childErrorMap[err] = struct{}{}
-				lastError = err
-			}
+		if nodeNotFound {
+			continue
+		}
+		if err := f.retrieveListNext(root, srcList, index, container); err != nil {
+			childErrorMap[err] = struct{}{}
+			lastError = err
 		}
 	}
 
