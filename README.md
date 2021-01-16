@@ -174,7 +174,7 @@ The printable symbols except hyphen and underscore can use by escaping them.
 ```text
 JSONPath : $.abc\.def
 srcJSON  : {"abc.def":1}
-Output   : 1
+Output   : [1]
 ```
 
 ### Wildcard in qualifier
