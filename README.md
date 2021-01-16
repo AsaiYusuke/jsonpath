@@ -50,7 +50,7 @@ func main() {
 ## Basic design
 
 - [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
-- The error specification enables the package user to handle errors correctly.
+- The error specification enables the library user to handle errors correctly.
 - Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
   Adapted my own behavior to the other part of the such consensus behavior that found difficult to use.
 - Equipped with a large number of unit tests to avoid bugs that lead to unexpected results.
@@ -154,7 +154,7 @@ If you don't want to worry about it, get the accessor again every time you chang
 
 ## Differences
 
-Some behaviors that differ from the consensus exists in this package.
+Some behaviors that differ from the consensus exists in this library.
 For the entire comparisons, please check [this result](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html).
 
 These behaviors will change in the future if appropriate ones found.
