@@ -10,49 +10,49 @@ func (q *syntaxBasicCompareQuery) compute(
 	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
 
 	leftValues := q.leftParam.compute(root, currentList, container)
-	q.comparator.typeCast(leftValues)
+	leftFound := q.comparator.typeCast(leftValues)
 
 	rightValues := q.rightParam.compute(root, currentList, container)
-	q.comparator.typeCast(rightValues)
+	rightFound := q.comparator.typeCast(rightValues)
 
-	var leftPartialFound bool
-	var rightPartialFound bool
-	for leftIndex := range leftValues {
-		if _, ok := leftValues[leftIndex].(struct{}); ok {
-			continue
-		}
-		leftPartialFound = true
-
-		for rightIndex := range rightValues {
-			if _, ok := rightValues[rightIndex].(struct{}); ok {
+	if leftFound {
+		for leftIndex := range leftValues {
+			if _, ok := leftValues[leftIndex].(struct{}); ok {
 				continue
 			}
-			rightPartialFound = true
 
-			if q.comparator.comparator(leftValues[leftIndex], rightValues[rightIndex]) {
-				if q.leftParam.isLiteral && q.rightParam.isLiteral {
-					return leftValues
+			if !rightFound {
+				if !q.leftParam.isLiteral {
+					leftValues[leftIndex] = struct{}{}
 				}
 				continue
 			}
 
-			if !q.leftParam.isLiteral {
-				leftValues[leftIndex] = struct{}{}
-				break
-			} else if !q.rightParam.isLiteral {
-				rightValues[rightIndex] = struct{}{}
-			} else {
-				leftValues[0] = struct{}{}
-				return leftValues[:1]
+			for rightIndex := range rightValues {
+				if _, ok := rightValues[rightIndex].(struct{}); ok {
+					continue
+				}
+
+				if q.comparator.comparator(leftValues[leftIndex], rightValues[rightIndex]) {
+					if q.leftParam.isLiteral && q.rightParam.isLiteral {
+						return leftValues
+					}
+					continue
+				}
+
+				if !q.leftParam.isLiteral {
+					leftValues[leftIndex] = struct{}{}
+					break
+				} else if !q.rightParam.isLiteral {
+					rightValues[rightIndex] = struct{}{}
+				} else {
+					leftValues[0] = struct{}{}
+					return leftValues[:1]
+				}
 			}
 		}
 
-		if !rightPartialFound && !q.leftParam.isLiteral {
-			leftValues[leftIndex] = struct{}{}
-		}
-	}
-
-	if !leftPartialFound && !q.rightParam.isLiteral {
+	} else if !q.rightParam.isLiteral {
 		for rightIndex := range rightValues {
 			rightValues[rightIndex] = struct{}{}
 		}
