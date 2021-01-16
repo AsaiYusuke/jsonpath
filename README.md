@@ -288,7 +288,7 @@ BenchmarkOliveagleJsonpath                                 	  not supported
 ##### JSON used for the benchmark measurement:
 
 <details>
-<summary>Show results</summary>
+<summary>Show</summary>
 
 ```text
 { "store": {
@@ -329,7 +329,7 @@ BenchmarkOliveagleJsonpath                                 	  not supported
 ##### Benchmark environment:
 
 <details>
-<summary>Show results</summary>
+<summary>Show</summary>
 
 ```text
 Processor  : Intel Core i5-6267U 2.90GHz
