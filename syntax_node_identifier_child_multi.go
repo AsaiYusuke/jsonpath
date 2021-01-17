@@ -60,22 +60,20 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	var lastError error
 
 	for _, identifier := range i.identifiers {
-		var found bool
 		switch typedNode := identifier.(type) {
 		case *syntaxChildWildcardIdentifier:
-			found = true
 		case *syntaxChildSingleIdentifier:
-			if _, ok := srcMap[typedNode.identifier]; ok {
-				found = true
-			}
-		}
-
-		if found {
-			if err := identifier.retrieve(root, srcMap, container); err != nil {
-				childErrorMap[err] = struct{}{}
-				lastError = err
+			if _, ok := srcMap[typedNode.identifier]; !ok {
 				continue
 			}
+		default:
+			continue
+		}
+
+		if err := identifier.retrieve(root, srcMap, container); err != nil {
+			childErrorMap[err] = struct{}{}
+			lastError = err
+			continue
 		}
 	}
 
