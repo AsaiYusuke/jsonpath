@@ -15,16 +15,9 @@ func (q *syntaxBasicCompareQuery) compute(
 	rightValues := q.rightParam.compute(root, currentList, container)
 	rightFound := q.comparator.typeCast(rightValues)
 
-	if leftFound {
+	if leftFound && rightFound {
 		for leftIndex := range leftValues {
 			if _, ok := leftValues[leftIndex].(struct{}); ok {
-				continue
-			}
-
-			if !rightFound {
-				if !q.leftParam.isLiteral {
-					leftValues[leftIndex] = struct{}{}
-				}
 				continue
 			}
 
@@ -51,16 +44,23 @@ func (q *syntaxBasicCompareQuery) compute(
 				}
 			}
 		}
-
-	} else if !q.rightParam.isLiteral {
-		for rightIndex := range rightValues {
-			rightValues[rightIndex] = struct{}{}
-		}
 	}
 
 	if !q.leftParam.isLiteral {
+		if !rightFound {
+			q.setBlankValues(leftValues)
+		}
 		return leftValues
 	}
 
+	if !leftFound {
+		q.setBlankValues(rightValues)
+	}
 	return rightValues
+}
+
+func (q *syntaxBasicCompareQuery) setBlankValues(values []interface{}) {
+	for leftIndex := range values {
+		values[leftIndex] = struct{}{}
+	}
 }
