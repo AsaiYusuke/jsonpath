@@ -723,14 +723,14 @@ func (p *pegJSONPathParser) Execute() {
 	_, _, _, _, _ = buffer, _buffer, text, begin, end
 }
 
-func Pretty(pretty bool) func(*pegJSONPathParser) error {
+func pretty(pretty bool) func(*pegJSONPathParser) error {
 	return func(p *pegJSONPathParser) error {
 		p.Pretty = pretty
 		return nil
 	}
 }
 
-func Size(size int) func(*pegJSONPathParser) error {
+func size(size int) func(*pegJSONPathParser) error {
 	return func(p *pegJSONPathParser) error {
 		p.tokens32 = tokens32{tree: make([]token32, 0, size)}
 		return nil

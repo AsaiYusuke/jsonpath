@@ -6014,12 +6014,12 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	parser.Parse(1)
 	parser.Parse(3)
 
-	Pretty(true)(&parser)
+	pretty(true)(&parser)
 	parser.PrintSyntaxTree()
 
 	_ = err.Error()
 
-	Size(10)(&parser)
+	size(10)(&parser)
 
 	parser.Init(func(p *pegJSONPathParser) error {
 		return fmt.Errorf(`test error`)
