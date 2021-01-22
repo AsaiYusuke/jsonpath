@@ -21,6 +21,19 @@ The core JSONPath syntax on which this library based:
 
 For syntax compatibility among other libraries, please check [:memo: my comparison results](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html).
 
+## Table of Contents
+* [Getting started](#getting-started)
+* [Basic design](#basic-design)
+* [How to use](#how-to-use)
+  * [Retrieve one-time or repeated](#retrieve-one-time-or-repeated)
+  * [Error handling](#error-handling)
+  * [Function syntax](#function-syntax)
+  * [Accessing JSON](#accessing-json)
+* [Differences](#differences)
+* [Benchmarks](#benchmarks)
+* [Project progress](#project-progress)
+
+
 ## Getting started
 
 ```bash
