@@ -36,6 +36,8 @@ For syntax compatibility among other libraries, please check [:memo: my comparis
 
 ## Getting started
 
+### Install:
+
 ```bash
 go get github.com/AsaiYusuke/jsonpath
 ```
@@ -66,11 +68,15 @@ func main() {
 
 ## Basic design
 
+#### *Ease of development*
 - [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
-- The error specification enables the library user to handle errors correctly.
-- Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
-  Adapted my own behavior to the other part of the such consensus behavior that found difficult to use.
 - Equipped with a large number of unit tests to avoid bugs that lead to unexpected results.
+
+#### *Ease of use*
+- The error specification enables the library user to handle errors correctly.
+
+#### *Compatibility*
+- Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
 
 ## How to use
 
