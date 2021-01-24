@@ -180,18 +180,27 @@ func (p *jsonPathParser) setNodeChain() {
 	}
 }
 
-func (p *jsonPathParser) setConnectedText(targetNode syntaxNode) {
-	childText := ``
+func (p *jsonPathParser) setConnectedText(targetNode syntaxNode, postfix ...string) {
+	appendText := ``
 	if targetNode.getNext() != nil {
-		p.setConnectedText(targetNode.getNext())
-		childText = targetNode.getNext().getConnectedText()
+		p.setConnectedText(targetNode.getNext(), postfix...)
+		appendText = targetNode.getNext().getConnectedText()
+	} else {
+		if postfix != nil && len(postfix) > 0 {
+			appendText = postfix[0]
+		}
 	}
-	targetNode.setConnectedText(targetNode.getText() + childText)
+
+	targetNode.setConnectedText(targetNode.getText() + appendText)
 
 	if multiIdentifier, ok := targetNode.(*syntaxChildMultiIdentifier); ok {
 		if multiIdentifier.isAllWildcard {
 			multiIdentifier.unionQualifier.setConnectedText(targetNode.getConnectedText())
 		}
+	}
+
+	if aggregate, ok := targetNode.(*syntaxAggregateFunction); ok {
+		p.setConnectedText(aggregate.param, aggregate.getConnectedText())
 	}
 }
 

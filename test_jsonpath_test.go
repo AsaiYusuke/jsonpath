@@ -5473,6 +5473,74 @@ func TestRetrieve_configFunction(t *testing.T) {
 				expectedErr: ErrorMemberNotExist{path: `.a`},
 			},
 		},
+		`jsonpath-error-with-filter`: []TestCase{
+			{
+				jsonpath:  `$.x.*.errAggregate()`,
+				inputJSON: `{"a":[122.345,123.45,123.456]}`,
+				aggregates: map[string]func([]interface{}) (interface{}, error){
+					`errAggregate`: errAggregateFunc,
+				},
+				expectedErr: ErrorMemberNotExist{path: `.x`},
+			},
+			{
+				jsonpath:  `$.*.a.b.c.errFilter()`,
+				inputJSON: `[{"a":{"b":1}},{"a":2}]`,
+				filters: map[string]func(interface{}) (interface{}, error){
+					`errFilter`: errFilterFunc,
+				},
+
+				expectedErr: ErrorNoneMatched{path: `.a.b.c.errFilter()`},
+			},
+			{
+				jsonpath:  `$.*.a.b.c.errFilter1().errFilter2()`,
+				inputJSON: `[{"a":{"b":1}},{"a":2}]`,
+				filters: map[string]func(interface{}) (interface{}, error){
+					`errFilter1`: errFilterFunc,
+					`errFilter2`: errFilterFunc,
+				},
+
+				expectedErr: ErrorNoneMatched{path: `.a.b.c.errFilter1().errFilter2()`},
+			},
+			{
+				jsonpath:  `$.*.a.b.c.errAggregate()`,
+				inputJSON: `[{"a":{"b":1}},{"a":2}]`,
+				aggregates: map[string]func([]interface{}) (interface{}, error){
+					`errAggregate`: errAggregateFunc,
+				},
+				expectedErr: ErrorNoneMatched{path: `.a.b.c.errAggregate()`},
+			},
+			{
+				jsonpath:  `$.*.a.b.c.errAggregate1().errAggregate2()`,
+				inputJSON: `[{"a":{"b":1}},{"a":2}]`,
+				aggregates: map[string]func([]interface{}) (interface{}, error){
+					`errAggregate1`: errAggregateFunc,
+					`errAggregate2`: errAggregateFunc,
+				},
+				expectedErr: ErrorNoneMatched{path: `.a.b.c.errAggregate1().errAggregate2()`},
+			},
+			{
+				jsonpath:  `$.*.a.b.c.errAggregate().errFilter()`,
+				inputJSON: `[{"a":{"b":1}},{"a":2}]`,
+				filters: map[string]func(interface{}) (interface{}, error){
+					`errFilter`: twiceFunc,
+				},
+				aggregates: map[string]func([]interface{}) (interface{}, error){
+					`errAggregate`: errAggregateFunc,
+				},
+				expectedErr: ErrorNoneMatched{path: `.a.b.c.errAggregate().errFilter()`},
+			},
+			{
+				jsonpath:  `$.*.a.b.c.errFilter().errAggregate()`,
+				inputJSON: `[{"a":{"b":1}},{"a":2}]`,
+				filters: map[string]func(interface{}) (interface{}, error){
+					`errFilter`: twiceFunc,
+				},
+				aggregates: map[string]func([]interface{}) (interface{}, error){
+					`errAggregate`: errAggregateFunc,
+				},
+				expectedErr: ErrorNoneMatched{path: `.a.b.c.errFilter().errAggregate()`},
+			},
+		},
 		`function-syntax-check`: []TestCase{
 			{
 				jsonpath:     `$.*.TWICE()`,
@@ -5480,6 +5548,14 @@ func TestRetrieve_configFunction(t *testing.T) {
 				expectedJSON: `[246.912,512]`,
 				filters: map[string]func(interface{}) (interface{}, error){
 					`TWICE`: twiceFunc,
+				},
+			},
+			{
+				jsonpath:     `$.*.123()`,
+				inputJSON:    `[123.456,256]`,
+				expectedJSON: `[246.912,512]`,
+				filters: map[string]func(interface{}) (interface{}, error){
+					`123`: twiceFunc,
 				},
 			},
 			{
