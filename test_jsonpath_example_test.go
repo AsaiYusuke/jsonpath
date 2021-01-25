@@ -160,7 +160,7 @@ func ExampleErrorTypeUnmatched() {
 }
 
 func ExampleErrorNoneMatched() {
-	jsonPath, srcJSON := `$[1,2]`, `["a"]`
+	jsonPath, srcJSON := `$[0,1].a.b`, `[{"a":1},{"a":{"c":2}}]`
 	var src interface{}
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
@@ -171,7 +171,7 @@ func ExampleErrorNoneMatched() {
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// jsonpath.ErrorNoneMatched, none matched (path=[1,2])
+	// jsonpath.ErrorNoneMatched, none matched (path=.b)
 }
 
 func ExampleErrorFunctionFailed() {

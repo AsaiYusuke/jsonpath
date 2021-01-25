@@ -5,7 +5,7 @@ type syntaxRootIdentifier struct {
 }
 
 func (i *syntaxRootIdentifier) retrieve(
-	root, _ interface{}, container *bufferContainer) error {
+	root, _ interface{}, container *bufferContainer) errorRuntime {
 
 	return i.retrieveAnyValueNext(root, root, container)
 }

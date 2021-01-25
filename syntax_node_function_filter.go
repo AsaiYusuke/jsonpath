@@ -7,13 +7,15 @@ type syntaxFilterFunction struct {
 }
 
 func (f *syntaxFilterFunction) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	filteredValue, err := f.function(current)
 	if err != nil {
 		return ErrorFunctionFailed{
-			function: f.text,
-			err:      err,
+			errorBasicRuntime: &errorBasicRuntime{
+				node: f.syntaxBasicNode,
+			},
+			err: err,
 		}
 	}
 

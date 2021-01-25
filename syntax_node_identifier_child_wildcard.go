@@ -5,28 +5,35 @@ type syntaxChildWildcardIdentifier struct {
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
-	childErrorMap := make(map[error]struct{}, 1)
-	var lastError error
+	deepestErrors := make([]errorRuntime, 0, 2)
 
 	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		lastError = i.retrieveMap(root, typedNodes, container, childErrorMap)
+		deepestErrors = i.retrieveMap(root, typedNodes, container, deepestErrors)
 
 	case []interface{}:
-		lastError = i.retrieveList(root, typedNodes, container, childErrorMap)
+		deepestErrors = i.retrieveList(root, typedNodes, container, deepestErrors)
 
 	}
 
 	if len(container.result) == 0 {
-		switch len(childErrorMap) {
+		switch len(deepestErrors) {
 		case 0:
-			return ErrorMemberNotExist{path: i.text}
+			return ErrorMemberNotExist{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: i.syntaxBasicNode,
+				},
+			}
 		case 1:
-			return lastError
+			return deepestErrors[0]
 		default:
-			return ErrorNoneMatched{path: i.next.getConnectedText()}
+			return ErrorNoneMatched{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: deepestErrors[0].getSyntaxNode(),
+				},
+			}
 		}
 	}
 
@@ -35,36 +42,34 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 
 func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
-	childErrorMap map[error]struct{}) error {
+	deepestErrors []errorRuntime) []errorRuntime {
 
-	var lastError error
+	deepestTextLen := -1
 
 	sortKeys := container.getSortedKeys(srcMap)
 
 	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
-			childErrorMap[err] = struct{}{}
-			lastError = err
+			deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
 		}
 	}
 
 	container.putSortSlice(sortKeys)
 
-	return lastError
+	return deepestErrors
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveList(
 	root interface{}, srcList []interface{}, container *bufferContainer,
-	childErrorMap map[error]struct{}) error {
+	deepestErrors []errorRuntime) []errorRuntime {
 
-	var lastError error
+	deepestTextLen := -1
 
 	for index := range srcList {
 		if err := i.retrieveListNext(root, srcList, index, container); err != nil {
-			childErrorMap[err] = struct{}{}
-			lastError = err
+			deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
 		}
 	}
 
-	return lastError
+	return deepestErrors
 }

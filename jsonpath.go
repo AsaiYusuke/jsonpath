@@ -58,7 +58,10 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 		container := bufferContainer{}
 
 		err := root.retrieve(src, src, &container)
-		return container.result, err
+		if err != nil {
+			return container.result, err.(error)
+		}
+		return container.result, nil
 
 	}, nil
 }

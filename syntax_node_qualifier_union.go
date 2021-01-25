@@ -9,7 +9,7 @@ type syntaxUnionQualifier struct {
 }
 
 func (u *syntaxUnionQualifier) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	srcArray, ok := current.([]interface{})
 	if !ok {
@@ -18,32 +18,42 @@ func (u *syntaxUnionQualifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: u.syntaxBasicNode,
+			},
 			expectedType: `array`,
 			foundType:    foundType,
-			path:         u.text,
 		}
 	}
 
 	if u.isValueGroup() {
-		childErrorMap := make(map[error]struct{}, 1)
-		var lastError error
+		deepestTextLen := -1
+		deepestErrors := make([]errorRuntime, 0, 2)
+
 		for _, subscript := range u.subscripts {
 			for _, index := range subscript.getIndexes(srcArray) {
 				if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
-					childErrorMap[err] = struct{}{}
-					lastError = err
+					deepestTextLen, deepestErrors = u.addDeepestError(err, deepestTextLen, deepestErrors)
 				}
 			}
 		}
 
 		if len(container.result) == 0 {
-			switch len(childErrorMap) {
+			switch len(deepestErrors) {
 			case 0:
-				return ErrorNoneMatched{path: u.text}
+				return ErrorIndexOutOfRange{
+					errorBasicRuntime: &errorBasicRuntime{
+						node: u.syntaxBasicNode,
+					},
+				}
 			case 1:
-				return lastError
+				return deepestErrors[0]
 			default:
-				return ErrorNoneMatched{path: u.next.getConnectedText()}
+				return ErrorNoneMatched{
+					errorBasicRuntime: &errorBasicRuntime{
+						node: deepestErrors[0].getSyntaxNode(),
+					},
+				}
 			}
 		}
 
@@ -52,7 +62,11 @@ func (u *syntaxUnionQualifier) retrieve(
 
 	indexes := u.subscripts[0].getIndexes(srcArray)
 	if len(indexes) == 0 {
-		return ErrorIndexOutOfRange{path: u.text}
+		return ErrorIndexOutOfRange{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: u.syntaxBasicNode,
+			},
+		}
 	}
 
 	return u.retrieveListNext(root, srcArray, indexes[0], container)

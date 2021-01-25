@@ -8,7 +8,7 @@ type syntaxAggregateFunction struct {
 }
 
 func (f *syntaxAggregateFunction) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	values := bufferContainer{}
 
@@ -25,8 +25,10 @@ func (f *syntaxAggregateFunction) retrieve(
 	filteredValue, err := f.function(values.result)
 	if err != nil {
 		return ErrorFunctionFailed{
-			function: f.text,
-			err:      err,
+			errorBasicRuntime: &errorBasicRuntime{
+				node: f.syntaxBasicNode,
+			},
+			err: err,
 		}
 	}
 

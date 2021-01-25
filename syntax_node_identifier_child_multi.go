@@ -11,7 +11,7 @@ type syntaxChildMultiIdentifier struct {
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	if i.isAllWildcard {
 		if _, ok := current.([]interface{}); ok {
@@ -29,24 +29,34 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
 			expectedType: `object`,
 			foundType:    foundType,
-			path:         i.text,
 		}
 	}
 
-	childErrorMap := make(map[error]struct{}, 1)
+	deepestErrors := make([]errorRuntime, 0, 2)
 
-	lastError := i.retrieveMap(root, srcMap, container, childErrorMap)
+	deepestErrors = i.retrieveMap(root, srcMap, container, deepestErrors)
 
 	if len(container.result) == 0 {
-		switch len(childErrorMap) {
+		switch len(deepestErrors) {
 		case 0:
-			return ErrorMemberNotExist{path: i.text}
+			return ErrorMemberNotExist{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: i.syntaxBasicNode,
+				},
+			}
 		case 1:
-			return lastError
+			return deepestErrors[0]
 		default:
-			return ErrorNoneMatched{path: i.next.getConnectedText()}
+			return ErrorNoneMatched{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: deepestErrors[0].getSyntaxNode(),
+				},
+			}
 		}
 	}
 
@@ -55,9 +65,9 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
-	childErrorMap map[error]struct{}) error {
+	deepestErrors []errorRuntime) []errorRuntime {
 
-	var lastError error
+	deepestTextLen := -1
 
 	for _, identifier := range i.identifiers {
 		switch typedNode := identifier.(type) {
@@ -71,11 +81,9 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 		}
 
 		if err := identifier.retrieve(root, srcMap, container); err != nil {
-			childErrorMap[err] = struct{}{}
-			lastError = err
-			continue
+			deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
 		}
 	}
 
-	return lastError
+	return deepestErrors
 }

@@ -12,7 +12,7 @@ type syntaxRecursiveChildIdentifier struct {
 }
 
 func (i *syntaxRecursiveChildIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	switch current.(type) {
 	case map[string]interface{}, []interface{}:
@@ -22,11 +22,16 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
 			expectedType: `object/array`,
 			foundType:    foundType,
-			path:         i.text,
 		}
 	}
+
+	deepestTextLen := -1
+	deepestErrors := make([]errorRuntime, 0, 2)
 
 	targetNodes := make([]interface{}, 1, 5)
 	targetNodes[0] = current
@@ -37,11 +42,12 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		switch typedNodes := currentNode.(type) {
 		case map[string]interface{}:
 			if i.nextMapRequired {
-				i.next.retrieve(root, typedNodes, container)
+				if err := i.next.retrieve(root, typedNodes, container); err != nil {
+					deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+				}
 			}
 
 			sortKeys := container.getSortedKeys(typedNodes)
-
 			for index := len(typedNodes) - 1; index >= 0; index-- {
 				node := typedNodes[(*sortKeys)[index]]
 				switch node.(type) {
@@ -54,7 +60,9 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 		case []interface{}:
 			if i.nextListRequired {
-				i.next.retrieve(root, typedNodes, container)
+				if err := i.next.retrieve(root, typedNodes, container); err != nil {
+					deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+				}
 			}
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
@@ -68,7 +76,22 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	}
 
 	if len(container.result) == 0 {
-		return ErrorNoneMatched{path: i.getConnectedText()}
+		switch len(deepestErrors) {
+		case 0:
+			return ErrorMemberNotExist{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: i.syntaxBasicNode,
+				},
+			}
+		case 1:
+			return deepestErrors[0]
+		default:
+			return ErrorNoneMatched{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: deepestErrors[0].getSyntaxNode(),
+				},
+			}
+		}
 	}
 
 	return nil

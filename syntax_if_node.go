@@ -1,7 +1,7 @@
 package jsonpath
 
 type syntaxNode interface {
-	retrieve(root, current interface{}, container *bufferContainer) error
+	retrieve(root, current interface{}, container *bufferContainer) errorRuntime
 	setText(text string)
 	getText() string
 	setValueGroup()

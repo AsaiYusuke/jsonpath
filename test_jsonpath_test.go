@@ -23,6 +23,59 @@ type TestCase struct {
 	resultValidator func(interface{}, []interface{}) error
 }
 
+func createErrorMemberNotExist(text string) ErrorMemberNotExist {
+	return ErrorMemberNotExist{
+		errorBasicRuntime: &errorBasicRuntime{
+			node: &syntaxBasicNode{
+				text: text,
+			},
+		},
+	}
+}
+
+func createErrorIndexOutOfRange(text string) ErrorIndexOutOfRange {
+	return ErrorIndexOutOfRange{
+		errorBasicRuntime: &errorBasicRuntime{
+			node: &syntaxBasicNode{
+				text: text,
+			},
+		},
+	}
+}
+
+func createErrorTypeUnmatched(text string, expected string, found string) ErrorTypeUnmatched {
+	return ErrorTypeUnmatched{
+		errorBasicRuntime: &errorBasicRuntime{
+			node: &syntaxBasicNode{
+				text: text,
+			},
+		},
+		expectedType: expected,
+		foundType:    found,
+	}
+}
+
+func createErrorNoneMatched(text string) ErrorNoneMatched {
+	return ErrorNoneMatched{
+		errorBasicRuntime: &errorBasicRuntime{
+			node: &syntaxBasicNode{
+				text: text,
+			},
+		},
+	}
+}
+
+func createErrorFunctionFailed(text string, errorString string) ErrorFunctionFailed {
+	return ErrorFunctionFailed{
+		errorBasicRuntime: &errorBasicRuntime{
+			node: &syntaxBasicNode{
+				text: text,
+			},
+		},
+		err: fmt.Errorf(errorString),
+	}
+}
+
 func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) ([]interface{}, error) {
 	jsonPath := testCase.jsonpath
 	hasConfig := false
@@ -227,7 +280,7 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.length`,
 				inputJSON:   `["length",1,2]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.length`},
+				expectedErr: createErrorTypeUnmatched(`.length`, `object`, `[]interface {}`),
 			},
 		},
 		`character-type::encoded-JSONPath`: []TestCase{
@@ -485,49 +538,49 @@ func TestRetrieve_dotNotation(t *testing.T) {
 			{
 				jsonpath:    `$.d`,
 				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
-				expectedErr: ErrorMemberNotExist{path: `.d`},
+				expectedErr: createErrorMemberNotExist(`.d`),
 			},
 		},
 		`type-unmatched`: []TestCase{
 			{
 				jsonpath:    `$.2`,
 				inputJSON:   `["a","b",{"2":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.2`},
+				expectedErr: createErrorTypeUnmatched(`.2`, `object`, `[]interface {}`),
 			},
 			{
 				jsonpath:    `$.-1`,
 				inputJSON:   `["a","b",{"2":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.-1`},
+				expectedErr: createErrorTypeUnmatched(`.-1`, `object`, `[]interface {}`),
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `string`, path: `.d`},
+				expectedErr: createErrorTypeUnmatched(`.d`, `object`, `string`),
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":123}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `.d`},
+				expectedErr: createErrorTypeUnmatched(`.d`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":true}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `bool`, path: `.d`},
+				expectedErr: createErrorTypeUnmatched(`.d`, `object`, `bool`),
 			},
 			{
 				jsonpath:    `$.a.d`,
 				inputJSON:   `{"a":null}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `null`, path: `.d`},
+				expectedErr: createErrorTypeUnmatched(`.d`, `object`, `null`),
 			},
 			{
 				jsonpath:    `$.a`,
 				inputJSON:   `[1,2]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.a`},
+				expectedErr: createErrorTypeUnmatched(`.a`, `object`, `[]interface {}`),
 			},
 			{
 				jsonpath:    `$.a`,
 				inputJSON:   `[{"a":1}]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `.a`},
+				expectedErr: createErrorTypeUnmatched(`.a`, `object`, `[]interface {}`),
 			},
 		},
 	}
@@ -610,22 +663,39 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 				expectedJSON: `[0,{"c":{"a":"d"}},{"g":{"a":"h"}}]`,
 			},
 		},
-		`none-matched`: []TestCase{
+		`empty-input`: []TestCase{
+			{
+				jsonpath:    `$..a`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$..a`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorMemberNotExist(`..`),
+			},
+		},
+		`child-error`: []TestCase{
 			{
 				jsonpath:    `$..x`,
 				inputJSON:   `{"a":"b","c":{"a":"d"},"e":["f",{"g":{"a":"h"}}]}`,
-				expectedErr: ErrorNoneMatched{path: `..x`},
+				expectedErr: createErrorMemberNotExist(`x`),
 			},
 			{
 				jsonpath:    `$..a.x`,
 				inputJSON:   `{"a":"b","c":{"a":"d"},"e":["f",{"g":{"a":"h"}}]}`,
-				expectedErr: ErrorNoneMatched{path: `..a.x`},
+				expectedErr: createErrorTypeUnmatched(`.x`, `object`, `string`),
+			},
+			{
+				jsonpath:    `$..a.x`,
+				inputJSON:   `{"a":"b","c":{"a":"d"},"e":["f",{"g":{"a":{"h":1}}}]}`,
+				expectedErr: createErrorNoneMatched(`.x`),
 			},
 			{
 				// The case where '.x' terminates with an error first
 				jsonpath:    `$.x..a`,
 				inputJSON:   `{"a":"b","c":{"a":"d"},"e":["f",{"g":{"a":"h"}}]}`,
-				expectedErr: ErrorMemberNotExist{path: `.x`},
+				expectedErr: createErrorMemberNotExist(`.x`),
 			},
 		},
 		`character-type::Non-alphabet-accepted-in-JSON`: []TestCase{
@@ -658,22 +728,22 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 			{
 				jsonpath:    `$..a`,
 				inputJSON:   `null`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `null`, path: `..`},
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `null`),
 			},
 			{
 				jsonpath:    `$..a`,
 				inputJSON:   `true`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `bool`, path: `..`},
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `bool`),
 			},
 			{
 				jsonpath:    `$..a`,
 				inputJSON:   `"abc"`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `string`, path: `..`},
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
 			},
 			{
 				jsonpath:    `$..a`,
 				inputJSON:   `123`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object/array`, foundType: `float64`, path: `..`},
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `float64`),
 			},
 		},
 	}
@@ -743,24 +813,24 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorMemberNotExist{path: `.*`},
+				expectedErr: createErrorMemberNotExist(`.*`),
 			},
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorMemberNotExist{path: `.*`},
+				expectedErr: createErrorMemberNotExist(`.*`),
 			},
 		},
 		`recursive`: []TestCase{
 			{
 				jsonpath:    `$..*`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorNoneMatched{path: `..*`},
+				expectedErr: createErrorMemberNotExist(`*`),
 			},
 			{
 				jsonpath:    `$..*`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorNoneMatched{path: `..*`},
+				expectedErr: createErrorMemberNotExist(`*`),
 			},
 			{
 				jsonpath:     `$..*`,
@@ -807,22 +877,32 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$.*.a.b`,
 				inputJSON:   `{"a":{"b":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$.*.a.b`,
 				inputJSON:   `[{"b":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$.*.a.b.c`,
 				inputJSON:   `{"a":{"b":1},"b":{"a":2}}`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$.*.a.b.c`,
 				inputJSON:   `[{"b":1},{"a":2}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
+			},
+			{
+				jsonpath:    `$.*.a.b.c`,
+				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
+				expectedErr: createErrorNoneMatched(`.b`),
+			},
+			{
+				jsonpath:    `$.*.a.b.c`,
+				inputJSON:   `[{"a":1},{"a":{"c":2}}]`,
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 		},
 	}
@@ -880,7 +960,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 			{
 				jsonpath:    `$['d']`,
 				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
-				expectedErr: ErrorMemberNotExist{path: `['d']`},
+				expectedErr: createErrorMemberNotExist(`['d']`),
 			},
 		},
 		`character-type::single-quoted`: []TestCase{
@@ -1146,7 +1226,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 			{
 				jsonpath:    `$['*']`,
 				inputJSON:   `{"a":1,"b":2}`,
-				expectedErr: ErrorMemberNotExist{path: `['*']`},
+				expectedErr: createErrorMemberNotExist(`['*']`),
 			},
 			{
 				jsonpath:     `$['.']`,
@@ -1194,7 +1274,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 				jsonpath:     `$[''][0]`,
 				inputJSON:    `[1,2,3]`,
 				expectedJSON: `[1]`,
-				expectedErr:  ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['']`},
+				expectedErr:  createErrorTypeUnmatched(`['']`, `object`, `[]interface {}`),
 			},
 		},
 		`mixing-bracket-and-dot-notation`: []TestCase{
@@ -1213,39 +1293,39 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a']`},
+				expectedErr: createErrorTypeUnmatched(`['a']`, `object`, `[]interface {}`),
 			},
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorMemberNotExist{path: `['a']`},
+				expectedErr: createErrorMemberNotExist(`['a']`),
 			},
 		},
 		`type-unmatched`: []TestCase{
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `"abc"`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `string`, path: `['a']`},
+				expectedErr: createErrorTypeUnmatched(`['a']`, `object`, `string`),
 			},
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `123`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `['a']`},
+				expectedErr: createErrorTypeUnmatched(`['a']`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `true`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `bool`, path: `['a']`},
+				expectedErr: createErrorTypeUnmatched(`['a']`, `object`, `bool`),
 			},
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `null`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `null`, path: `['a']`},
+				expectedErr: createErrorTypeUnmatched(`['a']`, `object`, `null`),
 			},
 			{
 				jsonpath:    `$['a']`,
 				inputJSON:   `[1,2,3]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a']`},
+				expectedErr: createErrorTypeUnmatched(`['a']`, `object`, `[]interface {}`),
 			},
 		},
 	}
@@ -1340,7 +1420,7 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 			{
 				jsonpath:    `$['c','d']`,
 				inputJSON:   `{"a":1,"b":2}`,
-				expectedErr: ErrorMemberNotExist{path: `['c','d']`},
+				expectedErr: createErrorMemberNotExist(`['c','d']`),
 			},
 		},
 		`two-level-multi-identifiers`: []TestCase{
@@ -1367,32 +1447,32 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 			{
 				jsonpath:    `$['a','b']['c','d']`,
 				inputJSON:   `{"a":{"a":1},"b":{"b":2}}`,
-				expectedErr: ErrorMemberNotExist{path: `['c','d']`},
+				expectedErr: createErrorMemberNotExist(`['c','d']`),
 			},
 			{
 				jsonpath:    `$['a','b']['c','d']`,
 				inputJSON:   `{"a":{"a":1},"c":{"b":2}}`,
-				expectedErr: ErrorMemberNotExist{path: `['c','d']`},
+				expectedErr: createErrorMemberNotExist(`['c','d']`),
 			},
 			{
 				jsonpath:    `$['a','b']['c','d']`,
 				inputJSON:   `{"c":{"a":1},"d":{"b":2}}`,
-				expectedErr: ErrorMemberNotExist{path: `['a','b']`},
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
 			},
 			{
 				jsonpath:    `$['a','b']['c','d'].e`,
 				inputJSON:   `{"a":{"c":1},"b":{"c":2}}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `.e`},
+				expectedErr: createErrorTypeUnmatched(`.e`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$['a','b']['c','d'].e`,
 				inputJSON:   `{"a":{"a":1},"b":{"c":2}}`,
-				expectedErr: ErrorNoneMatched{path: `['c','d'].e`},
+				expectedErr: createErrorTypeUnmatched(`.e`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$['a','b','x']['c','d'].e`,
 				inputJSON:   `{"a":{"a":1},"b":{"c":2}}`,
-				expectedErr: ErrorNoneMatched{path: `['c','d'].e`},
+				expectedErr: createErrorTypeUnmatched(`.e`, `object`, `float64`),
 			},
 		},
 		`same-identifiers`: []TestCase{
@@ -1428,56 +1508,61 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorMemberNotExist{path: `['a','b']`},
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
 			},
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a','b']`},
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `[]interface {}`),
 			},
 		},
 		`type-unmatched`: []TestCase{
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `"abc"`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `string`, path: `['a','b']`},
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
 			},
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `123`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `float64`, path: `['a','b']`},
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `true`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `bool`, path: `['a','b']`},
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `bool`),
 			},
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `null`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `null`, path: `['a','b']`},
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `null`),
 			},
 			{
 				jsonpath:    `$['a','b']`,
 				inputJSON:   `[1,2,3]`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `object`, foundType: `[]interface {}`, path: `['a','b']`},
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `[]interface {}`),
 			},
 		},
 		`child-error`: []TestCase{
 			{
 				jsonpath:    `$['a','b'].a.b`,
 				inputJSON:   `{"c":{"b":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `['a','b']`},
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
 			},
 			{
 				jsonpath:    `$['a','b'].a.b`,
 				inputJSON:   `{"a":{"b":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$['a','b'].a.b.c`,
 				inputJSON:   `{"a":{"b":1},"b":{"a":2}}`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
+			},
+			{
+				jsonpath:    `$['a','b'].a.b.c`,
+				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 		},
 	}
@@ -1557,12 +1642,12 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorMemberNotExist{path: `[*]`},
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorMemberNotExist{path: `[*]`},
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 		},
 		`apply-to-value-group`: []TestCase{
@@ -1598,22 +1683,32 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$[*].a.b`,
 				inputJSON:   `{"a":{"b":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[*].a.b`,
 				inputJSON:   `[{"b":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[*].a.b.c`,
 				inputJSON:   `{"a":{"b":1},"b":{"a":2}}`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 			},
 			{
 				jsonpath:    `$[*].a.b.c`,
 				inputJSON:   `[{"b":1},{"a":2}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
+			},
+			{
+				jsonpath:    `$[*].a.b.c`,
+				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
+				expectedErr: createErrorNoneMatched(`.b`),
+			},
+			{
+				jsonpath:    `$[*].a.b.c`,
+				inputJSON:   `[{"a":1},{"a":{"c":2}}]`,
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 		}}
 
@@ -1742,7 +1837,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 			{
 				jsonpath:    `$[3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[3]`},
+				expectedErr: createErrorIndexOutOfRange(`[3]`),
 			},
 		},
 		`basic::number-variation-minus`: []TestCase{
@@ -1764,7 +1859,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 			{
 				jsonpath:    `$[-4]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[-4]`},
+				expectedErr: createErrorIndexOutOfRange(`[-4]`),
 			},
 		},
 		`syntax-check::number`: []TestCase{
@@ -1820,61 +1915,61 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[0]`},
+				expectedErr: createErrorIndexOutOfRange(`[0]`),
 			},
 			{
 				jsonpath:    `$[1]`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1]`),
 			},
 			{
 				jsonpath:    `$[-1]`,
 				inputJSON:   `[]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1]`),
 			},
 		},
 		`big-number`: []TestCase{
 			{
 				jsonpath:    `$[1000000000000000000]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[1000000000000000000]`},
+				expectedErr: createErrorIndexOutOfRange(`[1000000000000000000]`),
 			},
 			{
 				jsonpath:    `$[-1000000000000000000]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorIndexOutOfRange{path: `[-1000000000000000000]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1000000000000000000]`),
 			},
 		},
 		`not-array`: []TestCase{
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `{"a":1,"b":2}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `map[string]interface {}`, path: `[0]`},
+				expectedErr: createErrorTypeUnmatched(`[0]`, `array`, `map[string]interface {}`),
 			},
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `"abc"`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `string`, path: `[0]`},
+				expectedErr: createErrorTypeUnmatched(`[0]`, `array`, `string`),
 			},
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `123`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `float64`, path: `[0]`},
+				expectedErr: createErrorTypeUnmatched(`[0]`, `array`, `float64`),
 			},
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `true`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `bool`, path: `[0]`},
+				expectedErr: createErrorTypeUnmatched(`[0]`, `array`, `bool`),
 			},
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `null`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `null`, path: `[0]`},
+				expectedErr: createErrorTypeUnmatched(`[0]`, `array`, `null`),
 			},
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `{}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `map[string]interface {}`, path: `[0]`},
+				expectedErr: createErrorTypeUnmatched(`[0]`, `array`, `map[string]interface {}`),
 			},
 		},
 	}
@@ -2004,7 +2099,7 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 			{
 				jsonpath:    `$[3,3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[3,3]`},
+				expectedErr: createErrorIndexOutOfRange(`[3,3]`),
 			},
 		},
 		`array`: []TestCase{
@@ -2018,22 +2113,22 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 			{
 				jsonpath:    `$[1,2].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: ErrorNoneMatched{path: `[1,2]`},
+				expectedErr: createErrorIndexOutOfRange(`[1,2]`),
 			},
 			{
 				jsonpath:    `$[0,1].a.b`,
 				inputJSON:   `[{"b":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[0,1].a.b`,
 				inputJSON:   `[{"b":1},{"c":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[0,1].a.b.c`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 			},
 		},
 	}
@@ -2047,7 +2142,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[0:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:0]`),
 			},
 			{
 				jsonpath:     `$[0:1]`,
@@ -2069,7 +2164,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:1]`),
 			},
 			{
 				jsonpath:     `$[1:2]`,
@@ -2086,7 +2181,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[2:2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:2]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:2]`),
 			},
 			{
 				jsonpath:     `$[2:3]`,
@@ -2098,36 +2193,36 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[2:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:1]`),
 			},
 			{
 				jsonpath:    `$[2:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:0]`),
 			},
 		},
 		`start-after-last`: []TestCase{
 			{
 				jsonpath:    `$[3:2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[3:2]`},
+				expectedErr: createErrorIndexOutOfRange(`[3:2]`),
 			},
 			{
 				jsonpath:    `$[3:3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[3:3]`},
+				expectedErr: createErrorIndexOutOfRange(`[3:3]`),
 			},
 			{
 				jsonpath:    `$[3:4]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[3:4]`},
+				expectedErr: createErrorIndexOutOfRange(`[3:4]`),
 			},
 		},
 		`start-minus-to-minus-forward`: []TestCase{
 			{
 				jsonpath:    `$[-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1:-1]`),
 			},
 			{
 				jsonpath:     `$[-2:-1]`,
@@ -2144,19 +2239,19 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-1:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:-2]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1:-2]`),
 			},
 			{
 				jsonpath:    `$[-1:-3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:-3]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1:-3]`),
 			},
 		},
 		`start-minus-to-plus`: []TestCase{
 			{
 				jsonpath:    `$[-1:2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:2]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1:2]`),
 			},
 			{
 				jsonpath:     `$[-1:3]`,
@@ -2166,7 +2261,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-2:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-2:1]`},
+				expectedErr: createErrorIndexOutOfRange(`[-2:1]`),
 			},
 			{
 				jsonpath:     `$[-2:2]`,
@@ -2176,7 +2271,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-3:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-3:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[-3:0]`),
 			},
 			{
 				jsonpath:     `$[-3:1]`,
@@ -2186,7 +2281,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-4:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-4:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[-4:0]`),
 			},
 			{
 				jsonpath:     `$[-4:1]`,
@@ -2213,12 +2308,12 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[0:-3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:-3]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:-3]`),
 			},
 			{
 				jsonpath:    `$[0:-4]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:-4]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:-4]`),
 			},
 		},
 		`start-middle-to-minus`: []TestCase{
@@ -2230,26 +2325,26 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:-2]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:-2]`),
 			},
 		},
 		`start-last-to-minus`: []TestCase{
 			{
 				jsonpath:    `$[2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:-1]`),
 			},
 			{
 				jsonpath:    `$[2:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:-2]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:-2]`),
 			},
 		},
 		`omitted-start`: []TestCase{
 			{
 				jsonpath:    `$[:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[:0]`),
 			},
 			{
 				jsonpath:     `$[:1]`,
@@ -2284,7 +2379,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[:-3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[:-3]`},
+				expectedErr: createErrorIndexOutOfRange(`[:-3]`),
 			},
 		},
 		`omitted-last`: []TestCase{
@@ -2306,7 +2401,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[3:]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[3:]`},
+				expectedErr: createErrorIndexOutOfRange(`[3:]`),
 			},
 			{
 				jsonpath:     `$[-1:]`,
@@ -2345,12 +2440,12 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1000000000000000000:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1000000000000000000:1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1000000000000000000:1]`),
 			},
 			{
 				jsonpath:    `$[1:-1000000000000000000]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:-1000000000000000000]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:-1000000000000000000]`),
 			},
 			{
 				jsonpath:     `$[1:1000000000000000000]`,
@@ -2362,12 +2457,12 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:2]`,
 				inputJSON:   `{"first":1,"second":2,"third":3}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `map[string]interface {}`, path: `[1:2]`},
+				expectedErr: createErrorTypeUnmatched(`[1:2]`, `array`, `map[string]interface {}`),
 			},
 			{
 				jsonpath:    `$[:]`,
 				inputJSON:   `{"first":1,"second":2,"third":3}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `map[string]interface {}`, path: `[:]`},
+				expectedErr: createErrorTypeUnmatched(`[:]`, `array`, `map[string]interface {}`),
 			},
 		},
 		`syntax`: []TestCase{
@@ -2396,22 +2491,22 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:2].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: ErrorNoneMatched{path: `[1:2]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:2]`),
 			},
 			{
 				jsonpath:    `$[0:2].a.b`,
 				inputJSON:   `[{"b":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[0:2].a.b`,
 				inputJSON:   `[{"b":1},{"c":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[0:2].a.b.c`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 			},
 		},
 	}
@@ -2457,24 +2552,24 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[0:2:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:2:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:2:0]`),
 			},
 			{
 				jsonpath:    `$[2:0:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:0:0]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:0:0]`),
 			},
 		},
 		`minus::start-variation`: []TestCase{
 			{
 				jsonpath:    `$[-3:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-3:1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[-3:1:-1]`),
 			},
 			{
 				jsonpath:    `$[-2:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[-2:1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[-2:1:-1]`),
 			},
 			{
 				jsonpath:     `$[-1:1:-1]`,
@@ -2484,12 +2579,12 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[0:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:1:-1]`),
 			},
 			{
 				jsonpath:    `$[1:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:1:-1]`),
 			},
 			{
 				jsonpath:     `$[2:1:-1]`,
@@ -2511,37 +2606,37 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[0:-2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:-2:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:-2:-1]`),
 			},
 			{
 				jsonpath:    `$[0:-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:-1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:-1:-1]`),
 			},
 			{
 				jsonpath:    `$[0:0:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:0:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:0:-1]`),
 			},
 			{
 				jsonpath:    `$[0:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:1:-1]`),
 			},
 			{
 				jsonpath:    `$[0:2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:2:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:2:-1]`),
 			},
 			{
 				jsonpath:    `$[0:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:3:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:3:-1]`),
 			},
 			{
 				jsonpath:    `$[0:4:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[0:4:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[0:4:-1]`),
 			},
 		},
 		`minus::end-variation::start1`: []TestCase{
@@ -2563,12 +2658,12 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[1:-2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:-2:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:-2:-1]`),
 			},
 			{
 				jsonpath:    `$[1:-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:-1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:-1:-1]`),
 			},
 			{
 				jsonpath:     `$[1:0:-1]`,
@@ -2578,18 +2673,18 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[1:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:1:-1]`),
 			},
 			{
 				jsonpath:     `$[1:2:-1]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["second","first"]`,
-				expectedErr:  ErrorNoneMatched{path: `[1:2:-1]`},
+				expectedErr:  createErrorIndexOutOfRange(`[1:2:-1]`),
 			},
 			{
 				jsonpath:    `$[1:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[1:3:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[1:3:-1]`),
 			},
 		},
 		`minus::end-variation::start2`: []TestCase{
@@ -2616,7 +2711,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:-1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:-1:-1]`),
 			},
 			{
 				jsonpath:     `$[2:0:-1]`,
@@ -2631,22 +2726,22 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:2:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:2:-1]`),
 			},
 			{
 				jsonpath:    `$[2:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:3:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:3:-1]`),
 			},
 			{
 				jsonpath:    `$[2:4:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:4:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:4:-1]`),
 			},
 			{
 				jsonpath:    `$[2:5:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:5:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:5:-1]`),
 			},
 		},
 		`minus::step-variation`: []TestCase{
@@ -2670,7 +2765,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:-1:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: ErrorNoneMatched{path: `[2:-1:-2]`},
+				expectedErr: createErrorIndexOutOfRange(`[2:-1:-2]`),
 			},
 			{
 				jsonpath:     `$[-1:0:-1]`,
@@ -2773,54 +2868,54 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:1:-1]`,
 				inputJSON:   `{"first":1,"second":2,"third":3}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `map[string]interface {}`, path: `[2:1:-1]`},
+				expectedErr: createErrorTypeUnmatched(`[2:1:-1]`, `array`, `map[string]interface {}`),
 			},
 			{
 				jsonpath:    `$[::-1]`,
 				inputJSON:   `{"first":1,"second":2,"third":3}`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `map[string]interface {}`, path: `[::-1]`},
+				expectedErr: createErrorTypeUnmatched(`[::-1]`, `array`, `map[string]interface {}`),
 			},
 			{
 				jsonpath:    `$[2:1:-1]`,
 				inputJSON:   `"value"`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `string`, path: `[2:1:-1]`},
+				expectedErr: createErrorTypeUnmatched(`[2:1:-1]`, `array`, `string`),
 			},
 			{
 				jsonpath:    `$[2:1:-1]`,
 				inputJSON:   `1`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `float64`, path: `[2:1:-1]`},
+				expectedErr: createErrorTypeUnmatched(`[2:1:-1]`, `array`, `float64`),
 			},
 			{
 				jsonpath:    `$[2:1:-1]`,
 				inputJSON:   `true`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `bool`, path: `[2:1:-1]`},
+				expectedErr: createErrorTypeUnmatched(`[2:1:-1]`, `array`, `bool`),
 			},
 			{
 				jsonpath:    `$[2:1:-1]`,
 				inputJSON:   `null`,
-				expectedErr: ErrorTypeUnmatched{expectedType: `array`, foundType: `null`, path: `[2:1:-1]`},
+				expectedErr: createErrorTypeUnmatched(`[2:1:-1]`, `array`, `null`),
 			},
 		},
 		`child-error`: []TestCase{
 			{
 				jsonpath:    `$[-1:-1:-1].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: ErrorNoneMatched{path: `[-1:-1:-1]`},
+				expectedErr: createErrorIndexOutOfRange(`[-1:-1:-1]`),
 			},
 			{
 				jsonpath:    `$[0:-2:-1].a.b`,
 				inputJSON:   `[{"b":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[1:-3:-1].a.b`,
 				inputJSON:   `[{"b":1},{"c":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 			{
 				jsonpath:    `$[1:-3:-1].a.b.c`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 			},
 		},
 	}
@@ -2839,7 +2934,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(!@)]`,
 				inputJSON:   `["a","b"]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(!@)]`},
+				expectedErr: createErrorMemberNotExist(`[?(!@)]`),
 			},
 		},
 		`child`: []TestCase{
@@ -2856,7 +2951,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.c)]`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.c)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.c)]`),
 			},
 			{
 				jsonpath:     `$[?(!@.c)]`,
@@ -2912,7 +3007,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(!$)]`,
 				inputJSON:   `{"a":1,"b":2}`,
-				expectedErr: ErrorMemberNotExist{path: `[?(!$)]`},
+				expectedErr: createErrorMemberNotExist(`[?(!$)]`),
 			},
 		},
 		`object::current-root`: []TestCase{
@@ -2924,7 +3019,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(!@)]`,
 				inputJSON:   `{"a":1}`,
-				expectedErr: ErrorMemberNotExist{path: `[?(!@)]`},
+				expectedErr: createErrorMemberNotExist(`[?(!@)]`),
 			},
 		},
 		`object::child`: []TestCase{
@@ -2994,7 +3089,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$.*[?(@.a)]`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a)]`),
 			},
 			{
 				jsonpath:     `$.*[?(@.a)]`,
@@ -3004,7 +3099,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$.*[?(@.a)]`,
 				inputJSON:   `{"a":{"a":1},"b":{"b":2}}`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a)]`),
 			},
 		},
 		`root`: []TestCase{
@@ -3021,7 +3116,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(!$[0].a)]`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(!$[0].a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(!$[0].a)]`),
 			},
 		},
 		`multi-identifier`: []TestCase{
@@ -3038,7 +3133,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@['c','d'])]`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@['c','d'])]`},
+				expectedErr: createErrorMemberNotExist(`[?(@['c','d'])]`),
 			},
 		},
 		`current-wildcard`: []TestCase{
@@ -3050,7 +3145,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.*)]`,
 				inputJSON:   `[1,2]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.*)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.*)]`),
 			},
 		},
 		`wildcard-qualifier`: []TestCase{
@@ -3067,7 +3162,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@[*])]`,
 				inputJSON:   `[1,2]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@[*])]`},
+				expectedErr: createErrorMemberNotExist(`[?(@[*])]`),
 			},
 		},
 		`union`: []TestCase{
@@ -3127,64 +3222,64 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a)].b`,
 				inputJSON:   `[{"b":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a)]`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].b.c`,
 				inputJSON:   `[{"a":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.b`},
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].b.c`,
 				inputJSON:   `[{"a":1},{"b":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `.b`},
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].b.c`,
 				inputJSON:   `[{"a":1},{"a":1}]`,
-				expectedErr: ErrorMemberNotExist{path: `.b`},
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `[{"a":1},{"a":{"c":2}}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `[{"a":1},{"a":{"c":2}},{"b":3}]`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 		},
 		`child-error::object`: []TestCase{
 			{
 				jsonpath:    `$[?(@.a)].b`,
 				inputJSON:   `{"a":{"b":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a)]`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].b.c`,
 				inputJSON:   `{"a":{"a":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `.b`},
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"b":2}}`,
-				expectedErr: ErrorMemberNotExist{path: `.b`},
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":1}}`,
-				expectedErr: ErrorMemberNotExist{path: `.b`},
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}},"c":{"b":3}}`,
-				expectedErr: ErrorNoneMatched{path: `.a.b.c`},
+				expectedErr: createErrorNoneMatched(`.b`),
 			},
 		},
 	}
@@ -3213,7 +3308,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a=='ab')]`,
 				inputJSON:   `[{"a":"abc"}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a=='ab')]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a=='ab')]`),
 			},
 		},
 		`ne`: []TestCase{
@@ -3235,7 +3330,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a!='ab')]`,
 				inputJSON:   `[{"a":"ab"}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a!='ab')]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a!='ab')]`),
 			},
 		},
 		`gt`: []TestCase{
@@ -3252,7 +3347,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(1 > @.a)]`,
 				inputJSON:   `[{"a":1.0000000},{"a":1.0000001},{"a":2},{"a":"0.9"},{"a":{}},{"a":[]},{"a":true},{"a":null},{"b":"c"}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(1 > @.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(1 > @.a)]`),
 			},
 		},
 		`ge`: []TestCase{
@@ -3269,7 +3364,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(1.00001 >= @.a)]`,
 				inputJSON:   `[{"a":1.00002},{"a":2,"b":4},{"a":"0.9"},{"a":{}},{"a":[]},{"a":true},{"a":null},{"b":"c"}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(1.00001 >= @.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(1.00001 >= @.a)]`),
 			},
 		},
 		`lt`: []TestCase{
@@ -3286,7 +3381,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(1 < @.a)]`,
 				inputJSON:   `[{"a":0},{"a":0.9999},{"a":1},{"a":"2"},{"a":{}},{"a":[]},{"a":true},{"a":null},{"b":"c"}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(1 < @.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(1 < @.a)]`),
 			},
 		},
 		`le`: []TestCase{
@@ -3303,7 +3398,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(1.000001 <= @.a)]`,
 				inputJSON:   `[{"a":0},{"a":1},{"a":1.0000009},{"a":"2"},{"a":{}},{"a":[]},{"a":true},{"a":null},{"b":"c"}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(1.000001 <= @.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(1.000001 <= @.a)]`),
 			},
 		},
 		`syntax-check::string-literal`: []TestCase{
@@ -3376,7 +3471,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a==5)]`,
 				inputJSON:   `[{"a":4.9},{"a":5.1},{"a":-5},{"a":"5"},{"a":"a"},{"a":true},{"a":null},{"a":{}},{"a":[]},{"b":5},{"a":{"a":5}},{"a":[{"a":5}]}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a==5)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a==5)]`),
 			},
 			{
 				// The number 1.0 is converted to 1 using Go's json.Marshal().
@@ -3387,7 +3482,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a==1)]`,
 				inputJSON:   `{"a":1}`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a==1)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a==1)]`),
 			},
 			{
 				// The number -0.123e2 is converted to -12.3 using Go's json.Marshal().
@@ -3553,22 +3648,22 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a == $.b)]`,
 				inputJSON:   `[{"a":1},{"a":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.a == $.b)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a == $.b)]`),
 			},
 			{
 				jsonpath:    `$[?($.b == @.a)]`,
 				inputJSON:   `[{"a":1},{"a":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?($.b == @.a)]`},
+				expectedErr: createErrorMemberNotExist(`[?($.b == @.a)]`),
 			},
 			{
 				jsonpath:    `$[?(@.b == $[0].a)]`,
 				inputJSON:   `[{"a":1},{"a":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@.b == $[0].a)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.b == $[0].a)]`),
 			},
 			{
 				jsonpath:    `$[?($[0].a == @.b)]`,
 				inputJSON:   `[{"a":1},{"a":2}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?($[0].a == @.b)]`},
+				expectedErr: createErrorMemberNotExist(`[?($[0].a == @.b)]`),
 			},
 		},
 		`child-after-filter`: []TestCase{
@@ -3587,7 +3682,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$..*[?(@.a>2)]`,
 				inputJSON:   `[{"b":"1","a":1},{"c":"2","a":2},{"d":"3","a":3}]`,
-				expectedErr: ErrorNoneMatched{path: `..*[?(@.a>2)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@.a>2)]`),
 			},
 			{
 				jsonpath:     `$..*[?(@.a>2)]`,
@@ -3614,7 +3709,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(10==20)]`,
 				inputJSON:   `[{"a":10},{"a":20},{"a":30},{"a+10":20}]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(10==20)]`},
+				expectedErr: createErrorMemberNotExist(`[?(10==20)]`),
 			},
 		},
 		`both-jsonpath`: []TestCase{
@@ -3831,7 +3926,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$[?(@[1][0]>1)][?(@[1][0]>1)][?(@[1]>1)]`,
 				inputJSON:   `[1,[21,[221,[222]]]]`,
-				expectedErr: ErrorMemberNotExist{path: `[?(@[1]>1)]`},
+				expectedErr: createErrorMemberNotExist(`[?(@[1]>1)]`),
 			},
 		},
 	}
@@ -5100,7 +5195,7 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 				jsonpath:      `$[?(@.a > 123.46)].a`,
 				inputJSON:     `[{"a":123.456}]`,
 				expectedJSON:  `[]`,
-				expectedErr:   ErrorMemberNotExist{path: `[?(@.a > 123.46)]`},
+				expectedErr:   createErrorMemberNotExist(`[?(@.a > 123.46)]`),
 				unmarshalFunc: useJSONNumberDecoderFunction,
 			},
 			{
@@ -5348,7 +5443,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errFilter`: errFilterFunc,
 				},
 
-				expectedErr: ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			},
 			{
 				jsonpath:  `$.*.errFilter()`,
@@ -5357,7 +5452,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errFilter`: errFilterFunc,
 				},
 
-				expectedErr: ErrorNoneMatched{path: `.errFilter()`},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			},
 			{
 				jsonpath:  `$.*.max().errFilter()`,
@@ -5368,7 +5463,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			},
 			{
 				jsonpath:  `$.*.twice().errFilter()`,
@@ -5378,7 +5473,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`twice`:     twiceFunc,
 				},
 
-				expectedErr: ErrorNoneMatched{path: `.twice().errFilter()`},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			}, {
 				jsonpath:  `$.errFilter().twice()`,
 				inputJSON: `[122.345,123.45,123.456]`,
@@ -5387,7 +5482,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`twice`:     twiceFunc,
 				},
 
-				expectedErr: ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			},
 			{
 				jsonpath:  `$.*.errFilter().twice()`,
@@ -5397,7 +5492,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`twice`:     twiceFunc,
 				},
 
-				expectedErr: ErrorNoneMatched{path: `.errFilter().twice()`},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			},
 			{
 				jsonpath:  `$.*.max().errFilter().twice()`,
@@ -5409,7 +5504,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errFilter()`, err: fmt.Errorf(`filter error`)},
+				expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 			},
 		},
 		`aggregate-error`: []TestCase{
@@ -5419,7 +5514,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 			},
 			{
 				jsonpath:  `$.*.max().errAggregate()`,
@@ -5428,7 +5523,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errAggregate`: errAggregateFunc,
 					`max`:          maxFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 			},
 			{
 				jsonpath:  `$.*.twice().errAggregate()`,
@@ -5439,7 +5534,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 			},
 			{
 				jsonpath:  `$.*.errAggregate().twice()`,
@@ -5450,7 +5545,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 			},
 			{
 				jsonpath:  `$.*.max().errAggregate().twice()`,
@@ -5462,7 +5557,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errAggregate`: errAggregateFunc,
 					`max`:          maxFunc,
 				},
-				expectedErr: ErrorFunctionFailed{function: `.errAggregate()`, err: fmt.Errorf(`aggregate error`)},
+				expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 			},
 			{
 				jsonpath:  `$.a.max()`,
@@ -5470,7 +5565,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxFunc,
 				},
-				expectedErr: ErrorMemberNotExist{path: `.a`},
+				expectedErr: createErrorMemberNotExist(`.a`),
 			},
 		},
 		`jsonpath-error-with-filter`: []TestCase{
@@ -5480,7 +5575,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorMemberNotExist{path: `.x`},
+				expectedErr: createErrorMemberNotExist(`.x`),
 			},
 			{
 				jsonpath:  `$.*.a.b.c.errFilter()`,
@@ -5489,7 +5584,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errFilter`: errFilterFunc,
 				},
 
-				expectedErr: ErrorNoneMatched{path: `.a.b.c.errFilter()`},
+				expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 			},
 			{
 				jsonpath:  `$.*.a.b.c.errFilter1().errFilter2()`,
@@ -5499,7 +5594,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errFilter2`: errFilterFunc,
 				},
 
-				expectedErr: ErrorNoneMatched{path: `.a.b.c.errFilter1().errFilter2()`},
+				expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 			},
 			{
 				jsonpath:  `$.*.a.b.c.errAggregate()`,
@@ -5507,7 +5602,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorNoneMatched{path: `.a.b.c.errAggregate()`},
+				expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 			},
 			{
 				jsonpath:  `$.*.a.b.c.errAggregate1().errAggregate2()`,
@@ -5516,7 +5611,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 					`errAggregate1`: errAggregateFunc,
 					`errAggregate2`: errAggregateFunc,
 				},
-				expectedErr: ErrorNoneMatched{path: `.a.b.c.errAggregate1().errAggregate2()`},
+				expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 			},
 			{
 				jsonpath:  `$.*.a.b.c.errAggregate().errFilter()`,
@@ -5527,7 +5622,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorNoneMatched{path: `.a.b.c.errAggregate().errFilter()`},
+				expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 			},
 			{
 				jsonpath:  `$.*.a.b.c.errFilter().errAggregate()`,
@@ -5538,7 +5633,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`errAggregate`: errAggregateFunc,
 				},
-				expectedErr: ErrorNoneMatched{path: `.a.b.c.errFilter().errAggregate()`},
+				expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 			},
 		},
 		`function-syntax-check`: []TestCase{
@@ -6058,7 +6153,7 @@ type UnsupportedStruct struct {
 func TestRetrieve_unsupportedStruct(t *testing.T) {
 	inputJSON := UnsupportedStruct{A: `test`, B: 123}
 	jsonpath := `$.A`
-	expectedError := ErrorTypeUnmatched{expectedType: `object/array`, foundType: `jsonpath.UnsupportedStruct`, path: `.A`}
+	expectedError := createErrorTypeUnmatched(`.A`, `object/array`, `jsonpath.UnsupportedStruct`)
 	_, err := Retrieve(jsonpath, inputJSON)
 
 	if reflect.TypeOf(expectedError) != reflect.TypeOf(err) {

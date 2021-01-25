@@ -1,5 +1,7 @@
 package jsonpath
 
+import "reflect"
+
 type syntaxBasicNode struct {
 	text          string
 	connectedText string
@@ -45,7 +47,7 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
-	root interface{}, nextSrc interface{}, container *bufferContainer) error {
+	root interface{}, nextSrc interface{}, container *bufferContainer) errorRuntime {
 
 	if i.next != nil {
 		return i.next.retrieve(root, nextSrc, container)
@@ -64,11 +66,15 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 }
 
 func (i *syntaxBasicNode) retrieveMapNext(
-	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) error {
+	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) errorRuntime {
 
 	nextNode, ok := currentMap[key]
 	if !ok {
-		return ErrorMemberNotExist{path: i.text}
+		return ErrorMemberNotExist{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i,
+			},
+		}
 	}
 
 	if i.next != nil {
@@ -88,7 +94,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 }
 
 func (i *syntaxBasicNode) retrieveListNext(
-	root interface{}, currentList []interface{}, index int, container *bufferContainer) error {
+	root interface{}, currentList []interface{}, index int, container *bufferContainer) errorRuntime {
 
 	if i.next != nil {
 		return i.next.retrieve(root, currentList[index], container)
@@ -108,4 +114,27 @@ func (i *syntaxBasicNode) retrieveListNext(
 
 func (i *syntaxBasicNode) setAccessorMode(mode bool) {
 	i.accessorMode = mode
+}
+
+func (i *syntaxBasicNode) addDeepestError(
+	err errorRuntime, deepestTextLen int, deepestErrors []errorRuntime) (int, []errorRuntime) {
+
+	textLength := len(err.getSyntaxNode().getConnectedText())
+
+	if deepestTextLen < 0 || deepestTextLen > textLength {
+		deepestTextLen = textLength
+		deepestErrors = deepestErrors[:0]
+	}
+
+	if deepestTextLen == textLength {
+		errType := reflect.TypeOf(err)
+		for _, deepestErr := range deepestErrors {
+			if errType == reflect.TypeOf(deepestErr) {
+				return deepestTextLen, deepestErrors
+			}
+		}
+		deepestErrors = append(deepestErrors, err)
+	}
+
+	return deepestTextLen, deepestErrors
 }

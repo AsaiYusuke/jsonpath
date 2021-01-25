@@ -7,28 +7,35 @@ type syntaxFilterQualifier struct {
 }
 
 func (f *syntaxFilterQualifier) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
-	childErrorMap := make(map[error]struct{}, 1)
-	var lastError error
+	deepestErrors := make([]errorRuntime, 0, 2)
 
 	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		lastError = f.retrieveMap(root, typedNodes, container, childErrorMap)
+		deepestErrors = f.retrieveMap(root, typedNodes, container, deepestErrors)
 
 	case []interface{}:
-		lastError = f.retrieveList(root, typedNodes, container, childErrorMap)
+		deepestErrors = f.retrieveList(root, typedNodes, container, deepestErrors)
 
 	}
 
 	if len(container.result) == 0 {
-		switch len(childErrorMap) {
+		switch len(deepestErrors) {
 		case 0:
-			return ErrorMemberNotExist{path: f.text}
+			return ErrorMemberNotExist{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: f.syntaxBasicNode,
+				},
+			}
 		case 1:
-			return lastError
+			return deepestErrors[0]
 		default:
-			return ErrorNoneMatched{path: f.next.getConnectedText()}
+			return ErrorNoneMatched{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: deepestErrors[0].getSyntaxNode(),
+				},
+			}
 		}
 	}
 
@@ -37,9 +44,9 @@ func (f *syntaxFilterQualifier) retrieve(
 
 func (f *syntaxFilterQualifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
-	childErrorMap map[error]struct{}) error {
+	deepestErrors []errorRuntime) []errorRuntime {
 
-	var lastError error
+	deepestTextLen := -1
 
 	sortKeys := container.getSortedKeys(srcMap)
 
@@ -56,7 +63,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	if !isEachResult {
 		_, nodeNotFound = valueList[0].(struct{})
 		if nodeNotFound {
-			return nil
+			return deepestErrors
 		}
 	}
 
@@ -68,21 +75,20 @@ func (f *syntaxFilterQualifier) retrieveMap(
 			continue
 		}
 		if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); err != nil {
-			childErrorMap[err] = struct{}{}
-			lastError = err
+			deepestTextLen, deepestErrors = f.addDeepestError(err, deepestTextLen, deepestErrors)
 		}
 	}
 
 	container.putSortSlice(sortKeys)
 
-	return lastError
+	return deepestErrors
 }
 
 func (f *syntaxFilterQualifier) retrieveList(
 	root interface{}, srcList []interface{}, container *bufferContainer,
-	childErrorMap map[error]struct{}) error {
+	deepestErrors []errorRuntime) []errorRuntime {
 
-	var lastError error
+	deepestTextLen := -1
 
 	valueList := f.query.compute(root, srcList, container)
 
@@ -92,7 +98,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 	if !isEachResult {
 		_, nodeNotFound = valueList[0].(struct{})
 		if nodeNotFound {
-			return nil
+			return deepestErrors
 		}
 	}
 
@@ -104,10 +110,9 @@ func (f *syntaxFilterQualifier) retrieveList(
 			continue
 		}
 		if err := f.retrieveListNext(root, srcList, index, container); err != nil {
-			childErrorMap[err] = struct{}{}
-			lastError = err
+			deepestTextLen, deepestErrors = f.addDeepestError(err, deepestTextLen, deepestErrors)
 		}
 	}
 
-	return lastError
+	return deepestErrors
 }

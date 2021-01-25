@@ -9,7 +9,7 @@ type syntaxChildSingleIdentifier struct {
 }
 
 func (i *syntaxChildSingleIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) error {
+	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	srcMap, ok := current.(map[string]interface{})
 	if !ok {
@@ -18,9 +18,11 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
 			expectedType: `object`,
 			foundType:    foundType,
-			path:         i.text,
 		}
 	}
 
