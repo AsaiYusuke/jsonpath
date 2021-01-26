@@ -27,7 +27,7 @@ func (u *syntaxUnionQualifier) retrieve(
 	}
 
 	if u.isValueGroup() {
-		deepestTextLen := -1
+		var deepestTextLen int
 		deepestErrors := make([]errorRuntime, 0, 2)
 
 		for _, subscript := range u.subscripts {

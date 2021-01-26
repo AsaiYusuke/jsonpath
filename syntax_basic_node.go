@@ -121,7 +121,7 @@ func (i *syntaxBasicNode) addDeepestError(
 
 	textLength := len(err.getSyntaxNode().getConnectedText())
 
-	if deepestTextLen < 0 || deepestTextLen > textLength {
+	if deepestTextLen == 0 || deepestTextLen > textLength {
 		deepestTextLen = textLength
 		deepestErrors = deepestErrors[:0]
 	}

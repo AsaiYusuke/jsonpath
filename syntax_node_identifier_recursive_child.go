@@ -30,7 +30,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		}
 	}
 
-	deepestTextLen := -1
+	var deepestTextLen int
 	deepestErrors := make([]errorRuntime, 0, 2)
 
 	targetNodes := make([]interface{}, 1, 5)

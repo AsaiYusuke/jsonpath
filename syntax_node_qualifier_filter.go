@@ -46,7 +46,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
 	deepestErrors []errorRuntime) []errorRuntime {
 
-	deepestTextLen := -1
+	var deepestTextLen int
 
 	sortKeys := container.getSortedKeys(srcMap)
 
@@ -88,7 +88,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 	root interface{}, srcList []interface{}, container *bufferContainer,
 	deepestErrors []errorRuntime) []errorRuntime {
 
-	deepestTextLen := -1
+	var deepestTextLen int
 
 	valueList := f.query.compute(root, srcList, container)
 

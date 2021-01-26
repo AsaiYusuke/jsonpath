@@ -44,7 +44,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
 	deepestErrors []errorRuntime) []errorRuntime {
 
-	deepestTextLen := -1
+	var deepestTextLen int
 
 	sortKeys := container.getSortedKeys(srcMap)
 
@@ -63,7 +63,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 	root interface{}, srcList []interface{}, container *bufferContainer,
 	deepestErrors []errorRuntime) []errorRuntime {
 
-	deepestTextLen := -1
+	var deepestTextLen int
 
 	for index := range srcList {
 		if err := i.retrieveListNext(root, srcList, index, container); err != nil {

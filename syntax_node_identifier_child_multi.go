@@ -67,7 +67,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
 	deepestErrors []errorRuntime) []errorRuntime {
 
-	deepestTextLen := -1
+	var deepestTextLen int
 
 	for _, identifier := range i.identifiers {
 		switch typedNode := identifier.(type) {
