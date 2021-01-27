@@ -17,7 +17,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	switch current.(type) {
 	case map[string]interface{}, []interface{}:
 	default:
-		foundType := `null`
+		foundType := msgTypeNull
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
@@ -25,7 +25,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			errorBasicRuntime: &errorBasicRuntime{
 				node: i.syntaxBasicNode,
 			},
-			expectedType: `object/array`,
+			expectedType: msgTypeObjectOrArray,
 			foundType:    foundType,
 		}
 	}

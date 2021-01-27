@@ -21,7 +21,7 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 		deepestErrors = i.retrieveList(root, typedNodes, container, deepestErrors)
 
 	default:
-		foundType := `null`
+		foundType := msgTypeNull
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
@@ -29,7 +29,7 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 			errorBasicRuntime: &errorBasicRuntime{
 				node: i.syntaxBasicNode,
 			},
-			expectedType: `object/array`,
+			expectedType: msgTypeObjectOrArray,
 			foundType:    foundType,
 		}
 	}

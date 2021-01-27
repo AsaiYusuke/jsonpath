@@ -21,7 +21,7 @@ func (f *syntaxFilterQualifier) retrieve(
 		deepestErrors = f.retrieveList(root, typedNodes, container, deepestErrors)
 
 	default:
-		foundType := `null`
+		foundType := msgTypeNull
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
@@ -29,7 +29,7 @@ func (f *syntaxFilterQualifier) retrieve(
 			errorBasicRuntime: &errorBasicRuntime{
 				node: f.syntaxBasicNode,
 			},
-			expectedType: `object/array`,
+			expectedType: msgTypeObjectOrArray,
 			foundType:    foundType,
 		}
 	}

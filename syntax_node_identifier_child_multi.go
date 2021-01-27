@@ -24,7 +24,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 	srcMap, ok := current.(map[string]interface{})
 	if !ok {
-		foundType := `null`
+		foundType := msgTypeNull
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
@@ -32,7 +32,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 			errorBasicRuntime: &errorBasicRuntime{
 				node: i.syntaxBasicNode,
 			},
-			expectedType: `object`,
+			expectedType: msgTypeObject,
 			foundType:    foundType,
 		}
 	}

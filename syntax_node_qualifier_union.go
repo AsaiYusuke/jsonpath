@@ -13,7 +13,7 @@ func (u *syntaxUnionQualifier) retrieve(
 
 	srcArray, ok := current.([]interface{})
 	if !ok {
-		foundType := `null`
+		foundType := msgTypeNull
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
@@ -21,7 +21,7 @@ func (u *syntaxUnionQualifier) retrieve(
 			errorBasicRuntime: &errorBasicRuntime{
 				node: u.syntaxBasicNode,
 			},
-			expectedType: `array`,
+			expectedType: msgTypeArray,
 			foundType:    foundType,
 		}
 	}
