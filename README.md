@@ -290,11 +290,11 @@ Oliveagle/jsonpath is fastest.
 ```text
 JSONPath : $.store.book[0].price
 
-BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4         	 5674974	       207 ns/op	      56 B/op	       3 allocs/op
-BenchmarkOhler55Ojg_threeLevelsWithIndex-4                 	 1728166	       683 ns/op	    1040 B/op	       2 allocs/op
-BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4              	  546034	      2213 ns/op	      32 B/op	       1 allocs/op
-BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4         	 1875916	       648 ns/op	     208 B/op	       7 allocs/op
-BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13331599	        90.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4         	 5570427	       210 ns/op	      56 B/op	       3 allocs/op
+BenchmarkOhler55Ojg_threeLevelsWithIndex-4                 	 1676749	       725 ns/op	    1040 B/op	       2 allocs/op
+BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4              	  572977	      2219 ns/op	      32 B/op	       1 allocs/op
+BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4         	 1835948	       642 ns/op	     208 B/op	       7 allocs/op
+BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13222105	        92.0 ns/op	       0 B/op	       0 allocs/op
 ```
 
 ### A slightly complex JSONPath
@@ -305,9 +305,9 @@ Among these libraries, my library is the fastest at the moment.
 ```text
 JSONPath : $..book[?(@.price > $.store.bicycle.price)]
 
-BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4   	  387717	      3325 ns/op	     656 B/op	      26 allocs/op
-BenchmarkOhler55Ojg_recursiveDescentWithFilter-4           	  231213	      5237 ns/op	    5240 B/op	      20 allocs/op
-BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4        	   52902	     22661 ns/op	    3032 B/op	      57 allocs/op
+BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4   	  388156	      3140 ns/op	     560 B/op	      20 allocs/op
+BenchmarkOhler55Ojg_recursiveDescentWithFilter-4           	  236010	      5156 ns/op	    5240 B/op	      20 allocs/op
+BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4        	   54012	     22726 ns/op	    3032 B/op	      57 allocs/op
 BenchmarkPaesslerAGJSONPath                                	  not supported
 BenchmarkOliveagleJsonpath                                 	  not supported
 ```
