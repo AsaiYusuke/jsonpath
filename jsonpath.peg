@@ -344,11 +344,11 @@ lBool <-
     }
 
 lString <-
-    '\'' < ( '\\' '\\' / '\\' '\'' / [^'] )* > '\'' {
+    '\'' < ( '\\' [\\'] / [^'] )* > '\'' {
         p.push(p.unescape(text))
     } /
 
-    '"' < ( '\\' '\\' / '\\' '"' / [^"] )* > '"' { // '
+    '"' < ( '\\' [\\"] / [^"] )* > '"' { // '
         p.push(p.unescape(text))
     }
 
@@ -356,7 +356,7 @@ lNull <- ( 'null' / 'Null' / 'NULL' ) {
         p.push(nil)
     }
 
-regex <- ( '\\' '\\' / '\\' '/' / [^/] )*
+regex <- ( '\\' [\\/] / [^/] )*
 
 squareBracketStart <- '[' space
 squareBracketEnd   <- space ']'
