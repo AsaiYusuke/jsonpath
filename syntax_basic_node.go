@@ -126,7 +126,7 @@ func (i *syntaxBasicNode) addDeepestError(
 		deepestErrors = deepestErrors[:0]
 	}
 
-	if deepestTextLen == textLength {
+	if deepestTextLen == textLength && len(deepestErrors) < 2 {
 		errType := reflect.TypeOf(err)
 		for _, deepestErr := range deepestErrors {
 			if errType == reflect.TypeOf(deepestErr) {

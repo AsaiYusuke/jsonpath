@@ -818,7 +818,7 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorMemberNotExist(`.*`),
+				expectedErr: createErrorIndexOutOfRange(`.*`),
 			},
 		},
 		`recursive`: []TestCase{
@@ -830,7 +830,7 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$..*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorMemberNotExist(`*`),
+				expectedErr: createErrorIndexOutOfRange(`*`),
 			},
 			{
 				jsonpath:     `$..*`,
@@ -1642,7 +1642,7 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorMemberNotExist(`[*]`),
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
 			},
 			{
 				jsonpath:    `$[*]`,
@@ -3682,7 +3682,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$..*[?(@.a>2)]`,
 				inputJSON:   `[{"b":"1","a":1},{"c":"2","a":2},{"d":"3","a":3}]`,
-				expectedErr: createErrorMemberNotExist(`[?(@.a>2)]`),
+				expectedErr: createErrorNoneMatched(`[?(@.a>2)]`),
 			},
 			{
 				jsonpath:     `$..*[?(@.a>2)]`,
@@ -4277,6 +4277,1143 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				jsonpath:     `$[?(@.b == 2 && @.a =~ /a/)]`,
 				inputJSON:    `[{"a":"a"},{"a":"a","b":2}]`,
 				expectedJSON: `[{"a":"a","b":2}]`,
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$..a..b`,
+				inputJSON:    `[{"a":{"a":{"b":1},"c":2}},{"b":{"a":{"d":3,"b":4}}}]`,
+				expectedJSON: `[1,1,4]`,
+			},
+			{
+				jsonpath:    `$..a..b`,
+				inputJSON:   `[{"a":{"a":{"x":1},"c":2}},{"b":{"a":{"d":3,"x":4}}}]`,
+				expectedErr: createErrorMemberNotExist(`b`),
+			},
+			{
+				jsonpath:    `$..a..b`,
+				inputJSON:   `[{"a":"b"},{"b":{"a":"b"}}]`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$..a..b`,
+				inputJSON:   `[{"x":{"x":{"b":1},"c":2}},{"b":{"x":{"d":3,"b":4}}}]`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$..a..b`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$..['a','b']`,
+				inputJSON:    `[{"a":1,"c":2},{"d":3,"b":4}]`,
+				expectedJSON: `[1,4]`,
+			},
+			{
+				jsonpath:    `$..['a','b']`,
+				inputJSON:   `[{"x":1,"c":2},{"d":3,"x":4}]`,
+				expectedErr: createErrorNoneMatched(`['a','b']`),
+			},
+			{
+				jsonpath:    `$..['a','b']`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$..['a','b']`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `[]interface {}`),
+			},
+			{
+				jsonpath:    `$..['a','b']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$..*`,
+				inputJSON:    `[{"a":1,"c":2},{"d":3,"b":4}]`,
+				expectedJSON: `[{"a":1,"c":2},{"b":4,"d":3},1,2,4,3]`,
+			},
+			{
+				jsonpath:    `$..*`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`*`),
+			},
+			{
+				jsonpath:    `$..*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$..[0:2]`,
+				inputJSON:    `{"a":[1,3,2],"b":{"a":[4,6,5]}}`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$..[0:2]`,
+				inputJSON:   `{"a":[],"b":{"a":[]}}`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$..[0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$..[*]`,
+				inputJSON:    `[[1,3,2],[4,6,5]]`,
+				expectedJSON: `[[1,3,2],[4,6,5],1,3,2,4,6,5]`,
+			},
+			{
+				jsonpath:    `$..[*]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$..a[*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$..[0,1]`,
+				inputJSON:    `[[1,3,2],[4,6,5]]`,
+				expectedJSON: `[[1,3,2],[4,6,5],1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$..[0,1]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$..[0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$..[?(@.b)]`,
+				inputJSON:    `[[{"a":1},{"b":2}],[{"a":3},{"b":4}]]`,
+				expectedJSON: `[{"b":2},{"b":4}]`,
+			},
+			{
+				jsonpath:    `$..[?(@.b)]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$..[?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$['a','b']..a`,
+				inputJSON:    `{"a":{"a":1,"c":2},"b":{"a":{"d":3,"a":4}}}`,
+				expectedJSON: `[1,{"a":4,"d":3},4]`,
+			},
+			{
+				jsonpath:    `$['a','b']..a`,
+				inputJSON:   `{"a":{"x":1,"c":2},"b":{"x":{"d":3,"x":4}}}`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$['a','b']..a`,
+				inputJSON:   `{"a":"a","b":"a"}`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$['a','b']..a`,
+				inputJSON:   `{"x":{"x":1,"c":2},"y":{"x":{"d":3,"x":4}}}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b']..a`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$['a','b']['c','d']`,
+				inputJSON:    `{"a":{"a":1,"c":2},"b":{"d":3,"a":4}}`,
+				expectedJSON: `[2,3]`,
+			},
+			{
+				jsonpath:    `$['a','b']['c','d']`,
+				inputJSON:   `{"a":{"a":1,"x":2},"b":{"x":3,"a":4}}`,
+				expectedErr: createErrorMemberNotExist(`['c','d']`),
+			},
+			{
+				jsonpath:    `$['a','b']['c','d']`,
+				inputJSON:   `{"x":{"a":1,"c":2},"x":{"d":3,"a":4}}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b']['c','d']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$['a','b'].*`,
+				inputJSON:    `{"a":{"a":1,"c":2},"b":{"d":3,"a":4}}`,
+				expectedJSON: `[1,2,4,3]`,
+			},
+			{
+				jsonpath:    `$['a','b'].*`,
+				inputJSON:   `{"a":{},"b":{}}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$['a','b'].*`,
+				inputJSON:   `{"x":[1,3,2],"y":[4,6,5]}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b'].*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$['a','b'][0:2]`,
+				inputJSON:    `{"a":[1,3,2],"b":[4,6,5]}`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$['a','b'][0:2]`,
+				inputJSON:   `{"a":[],"b":[]}`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$['a','b'][0:2]`,
+				inputJSON:   `{"x":[1,3,2],"y":[4,6,5]}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b'][0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$['a','b'][*]`,
+				inputJSON:    `{"a":[1,3,2],"b":[4,6,5]}`,
+				expectedJSON: `[1,3,2,4,6,5]`,
+			},
+			{
+				jsonpath:    `$['a','b'][*]`,
+				inputJSON:   `{"a":[],"b":[]}`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$['a','b'][*]`,
+				inputJSON:   `{"x":[1,3,2],"y":[4,6,5]}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b'][*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$['a','b'][0,1]`,
+				inputJSON:    `{"a":[1,3,2],"b":[4,6,5]}`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$['a','b'][0,1]`,
+				inputJSON:   `{"a":[],"b":[]}`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$['a','b'][0,1]`,
+				inputJSON:   `{"x":[1,3,2],"y":[4,6,5]}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b'][0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$['a','b'][?(@.b)]`,
+				inputJSON:    `{"a":[{"a":1},{"b":2}],"b":[{"a":3},{"b":4}]}`,
+				expectedJSON: `[{"b":2},{"b":4}]`,
+			},
+			{
+				jsonpath:    `$['a','b'][?(@.b)]`,
+				inputJSON:   `{"a":[{"a":1},{"x":2}],"b":[{"a":3},{"x":4}]}`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$['a','b'][?(@.b)]`,
+				inputJSON:   `{"x":[{"a":1},{"b":2}],"y":[{"a":3},{"b":4}]}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$['a','b'][?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Wildcard_identifiler(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$.*..a`,
+				inputJSON:    `{"a":{"a":1,"c":2},"b":{"d":{"e":3,"a":4}}}`,
+				expectedJSON: `[1,4]`,
+			},
+			{
+				jsonpath:    `$.*..a`,
+				inputJSON:   `{"x":{"x":1,"c":2},"b":{"d":{"e":3,"x":4}}}`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$.*..a`,
+				inputJSON:   `{"a":"a","b":"b"}`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$.*..a`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*..a`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$.*['a','b']`,
+				inputJSON:    `{"a":{"a":1},"c":{"c":3},"b":{"b":2}}`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$.*['a','b']`,
+				inputJSON:   `{"a":{"x":1},"c":{"c":3},"b":{"x":2}}`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$.*['a','b']`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*['a','b']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$.*.*`,
+				inputJSON:    `{"a":{"a":1,"c":2},"b":{"d":3,"a":4}}`,
+				expectedJSON: `[1,2,4,3]`,
+			},
+			{
+				jsonpath:    `$.*.*`,
+				inputJSON:   `{"a":{},"b":{}}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*.*`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*.*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$.*[0:2]`,
+				inputJSON:    `{"a":[1,3,2],"b":[4,6,5]}`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$.*[0:2]`,
+				inputJSON:   `{"a":[],"b":[]}`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$.*[0:2]`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*[0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$.*[*]`,
+				inputJSON:    `{"a":[1,3,2],"b":[4,6,5]}`,
+				expectedJSON: `[1,3,2,4,6,5]`,
+			},
+			{
+				jsonpath:    `$.*[*]`,
+				inputJSON:   `{"a":[],"b":[]}`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$.*[*]`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*[*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$.*[0,1]`,
+				inputJSON:    `{"a":[1,3,2],"b":[4,6,5]}`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$.*[0,1]`,
+				inputJSON:   `{"a":[],"b":[]}`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$.*[0,1]`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*[0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$.*[?(@.b)]`,
+				inputJSON:    `{"a":[{"a":1},{"b":2}],"b":[{"a":3},{"b":4}]}`,
+				expectedJSON: `[{"b":2},{"b":4}]`,
+			},
+			{
+				jsonpath:    `$.*[?(@.b)]`,
+				inputJSON:   `{"a":[{"a":1},{"x":2}],"b":[{"a":3},{"x":4}]}`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$.*[?(@.b)]`,
+				inputJSON:   `{}`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$.*[?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$[0:2]..a`,
+				inputJSON:    `[{"a":1},{"b":{"a":2}},{"a":3}]`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$[0:2]..a`,
+				inputJSON:   `[{"x":1},{"b":{"x":2}},{"a":3}]`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$[0:2]..a`,
+				inputJSON:   `["a","b",{"a":3}]`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$[0:2]..a`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2]..a`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$[0:2]['a','b']`,
+				inputJSON:    `[{"a":1},{"b":2}]`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$[0:2]['a','b']`,
+				inputJSON:   `[{"x":1},{"x":2}]`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$[0:2]['a','b']`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2]['a','b']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$[0:2].*`,
+				inputJSON:    `[{"a":1,"c":2},{"d":3,"b":4}]`,
+				expectedJSON: `[1,2,4,3]`,
+			},
+			{
+				jsonpath:    `$[0:2].*`,
+				inputJSON:   `[[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`.*`),
+			},
+			{
+				jsonpath:    `$[0:2].*`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2].*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0:2][0:2]`,
+				inputJSON:    `[[1,2,3],[4,5,6]]`,
+				expectedJSON: `[1,2,4,5]`,
+			},
+			{
+				jsonpath:    `$[0:2][0:2]`,
+				inputJSON:   `[[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2][0:2]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2][0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0:2][*]`,
+				inputJSON:    `[{"a":1,"c":3},{"d":4,"b":2},{"e":5}]`,
+				expectedJSON: `[1,3,2,4]`,
+			},
+			{
+				jsonpath:    `$[0:2][*]`,
+				inputJSON:   `[{},{}]`,
+				expectedErr: createErrorMemberNotExist(`[*]`),
+			},
+			{
+				jsonpath:    `$[0:2][*]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2][*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0:2][0,1]`,
+				inputJSON:    `[[1,3,2],[4,6,5],[7]]`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$[0:2][0,1]`,
+				inputJSON:   `[[],[],[7]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0:2][0,1]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2][0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0:2][?(@.b)]`,
+				inputJSON:    `[[{"a":1},{"b":2}],[{"a":3},{"b":4}]]`,
+				expectedJSON: `[{"b":2},{"b":4}]`,
+			},
+			{
+				jsonpath:    `$[0:2][?(@.b)]`,
+				inputJSON:   `[[{"a":1},{"x":2}],[{"a":3},{"x":4}]]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[0:2][?(@.b)]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0:2][?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$[*]..a`,
+				inputJSON:    `[{"a":1},{"b":{"a":2}},{"c":3}]`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$[*]..a`,
+				inputJSON:   `[{"x":1},{"b":{"x":2}},{"c":3}]`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$[*]..a`,
+				inputJSON:   `["a","b","c"]`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$[*]..a`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*]..a`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$[*]['a','b']`,
+				inputJSON:    `[{"c":4},{"b":2,"a":1},{"a":3}]`,
+				expectedJSON: `[1,2,3]`,
+			},
+			{
+				jsonpath:    `$[*]['a','b']`,
+				inputJSON:   `[{"c":4},{"x":2},{"x":1}]`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$[*]['a','b']`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*]['a','b']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$[*].*`,
+				inputJSON:    `[{"c":4},{"b":2,"a":1},{"a":3}]`,
+				expectedJSON: `[4,1,2,3]`,
+			},
+			{
+				jsonpath:    `$[*].*`,
+				inputJSON:   `[{},{},{}]`,
+				expectedErr: createErrorMemberNotExist(`.*`),
+			},
+			{
+				jsonpath:    `$[*].*`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*].*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[*][0:2]`,
+				inputJSON:    `[[1,2,3],[4,5],[6]]`,
+				expectedJSON: `[1,2,4,5,6]`,
+			},
+			{
+				jsonpath:    `$[*][0:2]`,
+				inputJSON:   `[[],[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[*][0:2]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*][0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[*][*]`,
+				inputJSON:    `[[1,2,3],[4,5],[6]]`,
+				expectedJSON: `[1,2,3,4,5,6]`,
+			},
+			{
+				jsonpath:    `$[*][*]`,
+				inputJSON:   `[[],[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*][*]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*][*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[*][0,1]`,
+				inputJSON:    `[[1,3,2],[4,6,5],[7]]`,
+				expectedJSON: `[1,3,4,6,7]`,
+			},
+			{
+				jsonpath:    `$[*][0,1]`,
+				inputJSON:   `[[],[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[*][0,1]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*][0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[*][?(@.b)]`,
+				inputJSON:    `[[{"a":1},{"b":2}],[{"a":3},{"b":4}]]`,
+				expectedJSON: `[{"b":2},{"b":4}]`,
+			},
+			{
+				jsonpath:    `$[*][?(@.b)]`,
+				inputJSON:   `[[{"a":1},{"x":2}],[{"a":3},{"x":4}]]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[*][?(@.b)]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[*][?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$[0,1]..a`,
+				inputJSON:    `[{"a":1},{"b":{"a":2}},{"a":3}]`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$[0,1]..a`,
+				inputJSON:   `[{"x":1},{"b":{"x":2}},{"a":3}]`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$[0,1]..a`,
+				inputJSON:   `["a","b",{"a":3}]`,
+				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$[0,1]..a`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1]..a`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$[0,1]['a','b']`,
+				inputJSON:    `[{"a":1},{"b":2}]`,
+				expectedJSON: `[1,2]`,
+			},
+			{
+				jsonpath:    `$[0,1]['a','b']`,
+				inputJSON:   `[{"x":1},{"x":2}]`,
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
+			},
+			{
+				jsonpath:    `$[0,1]['a','b']`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1]['a','b']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$[0,1].*`,
+				inputJSON:    `[{"a":1,"c":2},{"d":3,"b":4}]`,
+				expectedJSON: `[1,2,4,3]`,
+			},
+			{
+				jsonpath:    `$[0,1].*`,
+				inputJSON:   `[[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`.*`),
+			},
+			{
+				jsonpath:    `$[0,1].*`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1].*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0,1][0:2]`,
+				inputJSON:    `[[1,2,3],[4,5,6]]`,
+				expectedJSON: `[1,2,4,5]`,
+			},
+			{
+				jsonpath:    `$[0,1][0:2]`,
+				inputJSON:   `[[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[0,1][0:2]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1][0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0,1][*]`,
+				inputJSON:    `[{"a":1,"c":3},{"d":4,"b":2},{"e":5}]`,
+				expectedJSON: `[1,3,2,4]`,
+			},
+			{
+				jsonpath:    `$[0,1][*]`,
+				inputJSON:   `[{},{}]`,
+				expectedErr: createErrorMemberNotExist(`[*]`),
+			},
+			{
+				jsonpath:    `$[0,1][*]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1][*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0,1][0,1]`,
+				inputJSON:    `[[1,3,2],[4,6,5],[7]]`,
+				expectedJSON: `[1,3,4,6]`,
+			},
+			{
+				jsonpath:    `$[0,1][0,1]`,
+				inputJSON:   `[[],[],[7]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1][0,1]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1][0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[0,1][?(@.b)]`,
+				inputJSON:    `[[{"a":1},{"b":2}],[{"a":3},{"b":4}]]`,
+				expectedJSON: `[{"b":2},{"b":4}]`,
+			},
+			{
+				jsonpath:    `$[0,1][?(@.b)]`,
+				inputJSON:   `[[{"a":1},{"x":2}],[{"a":3},{"x":4}]]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[0,1][?(@.b)]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[0,1][?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
+			},
+		},
+	}
+
+	execTestRetrieveTestGroups(t, testGroups)
+}
+
+func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
+	testGroups := TestGroup{
+		`Recursive-descent`: []TestCase{
+			{
+				jsonpath:     `$[?(@.b)]..a`,
+				inputJSON:    `[{"a":1},{"b":{"a":2}},{"c":3},{"b":[{"a":4}]}]`,
+				expectedJSON: `[2,4]`,
+			},
+			{
+				jsonpath:    `$[?(@.b)]..a`,
+				inputJSON:   `[{"a":1},{"b":{"x":2}},{"c":3},{"b":[{"x":4}]}]`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$[?(@.b)]..a`,
+				inputJSON:   `[{"a":1},{"b":"a"},{"c":3},{"b":"a"}]`,
+				expectedErr: createErrorMemberNotExist(`a`),
+			},
+			{
+				jsonpath:    `$[?(@.b)]..a`,
+				inputJSON:   `[{"a":1},{"x":{"a":2}},{"c":3},{"x":[{"a":4}]}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b)]..a`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.b)]`, `object/array`, `string`),
+			},
+		},
+		`Multiple-identifiler`: []TestCase{
+			{
+				jsonpath:     `$[?(@.b)]['a','c']`,
+				inputJSON:    `[{"a":1},{"b":2},{"a":3,"b":4},{"c":5},{"a":6,"c":7},{"b":8,"c":9},{"a":10,"b":11,"c":12}]`,
+				expectedJSON: `[3,9,10,12]`,
+			},
+			{
+				jsonpath:    `$[?(@.b)]['a','c']`,
+				inputJSON:   `[{"a":1},{"b":2},{"x":3,"b":4},{"c":5},{"a":6,"c":7},{"b":8,"z":9},{"x":10,"b":11,"z":12}]`,
+				expectedErr: createErrorMemberNotExist(`['a','c']`),
+			},
+			{
+				jsonpath:    `$[?(@.b)]['a','c']`,
+				inputJSON:   `[{"a":1},{"x":2},{"a":3,"x":4},{"c":5},{"a":6,"c":7},{"x":8,"c":9},{"a":10,"x":11,"c":12}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b)]['a','c']`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.b)]`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-identifier`: []TestCase{
+			{
+				jsonpath:     `$[?(@.b)].*`,
+				inputJSON:    `[{"a":1},{"b":2},{"a":3,"b":4},{"c":5},{"a":6,"c":7},{"b":8,"c":9},{"a":10,"b":11,"c":12}]`,
+				expectedJSON: `[2,3,4,8,9,10,11,12]`,
+			},
+			{
+				jsonpath:    `$[?(@.b)].*`,
+				inputJSON:   `[{"a":1},{"x":2},{"a":3,"x":4},{"c":5},{"a":6,"c":7},{"x":8,"c":9},{"a":10,"x":11,"c":12}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b)].*`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.b)]`, `object/array`, `string`),
+			},
+		},
+		`Slice-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[?(@)][0:2]`,
+				inputJSON:    `[[1,2],[3,4],[5,6,7]]`,
+				expectedJSON: `[1,2,3,4,5,6]`,
+			},
+			{
+				jsonpath:    `$[?(@)][0:2]`,
+				inputJSON:   `[[],[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+			},
+			{
+				jsonpath:    `$[?(@)][0:2]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorMemberNotExist(`[?(@)]`),
+			},
+			{
+				jsonpath:    `$[?(@)][0:2]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@)]`, `object/array`, `string`),
+			},
+		},
+		`Wildcard-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[?(@)][*]`,
+				inputJSON:    `[[1,2],[3,4],[5,6,7]]`,
+				expectedJSON: `[1,2,3,4,5,6,7]`,
+			},
+			{
+				jsonpath:    `$[?(@)][*]`,
+				inputJSON:   `[[],[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[*]`),
+			},
+			{
+				jsonpath:    `$[?(@)][*]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorMemberNotExist(`[?(@)]`),
+			},
+			{
+				jsonpath:    `$[?(@)][*]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@)]`, `object/array`, `string`),
+			},
+		},
+		`Union-in-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[?(@)][0,1]`,
+				inputJSON:    `[[1,2],[3,4],[5,6,7]]`,
+				expectedJSON: `[1,2,3,4,5,6]`,
+			},
+			{
+				jsonpath:    `$[?(@)][0,1]`,
+				inputJSON:   `[[],[],[]]`,
+				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+			},
+			{
+				jsonpath:    `$[?(@)][0,1]`,
+				inputJSON:   `[]`,
+				expectedErr: createErrorMemberNotExist(`[?(@)]`),
+			},
+			{
+				jsonpath:    `$[?(@)][0,1]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@)]`, `object/array`, `string`),
+			},
+		},
+		`Filter-qualifier`: []TestCase{
+			{
+				jsonpath:     `$[?(@.a)][?(@.b)]`,
+				inputJSON:    `[{"a":{"b":2}},{"b":{"a":1}},{"a":{"a":3}}]`,
+				expectedJSON: `[{"b":2}]`,
+			},
+			{
+				jsonpath:    `$[?(@.a)][?(@.b)]`,
+				inputJSON:   `[{"a":{"x":2}},{"b":{"a":1}},{"a":{"a":3}}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.a)][?(@.b)]`,
+				inputJSON:   `[{"x":{"b":2}},{"b":{"a":1}},{"x":{"a":3}}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a)]`),
+			},
+			{
+				jsonpath:    `$[?(@.a)][?(@.b)]`,
+				inputJSON:   `"x"`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.a)]`, `object/array`, `string`),
 			},
 		},
 	}

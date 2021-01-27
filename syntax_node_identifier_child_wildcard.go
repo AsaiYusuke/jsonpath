@@ -1,5 +1,9 @@
 package jsonpath
 
+import (
+	"reflect"
+)
+
 type syntaxChildWildcardIdentifier struct {
 	*syntaxBasicNode
 }
@@ -16,28 +20,33 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 	case []interface{}:
 		deepestErrors = i.retrieveList(root, typedNodes, container, deepestErrors)
 
-	}
-
-	if len(container.result) == 0 {
-		switch len(deepestErrors) {
-		case 0:
-			return ErrorMemberNotExist{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: i.syntaxBasicNode,
-				},
-			}
-		case 1:
-			return deepestErrors[0]
-		default:
-			return ErrorNoneMatched{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: deepestErrors[0].getSyntaxNode(),
-				},
-			}
+	default:
+		foundType := `null`
+		if current != nil {
+			foundType = reflect.TypeOf(current).String()
+		}
+		return ErrorTypeUnmatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
+			expectedType: `object/array`,
+			foundType:    foundType,
 		}
 	}
 
-	return nil
+	switch len(deepestErrors) {
+	case 0:
+		return nil
+	case 1:
+		return deepestErrors[0]
+	default:
+		return ErrorNoneMatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: deepestErrors[0].getSyntaxNode(),
+			},
+		}
+	}
+
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveMap(
@@ -50,11 +59,25 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 
 	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
-			deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+			if len(container.result) == 0 {
+				deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+			}
 		}
 	}
 
 	container.putSortSlice(sortKeys)
+
+	if len(container.result) > 0 {
+		return nil
+	}
+
+	if len(deepestErrors) == 0 {
+		return append(deepestErrors, ErrorMemberNotExist{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
+		})
+	}
 
 	return deepestErrors
 }
@@ -67,8 +90,22 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 
 	for index := range srcList {
 		if err := i.retrieveListNext(root, srcList, index, container); err != nil {
-			deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+			if len(container.result) == 0 {
+				deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+			}
 		}
+	}
+
+	if len(container.result) > 0 {
+		return nil
+	}
+
+	if len(deepestErrors) == 0 {
+		return append(deepestErrors, ErrorIndexOutOfRange{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
+		})
 	}
 
 	return deepestErrors

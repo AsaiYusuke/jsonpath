@@ -41,26 +41,19 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 
 	deepestErrors = i.retrieveMap(root, srcMap, container, deepestErrors)
 
-	if len(container.result) == 0 {
-		switch len(deepestErrors) {
-		case 0:
-			return ErrorMemberNotExist{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: i.syntaxBasicNode,
-				},
-			}
-		case 1:
-			return deepestErrors[0]
-		default:
-			return ErrorNoneMatched{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: deepestErrors[0].getSyntaxNode(),
-				},
-			}
+	switch len(deepestErrors) {
+	case 0:
+		return nil
+	case 1:
+		return deepestErrors[0]
+	default:
+		return ErrorNoneMatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: deepestErrors[0].getSyntaxNode(),
+			},
 		}
 	}
 
-	return nil
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
@@ -81,8 +74,22 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 		}
 
 		if err := identifier.retrieve(root, srcMap, container); err != nil {
-			deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+			if len(container.result) == 0 {
+				deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+			}
 		}
+	}
+
+	if len(container.result) > 0 {
+		return nil
+	}
+
+	if len(deepestErrors) == 0 {
+		return append(deepestErrors, ErrorMemberNotExist{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
+		})
 	}
 
 	return deepestErrors

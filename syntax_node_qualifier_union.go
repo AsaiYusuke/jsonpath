@@ -33,31 +33,33 @@ func (u *syntaxUnionQualifier) retrieve(
 		for _, subscript := range u.subscripts {
 			for _, index := range subscript.getIndexes(srcArray) {
 				if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
-					deepestTextLen, deepestErrors = u.addDeepestError(err, deepestTextLen, deepestErrors)
+					if len(container.result) == 0 {
+						deepestTextLen, deepestErrors = u.addDeepestError(err, deepestTextLen, deepestErrors)
+					}
 				}
 			}
 		}
 
-		if len(container.result) == 0 {
-			switch len(deepestErrors) {
-			case 0:
-				return ErrorIndexOutOfRange{
-					errorBasicRuntime: &errorBasicRuntime{
-						node: u.syntaxBasicNode,
-					},
-				}
-			case 1:
-				return deepestErrors[0]
-			default:
-				return ErrorNoneMatched{
-					errorBasicRuntime: &errorBasicRuntime{
-						node: deepestErrors[0].getSyntaxNode(),
-					},
-				}
-			}
+		if len(container.result) > 0 {
+			return nil
 		}
 
-		return nil
+		switch len(deepestErrors) {
+		case 0:
+			return ErrorIndexOutOfRange{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: u.syntaxBasicNode,
+				},
+			}
+		case 1:
+			return deepestErrors[0]
+		default:
+			return ErrorNoneMatched{
+				errorBasicRuntime: &errorBasicRuntime{
+					node: deepestErrors[0].getSyntaxNode(),
+				},
+			}
+		}
 	}
 
 	indexes := u.subscripts[0].getIndexes(srcArray)

@@ -43,7 +43,9 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		case map[string]interface{}:
 			if i.nextMapRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
-					deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+					if len(container.result) == 0 {
+						deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+					}
 				}
 			}
 
@@ -61,7 +63,9 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		case []interface{}:
 			if i.nextListRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
-					deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+					if len(container.result) == 0 {
+						deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+					}
 				}
 			}
 
@@ -75,24 +79,24 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		}
 	}
 
-	if len(container.result) == 0 {
-		switch len(deepestErrors) {
-		case 0:
-			return ErrorMemberNotExist{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: i.syntaxBasicNode,
-				},
-			}
-		case 1:
-			return deepestErrors[0]
-		default:
-			return ErrorNoneMatched{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: deepestErrors[0].getSyntaxNode(),
-				},
-			}
-		}
+	if len(container.result) > 0 {
+		return nil
 	}
 
-	return nil
+	switch len(deepestErrors) {
+	case 0:
+		return ErrorMemberNotExist{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: i.syntaxBasicNode,
+			},
+		}
+	case 1:
+		return deepestErrors[0]
+	default:
+		return ErrorNoneMatched{
+			errorBasicRuntime: &errorBasicRuntime{
+				node: deepestErrors[0].getSyntaxNode(),
+			},
+		}
+	}
 }
