@@ -67,7 +67,7 @@ currentRootIdentifier <-
 dotChildIdentifier <-
     wildcardIdentifier /
 
-    < ( '\\' signsWithoutHyphenUnderscore / ![\0x00-\0x1F\0x7F] !signsWithoutHyphenUnderscore . )+ > !'()' { //`
+    < ( '\\' signsWithoutHyphenUnderscore / ![\0x00-\0x1F\0x7F] !signsWithoutHyphenUnderscore . )+ > !'()' {
         p.pushChildSingleIdentifier(p.unescape(text))
     }
 
@@ -100,7 +100,7 @@ singleQuotedNodeIdentifier <-
     }
 
 doubleQuotedNodeIdentifier <-
-    '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' { // '
+    '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' {
         p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
     }
 
@@ -348,7 +348,7 @@ lString <-
         p.push(p.unescape(text))
     } /
 
-    '"' < ( '\\' [\\"] / [^"] )* > '"' { // '
+    '"' < ( '\\' [\\"] / [^"] )* > '"' {
         p.push(p.unescape(text))
     }
 
