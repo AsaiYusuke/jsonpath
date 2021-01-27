@@ -26,11 +26,9 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i.syntaxBasicNode,
-			},
-			expectedType: msgTypeObjectOrArray,
-			foundType:    foundType,
+			errorBasicRuntime: i.errorRuntime,
+			expectedType:      msgTypeObjectOrArray,
+			foundType:         foundType,
 		}
 	}
 
@@ -41,9 +39,7 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 		return deepestErrors[0]
 	default:
 		return ErrorNoneMatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: deepestErrors[0].getSyntaxNode(),
-			},
+			errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
 		}
 	}
 
@@ -73,9 +69,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 
 	if len(deepestErrors) == 0 {
 		return append(deepestErrors, ErrorMemberNotExist{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i.syntaxBasicNode,
-			},
+			errorBasicRuntime: i.errorRuntime,
 		})
 	}
 
@@ -102,9 +96,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 
 	if len(deepestErrors) == 0 {
 		return append(deepestErrors, ErrorIndexOutOfRange{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i.syntaxBasicNode,
-			},
+			errorBasicRuntime: i.errorRuntime,
 		})
 	}
 

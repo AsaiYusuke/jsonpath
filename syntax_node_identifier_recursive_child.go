@@ -22,11 +22,9 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i.syntaxBasicNode,
-			},
-			expectedType: msgTypeObjectOrArray,
-			foundType:    foundType,
+			errorBasicRuntime: i.errorRuntime,
+			expectedType:      msgTypeObjectOrArray,
+			foundType:         foundType,
 		}
 	}
 
@@ -86,17 +84,13 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	switch len(deepestErrors) {
 	case 0:
 		return ErrorMemberNotExist{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i.syntaxBasicNode,
-			},
+			errorBasicRuntime: i.errorRuntime,
 		}
 	case 1:
 		return deepestErrors[0]
 	default:
 		return ErrorNoneMatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: deepestErrors[0].getSyntaxNode(),
-			},
+			errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
 		}
 	}
 }

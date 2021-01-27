@@ -25,10 +25,8 @@ func (f *syntaxAggregateFunction) retrieve(
 	filteredValue, err := f.function(values.result)
 	if err != nil {
 		return ErrorFunctionFailed{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: f.syntaxBasicNode,
-			},
-			err: err,
+			errorBasicRuntime: f.errorRuntime,
+			err:               err,
 		}
 	}
 

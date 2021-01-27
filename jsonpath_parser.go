@@ -256,23 +256,35 @@ func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
 
 func (p *jsonPathParser) pushFunction(text string, funcName string) {
 	if function, ok := p.filterFunctions[funcName]; ok {
-		p.push(&syntaxFilterFunction{
+		functionNode := syntaxFilterFunction{
 			syntaxBasicNode: &syntaxBasicNode{
 				text:         text,
 				accessorMode: p.accessorMode,
 			},
 			function: function,
-		})
+		}
+
+		functionNode.errorRuntime = &errorBasicRuntime{
+			node: functionNode.syntaxBasicNode,
+		}
+
+		p.push(&functionNode)
 		return
 	}
 	if function, ok := p.aggregateFunctions[funcName]; ok {
-		p.push(&syntaxAggregateFunction{
+		functionNode := syntaxAggregateFunction{
 			syntaxBasicNode: &syntaxBasicNode{
 				text:         text,
 				accessorMode: p.accessorMode,
 			},
 			function: function,
-		})
+		}
+
+		functionNode.errorRuntime = &errorBasicRuntime{
+			node: functionNode.syntaxBasicNode,
+		}
+
+		p.push(&functionNode)
 		return
 	}
 
@@ -300,14 +312,20 @@ func (p *jsonPathParser) pushCurrentRootIdentifier() {
 }
 
 func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
-	p.push(&syntaxChildSingleIdentifier{
+	identifier := syntaxChildSingleIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         text,
 			valueGroup:   false,
 			accessorMode: p.accessorMode,
 		},
 		identifier: text,
-	})
+	}
+
+	identifier.errorRuntime = &errorBasicRuntime{
+		node: identifier.syntaxBasicNode,
+	}
+
+	p.push(&identifier)
 }
 
 func (p *jsonPathParser) pushChildMultiIdentifier(
@@ -347,6 +365,10 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 		isAllWildcard: isNodeWildcard && isAppendNodeWildcard,
 	}
 
+	identifier.errorRuntime = &errorBasicRuntime{
+		node: identifier.syntaxBasicNode,
+	}
+
 	if identifier.isAllWildcard {
 		identifier.unionQualifier = syntaxUnionQualifier{
 			syntaxBasicNode: &syntaxBasicNode{
@@ -358,19 +380,29 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 				&syntaxWildcardSubscript{},
 			},
 		}
+
+		identifier.unionQualifier.errorRuntime = &errorBasicRuntime{
+			node: identifier.unionQualifier.syntaxBasicNode,
+		}
 	}
 
 	p.push(&identifier)
 }
 
 func (p *jsonPathParser) pushChildWildcardIdentifier() {
-	p.push(&syntaxChildWildcardIdentifier{
+	identifier := syntaxChildWildcardIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         `*`,
 			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
-	})
+	}
+
+	identifier.errorRuntime = &errorBasicRuntime{
+		node: identifier.syntaxBasicNode,
+	}
+
+	p.push(&identifier)
 }
 
 func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
@@ -384,7 +416,8 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 	case *syntaxUnionQualifier:
 		nextListRequired = true
 	}
-	p.push(&syntaxRecursiveChildIdentifier{
+
+	identifier := syntaxRecursiveChildIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         `..`,
 			valueGroup:   true,
@@ -393,27 +426,45 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 		},
 		nextMapRequired:  nextMapRequired,
 		nextListRequired: nextListRequired,
-	})
+	}
+
+	identifier.errorRuntime = &errorBasicRuntime{
+		node: identifier.syntaxBasicNode,
+	}
+
+	p.push(&identifier)
 }
 
 func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
-	p.push(&syntaxUnionQualifier{
+	qualifier := syntaxUnionQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			valueGroup:   subscript.isValueGroup(),
 			accessorMode: p.accessorMode,
 		},
 		subscripts: []syntaxSubscript{subscript},
-	})
+	}
+
+	qualifier.errorRuntime = &errorBasicRuntime{
+		node: qualifier.syntaxBasicNode,
+	}
+
+	p.push(&qualifier)
 }
 
 func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
-	p.push(&syntaxFilterQualifier{
+	qualifier := syntaxFilterQualifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
 		query: query,
-	})
+	}
+
+	qualifier.errorRuntime = &errorBasicRuntime{
+		node: qualifier.syntaxBasicNode,
+	}
+
+	p.push(&qualifier)
 }
 
 func (p *jsonPathParser) pushScriptQualifier(text string) {

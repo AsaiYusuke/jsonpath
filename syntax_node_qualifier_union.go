@@ -18,11 +18,9 @@ func (u *syntaxUnionQualifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: u.syntaxBasicNode,
-			},
-			expectedType: msgTypeArray,
-			foundType:    foundType,
+			errorBasicRuntime: u.errorRuntime,
+			expectedType:      msgTypeArray,
+			foundType:         foundType,
 		}
 	}
 
@@ -47,17 +45,13 @@ func (u *syntaxUnionQualifier) retrieve(
 		switch len(deepestErrors) {
 		case 0:
 			return ErrorIndexOutOfRange{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: u.syntaxBasicNode,
-				},
+				errorBasicRuntime: u.errorRuntime,
 			}
 		case 1:
 			return deepestErrors[0]
 		default:
 			return ErrorNoneMatched{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: deepestErrors[0].getSyntaxNode(),
-				},
+				errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
 			}
 		}
 	}
@@ -65,9 +59,7 @@ func (u *syntaxUnionQualifier) retrieve(
 	indexes := u.subscripts[0].getIndexes(srcArray)
 	if len(indexes) == 0 {
 		return ErrorIndexOutOfRange{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: u.syntaxBasicNode,
-			},
+			errorBasicRuntime: u.errorRuntime,
 		}
 	}
 

@@ -26,11 +26,9 @@ func (f *syntaxFilterQualifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: f.syntaxBasicNode,
-			},
-			expectedType: msgTypeObjectOrArray,
-			foundType:    foundType,
+			errorBasicRuntime: f.errorRuntime,
+			expectedType:      msgTypeObjectOrArray,
+			foundType:         foundType,
 		}
 	}
 
@@ -41,9 +39,7 @@ func (f *syntaxFilterQualifier) retrieve(
 		return deepestErrors[0]
 	default:
 		return ErrorNoneMatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: deepestErrors[0].getSyntaxNode(),
-			},
+			errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
 		}
 	}
 }
@@ -70,9 +66,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		_, nodeNotFound = valueList[0].(struct{})
 		if nodeNotFound {
 			return append(deepestErrors, ErrorMemberNotExist{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: f.syntaxBasicNode,
-				},
+				errorBasicRuntime: f.errorRuntime,
 			})
 		}
 	}
@@ -99,9 +93,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 	if len(deepestErrors) == 0 {
 		return append(deepestErrors, ErrorMemberNotExist{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: f.syntaxBasicNode,
-			},
+			errorBasicRuntime: f.errorRuntime,
 		})
 	}
 
@@ -123,9 +115,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 		_, nodeNotFound = valueList[0].(struct{})
 		if nodeNotFound {
 			return append(deepestErrors, ErrorMemberNotExist{
-				errorBasicRuntime: &errorBasicRuntime{
-					node: f.syntaxBasicNode,
-				},
+				errorBasicRuntime: f.errorRuntime,
 			})
 		}
 	}
@@ -150,9 +140,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 
 	if len(deepestErrors) == 0 {
 		return append(deepestErrors, ErrorMemberNotExist{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: f.syntaxBasicNode,
-			},
+			errorBasicRuntime: f.errorRuntime,
 		})
 	}
 

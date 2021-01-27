@@ -18,11 +18,9 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 			foundType = reflect.TypeOf(current).String()
 		}
 		return ErrorTypeUnmatched{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i.syntaxBasicNode,
-			},
-			expectedType: msgTypeObject,
-			foundType:    foundType,
+			errorBasicRuntime: i.errorRuntime,
+			expectedType:      msgTypeObject,
+			foundType:         foundType,
 		}
 	}
 

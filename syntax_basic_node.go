@@ -8,6 +8,7 @@ type syntaxBasicNode struct {
 	valueGroup    bool
 	next          syntaxNode
 	accessorMode  bool
+	errorRuntime  *errorBasicRuntime
 }
 
 func (i *syntaxBasicNode) setText(text string) {
@@ -71,9 +72,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 	nextNode, ok := currentMap[key]
 	if !ok {
 		return ErrorMemberNotExist{
-			errorBasicRuntime: &errorBasicRuntime{
-				node: i,
-			},
+			errorBasicRuntime: i.errorRuntime,
 		}
 	}
 
