@@ -496,7 +496,7 @@ func (p *pegJSONPathParser) Execute() {
 			p.pushCurrentRootIdentifier()
 
 		case ruleAction10:
-			//`
+
 			p.pushChildSingleIdentifier(p.unescape(text))
 
 		case ruleAction11:
@@ -514,7 +514,7 @@ func (p *pegJSONPathParser) Execute() {
 			p.pushChildSingleIdentifier(p.unescapeSingleQuotedString(text))
 
 		case ruleAction14:
-			// '
+
 			p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
 
 		case ruleAction15:
@@ -711,7 +711,7 @@ func (p *pegJSONPathParser) Execute() {
 			p.push(p.unescape(text))
 
 		case ruleAction44:
-			// '
+
 			p.push(p.unescape(text))
 
 		case ruleAction45:
@@ -3594,7 +3594,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			}
 			return true
 		},
-		/* 71 Action10 <- <{ //`
+		/* 71 Action10 <- <{
 		    p.pushChildSingleIdentifier(p.unescape(text))
 		}> */
 		func() bool {
@@ -3632,7 +3632,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			}
 			return true
 		},
-		/* 75 Action14 <- <{ // '
+		/* 75 Action14 <- <{
 		    p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
 		}> */
 		func() bool {
@@ -3979,7 +3979,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			}
 			return true
 		},
-		/* 105 Action44 <- <{ // '
+		/* 105 Action44 <- <{
 		    p.push(p.unescape(text))
 		}> */
 		func() bool {
