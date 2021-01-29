@@ -23,12 +23,14 @@ func TestUnescapeDoubleQuotedString(t *testing.T) {
 		{input: `\r`, expectOut: "\r"},
 		{input: `\t`, expectOut: "\t"},
 		{input: `\uD834\uDD1E`, expectOut: `𝄞`},
+		{input: `"`, expectError: ErrorInvalidArgument{argument: `"`, err: fmt.Errorf(`invalid character '"' after top-level value`)}},
+		{input: `\u`, expectError: ErrorInvalidArgument{argument: `\u`, err: fmt.Errorf(`invalid character '"' in \u hexadecimal character escape`)}},
 	}
 	parser := jsonPathParser{}
 
 	for _, testcase := range testcases {
 		if testcase.expectError != nil {
-			expectPanic(t, testcase.input, testcase.expectError)
+			expectPanic(t, testcase.input, testcase.expectError, parser.unescapeDoubleQuotedString)
 			continue
 		}
 		actual := parser.unescapeDoubleQuotedString(testcase.input)
@@ -52,12 +54,14 @@ func TestUnescapeSingleQuotedString(t *testing.T) {
 		{input: `\r`, expectOut: "\r"},
 		{input: `\t`, expectOut: "\t"},
 		{input: `\uD834\uDD1E`, expectOut: `𝄞`},
+		{input: `'`, expectOut: `'`},
+		{input: `\u`, expectError: ErrorInvalidArgument{argument: `\u`, err: fmt.Errorf(`invalid character '"' in \u hexadecimal character escape`)}},
 	}
 	parser := jsonPathParser{}
 
 	for _, testcase := range testcases {
 		if testcase.expectError != nil {
-			expectPanic(t, testcase.input, testcase.expectError)
+			expectPanic(t, testcase.input, testcase.expectError, parser.unescapeSingleQuotedString)
 			continue
 		}
 		actual := parser.unescapeSingleQuotedString(testcase.input)
@@ -69,7 +73,7 @@ func TestUnescapeSingleQuotedString(t *testing.T) {
 	}
 }
 
-func expectPanic(t *testing.T, text string, expectedError error) {
+func expectPanic(t *testing.T, text string, expectedError error, function func(string) string) {
 	defer func() {
 		actualError := recover().(error)
 		if reflect.TypeOf(expectedError) != reflect.TypeOf(actualError) ||
@@ -78,6 +82,6 @@ func expectPanic(t *testing.T, text string, expectedError error) {
 		}
 
 	}()
-	parser.unescapeDoubleQuotedString(text)
+	function(text)
 	t.Errorf("expect panic")
 }
