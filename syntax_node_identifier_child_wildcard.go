@@ -81,7 +81,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 	}
 
 	if deepestError == nil {
-		return ErrorIndexOutOfRange{
+		return ErrorMemberNotExist{
 			errorBasicRuntime: i.errorRuntime,
 		}
 	}

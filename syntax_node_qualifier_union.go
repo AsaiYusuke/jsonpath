@@ -43,7 +43,7 @@ func (u *syntaxUnionQualifier) retrieve(
 		}
 
 		if deepestError == nil {
-			return ErrorIndexOutOfRange{
+			return ErrorMemberNotExist{
 				errorBasicRuntime: u.errorRuntime,
 			}
 		}
@@ -53,7 +53,7 @@ func (u *syntaxUnionQualifier) retrieve(
 
 	indexes := u.subscripts[0].getIndexes(srcArray)
 	if len(indexes) == 0 {
-		return ErrorIndexOutOfRange{
+		return ErrorMemberNotExist{
 			errorBasicRuntime: u.errorRuntime,
 		}
 	}

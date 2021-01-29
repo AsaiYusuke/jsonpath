@@ -2,7 +2,7 @@ package jsonpath
 
 import "fmt"
 
-// ErrorMemberNotExist represents the error that the object member specified in the JSONPath did not exist in the JSON object.
+// ErrorMemberNotExist represents the error that the member specified in the JSONPath did not exist in the JSON object.
 type ErrorMemberNotExist struct {
 	*errorBasicRuntime
 }

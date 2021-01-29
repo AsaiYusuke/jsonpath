@@ -129,21 +129,6 @@ func ExampleErrorMemberNotExist() {
 	// jsonpath.ErrorMemberNotExist, member did not exist (path=.none)
 }
 
-func ExampleErrorIndexOutOfRange() {
-	jsonPath, srcJSON := `$[1]`, `["a"]`
-	var src interface{}
-	json.Unmarshal([]byte(srcJSON), &src)
-	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
-		return
-	}
-	outputJSON, _ := json.Marshal(output)
-	fmt.Println(string(outputJSON))
-	// Output:
-	// jsonpath.ErrorIndexOutOfRange, index out of range (path=[1])
-}
-
 func ExampleErrorTypeUnmatched() {
 	jsonPath, srcJSON := `$.a`, `[]`
 	var src interface{}

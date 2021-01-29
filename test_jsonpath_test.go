@@ -33,16 +33,6 @@ func createErrorMemberNotExist(text string) ErrorMemberNotExist {
 	}
 }
 
-func createErrorIndexOutOfRange(text string) ErrorIndexOutOfRange {
-	return ErrorIndexOutOfRange{
-		errorBasicRuntime: &errorBasicRuntime{
-			node: &syntaxBasicNode{
-				text: text,
-			},
-		},
-	}
-}
-
 func createErrorTypeUnmatched(text string, expected string, found string) ErrorTypeUnmatched {
 	return ErrorTypeUnmatched{
 		errorBasicRuntime: &errorBasicRuntime{
@@ -808,7 +798,7 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$.*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`.*`),
+				expectedErr: createErrorMemberNotExist(`.*`),
 			},
 		},
 		`recursive`: []TestCase{
@@ -820,7 +810,7 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$..*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`*`),
+				expectedErr: createErrorMemberNotExist(`*`),
 			},
 			{
 				jsonpath:     `$..*`,
@@ -1632,7 +1622,7 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$[*]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*]`,
@@ -1827,7 +1817,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 			{
 				jsonpath:    `$[3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[3]`),
+				expectedErr: createErrorMemberNotExist(`[3]`),
 			},
 		},
 		`basic::number-variation-minus`: []TestCase{
@@ -1849,7 +1839,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 			{
 				jsonpath:    `$[-4]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-4]`),
+				expectedErr: createErrorMemberNotExist(`[-4]`),
 			},
 		},
 		`syntax-check::number`: []TestCase{
@@ -1905,29 +1895,29 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 			{
 				jsonpath:    `$[0]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0]`),
+				expectedErr: createErrorMemberNotExist(`[0]`),
 			},
 			{
 				jsonpath:    `$[1]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[1]`),
+				expectedErr: createErrorMemberNotExist(`[1]`),
 			},
 			{
 				jsonpath:    `$[-1]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1]`),
+				expectedErr: createErrorMemberNotExist(`[-1]`),
 			},
 		},
 		`big-number`: []TestCase{
 			{
 				jsonpath:    `$[1000000000000000000]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1000000000000000000]`),
+				expectedErr: createErrorMemberNotExist(`[1000000000000000000]`),
 			},
 			{
 				jsonpath:    `$[-1000000000000000000]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1000000000000000000]`),
+				expectedErr: createErrorMemberNotExist(`[-1000000000000000000]`),
 			},
 		},
 		`not-array`: []TestCase{
@@ -2089,7 +2079,7 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 			{
 				jsonpath:    `$[3,3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[3,3]`),
+				expectedErr: createErrorMemberNotExist(`[3,3]`),
 			},
 		},
 		`array`: []TestCase{
@@ -2103,7 +2093,7 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 			{
 				jsonpath:    `$[1,2].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: createErrorIndexOutOfRange(`[1,2]`),
+				expectedErr: createErrorMemberNotExist(`[1,2]`),
 			},
 			{
 				jsonpath:    `$[0,1].a.b`,
@@ -2132,7 +2122,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[0:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:0]`),
+				expectedErr: createErrorMemberNotExist(`[0:0]`),
 			},
 			{
 				jsonpath:     `$[0:1]`,
@@ -2154,7 +2144,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:1]`),
+				expectedErr: createErrorMemberNotExist(`[1:1]`),
 			},
 			{
 				jsonpath:     `$[1:2]`,
@@ -2171,7 +2161,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[2:2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:2]`),
+				expectedErr: createErrorMemberNotExist(`[2:2]`),
 			},
 			{
 				jsonpath:     `$[2:3]`,
@@ -2183,36 +2173,36 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[2:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:1]`),
+				expectedErr: createErrorMemberNotExist(`[2:1]`),
 			},
 			{
 				jsonpath:    `$[2:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:0]`),
+				expectedErr: createErrorMemberNotExist(`[2:0]`),
 			},
 		},
 		`start-after-last`: []TestCase{
 			{
 				jsonpath:    `$[3:2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[3:2]`),
+				expectedErr: createErrorMemberNotExist(`[3:2]`),
 			},
 			{
 				jsonpath:    `$[3:3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[3:3]`),
+				expectedErr: createErrorMemberNotExist(`[3:3]`),
 			},
 			{
 				jsonpath:    `$[3:4]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[3:4]`),
+				expectedErr: createErrorMemberNotExist(`[3:4]`),
 			},
 		},
 		`start-minus-to-minus-forward`: []TestCase{
 			{
 				jsonpath:    `$[-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[-1:-1]`),
 			},
 			{
 				jsonpath:     `$[-2:-1]`,
@@ -2229,19 +2219,19 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-1:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1:-2]`),
+				expectedErr: createErrorMemberNotExist(`[-1:-2]`),
 			},
 			{
 				jsonpath:    `$[-1:-3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1:-3]`),
+				expectedErr: createErrorMemberNotExist(`[-1:-3]`),
 			},
 		},
 		`start-minus-to-plus`: []TestCase{
 			{
 				jsonpath:    `$[-1:2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1:2]`),
+				expectedErr: createErrorMemberNotExist(`[-1:2]`),
 			},
 			{
 				jsonpath:     `$[-1:3]`,
@@ -2251,7 +2241,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-2:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-2:1]`),
+				expectedErr: createErrorMemberNotExist(`[-2:1]`),
 			},
 			{
 				jsonpath:     `$[-2:2]`,
@@ -2261,7 +2251,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-3:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-3:0]`),
+				expectedErr: createErrorMemberNotExist(`[-3:0]`),
 			},
 			{
 				jsonpath:     `$[-3:1]`,
@@ -2271,7 +2261,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[-4:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-4:0]`),
+				expectedErr: createErrorMemberNotExist(`[-4:0]`),
 			},
 			{
 				jsonpath:     `$[-4:1]`,
@@ -2298,12 +2288,12 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[0:-3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:-3]`),
+				expectedErr: createErrorMemberNotExist(`[0:-3]`),
 			},
 			{
 				jsonpath:    `$[0:-4]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:-4]`),
+				expectedErr: createErrorMemberNotExist(`[0:-4]`),
 			},
 		},
 		`start-middle-to-minus`: []TestCase{
@@ -2315,26 +2305,26 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:-2]`),
+				expectedErr: createErrorMemberNotExist(`[1:-2]`),
 			},
 		},
 		`start-last-to-minus`: []TestCase{
 			{
 				jsonpath:    `$[2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:-1]`),
+				expectedErr: createErrorMemberNotExist(`[2:-1]`),
 			},
 			{
 				jsonpath:    `$[2:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:-2]`),
+				expectedErr: createErrorMemberNotExist(`[2:-2]`),
 			},
 		},
 		`omitted-start`: []TestCase{
 			{
 				jsonpath:    `$[:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[:0]`),
+				expectedErr: createErrorMemberNotExist(`[:0]`),
 			},
 			{
 				jsonpath:     `$[:1]`,
@@ -2369,7 +2359,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[:-3]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[:-3]`),
+				expectedErr: createErrorMemberNotExist(`[:-3]`),
 			},
 		},
 		`omitted-last`: []TestCase{
@@ -2391,7 +2381,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[3:]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[3:]`),
+				expectedErr: createErrorMemberNotExist(`[3:]`),
 			},
 			{
 				jsonpath:     `$[-1:]`,
@@ -2430,12 +2420,12 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1000000000000000000:1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1000000000000000000:1]`),
+				expectedErr: createErrorMemberNotExist(`[1000000000000000000:1]`),
 			},
 			{
 				jsonpath:    `$[1:-1000000000000000000]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:-1000000000000000000]`),
+				expectedErr: createErrorMemberNotExist(`[1:-1000000000000000000]`),
 			},
 			{
 				jsonpath:     `$[1:1000000000000000000]`,
@@ -2481,7 +2471,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 			{
 				jsonpath:    `$[1:2].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:2]`),
+				expectedErr: createErrorMemberNotExist(`[1:2]`),
 			},
 			{
 				jsonpath:    `$[0:2].a.b`,
@@ -2542,24 +2532,24 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[0:2:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2:0]`),
+				expectedErr: createErrorMemberNotExist(`[0:2:0]`),
 			},
 			{
 				jsonpath:    `$[2:0:0]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:0:0]`),
+				expectedErr: createErrorMemberNotExist(`[2:0:0]`),
 			},
 		},
 		`minus::start-variation`: []TestCase{
 			{
 				jsonpath:    `$[-3:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-3:1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[-3:1:-1]`),
 			},
 			{
 				jsonpath:    `$[-2:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[-2:1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[-2:1:-1]`),
 			},
 			{
 				jsonpath:     `$[-1:1:-1]`,
@@ -2569,12 +2559,12 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[0:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:1:-1]`),
 			},
 			{
 				jsonpath:    `$[1:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[1:1:-1]`),
 			},
 			{
 				jsonpath:     `$[2:1:-1]`,
@@ -2596,37 +2586,37 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[0:-2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:-2:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:-2:-1]`),
 			},
 			{
 				jsonpath:    `$[0:-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:-1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:-1:-1]`),
 			},
 			{
 				jsonpath:    `$[0:0:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:0:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:0:-1]`),
 			},
 			{
 				jsonpath:    `$[0:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:1:-1]`),
 			},
 			{
 				jsonpath:    `$[0:2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:2:-1]`),
 			},
 			{
 				jsonpath:    `$[0:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:3:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:3:-1]`),
 			},
 			{
 				jsonpath:    `$[0:4:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:4:-1]`),
+				expectedErr: createErrorMemberNotExist(`[0:4:-1]`),
 			},
 		},
 		`minus::end-variation::start1`: []TestCase{
@@ -2648,12 +2638,12 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[1:-2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:-2:-1]`),
+				expectedErr: createErrorMemberNotExist(`[1:-2:-1]`),
 			},
 			{
 				jsonpath:    `$[1:-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:-1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[1:-1:-1]`),
 			},
 			{
 				jsonpath:     `$[1:0:-1]`,
@@ -2663,18 +2653,18 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[1:1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[1:1:-1]`),
 			},
 			{
 				jsonpath:     `$[1:2:-1]`,
 				inputJSON:    `["first","second","third"]`,
 				expectedJSON: `["second","first"]`,
-				expectedErr:  createErrorIndexOutOfRange(`[1:2:-1]`),
+				expectedErr:  createErrorMemberNotExist(`[1:2:-1]`),
 			},
 			{
 				jsonpath:    `$[1:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[1:3:-1]`),
+				expectedErr: createErrorMemberNotExist(`[1:3:-1]`),
 			},
 		},
 		`minus::end-variation::start2`: []TestCase{
@@ -2701,7 +2691,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:-1:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:-1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[2:-1:-1]`),
 			},
 			{
 				jsonpath:     `$[2:0:-1]`,
@@ -2716,22 +2706,22 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:2:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:2:-1]`),
+				expectedErr: createErrorMemberNotExist(`[2:2:-1]`),
 			},
 			{
 				jsonpath:    `$[2:3:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:3:-1]`),
+				expectedErr: createErrorMemberNotExist(`[2:3:-1]`),
 			},
 			{
 				jsonpath:    `$[2:4:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:4:-1]`),
+				expectedErr: createErrorMemberNotExist(`[2:4:-1]`),
 			},
 			{
 				jsonpath:    `$[2:5:-1]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:5:-1]`),
+				expectedErr: createErrorMemberNotExist(`[2:5:-1]`),
 			},
 		},
 		`minus::step-variation`: []TestCase{
@@ -2755,7 +2745,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[2:-1:-2]`,
 				inputJSON:   `["first","second","third"]`,
-				expectedErr: createErrorIndexOutOfRange(`[2:-1:-2]`),
+				expectedErr: createErrorMemberNotExist(`[2:-1:-2]`),
 			},
 			{
 				jsonpath:     `$[-1:0:-1]`,
@@ -2890,7 +2880,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 			{
 				jsonpath:    `$[-1:-1:-1].a.b`,
 				inputJSON:   `[0]`,
-				expectedErr: createErrorIndexOutOfRange(`[-1:-1:-1]`),
+				expectedErr: createErrorMemberNotExist(`[-1:-1:-1]`),
 			},
 			{
 				jsonpath:    `$[0:-2:-1].a.b`,
@@ -4356,7 +4346,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 			{
 				jsonpath:    `$..[0:2]`,
 				inputJSON:   `{"a":[],"b":{"a":[]}}`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$..[0:2]`,
@@ -4373,7 +4363,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 			{
 				jsonpath:    `$..[*]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$..a[*]`,
@@ -4390,7 +4380,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 			{
 				jsonpath:    `$..[0,1]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$..[0,1]`,
@@ -4502,7 +4492,7 @@ func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
 			{
 				jsonpath:    `$['a','b'][0:2]`,
 				inputJSON:   `{"a":[],"b":[]}`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$['a','b'][0:2]`,
@@ -4524,7 +4514,7 @@ func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
 			{
 				jsonpath:    `$['a','b'][*]`,
 				inputJSON:   `{"a":[],"b":[]}`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$['a','b'][*]`,
@@ -4546,7 +4536,7 @@ func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
 			{
 				jsonpath:    `$['a','b'][0,1]`,
 				inputJSON:   `{"a":[],"b":[]}`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$['a','b'][0,1]`,
@@ -4668,7 +4658,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_identifiler(t *testing.T) {
 			{
 				jsonpath:    `$.*[0:2]`,
 				inputJSON:   `{"a":[],"b":[]}`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$.*[0:2]`,
@@ -4690,7 +4680,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_identifiler(t *testing.T) {
 			{
 				jsonpath:    `$.*[*]`,
 				inputJSON:   `{"a":[],"b":[]}`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$.*[*]`,
@@ -4712,7 +4702,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_identifiler(t *testing.T) {
 			{
 				jsonpath:    `$.*[0,1]`,
 				inputJSON:   `{"a":[],"b":[]}`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$.*[0,1]`,
@@ -4773,7 +4763,7 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2]..a`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2]..a`,
@@ -4795,7 +4785,7 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2]['a','b']`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2]['a','b']`,
@@ -4812,12 +4802,12 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2].*`,
 				inputJSON:   `[[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`.*`),
+				expectedErr: createErrorMemberNotExist(`.*`),
 			},
 			{
 				jsonpath:    `$[0:2].*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2].*`,
@@ -4834,12 +4824,12 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2][0:2]`,
 				inputJSON:   `[[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2][0:2]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2][0:2]`,
@@ -4861,7 +4851,7 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2][*]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2][*]`,
@@ -4878,12 +4868,12 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2][0,1]`,
 				inputJSON:   `[[],[],[7]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0:2][0,1]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2][0,1]`,
@@ -4905,7 +4895,7 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0:2][?(@.b)]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0:2][?(@.b)]`,
@@ -4939,7 +4929,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*]..a`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*]..a`,
@@ -4961,7 +4951,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*]['a','b']`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*]['a','b']`,
@@ -4983,7 +4973,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*].*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*].*`,
@@ -5000,12 +4990,12 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*][0:2]`,
 				inputJSON:   `[[],[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[*][0:2]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*][0:2]`,
@@ -5022,12 +5012,12 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*][*]`,
 				inputJSON:   `[[],[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*][*]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*][*]`,
@@ -5044,12 +5034,12 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*][0,1]`,
 				inputJSON:   `[[],[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[*][0,1]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*][0,1]`,
@@ -5071,7 +5061,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[*][?(@.b)]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[*][?(@.b)]`,
@@ -5105,7 +5095,7 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1]..a`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1]..a`,
@@ -5127,7 +5117,7 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1]['a','b']`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1]['a','b']`,
@@ -5144,12 +5134,12 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1].*`,
 				inputJSON:   `[[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`.*`),
+				expectedErr: createErrorMemberNotExist(`.*`),
 			},
 			{
 				jsonpath:    `$[0,1].*`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1].*`,
@@ -5166,12 +5156,12 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1][0:2]`,
 				inputJSON:   `[[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[0,1][0:2]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1][0:2]`,
@@ -5193,7 +5183,7 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1][*]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1][*]`,
@@ -5210,12 +5200,12 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1][0,1]`,
 				inputJSON:   `[[],[],[7]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1][0,1]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1][0,1]`,
@@ -5237,7 +5227,7 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[0,1][?(@.b)]`,
 				inputJSON:   `[]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[0,1][?(@.b)]`,
@@ -5327,7 +5317,7 @@ func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[?(@)][0:2]`,
 				inputJSON:   `[[],[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0:2]`),
+				expectedErr: createErrorMemberNotExist(`[0:2]`),
 			},
 			{
 				jsonpath:    `$[?(@)][0:2]`,
@@ -5349,7 +5339,7 @@ func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[?(@)][*]`,
 				inputJSON:   `[[],[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[*]`),
+				expectedErr: createErrorMemberNotExist(`[*]`),
 			},
 			{
 				jsonpath:    `$[?(@)][*]`,
@@ -5371,7 +5361,7 @@ func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
 			{
 				jsonpath:    `$[?(@)][0,1]`,
 				inputJSON:   `[[],[],[]]`,
-				expectedErr: createErrorIndexOutOfRange(`[0,1]`),
+				expectedErr: createErrorMemberNotExist(`[0,1]`),
 			},
 			{
 				jsonpath:    `$[?(@)][0,1]`,
