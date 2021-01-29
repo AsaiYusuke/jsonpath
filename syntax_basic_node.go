@@ -136,11 +136,6 @@ func (i *syntaxBasicNode) addDeepestError(
 		if deepestErrorType == errorTypeUnmatched {
 			return deepestTextLen, err
 		}
-
-		errorType := reflect.TypeOf(err)
-		if errorType != errorTypeUnmatched && errorType != deepestErrorType {
-			return deepestTextLen, err
-		}
 	}
 
 	return deepestTextLen, deepestError
