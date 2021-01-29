@@ -45,14 +45,10 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	var deepestError errorRuntime
 
 	for _, identifier := range i.identifiers {
-		switch typedNode := identifier.(type) {
-		case *syntaxChildWildcardIdentifier:
-		case *syntaxChildSingleIdentifier:
-			if _, ok := srcMap[typedNode.identifier]; !ok {
+		if singleIdentifier, ok := identifier.(*syntaxChildSingleIdentifier); ok {
+			if _, ok := srcMap[singleIdentifier.identifier]; !ok {
 				continue
 			}
-		default:
-			continue
 		}
 
 		if err := identifier.retrieve(root, srcMap, container); err != nil {
