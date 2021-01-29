@@ -11,14 +11,12 @@ type syntaxChildWildcardIdentifier struct {
 func (i *syntaxChildWildcardIdentifier) retrieve(
 	root, current interface{}, container *bufferContainer) errorRuntime {
 
-	deepestErrors := make([]errorRuntime, 0, 2)
-
 	switch typedNodes := current.(type) {
 	case map[string]interface{}:
-		deepestErrors = i.retrieveMap(root, typedNodes, container, deepestErrors)
+		return i.retrieveMap(root, typedNodes, container)
 
 	case []interface{}:
-		deepestErrors = i.retrieveList(root, typedNodes, container, deepestErrors)
+		return i.retrieveList(root, typedNodes, container)
 
 	default:
 		foundType := msgTypeNull
@@ -31,32 +29,20 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 			foundType:         foundType,
 		}
 	}
-
-	switch len(deepestErrors) {
-	case 0:
-		return nil
-	case 1:
-		return deepestErrors[0]
-	default:
-		return ErrorNoneMatched{
-			errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
-		}
-	}
-
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer,
-	deepestErrors []errorRuntime) []errorRuntime {
+	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errorRuntime {
 
 	var deepestTextLen int
+	var deepestError errorRuntime
 
 	sortKeys := container.getSortedKeys(srcMap)
 
 	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
 			if len(container.result) == 0 {
-				deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+				deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
 			}
 		}
 	}
@@ -67,25 +53,25 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 		return nil
 	}
 
-	if len(deepestErrors) == 0 {
-		return append(deepestErrors, ErrorMemberNotExist{
+	if deepestError == nil {
+		return ErrorMemberNotExist{
 			errorBasicRuntime: i.errorRuntime,
-		})
+		}
 	}
 
-	return deepestErrors
+	return deepestError
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveList(
-	root interface{}, srcList []interface{}, container *bufferContainer,
-	deepestErrors []errorRuntime) []errorRuntime {
+	root interface{}, srcList []interface{}, container *bufferContainer) errorRuntime {
 
 	var deepestTextLen int
+	var deepestError errorRuntime
 
 	for index := range srcList {
 		if err := i.retrieveListNext(root, srcList, index, container); err != nil {
 			if len(container.result) == 0 {
-				deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+				deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
 			}
 		}
 	}
@@ -94,11 +80,11 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 		return nil
 	}
 
-	if len(deepestErrors) == 0 {
-		return append(deepestErrors, ErrorIndexOutOfRange{
+	if deepestError == nil {
+		return ErrorIndexOutOfRange{
 			errorBasicRuntime: i.errorRuntime,
-		})
+		}
 	}
 
-	return deepestErrors
+	return deepestError
 }

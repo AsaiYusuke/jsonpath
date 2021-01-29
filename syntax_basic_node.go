@@ -115,26 +115,33 @@ func (i *syntaxBasicNode) setAccessorMode(mode bool) {
 	i.accessorMode = mode
 }
 
+var errorTypeUnmatched = reflect.TypeOf(ErrorTypeUnmatched{})
+
 func (i *syntaxBasicNode) addDeepestError(
-	err errorRuntime, deepestTextLen int, deepestErrors []errorRuntime) (int, []errorRuntime) {
+	err errorRuntime, deepestTextLen int, deepestError errorRuntime) (int, errorRuntime) {
 
 	textLength := len(err.getSyntaxNode().getConnectedText())
 
 	if deepestTextLen == 0 || deepestTextLen > textLength {
 		deepestTextLen = textLength
-		deepestErrors = deepestErrors[:0]
+		deepestError = nil
 	}
 
 	if deepestTextLen == textLength {
-		switch len(deepestErrors) {
-		case 0:
-			return deepestTextLen, append(deepestErrors, err)
-		case 1:
-			if reflect.TypeOf(err) != reflect.TypeOf(deepestErrors[0]) {
-				return deepestTextLen, append(deepestErrors, err)
-			}
+		if deepestError == nil {
+			return deepestTextLen, err
+		}
+
+		deepestErrorType := reflect.TypeOf(deepestError)
+		if deepestErrorType == errorTypeUnmatched {
+			return deepestTextLen, err
+		}
+
+		errorType := reflect.TypeOf(err)
+		if errorType != errorTypeUnmatched && errorType != deepestErrorType {
+			return deepestTextLen, err
 		}
 	}
 
-	return deepestTextLen, deepestErrors
+	return deepestTextLen, deepestError
 }

@@ -55,16 +55,6 @@ func createErrorTypeUnmatched(text string, expected string, found string) ErrorT
 	}
 }
 
-func createErrorNoneMatched(text string) ErrorNoneMatched {
-	return ErrorNoneMatched{
-		errorBasicRuntime: &errorBasicRuntime{
-			node: &syntaxBasicNode{
-				text: text,
-			},
-		},
-	}
-}
-
 func createErrorFunctionFailed(text string, errorString string) ErrorFunctionFailed {
 	return ErrorFunctionFailed{
 		errorBasicRuntime: &errorBasicRuntime{
@@ -689,7 +679,7 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 			{
 				jsonpath:    `$..a.x`,
 				inputJSON:   `{"a":"b","c":{"a":"d"},"e":["f",{"g":{"a":{"h":1}}}]}`,
-				expectedErr: createErrorNoneMatched(`.x`),
+				expectedErr: createErrorMemberNotExist(`.x`),
 			},
 			{
 				// The case where '.x' terminates with an error first
@@ -897,12 +887,12 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$.*.a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$.*.a.b.c`,
 				inputJSON:   `[{"a":1},{"a":{"c":2}}]`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 		},
 	}
@@ -1562,7 +1552,7 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 			{
 				jsonpath:    `$['a','b'].a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 		},
 	}
@@ -1703,12 +1693,12 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			{
 				jsonpath:    `$[*].a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[*].a.b.c`,
 				inputJSON:   `[{"a":1},{"a":{"c":2}}]`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 		}}
 
@@ -3242,12 +3232,12 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `[{"a":1},{"a":{"c":2}}]`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `[{"a":1},{"a":{"c":2}},{"b":3}]`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 		},
 		`child-error::object`: []TestCase{
@@ -3274,12 +3264,12 @@ func TestRetrieve_filterExist(t *testing.T) {
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}}}`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 			{
 				jsonpath:    `$[?(@.a)].a.b.c`,
 				inputJSON:   `{"a":{"a":1},"b":{"a":{"c":2}},"c":{"b":3}}`,
-				expectedErr: createErrorNoneMatched(`.b`),
+				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 		},
 	}
@@ -3682,7 +3672,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			{
 				jsonpath:    `$..*[?(@.a>2)]`,
 				inputJSON:   `[{"b":"1","a":1},{"c":"2","a":2},{"d":"3","a":3}]`,
-				expectedErr: createErrorNoneMatched(`[?(@.a>2)]`),
+				expectedErr: createErrorMemberNotExist(`[?(@.a>2)]`),
 			},
 			{
 				jsonpath:     `$..*[?(@.a>2)]`,
@@ -4322,7 +4312,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 			{
 				jsonpath:    `$..['a','b']`,
 				inputJSON:   `[{"x":1,"c":2},{"d":3,"x":4}]`,
-				expectedErr: createErrorNoneMatched(`['a','b']`),
+				expectedErr: createErrorMemberNotExist(`['a','b']`),
 			},
 			{
 				jsonpath:    `$..['a','b']`,

@@ -45,7 +45,6 @@ func main() {
 		case jsonpath.ErrorMemberNotExist,
 			jsonpath.ErrorIndexOutOfRange,
 			jsonpath.ErrorTypeUnmatched,
-			jsonpath.ErrorNoneMatched,
 			jsonpath.ErrorFunctionFailed:
 			os.Exit(3)
 		}

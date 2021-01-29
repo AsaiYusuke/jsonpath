@@ -26,13 +26,13 @@ func (u *syntaxUnionQualifier) retrieve(
 
 	if u.isValueGroup() {
 		var deepestTextLen int
-		deepestErrors := make([]errorRuntime, 0, 2)
+		var deepestError errorRuntime
 
 		for _, subscript := range u.subscripts {
 			for _, index := range subscript.getIndexes(srcArray) {
 				if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
 					if len(container.result) == 0 {
-						deepestTextLen, deepestErrors = u.addDeepestError(err, deepestTextLen, deepestErrors)
+						deepestTextLen, deepestError = u.addDeepestError(err, deepestTextLen, deepestError)
 					}
 				}
 			}
@@ -42,18 +42,13 @@ func (u *syntaxUnionQualifier) retrieve(
 			return nil
 		}
 
-		switch len(deepestErrors) {
-		case 0:
+		if deepestError == nil {
 			return ErrorIndexOutOfRange{
 				errorBasicRuntime: u.errorRuntime,
 			}
-		case 1:
-			return deepestErrors[0]
-		default:
-			return ErrorNoneMatched{
-				errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
-			}
 		}
+
+		return deepestError
 	}
 
 	indexes := u.subscripts[0].getIndexes(srcArray)

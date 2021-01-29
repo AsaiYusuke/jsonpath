@@ -159,21 +159,6 @@ func ExampleErrorTypeUnmatched() {
 	// jsonpath.ErrorTypeUnmatched, type unmatched (expected=object, found=[]interface {}, path=.a)
 }
 
-func ExampleErrorNoneMatched() {
-	jsonPath, srcJSON := `$[0,1].a.b`, `[{"a":1},{"a":{"c":2}}]`
-	var src interface{}
-	json.Unmarshal([]byte(srcJSON), &src)
-	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
-		return
-	}
-	outputJSON, _ := json.Marshal(output)
-	fmt.Println(string(outputJSON))
-	// Output:
-	// jsonpath.ErrorNoneMatched, none matched (path=.b)
-}
-
 func ExampleErrorFunctionFailed() {
 	config := jsonpath.Config{}
 	config.SetFilterFunction(`invalid`, func(param interface{}) (interface{}, error) {

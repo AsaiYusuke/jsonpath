@@ -29,7 +29,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	}
 
 	var deepestTextLen int
-	deepestErrors := make([]errorRuntime, 0, 2)
+	var deepestError errorRuntime
 
 	targetNodes := make([]interface{}, 1, 5)
 	targetNodes[0] = current
@@ -42,7 +42,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			if i.nextMapRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
 					if len(container.result) == 0 {
-						deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+						deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
 					}
 				}
 			}
@@ -62,7 +62,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			if i.nextListRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
 					if len(container.result) == 0 {
-						deepestTextLen, deepestErrors = i.addDeepestError(err, deepestTextLen, deepestErrors)
+						deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
 					}
 				}
 			}
@@ -81,16 +81,11 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		return nil
 	}
 
-	switch len(deepestErrors) {
-	case 0:
+	if deepestError == nil {
 		return ErrorMemberNotExist{
 			errorBasicRuntime: i.errorRuntime,
 		}
-	case 1:
-		return deepestErrors[0]
-	default:
-		return ErrorNoneMatched{
-			errorBasicRuntime: deepestErrors[0].getSyntaxNode().errorRuntime,
-		}
 	}
+
+	return deepestError
 }

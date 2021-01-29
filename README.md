@@ -123,7 +123,6 @@ These error types define the corresponding symptom, as listed below:
 | `ErrorMemberNotExist`  | `member did not exist (path=%s)`                  | The object/array member specified in the JSONPath did not exist in the JSON object. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorMemberNotExist)  |
 | `ErrorIndexOutOfRange` | `index out of range (path=%s)`                    | The array indexes specified in the JSONPath were out of range.                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorIndexOutOfRange) |
 | `ErrorTypeUnmatched`   | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorTypeUnmatched)   |
-| `ErrorNoneMatched`     | `none matched (path=%s)`                          | The retrieving child paths specified in the JSONPath resulted in empty output.      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorNoneMatched)     |
 | `ErrorFunctionFailed`  | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionFailed)  |
 
 The type checking is convenient to recognize which error happened.
