@@ -131,7 +131,7 @@ The type checking is convenient to recognize which error happened.
   _,err := jsonpath.Retrieve(jsonPath, srcJSON)
   if err != nil {
     switch err.(type) {
-    case jsonpath.ErrorIndexOutOfRange:
+    case jsonpath.ErrorMemberNotExist:
       fmt.printf(`retry with other srcJSON: %v`, err)
       continue
     case jsonpath.ErrorInvalidArgumentFormat:
