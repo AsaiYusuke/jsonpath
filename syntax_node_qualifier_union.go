@@ -24,41 +24,30 @@ func (u *syntaxUnionQualifier) retrieve(
 		}
 	}
 
-	if u.isValueGroup() {
-		var deepestTextLen int
-		var deepestError errorRuntime
+	var deepestTextLen int
+	var deepestError errorRuntime
 
-		for _, subscript := range u.subscripts {
-			for _, index := range subscript.getIndexes(srcArray) {
-				if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
-					if len(container.result) == 0 {
-						deepestTextLen, deepestError = u.addDeepestError(err, deepestTextLen, deepestError)
-					}
+	for _, subscript := range u.subscripts {
+		for _, index := range subscript.getIndexes(srcArray) {
+			if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
+				if len(container.result) == 0 {
+					deepestTextLen, deepestError = u.addDeepestError(err, deepestTextLen, deepestError)
 				}
 			}
 		}
-
-		if len(container.result) > 0 {
-			return nil
-		}
-
-		if deepestError == nil {
-			return ErrorMemberNotExist{
-				errorBasicRuntime: u.errorRuntime,
-			}
-		}
-
-		return deepestError
 	}
 
-	indexes := u.subscripts[0].getIndexes(srcArray)
-	if len(indexes) == 0 {
+	if len(container.result) > 0 {
+		return nil
+	}
+
+	if deepestError == nil {
 		return ErrorMemberNotExist{
 			errorBasicRuntime: u.errorRuntime,
 		}
 	}
 
-	return u.retrieveListNext(root, srcArray, indexes[0], container)
+	return deepestError
 }
 
 func (u *syntaxUnionQualifier) merge(union *syntaxUnionQualifier) {
