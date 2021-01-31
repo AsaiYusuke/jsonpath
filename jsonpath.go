@@ -23,11 +23,8 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 	parseMutex.Lock()
 	defer func() {
 		if exception := recover(); exception != nil {
-			switch typedException := exception.(type) {
-			case error:
-				err = typedException
-			default:
-				panic(typedException)
+			if _err, ok := exception.(error); ok {
+				err = _err
 			}
 		}
 		parser.jsonPathParser = jsonPathParser{}
