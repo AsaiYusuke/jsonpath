@@ -28,7 +28,7 @@ func (u *syntaxUnionQualifier) retrieve(
 	var deepestError errorRuntime
 
 	for _, subscript := range u.subscripts {
-		for _, index := range subscript.getIndexes(srcArray) {
+		for _, index := range subscript.getIndexes(len(srcArray)) {
 			if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
 				if len(container.result) == 0 {
 					deepestTextLen, deepestError = u.addDeepestError(err, deepestTextLen, deepestError)

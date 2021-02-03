@@ -7,9 +7,8 @@ type syntaxIndexSubscript struct {
 	isOmitted bool
 }
 
-func (i *syntaxIndexSubscript) getIndexes(src []interface{}) []int {
+func (i *syntaxIndexSubscript) getIndexes(srcLength int) []int {
 	index := i.number
-	srcLength := len(src)
 
 	if index < 0 {
 		index += srcLength

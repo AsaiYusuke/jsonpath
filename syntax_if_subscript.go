@@ -1,6 +1,6 @@
 package jsonpath
 
 type syntaxSubscript interface {
-	getIndexes(src []interface{}) []int
+	getIndexes(srcLength int) []int
 	isValueGroup() bool
 }

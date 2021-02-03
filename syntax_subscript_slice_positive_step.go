@@ -8,8 +8,7 @@ type syntaxSlicePositiveStepSubscript struct {
 	step  *syntaxIndexSubscript
 }
 
-func (s *syntaxSlicePositiveStepSubscript) getIndexes(src []interface{}) []int {
-	srcLength := len(src)
+func (s *syntaxSlicePositiveStepSubscript) getIndexes(srcLength int) []int {
 	loopStart := s.getLoopStart(srcLength)
 	loopEnd := s.getLoopEnd(srcLength)
 
