@@ -6286,6 +6286,11 @@ func TestRetrieve_notSupported(t *testing.T) {
 				inputJSON:   `{}`,
 				expectedErr: ErrorNotSupported{feature: `script`, path: `[(command)]`},
 			},
+			{
+				jsonpath:    `$[( command )]`,
+				inputJSON:   `{}`,
+				expectedErr: ErrorNotSupported{feature: `script`, path: `[(command)]`},
+			},
 		},
 	}
 

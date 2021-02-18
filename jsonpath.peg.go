@@ -2227,17 +2227,16 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 			position, tokenIndex = position189, tokenIndex189
 			return false
 		},
-		/* 31 command <- <(!')' .)+> */
+		/* 31 command <- <(!scriptEnd .)+> */
 		func() bool {
 			position192, tokenIndex192 := position, tokenIndex
 			{
 				position193 := position
 				{
 					position196, tokenIndex196 := position, tokenIndex
-					if buffer[position] != rune(')') {
+					if !_rules[rulescriptEnd]() {
 						goto l196
 					}
-					position++
 					goto l192
 				l196:
 					position, tokenIndex = position196, tokenIndex196
@@ -2250,10 +2249,9 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 					position195, tokenIndex195 := position, tokenIndex
 					{
 						position197, tokenIndex197 := position, tokenIndex
-						if buffer[position] != rune(')') {
+						if !_rules[rulescriptEnd]() {
 							goto l197
 						}
-						position++
 						goto l195
 					l197:
 						position, tokenIndex = position197, tokenIndex197

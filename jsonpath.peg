@@ -176,7 +176,7 @@ script <-
         p.pushScriptQualifier(text)
     }
 
-command <- [^)]+
+command <- ( !scriptEnd . )+
 
 filter <-
     filterStart query filterEnd {
