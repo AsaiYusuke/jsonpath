@@ -288,11 +288,12 @@ Oliveagle/jsonpath is fastest.
 ```text
 JSONPath : $.store.book[0].price
 
-BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4         	 5570427	       210 ns/op	      56 B/op	       3 allocs/op
-BenchmarkOhler55Ojg_threeLevelsWithIndex-4                 	 1676749	       725 ns/op	    1040 B/op	       2 allocs/op
-BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4              	  572977	      2219 ns/op	      32 B/op	       1 allocs/op
-BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4         	 1835948	       642 ns/op	     208 B/op	       7 allocs/op
-BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13222105	        92.0 ns/op	       0 B/op	       0 allocs/op
+cpu: Intel(R) Core(TM) i5-6267U CPU @ 2.90GHz
+BenchmarkAsaiYusukeJSONPath_threeLevelsWithIndex-4         	 5846179	       211.3 ns/op	      48 B/op	       3 allocs/op
+BenchmarkOhler55Ojg_threeLevelsWithIndex-4                 	 1721571	       689.4 ns/op	    1040 B/op	       2 allocs/op
+BenchmarkBhmjJSONSlice_threeLevelsWithIndex-4              	  687261	      1844 ns/op	      24 B/op	       1 allocs/op
+BenchmarkPaesslerAGJSONPath_threeLevelsWithIndex-4         	 1892106	       639.2 ns/op	     208 B/op	       7 allocs/op
+BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13973798	        85.53 ns/op	       0 B/op	       0 allocs/op
 ```
 
 ### A slightly complex JSONPath
@@ -303,9 +304,10 @@ Among these libraries, my library is the fastest at the moment.
 ```text
 JSONPath : $..book[?(@.price > $.store.bicycle.price)]
 
-BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4   	  388156	      3140 ns/op	     560 B/op	      20 allocs/op
-BenchmarkOhler55Ojg_recursiveDescentWithFilter-4           	  236010	      5156 ns/op	    5240 B/op	      20 allocs/op
-BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4        	   54012	     22726 ns/op	    3032 B/op	      57 allocs/op
+cpu: Intel(R) Core(TM) i5-6267U CPU @ 2.90GHz
+BenchmarkAsaiYusukeJSONPath_recursiveDescentWithFilter-4   	  400609	      3002 ns/op	     464 B/op	      20 allocs/op
+BenchmarkOhler55Ojg_recursiveDescentWithFilter-4           	  247669	      5094 ns/op	    5240 B/op	      20 allocs/op
+BenchmarkBhmjJSONSlice_recursiveDescentWithFilter-4        	   59060	     20075 ns/op	    2936 B/op	      57 allocs/op
 BenchmarkPaesslerAGJSONPath                                	  not supported
 BenchmarkOliveagleJsonpath                                 	  not supported
 ```
@@ -360,7 +362,7 @@ BenchmarkOliveagleJsonpath                                 	  not supported
 Processor  : Intel Core i5-6267U 2.90GHz
 Memory     : 16.0 GB
 OS         : Windows 10
-Go version : go1.15.6 windows/amd64
+Go version : go1.16 windows/amd64
 ```
 </details>
 
