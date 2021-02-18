@@ -299,7 +299,7 @@ BenchmarkOliveagleJsonpath_threeLevelsWithIndex-4          	13973798	        85.
 ### A slightly complex JSONPath
 
 Libraries that can handle complex syntax limited to a few.
-Among these libraries, my library is the fastest at the moment.
+Among these libraries, my library is fastest.
 
 ```text
 JSONPath : $..book[?(@.price > $.store.bicycle.price)]
