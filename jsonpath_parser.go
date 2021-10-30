@@ -186,7 +186,7 @@ func (p *jsonPathParser) setConnectedText(targetNode syntaxNode, postfix ...stri
 		p.setConnectedText(targetNode.getNext(), postfix...)
 		appendText = targetNode.getNext().getConnectedText()
 	} else {
-		if postfix != nil && len(postfix) > 0 {
+		if len(postfix) > 0 {
 			appendText = postfix[0]
 		}
 	}
