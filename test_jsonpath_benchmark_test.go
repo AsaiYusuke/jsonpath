@@ -5,37 +5,22 @@ import (
 	"testing"
 )
 
-func execRetrieve(jsonPath, srcJSON string, b *testing.B) {
-	var src interface{}
-	if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
-		b.Errorf(`%w`, err)
-		return
-	}
-
-	for i := 0; i < b.N; i++ {
-		if _, err := Retrieve(jsonPath, src); err != nil {
-			b.Error(`%w`, err)
-		}
-
-	}
-}
-
 func execParserFunc(jsonPath, srcJSON string, b *testing.B) {
 	var src interface{}
 	if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
-		b.Errorf(`%w`, err)
+		b.Errorf(`%s`, err)
 		return
 	}
 
 	parserFunc, err := Parse(jsonPath)
 	if err != nil {
-		b.Errorf(`%w`, err)
+		b.Errorf(`%s`, err)
 		return
 	}
 
 	for i := 0; i < b.N; i++ {
 		if _, err := parserFunc(src); err != nil {
-			b.Error(`%w`, err)
+			b.Errorf(`%s`, err)
 		}
 
 	}

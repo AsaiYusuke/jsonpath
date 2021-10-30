@@ -94,7 +94,7 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) ([
 		return nil, err
 	}
 	if expectedError != nil {
-		t.Errorf("expected error<%w> != actual error<none>\n", expectedError)
+		t.Errorf("expected error<%s> != actual error<none>\n", expectedError)
 		return nil, err
 	}
 
@@ -122,7 +122,7 @@ func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
 						err = json.Unmarshal([]byte(srcJSON), &src)
 					}
 					if err != nil {
-						t.Errorf("%w", err)
+						t.Errorf("%s", err)
 						return
 					}
 
@@ -138,14 +138,14 @@ func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
 					if testCase.resultValidator != nil {
 						err := testCase.resultValidator(src, actualObject)
 						if err != nil {
-							t.Errorf("%w", err)
+							t.Errorf("%s", err)
 						}
 						return
 					}
 
 					actualOutputJSON, err := json.Marshal(actualObject)
 					if err != nil {
-						t.Errorf("%w", err)
+						t.Errorf("%s", err)
 						return
 					}
 
@@ -7176,12 +7176,12 @@ func TestRetrieveExecTwice(t *testing.T) {
 
 	var src1 interface{}
 	if err := json.Unmarshal([]byte(srcJSON1), &src1); err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 	var src2 interface{}
 	if err := json.Unmarshal([]byte(srcJSON2), &src2); err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 
@@ -7198,12 +7198,12 @@ func TestRetrieveExecTwice(t *testing.T) {
 
 	actualOutputJSON1, err := json.Marshal(actualObject1)
 	if err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 	actualOutputJSON2, err := json.Marshal(actualObject2)
 	if err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 
@@ -7223,12 +7223,12 @@ func TestParserFuncExecTwice(t *testing.T) {
 
 	var src1 interface{}
 	if err := json.Unmarshal([]byte(srcJSON1), &src1); err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 	var src2 interface{}
 	if err := json.Unmarshal([]byte(srcJSON2), &src2); err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 
@@ -7251,12 +7251,12 @@ func TestParserFuncExecTwice(t *testing.T) {
 
 	actualOutputJSON1, err := json.Marshal(actualObject1)
 	if err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 	actualOutputJSON2, err := json.Marshal(actualObject2)
 	if err != nil {
-		t.Errorf("%w", err)
+		t.Errorf("%s", err)
 		return
 	}
 
