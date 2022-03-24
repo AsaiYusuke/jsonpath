@@ -29,25 +29,12 @@ func (q *syntaxBasicCompareQuery) compute(
 			return rightValues
 		}
 
-		if q.rightParam.isLiteral {
-			for leftIndex := range leftValues {
-				if _, ok := leftValues[leftIndex].(struct{}); ok {
-					continue
-				}
-
-				if !q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
-					leftValues[leftIndex] = struct{}{}
-				}
-			}
-			return leftValues
-		}
-
 		for leftIndex := range leftValues {
 			if _, ok := leftValues[leftIndex].(struct{}); ok {
 				continue
 			}
 
-			if !q.comparator.comparator(leftValues[leftIndex], rightValues[leftIndex]) {
+			if !q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
 				leftValues[leftIndex] = struct{}{}
 			}
 		}
