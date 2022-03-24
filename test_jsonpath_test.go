@@ -4148,6 +4148,26 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
 				expectedJSON: `[{"a":1},{"a":3}]`,
 			},
+			{
+				jsonpath:     `$[?((1==2) || @.a>1)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?((1==1) || @.a>1)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":1},{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 || (1==2))]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 || (1==1))]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":1},{"a":2},{"a":3}]`,
+			},
 		},
 		`logical AND`: []TestCase{
 			{
@@ -4164,6 +4184,28 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				jsonpath:     `$[?(@.a<3 && @.a>1)]`,
 				inputJSON:    `[{"a":1},{"a":1.1},{"a":2.9},{"a":3}]`,
 				expectedJSON: `[{"a":1.1},{"a":2.9}]`,
+			},
+			{
+				jsonpath:     `$[?((1==2) && @.a>1)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[]`,
+				expectedErr:  createErrorMemberNotExist(`[?((1==2) && @.a>1)]`),
+			},
+			{
+				jsonpath:     `$[?((1==1) && @.a>1)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 && (1==2))]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[]`,
+				expectedErr:  createErrorMemberNotExist(`[?(@.a>1 && (1==2))]`),
+			},
+			{
+				jsonpath:     `$[?(@.a>1 && (1==1))]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
 			},
 		},
 		`logical NOT`: []TestCase{
