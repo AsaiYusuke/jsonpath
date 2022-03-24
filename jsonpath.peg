@@ -229,7 +229,16 @@ basicQuery <-
         } else {
             p.push(jsonpathFilter)
         }
+    } /
+    lBool {
+       value := p.pop().(bool)
+       if value {
+           p.pushCompareParameterLiteral(value)
+        } else {
+           p.pushCompareParameterLiteral(struct{}{})
+        }       
     }
+
 
 logicOr  <- space '||' space
 logicAnd <- space '&&' space
