@@ -221,7 +221,7 @@ The regular expression syntax works as a regular expression in Go lang.
 In particular, you can use "(?i)" to specify the regular expression as the ignore case option.
 
 ```text
-JSONPath : $[?(@.a=~/(?i)CASE/)]
+JSONPath : $[?(@=~/(?i)CASE/)]
 srcJSON  : ["Case","Hello"]
 Output   : ["Case"]
 ```
