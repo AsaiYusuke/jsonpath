@@ -203,7 +203,7 @@ andQuery <-
 
 basicQuery <-
     subQueryStart query subQueryEnd /
-    
+
     < comparator > {
         query := p.pop()
         p.push(query)
@@ -213,14 +213,14 @@ basicQuery <-
         }
         if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
             _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
-            _, rigthIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
-            if leftIsCurrentRoot && rigthIsCurrentRoot {
+            _, rightIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
+            if leftIsCurrentRoot && rightIsCurrentRoot {
                 panic(p.syntaxErr(
                     begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
             }
         }
     } /
-    
+
     < logicNot? jsonpathFilter > {
         _ = p.pop()
         jsonpathFilter := p.pop().(syntaxQuery)
@@ -287,7 +287,7 @@ qParam <-
     } /
 
     singleJsonpathFilter
-    
+
 qNumericParam <-
     lNumber {
         p.pushCompareParameterLiteral(p.pop())
@@ -338,7 +338,7 @@ lBool <-
     ( 'true' / 'True' / 'TRUE' ) {
         p.push(true)
     } /
-    
+
     ( 'false' / 'False' / 'FALSE' ) {
         p.push(false)
     }

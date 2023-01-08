@@ -13,4 +13,3 @@ script:
 
 after_script:
   - curl -d "repo=github.com/AsaiYusuke/jsonpath" https://goreportcard.com/checks
-  
