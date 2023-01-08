@@ -4335,7 +4335,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`..`, `object/array`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$..['a','b']`,
 				inputJSON:    `[{"a":1,"c":2},{"d":3,"b":4}]`,
@@ -4452,7 +4452,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 	execTestRetrieveTestGroups(t, testGroups)
 }
 
-func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
+func TestRetrieve_valueGroupCombination_Multiple_identifier(t *testing.T) {
 	testGroups := TestGroup{
 		`Recursive-descent`: []TestCase{
 			{
@@ -4481,7 +4481,7 @@ func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`['a','b']`, `object`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$['a','b']['c','d']`,
 				inputJSON:    `{"a":{"a":1,"c":2},"b":{"d":3,"a":4}}`,
@@ -4618,7 +4618,7 @@ func TestRetrieve_valueGroupCombination_Multiple_identifiler(t *testing.T) {
 	execTestRetrieveTestGroups(t, testGroups)
 }
 
-func TestRetrieve_valueGroupCombination_Wildcard_identifiler(t *testing.T) {
+func TestRetrieve_valueGroupCombination_Wildcard_identifier(t *testing.T) {
 	testGroups := TestGroup{
 		`Recursive-descent`: []TestCase{
 			{
@@ -4647,7 +4647,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_identifiler(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$.*['a','b']`,
 				inputJSON:    `{"a":{"a":1},"c":{"c":3},"b":{"b":2}}`,
@@ -4813,7 +4813,7 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`[0:2]`, `array`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$[0:2]['a','b']`,
 				inputJSON:    `[{"a":1},{"b":2}]`,
@@ -4979,7 +4979,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`[*]`, `object/array`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$[*]['a','b']`,
 				inputJSON:    `[{"c":4},{"b":2,"a":1},{"a":3}]`,
@@ -5145,7 +5145,7 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`[0,1]`, `array`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$[0,1]['a','b']`,
 				inputJSON:    `[{"a":1},{"b":2}]`,
@@ -5311,7 +5311,7 @@ func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
 				expectedErr: createErrorTypeUnmatched(`[?(@.b)]`, `object/array`, `string`),
 			},
 		},
-		`Multiple-identifiler`: []TestCase{
+		`Multiple-identifier`: []TestCase{
 			{
 				jsonpath:     `$[?(@.b)]['a','c']`,
 				inputJSON:    `[{"a":1},{"b":2},{"a":3,"b":4},{"c":5},{"a":6,"c":7},{"b":8,"c":9},{"a":10,"b":11,"c":12}]`,
@@ -6917,21 +6917,21 @@ var sliceStructChangedResultValidator = func(src interface{}, actualObject []int
 	}
 	srcArray = append(srcArray[:1], srcArray[2:]...) // srcArray:[1] , accessor:[1,5,3]
 	if len(srcArray) != 1 || accessor.Get() != 5 {
-		return fmt.Errorf(`Delx2 -> Get : expect<%d> != actual<%d>`, 5, accessor.Get())
+		return fmt.Errorf(`Del x2 -> Get : expect<%d> != actual<%d>`, 5, accessor.Get())
 	}
 	accessor.Set(6) // srcArray:[1] , accessor:[1,6,3]
 	if len(srcArray) != 1 {
-		return fmt.Errorf(`Delx2 -> Set -> Len : expect<%d> != actual<%d>`, 1, len(srcArray))
+		return fmt.Errorf(`Del x2 -> Set -> Len : expect<%d> != actual<%d>`, 1, len(srcArray))
 	}
 	srcArray = append(srcArray, 7) // srcArray:[1,7] , accessor:[1,7,3]
 	if len(srcArray) != 2 || accessor.Get() != 7 {
-		return fmt.Errorf(`Delx2 -> Add -> Get : expect<%d> != actual<%d>`, 7, accessor.Get())
+		return fmt.Errorf(`Del x2 -> Add -> Get : expect<%d> != actual<%d>`, 7, accessor.Get())
 	}
 	srcArray = append(srcArray, 8) // srcArray:[1,7,8]    , accessor:[1,7,8]
 	srcArray = append(srcArray, 9) // srcArray:[1,7,8,9]  , accessor:[1,7,8,9]
 	srcArray[1] = 10               // srcArray:[1,10,8,9] , accessor:[1,10,8,9]
 	if len(srcArray) != 4 || accessor.Get() != 10 {
-		return fmt.Errorf(`Delx2 -> Addx3 -> Update -> Get : expect<%d> != actual<%d>`, 10, accessor.Get())
+		return fmt.Errorf(`Del x2 -> Add x3 -> Update -> Get : expect<%d> != actual<%d>`, 10, accessor.Get())
 	}
 	return nil
 }

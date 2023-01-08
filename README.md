@@ -4,12 +4,12 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AsaiYusuke/jsonpath)](https://goreportcard.com/report/github.com/AsaiYusuke/jsonpath)
 [![Coverage Status](https://coveralls.io/repos/github/AsaiYusuke/jsonpath/badge.svg?branch=main)](https://coveralls.io/github/AsaiYusuke/jsonpath?branch=main)
 [![Go Reference](https://pkg.go.dev/badge/github.com/AsaiYusuke/jsonpath.svg)](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath)
-[![Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go#query-language)  
+[![Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go#query-language)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![AsaiYusuke/JSONPath](assets/logo.svg)
 
-This [Go](https://golang.org/) library is for retrieving a part of JSON  according to the *JSONPath* query syntax.
+This [Go](https://golang.org/) library is for retrieving a part of JSON according to the _JSONPath_ query syntax.
 
 The core JSONPath syntax on which this library based:
 
@@ -22,17 +22,17 @@ The core JSONPath syntax on which this library based:
 For syntax compatibility among other libraries, please check [:memo: my comparison results](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html).
 
 ## Table of Contents
-* [Getting started](#getting-started)
-* [Basic design](#basic-design)
-* [How to use](#how-to-use)
-  * [Retrieve one-time or repeated](#-retrieve-one-time-or-repeated)
-  * [Error handling](#-error-handling)
-  * [Function syntax](#-function-syntax)
-  * [Accessing JSON](#-accessing-json)
-* [Differences](#differences)
-* [Benchmarks](#benchmarks)
-* [Project progress](#project-progress)
 
+- [Getting started](#getting-started)
+- [Basic design](#basic-design)
+- [How to use](#how-to-use)
+  - [Retrieve one-time or repeated](#-retrieve-one-time-or-repeated)
+  - [Error handling](#-error-handling)
+  - [Function syntax](#-function-syntax)
+  - [Accessing JSON](#-accessing-json)
+- [Differences](#differences)
+- [Benchmarks](#benchmarks)
+- [Project progress](#project-progress)
 
 ## Getting started
 
@@ -68,19 +68,22 @@ func main() {
 
 ## Basic design
 
-#### *Ease of development*
+#### _Ease of development_
+
 - [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
 - Equipped with a large number of unit tests to avoid bugs that lead to unexpected results.
 
-#### *Ease of use*
+#### _Ease of use_
+
 - The error specification enables the library user to handle errors correctly.
 
-#### *Compatibility*
+#### _Compatibility_
+
 - Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
 
 ## How to use
 
-### * Retrieve one-time or repeated
+### \* Retrieve one-time or repeated
 
 The `Retrieve` function returns retrieved result using JSONPath and JSON object:
 
@@ -90,8 +93,8 @@ output, err := jsonpath.Retrieve(jsonPath, src)
 
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Retrieve)
 
-The `Parse` function returns a *parser-function* that completed to check JSONPath syntax.
-By using *parser-function*, it can repeat to retrieve with the same JSONPath :
+The `Parse` function returns a _parser-function_ that completed to check JSONPath syntax.
+By using _parser-function_, it can repeat to retrieve with the same JSONPath :
 
 ```go
 jsonPath, err := jsonpath.Parse(jsonPath)
@@ -102,27 +105,27 @@ output2, err2 := jsonPath(src2)
 
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Parse)
 
-### * Error handling
+### \* Error handling
 
-If there is a problem with the execution of *APIs*, an error type returned.
+If there is a problem with the execution of _APIs_, an error type returned.
 These error types define the corresponding symptom, as listed below:
 
 #### Syntax check errors from `Retrieve`, `Parse`
 
-| Error type              | Message format                                     | Symptom                                                                                                          | Ex                                                                                             |
-|-------------------------|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath.<br>The *reason* including in this message will tell you more about it. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidSyntax)    |
+| Error type              | Message format                                     | Symptom                                                                                                          | Ex                                                                                        |
+| ----------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath.<br>The _reason_ including in this message will tell you more about it. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidSyntax)    |
 | `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath treated as the invalid error in Go syntax.                                | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidArgument)  |
 | `ErrorFunctionNotFound` | `function not found (function=%s)`                 | The function specified in the JSONPath is not found.                                                             | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionNotFound) |
 | `ErrorNotSupported`     | `not supported (feature=%s, path=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                              | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorNotSupported)     |
 
-#### Runtime errors from `Retrieve`, *`parser-functions`*
+#### Runtime errors from `Retrieve`, _`parser-functions`_
 
-| Error type             | Message format                                    | Symptom                                                                             | Ex                                                                                            |
-|------------------------|---------------------------------------------------|-------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `ErrorMemberNotExist`  | `member did not exist (path=%s)`                  | The object/array member specified in the JSONPath did not exist in the JSON object. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorMemberNotExist)  |
-| `ErrorTypeUnmatched`   | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorTypeUnmatched)   |
-| `ErrorFunctionFailed`  | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionFailed)  |
+| Error type            | Message format                                    | Symptom                                                                             | Ex                                                                                      |
+| --------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `ErrorMemberNotExist` | `member did not exist (path=%s)`                  | The object/array member specified in the JSONPath did not exist in the JSON object. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorMemberNotExist) |
+| `ErrorTypeUnmatched`  | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorTypeUnmatched)  |
+| `ErrorFunctionFailed` | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionFailed) |
 
 The type checking is convenient to recognize which error happened.
 
@@ -141,7 +144,7 @@ The type checking is convenient to recognize which error happened.
   }
 ```
 
-### * Function syntax
+### \* Function syntax
 
 Function enables to format results by using user defined functions.
 The function syntax comes after the JSONPath.
@@ -154,16 +157,15 @@ The filter function applies a user function to each values in the result to get 
 
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetFilterFunction)
 
-
 #### Aggregate function
 
 The aggregate function converts all values in the result into a single value.
 
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAggregateFunction)
 
-### * Accessing JSON
+### \* Accessing JSON
 
-You can get the accessors ( *Getters / Setters* ) of the input JSON instead of the retrieved values.
+You can get the accessors ( _Getters / Setters_ ) of the input JSON instead of the retrieved values.
 These accessors can use to update for the input JSON.
 
 This feature can get enabled by giving `Config.SetAccessorMode()`.
@@ -171,7 +173,8 @@ This feature can get enabled by giving `Config.SetAccessorMode()`.
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAccessorMode)
 
 #### Note:
-It is not possible to use *Setter* for some results, such as for JSONPath including function syntax.
+
+It is not possible to use _Setter_ for some results, such as for JSONPath including function syntax.
 
 Also, operations using accessors follow the map/slice manner of Go language.
 If you use accessors after changing the structure of JSON, you need to pay attention to the behavior.
@@ -188,11 +191,11 @@ These behaviors will change in the future if appropriate ones found.
 
 The following character types can be available for identifiers in dot-child notation.
 
-| Character type                                                                                                                           | Availabe | Escape |
-|------------------------------------------------------------------------------------------------------------------------------------------|----------|--------|
-| * Numbers and alphabets (`0-9` `A-Z` `a-z`)<br> * Hyphen and underscore (`-` `_`)<br> * Non-ASCII Unicode characters (`0x80 - 0x10FFFF`) | Yes      | No     |
-| * Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` <code>&#124;</code> `}` `~`) | Yes | Yes |
-| * ~~Control code characters~~ (`0x00 - 0x1F`, `0x7F`) | No       | -      |
+| Character type                                                                                                                                                                | Available | Escape required |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------- |
+| \* Numbers and alphabets (`0-9` `A-Z` `a-z`)<br> \* Hyphen and underscore (`-` `_`)<br> \* Non-ASCII Unicode characters (`0x80 - 0x10FFFF`)                                     | Yes       | No              |
+| \* Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` <code>&#124;</code> `}` `~`) | Yes       | Yes             |
+| \* ~~Control code characters~~ (`0x00 - 0x1F`, `0x7F`)                                                                                                                        | No        | -               |
 
 The printable symbols except hyphen and underscore can use by escaping them.
 
@@ -228,9 +231,8 @@ Output   : ["Case"]
 JSONPaths that returns value group cannot specify with `comparator` or `regular expression`.
 But, `existence check` can use these.
 
-
 | JSONPaths that return a value group | example       |
-|-------------------------------------|---------------|
+| ----------------------------------- | ------------- |
 | Recursive descent                   | `@..a`        |
 | Multiple identifier                 | `@['a','b']`  |
 | Wildcard identifier                 | `@.*`         |
@@ -364,6 +366,7 @@ Memory     : 16.0 GB
 OS         : Windows 10
 Go version : go1.16 windows/amd64
 ```
+
 </details>
 
 ## Project progress
@@ -388,7 +391,7 @@ Go version : go1.16 windows/amd64
     - [x] filter
     - [x] aggregate
   - [x] Refer to the consensus behaviors
-- Archtecture
+- Architecture
   - [x] PEG syntax analyzing
   - [x] Error handling
   - [x] Function
