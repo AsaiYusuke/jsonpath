@@ -12,18 +12,14 @@ func (l *syntaxLogicalAnd) compute(
 	rightComputedList := l.rightQuery.compute(root, currentList, container)
 	if len(leftComputedList) == 1 {
 		if _, ok := leftComputedList[0].(struct{}); ok {
-			for index := range rightComputedList {
-				rightComputedList[index] = struct{}{}
-			}
+			return leftComputedList
 		}
 		return rightComputedList
 	}
 
 	if len(rightComputedList) == 1 {
 		if _, ok := rightComputedList[0].(struct{}); ok {
-			for index := range leftComputedList {
-				leftComputedList[index] = struct{}{}
-			}
+			return rightComputedList
 		}
 		return leftComputedList
 	}

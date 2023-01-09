@@ -11,21 +11,17 @@ func (l *syntaxLogicalOr) compute(
 	leftComputedList := l.leftQuery.compute(root, currentList, container)
 	rightComputedList := l.rightQuery.compute(root, currentList, container)
 	if len(leftComputedList) == 1 {
-		if _, ok := leftComputedList[0].(struct{}); !ok {
-			for index := range rightComputedList {
-				rightComputedList[index] = leftComputedList[0]
-			}
+		if _, ok := leftComputedList[0].(struct{}); ok {
+			return rightComputedList
 		}
-		return rightComputedList
+		return leftComputedList
 	}
 
 	if len(rightComputedList) == 1 {
-		if _, ok := rightComputedList[0].(struct{}); !ok {
-			for index := range leftComputedList {
-				leftComputedList[index] = rightComputedList[0]
-			}
+		if _, ok := rightComputedList[0].(struct{}); ok {
+			return leftComputedList
 		}
-		return leftComputedList
+		return rightComputedList
 	}
 
 	for index := range leftComputedList {

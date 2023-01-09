@@ -3909,6 +3909,190 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedErr: createErrorMemberNotExist(`[?(@[1]>1)]`),
 			},
 		},
+		`found-path-and-not-found-literal`: []TestCase{
+			{
+				jsonpath:    `$[?(@.a == $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a == $.b)]`),
+			},
+			{
+				jsonpath:     `$[?(@.a != $.b)]`,
+				inputJSON:    `[{"a":0},{"a":1}]`,
+				expectedJSON: `[{"a":0},{"a":1}]`,
+			},
+			{
+				jsonpath:    `$[?(@.a < $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a < $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.a <= $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a <= $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.a > $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a > $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.a >= $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a >= $.b)]`),
+			}, {
+				jsonpath:    `$[?($.b == @.a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b == @.a)]`),
+			},
+			{
+				jsonpath:     `$[?($.b != @.a)]`,
+				inputJSON:    `[{"a":0},{"a":1}]`,
+				expectedJSON: `[{"a":0},{"a":1}]`,
+			},
+			{
+				jsonpath:    `$[?($.b < @.a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b < @.a)]`),
+			},
+			{
+				jsonpath:    `$[?($.b <= @.a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b <= @.a)]`),
+			},
+			{
+				jsonpath:    `$[?($.b > @.a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b > @.a)]`),
+			},
+			{
+				jsonpath:    `$[?($.b >= @.a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b >= @.a)]`),
+			},
+		},
+		`not-found-path-and-found-literal`: []TestCase{
+			{
+				jsonpath:    `$[?(@.b == $[0].a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b == $[0].a)]`),
+			},
+			{
+				jsonpath:     `$[?(@.b != $[0].a)]`,
+				inputJSON:    `[{"a":0},{"a":1}]`,
+				expectedJSON: `[{"a":0},{"a":1}]`,
+			},
+			{
+				jsonpath:    `$[?(@.b < $[0].a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b < $[0].a)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b <= $[0].a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b <= $[0].a)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b > $[0].a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b > $[0].a)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b >= $[0].a)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b >= $[0].a)]`),
+			}, {
+				jsonpath:    `$[?($[0].a == @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($[0].a == @.b)]`),
+			},
+			{
+				jsonpath:     `$[?($[0].a != @.b)]`,
+				inputJSON:    `[{"a":0},{"a":1}]`,
+				expectedJSON: `[{"a":0},{"a":1}]`,
+			},
+			{
+				jsonpath:    `$[?($[0].a < @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($[0].a < @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($[0].a <= @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($[0].a <= @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($[0].a > @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($[0].a > @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($[0].a >= @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($[0].a >= @.b)]`),
+			},
+		},
+		`not-found-path-and-not-found-literal`: []TestCase{
+			{
+				jsonpath:     `$[?(@.b == $.b)]`,
+				inputJSON:    `[{"a":0},{"a":1}]`,
+				expectedJSON: `[{"a":0},{"a":1}]`,
+			},
+			{
+				jsonpath:    `$[?(@.b != $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b != $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b < $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b < $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b <= $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b <= $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b > $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b > $.b)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b >= $.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b >= $.b)]`),
+			},
+			{
+				jsonpath:     `$[?($.b == @.b)]`,
+				inputJSON:    `[{"a":0},{"a":1}]`,
+				expectedJSON: `[{"a":0},{"a":1}]`,
+			},
+			{
+				jsonpath:    `$[?($.b != @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b != @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($.b < @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b < @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($.b <= @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b <= @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($.b > @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b > @.b)]`),
+			},
+			{
+				jsonpath:    `$[?($.b >= @.b)]`,
+				inputJSON:   `[{"a":0},{"a":1}]`,
+				expectedErr: createErrorMemberNotExist(`[?($.b >= @.b)]`),
+			},
+		},
 	}
 
 	execTestRetrieveTestGroups(t, testGroups)
