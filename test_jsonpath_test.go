@@ -3290,6 +3290,11 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				inputJSON:   `[{"a":"abc"}]`,
 				expectedErr: createErrorMemberNotExist(`[?(@.a=='ab')]`),
 			},
+			{
+				jsonpath:     `$[?(@.a==1)]`,
+				inputJSON:    `[{"a":1},{"b":1}]`,
+				expectedJSON: `[{"a":1}]`,
+			},
 		},
 		`ne`: []TestCase{
 			{
@@ -3311,6 +3316,11 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				jsonpath:    `$[?(@.a!='ab')]`,
 				inputJSON:   `[{"a":"ab"}]`,
 				expectedErr: createErrorMemberNotExist(`[?(@.a!='ab')]`),
+			},
+			{
+				jsonpath:     `$[?(@.a!=1)]`,
+				inputJSON:    `[{"a":1},{"b":1}]`,
+				expectedJSON: `[{"b":1}]`,
 			},
 		},
 		`gt`: []TestCase{
@@ -4352,6 +4362,11 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
 				expectedJSON: `[{"a":1},{"a":2},{"a":3}]`,
 			},
+			{
+				jsonpath:     `$[?(@.x || @.b > 2)]`,
+				inputJSON:    `[{"a":"a"},{"b":2},{"b":3}]`,
+				expectedJSON: `[{"b":3}]`,
+			},
 		},
 		`logical AND`: []TestCase{
 			{
@@ -4390,6 +4405,11 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				jsonpath:     `$[?(@.a>1 && (1==1))]`,
 				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
 				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:    `$[?(@.x && @.b > 2)]`,
+				inputJSON:   `[{"a":"a"},{"b":2},{"b":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.x && @.b > 2)]`),
 			},
 		},
 		`logical NOT`: []TestCase{
@@ -4465,12 +4485,12 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 		},
 		`comparator`: []TestCase{
 			{
-				jsonpath:     `$[?(@.a || @.b != 2)]`,
+				jsonpath:     `$[?(@.a || @.b > 2)]`,
 				inputJSON:    `[{"a":"a"},{"b":2},{"b":3}]`,
 				expectedJSON: `[{"a":"a"},{"b":3}]`,
 			},
 			{
-				jsonpath:     `$[?(@.b != 2 || @.a)]`,
+				jsonpath:     `$[?(@.b > 2 || @.a)]`,
 				inputJSON:    `[{"a":"a"},{"b":2},{"b":3}]`,
 				expectedJSON: `[{"a":"a"},{"b":3}]`,
 			},
@@ -7529,7 +7549,7 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	parser.PrintSyntaxTree()
 	parser.SprintSyntaxTree()
 
-	err := parseError{p: &parser}
+	err := parseError{p: &parser, max: token32{begin: 0, end: 1}}
 	_ = err.Error()
 
 	parser.buffer = []rune{'\n'}
