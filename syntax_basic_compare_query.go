@@ -41,21 +41,11 @@ func (q *syntaxBasicCompareQuery) compute(
 		return leftValues
 	}
 
-	if !q.leftParam.isLiteral {
-		if !rightFound {
-			q.setBlankValues(leftValues)
+	if !leftFound && !rightFound {
+		if _, ok := q.comparator.(*syntaxCompareEQ); ok {
+			return currentList
 		}
-		return leftValues
 	}
 
-	if !leftFound {
-		q.setBlankValues(rightValues)
-	}
-	return rightValues
-}
-
-func (q *syntaxBasicCompareQuery) setBlankValues(values []interface{}) {
-	for index := range values {
-		values[index] = struct{}{}
-	}
+	return []interface{}{struct{}{}}
 }

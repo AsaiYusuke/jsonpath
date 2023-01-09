@@ -6,12 +6,18 @@ type syntaxBasicAnyValueComparator struct {
 }
 
 func (c *syntaxBasicAnyValueComparator) typeCast(values []interface{}) bool {
+	var foundValue bool
 	for index := range values {
-		if number, ok := values[index].(json.Number); ok {
-			if floatNumber, err := number.Float64(); err == nil {
+		switch typedValue := values[index].(type) {
+		case json.Number:
+			foundValue = true
+			if floatNumber, err := typedValue.Float64(); err == nil {
 				values[index] = floatNumber
 			}
+		case struct{}:
+		default:
+			foundValue = true
 		}
 	}
-	return len(values) > 0
+	return foundValue
 }
