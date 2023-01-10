@@ -240,13 +240,21 @@ comparator <-
         '==' space qParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.pushCompareEQ(leftParam, rightParam)
+            if leftParam.isLiteral {
+                p.pushCompareEQ(rightParam, leftParam)
+            } else {
+                p.pushCompareEQ(leftParam, rightParam)
+            }
         } /
 
         '!=' space qParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.pushCompareNE(leftParam, rightParam)
+            if leftParam.isLiteral {
+                p.pushCompareNE(rightParam, leftParam)
+            } else {
+                p.pushCompareNE(leftParam, rightParam)
+            }
         }
     ) /
 
@@ -254,25 +262,41 @@ comparator <-
         '<=' space qNumericParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.pushCompareGE(leftParam, rightParam)
+            if leftParam.isLiteral {
+                p.pushCompareLE(rightParam, leftParam)
+            } else {
+                p.pushCompareGE(leftParam, rightParam)
+            }
         } /
 
         '<' space qNumericParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.pushCompareGT(leftParam, rightParam)
+            if leftParam.isLiteral {
+                p.pushCompareLT(rightParam, leftParam)
+            } else {
+                p.pushCompareGT(leftParam, rightParam)
+            }
         } /
 
         '>=' space qNumericParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.pushCompareLE(leftParam, rightParam)
+            if leftParam.isLiteral {
+                p.pushCompareGE(rightParam, leftParam)
+            } else {
+                p.pushCompareLE(leftParam, rightParam)
+            }
         } /
 
         '>' space qNumericParam {
             rightParam := p.pop().(*syntaxBasicCompareParameter)
             leftParam := p.pop().(*syntaxBasicCompareParameter)
-            p.pushCompareLT(leftParam, rightParam)
+            if leftParam.isLiteral {
+                p.pushCompareGT(rightParam, leftParam)
+            } else {
+                p.pushCompareLT(leftParam, rightParam)
+            }
         }
     ) /
 
