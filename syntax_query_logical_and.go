@@ -25,10 +25,12 @@ func (l *syntaxLogicalAnd) compute(
 	}
 
 	var hasValue bool
-	for index := range leftComputedList {
+	for index := range rightComputedList {
 		if _, ok := rightComputedList[index].(struct{}); ok {
 			leftComputedList[index] = struct{}{}
-		} else {
+			continue
+		}
+		if _, ok := leftComputedList[index].(struct{}); !ok {
 			hasValue = true
 		}
 	}

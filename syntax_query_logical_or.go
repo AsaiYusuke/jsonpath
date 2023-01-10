@@ -24,16 +24,10 @@ func (l *syntaxLogicalOr) compute(
 		return rightComputedList
 	}
 
-	var hasValue bool
 	for index := range leftComputedList {
 		if _, ok := rightComputedList[index].(struct{}); !ok {
 			leftComputedList[index] = rightComputedList[index]
-		} else {
-			hasValue = true
 		}
 	}
-	if hasValue {
-		return leftComputedList
-	}
-	return []interface{}{struct{}{}}
+	return leftComputedList
 }
