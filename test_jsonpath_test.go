@@ -4367,6 +4367,21 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				inputJSON:    `[{"a":"a"},{"b":2},{"b":3}]`,
 				expectedJSON: `[{"b":3}]`,
 			},
+			{
+				jsonpath:     `$[?(@.b > 2 || @.x)]`,
+				inputJSON:    `[{"a":"a"},{"b":2},{"b":3}]`,
+				expectedJSON: `[{"b":3}]`,
+			},
+			{
+				jsonpath:    `$[?(@.x || @.x)]`,
+				inputJSON:   `[{"a":"a"},{"b":2},{"b":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.x || @.x)]`),
+			},
+			{
+				jsonpath:     `$[?(@.b > 2 || @.b < 2)]`,
+				inputJSON:    `[{"b":1},{"b":2},{"b":3}]`,
+				expectedJSON: `[{"b":1},{"b":3}]`,
+			},
 		},
 		`logical AND`: []TestCase{
 			{
@@ -4410,6 +4425,21 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				jsonpath:    `$[?(@.x && @.b > 2)]`,
 				inputJSON:   `[{"a":"a"},{"b":2},{"b":3}]`,
 				expectedErr: createErrorMemberNotExist(`[?(@.x && @.b > 2)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b > 2 && @.x)]`,
+				inputJSON:   `[{"a":"a"},{"b":2},{"b":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b > 2 && @.x)]`),
+			},
+			{
+				jsonpath:    `$[?(@.x && @.x)]`,
+				inputJSON:   `[{"a":"a"},{"b":2},{"b":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.x && @.x)]`),
+			},
+			{
+				jsonpath:    `$[?(@.b > 2 && @.b < 2)]`,
+				inputJSON:   `[{"b":1},{"b":2},{"b":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.b > 2 && @.b < 2)]`),
 			},
 		},
 		`logical NOT`: []TestCase{

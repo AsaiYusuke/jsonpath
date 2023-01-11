@@ -14,7 +14,7 @@ func (e *syntaxQueryParamRoot) compute(
 	values := bufferContainer{}
 
 	if err := e.param.retrieve(root, root, &values); err != nil {
-		return []interface{}{}
+		return []interface{}{struct{}{}}
 	}
 
 	// e.param.isValueGroup() should always be false.

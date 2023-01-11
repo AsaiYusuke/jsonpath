@@ -13,6 +13,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 
 	result := make([]interface{}, len(currentList))
 
+	var hasValue bool
 	for index := range currentList {
 		values := bufferContainer{}
 
@@ -20,12 +21,15 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 			result[index] = struct{}{}
 			continue
 		}
+		hasValue = true
 		if e.param.isValueGroup() {
 			result[index] = values.result
 		} else {
 			result[index] = values.result[0]
 		}
 	}
-
-	return result
+	if hasValue {
+		return result
+	}
+	return []interface{}{struct{}{}}
 }

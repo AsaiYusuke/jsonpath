@@ -16,32 +16,26 @@ func (q *syntaxBasicCompareQuery) compute(
 	rightFound := q.comparator.typeCast(rightValues)
 
 	if leftFound && rightFound {
-		if q.leftParam.isLiteral {
-			for rightIndex := range rightValues {
-				if _, ok := rightValues[rightIndex].(struct{}); ok {
-					continue
-				}
-
-				if !q.comparator.comparator(leftValues[0], rightValues[rightIndex]) {
-					rightValues[rightIndex] = struct{}{}
-				}
-			}
-			return rightValues
-		}
-
+		var hasValue bool
+		// The syntax parser always results in a literal value on the right side as input.
 		for leftIndex := range leftValues {
 			if _, ok := leftValues[leftIndex].(struct{}); ok {
 				continue
 			}
-
-			if !q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
+			if q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
+				hasValue = true
+			} else {
 				leftValues[leftIndex] = struct{}{}
 			}
 		}
-		return leftValues
+		if hasValue {
+			return leftValues
+		}
+		return []interface{}{struct{}{}}
 	}
 
-	if !leftFound && !rightFound {
+	// leftFound == false && rightFound == false
+	if leftFound == rightFound {
 		if _, ok := q.comparator.(*syntaxCompareEQ); ok {
 			return currentList
 		}
