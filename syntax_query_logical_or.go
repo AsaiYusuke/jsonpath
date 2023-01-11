@@ -24,7 +24,7 @@ func (l *syntaxLogicalOr) compute(
 		return rightComputedList
 	}
 
-	for index := range leftComputedList {
+	for index := range rightComputedList {
 		if _, ok := rightComputedList[index].(struct{}); !ok {
 			leftComputedList[index] = rightComputedList[index]
 		}
