@@ -1,7 +1,5 @@
 package jsonpath
 
-import "reflect"
-
 type syntaxBasicNode struct {
 	text          string
 	connectedText string
@@ -115,25 +113,17 @@ func (i *syntaxBasicNode) setAccessorMode(mode bool) {
 	i.accessorMode = mode
 }
 
-var errorTypeUnmatched = reflect.TypeOf(ErrorTypeUnmatched{})
-
 func (i *syntaxBasicNode) addDeepestError(
 	err errorRuntime, deepestTextLen int, deepestError errorRuntime) (int, errorRuntime) {
 
 	textLength := len(err.getSyntaxNode().getConnectedText())
 
 	if deepestTextLen == 0 || deepestTextLen > textLength {
-		deepestTextLen = textLength
-		deepestError = nil
+		return textLength, err
 	}
 
 	if deepestTextLen == textLength {
-		if deepestError == nil {
-			return deepestTextLen, err
-		}
-
-		deepestErrorType := reflect.TypeOf(deepestError)
-		if deepestErrorType == errorTypeUnmatched {
+		if _, ok := deepestError.(ErrorTypeUnmatched); ok {
 			return deepestTextLen, err
 		}
 	}
