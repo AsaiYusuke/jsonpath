@@ -123,10 +123,6 @@ func (i *syntaxBasicNode) addDeepestError(
 	}
 
 	if deepestTextLen == textLength {
-		if deepestError == nil {
-			return deepestTextLen, err
-		}
-
 		if _, ok := deepestError.(ErrorTypeUnmatched); ok {
 			return deepestTextLen, err
 		}
