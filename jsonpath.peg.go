@@ -606,6 +606,14 @@ func (p *pegJSONPathParser) Execute() {
 
 			_ = p.pop()
 			jsonpathFilter := p.pop().(syntaxQuery)
+
+			if param, isRoot := jsonpathFilter.(*syntaxQueryParamRoot); isRoot {
+				if param.isValueGroupParameter() {
+					panic(p.syntaxErr(
+						begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
+				}
+			}
+
 			if text[0:1] == `!` {
 				p.pushLogicalNot(jsonpathFilter)
 			} else {
@@ -3811,6 +3819,14 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 88 Action27 <- <{
 		    _ = p.pop()
 		    jsonpathFilter := p.pop().(syntaxQuery)
+
+		    if param, isRoot := jsonpathFilter.(*syntaxQueryParamRoot); isRoot {
+		        if param.isValueGroupParameter() {
+		            panic(p.syntaxErr(
+		                begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
+		        }
+		    }
+
 		    if text[0:1] == `!` {
 		        p.pushLogicalNot(jsonpathFilter)
 		    } else {

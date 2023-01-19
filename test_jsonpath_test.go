@@ -6463,6 +6463,43 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(a=~/123/)]`},
 			},
 		},
+		`qualifier::existence-check`: []TestCase{
+			{
+				jsonpath:    `$.z[?($..x)]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$..x)]`},
+			},
+			{
+				jsonpath:    `$.z[?($["x","y"])]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$["x","y"])]`},
+			},
+			{
+				jsonpath:    `$.z[?($.*)]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$.*)]`},
+			},
+			{
+				jsonpath:    `$.z[?($[0:1])]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[0:1])]`},
+			},
+			{
+				jsonpath:    `$.z[?($[*])]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[*])]`},
+			},
+			{
+				jsonpath:    `$.z[?($[0,1])]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[0,1])]`},
+			},
+			{
+				jsonpath:    `$.z[?($[?(@.x)])]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[?(@.x)])]`},
+			},
+		},
 		`function`: []TestCase{
 			{
 				jsonpath:    `$.func(`,
