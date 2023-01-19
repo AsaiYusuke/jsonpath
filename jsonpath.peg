@@ -224,6 +224,14 @@ basicQuery <-
     < logicNot? jsonpathFilter > {
         _ = p.pop()
         jsonpathFilter := p.pop().(syntaxQuery)
+
+        if param, isRoot := jsonpathFilter.(*syntaxQueryParamRoot); isRoot {
+            if param.isValueGroupParameter() {
+                panic(p.syntaxErr(
+                    begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
+            }
+        }
+
         if text[0:1] == `!` {
             p.pushLogicalNot(jsonpathFilter)
         } else {

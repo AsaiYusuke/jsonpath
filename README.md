@@ -228,8 +228,7 @@ Output   : ["Case"]
 
 ### JSONPaths in the filter-qualifier
 
-JSONPaths that returns value group cannot specify with `comparator` or `regular expression`.
-But, `existence check` can use these.
+JSONPaths with the current root that return a value group cannot use with `comparator` or `regular expression`. However, `existence check` can use these syntaxes.
 
 | JSONPaths that return a value group | example       |
 | ----------------------------------- | ------------- |
