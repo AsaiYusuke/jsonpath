@@ -17,7 +17,5 @@ func (e *syntaxQueryParamRoot) compute(
 		return []interface{}{struct{}{}}
 	}
 
-	// e.param.isValueGroup() should always be false.
-
-	return values.result[:1]
+	return []interface{}{true}
 }

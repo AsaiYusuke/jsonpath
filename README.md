@@ -228,7 +228,7 @@ Output   : ["Case"]
 
 ### JSONPaths in the filter-qualifier
 
-JSONPaths with the current root that return a value group cannot use with `comparator` or `regular expression`. However, `existence check` can use these syntaxes.
+JSONPaths that return a value group cannot use with `comparator` or `regular expression`. However, `existence check` can use these syntaxes.
 
 | JSONPaths that return a value group | example       |
 | ----------------------------------- | ------------- |
@@ -262,6 +262,14 @@ Error    : ErrorInvalidSyntax
 JSONPath : $[?(@..x)]
 srcJSON  : [{"a":1},{"b":{"x":"hello world"}}]
 Output   : [{"b":{"x":"hello world"}}]
+```
+
+JSONPath filter that begins with Root is a whole-match operation when any one is detected.
+
+```text
+JSONPath : $[?($..x)]
+srcJSON  : [{"a":1},{"b":{"x":"hello world"}}]
+Output   : [{"a":1},{"b":{"x":"hello world"}}]
 ```
 
 ## Benchmarks
