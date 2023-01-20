@@ -621,17 +621,15 @@ func (p *jsonPathParser) pushCompareParameterLiteral(text interface{}) {
 }
 
 func (p *jsonPathParser) pushCompareParameterRoot(node syntaxNode) {
-	param := &syntaxQueryParamRoot{
+	p.updateAccessorMode(node, false)
+	p.push(&syntaxQueryParamRoot{
 		param: node,
-	}
-	p.updateAccessorMode(param.param, false)
-	p.push(param)
+	})
 }
 
 func (p *jsonPathParser) pushCompareParameterCurrentRoot(node syntaxNode) {
-	param := &syntaxQueryParamCurrentRoot{
+	p.updateAccessorMode(node, false)
+	p.push(&syntaxQueryParamCurrentRoot{
 		param: node,
-	}
-	p.updateAccessorMode(param.param, false)
-	p.push(param)
+	})
 }
