@@ -3262,6 +3262,43 @@ func TestRetrieve_filterExist(t *testing.T) {
 				expectedErr: createErrorMemberNotExist(`.b`),
 			},
 		},
+		`root-value-group`: []TestCase{
+			{
+				jsonpath:     `$.z[?($..x)]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$.z[?($["x","y"])]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$.z[?($.*)]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$[1].z[?($[0:1])]`,
+				inputJSON:    `[0,{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}]`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$.z[?($[*])]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$[1].z[?($[0,1])]`,
+				inputJSON:    `[0,{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}]`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$.z[?($[?(@.x)])]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+		},
 	}
 
 	execTestRetrieveTestGroups(t, testGroups)
@@ -4382,6 +4419,16 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				inputJSON:    `[{"b":1},{"b":2},{"b":3}]`,
 				expectedJSON: `[{"b":1},{"b":3}]`,
 			},
+			{
+				jsonpath:     `$.z[?($..x || @.b < 2)]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
+			},
+			{
+				jsonpath:     `$.z[?($..xx || @.b < 2)]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1}]`,
+			},
 		},
 		`logical AND`: []TestCase{
 			{
@@ -4441,6 +4488,16 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				inputJSON:   `[{"b":1},{"b":2},{"b":3}]`,
 				expectedErr: createErrorMemberNotExist(`[?(@.b > 2 && @.b < 2)]`),
 			},
+			{
+				jsonpath:     `$.z[?($..x && @.b < 2)]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1}]`,
+			},
+			{
+				jsonpath:    `$.z[?($..xx && @.b < 2)]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: createErrorMemberNotExist(`[?($..xx && @.b < 2)]`),
+			},
 		},
 		`logical NOT`: []TestCase{
 			{
@@ -4452,6 +4509,16 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				jsonpath:     `$[?(!@.c)]`,
 				inputJSON:    `[{"a":1},{"b":2},{"a":3,"b":4}]`,
 				expectedJSON: `[{"a":1},{"b":2},{"a":3,"b":4}]`,
+			},
+			{
+				jsonpath:    `$.z[?(!$..x)]`,
+				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedErr: createErrorMemberNotExist(`[?(!$..x)]`),
+			},
+			{
+				jsonpath:     `$.z[?(!$..xx)]`,
+				inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
+				expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
 			},
 		},
 		`priority`: []TestCase{
@@ -6461,43 +6528,6 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				jsonpath:    `$[?(a=~/123/)]`,
 				inputJSON:   `[{"a":"123"},{"a":123}]`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(a=~/123/)]`},
-			},
-		},
-		`qualifier::existence-check`: []TestCase{
-			{
-				jsonpath:    `$.z[?($..x)]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$..x)]`},
-			},
-			{
-				jsonpath:    `$.z[?($["x","y"])]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$["x","y"])]`},
-			},
-			{
-				jsonpath:    `$.z[?($.*)]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$.*)]`},
-			},
-			{
-				jsonpath:    `$.z[?($[0:1])]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[0:1])]`},
-			},
-			{
-				jsonpath:    `$.z[?($[*])]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[*])]`},
-			},
-			{
-				jsonpath:    `$.z[?($[0,1])]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[0,1])]`},
-			},
-			{
-				jsonpath:    `$.z[?($[?(@.x)])]`,
-				inputJSON:   `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
-				expectedErr: ErrorInvalidSyntax{position: 6, reason: `JSONPath that returns a value group is prohibited`, near: `$[?(@.x)])]`},
 			},
 		},
 		`function`: []TestCase{
