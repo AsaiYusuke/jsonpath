@@ -17,5 +17,9 @@ func (e *syntaxQueryParamRoot) compute(
 		return []interface{}{struct{}{}}
 	}
 
+	if len(values.result) == 1 {
+		return values.result
+	}
+
 	return []interface{}{true}
 }
