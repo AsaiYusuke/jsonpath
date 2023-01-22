@@ -5,7 +5,7 @@ type syntaxQueryParamLiteral struct {
 }
 
 func (l *syntaxQueryParamLiteral) compute(
-	_ interface{}, _ []interface{}, _ *bufferContainer) []interface{} {
+	_ interface{}, _ []interface{}) []interface{} {
 
 	return l.literal
 }

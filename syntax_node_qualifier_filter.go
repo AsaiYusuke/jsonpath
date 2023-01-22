@@ -44,7 +44,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		valueList[index] = srcMap[(*sortKeys)[index]]
 	}
 
-	valueList = f.query.compute(root, valueList, container)
+	valueList = f.query.compute(root, valueList)
 
 	isEachResult := len(valueList) == len(srcMap)
 
@@ -91,7 +91,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 	var deepestTextLen int
 	var deepestError errorRuntime
 
-	valueList := f.query.compute(root, srcList, container)
+	valueList := f.query.compute(root, srcList)
 
 	isEachResult := len(valueList) == len(srcList)
 

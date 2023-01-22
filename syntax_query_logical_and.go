@@ -6,17 +6,17 @@ type syntaxLogicalAnd struct {
 }
 
 func (l *syntaxLogicalAnd) compute(
-	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
-	leftComputedList := l.leftQuery.compute(root, currentList, container)
+	leftComputedList := l.leftQuery.compute(root, currentList)
 	if len(leftComputedList) == 1 {
 		if _, ok := leftComputedList[0].(struct{}); ok {
 			return leftComputedList
 		}
-		return l.rightQuery.compute(root, currentList, container)
+		return l.rightQuery.compute(root, currentList)
 	}
 
-	rightComputedList := l.rightQuery.compute(root, currentList, container)
+	rightComputedList := l.rightQuery.compute(root, currentList)
 	if len(rightComputedList) == 1 {
 		if _, ok := rightComputedList[0].(struct{}); ok {
 			return rightComputedList
