@@ -9,7 +9,7 @@ func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamRoot) compute(
-	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
 	values := bufferContainer{}
 

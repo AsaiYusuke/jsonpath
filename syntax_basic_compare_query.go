@@ -7,12 +7,12 @@ type syntaxBasicCompareQuery struct {
 }
 
 func (q *syntaxBasicCompareQuery) compute(
-	root interface{}, currentList []interface{}, container *bufferContainer) []interface{} {
+	root interface{}, currentList []interface{}) []interface{} {
 
-	leftValues := q.leftParam.compute(root, currentList, container)
+	leftValues := q.leftParam.compute(root, currentList)
 	leftFound := q.comparator.typeCast(leftValues)
 
-	rightValues := q.rightParam.compute(root, currentList, container)
+	rightValues := q.rightParam.compute(root, currentList)
 	rightFound := q.comparator.typeCast(rightValues)
 
 	if leftFound && rightFound {
