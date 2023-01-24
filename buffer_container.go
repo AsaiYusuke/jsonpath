@@ -25,7 +25,7 @@ func (b *bufferContainer) getSortedKeys(srcMap map[string]interface{}) *sort.Str
 		(*sortKeys)[index] = key
 		index++
 	}
-	if len(*sortKeys) > 1 {
+	if length > 1 {
 		sortKeys.Sort()
 	}
 	return sortKeys
