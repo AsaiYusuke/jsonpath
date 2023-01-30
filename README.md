@@ -68,18 +68,18 @@ func main() {
 
 ## Basic design
 
-#### _Ease of development_
+#### _Streamlined Development_
 
-- [PEG](https://github.com/pointlander/peg) separated the JSONPath syntax analyzer from functionality itself to simplify the source.
-- Equipped with a large number of unit tests to avoid bugs that lead to unexpected results.
+- The JSONPath syntax analysis functionality has been separated using [PEG](https://github.com/pointlander/peg), resulting in a more simplified source code.
+- Robust unit testing has been implemented to prevent bugs and ensure consistent outcomes.
 
-#### _Ease of use_
+#### _User-Friendly Interface_
 
-- The error specification enables the library user to handle errors correctly.
+- The library is equipped with a comprehensive error specification, allowing users to effectively handle any errors that may arise.
 
-#### _Compatibility_
+#### _Unwavering Compatibility_
 
-- Adopted more of the consensus behavior from the [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison).
+- The library has integrated a greater level of consensus behavior from [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison), ensuring seamless compatibility with related technologies.
 
 ## How to use
 
