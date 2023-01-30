@@ -79,7 +79,7 @@ func main() {
 
 #### _Unwavering Compatibility_
 
-- The library has integrated a greater level of consensus behavior from [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison), ensuring seamless compatibility with related technologies.
+- The library has integrated a greater level of consensus behavior from [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison), ensuring seamless compatibility.
 
 ## How to use
 
