@@ -11,9 +11,7 @@ func (c *syntaxBasicAnyValueComparator) typeCast(values []interface{}) bool {
 		switch typedValue := values[index].(type) {
 		case json.Number:
 			foundValue = true
-			if floatNumber, err := typedValue.Float64(); err == nil {
-				values[index] = floatNumber
-			}
+			values[index], _ = typedValue.Float64()
 		case struct{}:
 		default:
 			foundValue = true
