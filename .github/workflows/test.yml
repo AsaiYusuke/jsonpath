@@ -1,0 +1,33 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Run Unit tests
+        run: go test -race -covermode atomic -coverprofile=covprofile ./...
+
+      - name: Install goveralls
+        run: go get github.com/mattn/goveralls@latest
+
+      - name: Send coveralls
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=covprofile -service=github
+
+      - name: Send goreportcard
+        uses: creekorful/goreportcard-action@v1.0
