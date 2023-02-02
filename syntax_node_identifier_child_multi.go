@@ -46,7 +46,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 
 	for _, identifier := range i.identifiers {
 		if singleIdentifier, ok := identifier.(*syntaxChildSingleIdentifier); ok {
-			if _, ok := srcMap[singleIdentifier.identifier]; !ok {
+			if _, ok = srcMap[singleIdentifier.identifier]; !ok {
 				continue
 			}
 		}
