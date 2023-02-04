@@ -537,7 +537,9 @@ func (p *jsonPathParser) pushLogicalAnd(leftQuery, rightQuery syntaxQuery) {
 }
 
 func (p *jsonPathParser) pushLogicalNot(query syntaxQuery) {
-	p.push(&syntaxLogicalNot{query: query})
+	p.push(&syntaxLogicalNot{
+		query: query,
+	})
 }
 
 func (p *jsonPathParser) _createBasicCompareQuery(

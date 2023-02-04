@@ -6,10 +6,12 @@ type syntaxBasicStringComparator struct {
 func (c *syntaxBasicStringComparator) typeCast(values []interface{}) bool {
 	var foundValue bool
 	for index := range values {
-		if _, ok := values[index].(string); ok {
+		switch values[index].(type) {
+		case string:
 			foundValue = true
-		} else {
-			values[index] = struct{}{}
+		case struct{}:
+		default:
+			values[index] = emptyEntity
 		}
 	}
 	return foundValue

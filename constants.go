@@ -10,3 +10,7 @@ const (
 	msgTypeArray         string = `array`
 	msgTypeObjectOrArray string = `object/array`
 )
+
+var emptyEntity = struct{}{}
+var emptyList = []interface{}{emptyEntity}
+var fullList = []interface{}{true}

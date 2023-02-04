@@ -14,8 +14,9 @@ func (c *syntaxBasicNumericComparator) typeCast(values []interface{}) bool {
 		case json.Number:
 			foundValue = true
 			values[index], _ = typedValue.Float64()
+		case struct{}:
 		default:
-			values[index] = struct{}{}
+			values[index] = emptyEntity
 		}
 	}
 	return foundValue

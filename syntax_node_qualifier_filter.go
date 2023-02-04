@@ -48,9 +48,8 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 	isEachResult := len(valueList) == len(srcMap)
 
-	var nodeNotFound bool
 	if !isEachResult {
-		if _, nodeNotFound = valueList[0].(struct{}); nodeNotFound {
+		if valueList[0] == emptyEntity {
 			return ErrorMemberNotExist{
 				errorBasicRuntime: f.errorRuntime,
 			}
@@ -59,7 +58,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 	for index := range *sortKeys {
 		if isEachResult {
-			if _, nodeNotFound = valueList[index].(struct{}); nodeNotFound {
+			if valueList[index] == emptyEntity {
 				continue
 			}
 		}
@@ -95,9 +94,8 @@ func (f *syntaxFilterQualifier) retrieveList(
 
 	isEachResult := len(valueList) == len(srcList)
 
-	var nodeNotFound bool
 	if !isEachResult {
-		if _, nodeNotFound = valueList[0].(struct{}); nodeNotFound {
+		if valueList[0] == emptyEntity {
 			return ErrorMemberNotExist{
 				errorBasicRuntime: f.errorRuntime,
 			}
@@ -106,7 +104,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 
 	for index := range srcList {
 		if isEachResult {
-			if _, nodeNotFound = valueList[index].(struct{}); nodeNotFound {
+			if valueList[index] == emptyEntity {
 				continue
 			}
 		}
