@@ -1,9 +1,7 @@
 package jsonpath
 
 type syntaxLogicalNot struct {
-	query     syntaxQuery
-	emptyList []interface{}
-	fullList  []interface{}
+	query syntaxQuery
 }
 
 func (l *syntaxLogicalNot) compute(
@@ -12,9 +10,9 @@ func (l *syntaxLogicalNot) compute(
 	computedList := l.query.compute(root, currentList)
 	if len(computedList) == 1 {
 		if computedList[0] == struct{}{} {
-			return l.fullList
+			return fullList
 		}
-		return l.emptyList
+		return emptyList
 	}
 
 	var hasValue bool
@@ -29,5 +27,5 @@ func (l *syntaxLogicalNot) compute(
 	if hasValue {
 		return computedList
 	}
-	return l.emptyList
+	return emptyList
 }

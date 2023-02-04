@@ -3,7 +3,6 @@ package jsonpath
 type syntaxLogicalAnd struct {
 	leftQuery  syntaxQuery
 	rightQuery syntaxQuery
-	emptyList  []interface{}
 }
 
 func (l *syntaxLogicalAnd) compute(
@@ -38,5 +37,5 @@ func (l *syntaxLogicalAnd) compute(
 	if hasValue {
 		return leftComputedList
 	}
-	return l.emptyList
+	return emptyList
 }
