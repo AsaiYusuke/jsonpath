@@ -9,7 +9,7 @@ func (c *syntaxBasicStringComparator) typeCast(values []interface{}) bool {
 		if _, ok := values[index].(string); ok {
 			foundValue = true
 		} else {
-			values[index] = struct{}{}
+			values[index] = emptyEntity
 		}
 	}
 	return foundValue

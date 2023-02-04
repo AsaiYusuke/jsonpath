@@ -10,7 +10,7 @@ func (l *syntaxLogicalOr) compute(
 
 	leftComputedList := l.leftQuery.compute(root, currentList)
 	if len(leftComputedList) == 1 {
-		if _, ok := leftComputedList[0].(struct{}); ok {
+		if leftComputedList[0] == emptyEntity {
 			return l.rightQuery.compute(root, currentList)
 		}
 		return leftComputedList
@@ -18,14 +18,14 @@ func (l *syntaxLogicalOr) compute(
 
 	rightComputedList := l.rightQuery.compute(root, currentList)
 	if len(rightComputedList) == 1 {
-		if _, ok := rightComputedList[0].(struct{}); ok {
+		if rightComputedList[0] == emptyEntity {
 			return leftComputedList
 		}
 		return rightComputedList
 	}
 
 	for index := range rightComputedList {
-		if _, ok := rightComputedList[index].(struct{}); !ok {
+		if rightComputedList[index] != emptyEntity {
 			leftComputedList[index] = rightComputedList[index]
 		}
 	}

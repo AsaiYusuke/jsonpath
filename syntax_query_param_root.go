@@ -14,12 +14,12 @@ func (e *syntaxQueryParamRoot) compute(
 	values := bufferContainer{}
 
 	if err := e.param.retrieve(root, root, &values); err != nil {
-		return []interface{}{struct{}{}}
+		return emptyList
 	}
 
 	if len(values.result) == 1 {
 		return values.result
 	}
 
-	return []interface{}{true}
+	return fullList
 }
