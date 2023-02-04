@@ -1,7 +1,8 @@
 package jsonpath
 
 type syntaxQueryParamCurrentRoot struct {
-	param syntaxNode
+	param     syntaxNode
+	emptyList []interface{}
 }
 
 func (e *syntaxQueryParamCurrentRoot) isValueGroupParameter() bool {
@@ -17,7 +18,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 	var hasValue bool
 	for index := range currentList {
 		if err := e.param.retrieve(root, currentList[index], &containers[index]); err != nil {
-			result[index] = emptyEntity
+			result[index] = struct{}{}
 			continue
 		}
 		hasValue = true
@@ -30,5 +31,5 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 	if hasValue {
 		return result
 	}
-	return emptyList
+	return e.emptyList
 }

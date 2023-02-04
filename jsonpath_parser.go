@@ -533,11 +533,16 @@ func (p *jsonPathParser) pushLogicalAnd(leftQuery, rightQuery syntaxQuery) {
 	p.push(&syntaxLogicalAnd{
 		leftQuery:  leftQuery,
 		rightQuery: rightQuery,
+		emptyList:  []interface{}{struct{}{}},
 	})
 }
 
 func (p *jsonPathParser) pushLogicalNot(query syntaxQuery) {
-	p.push(&syntaxLogicalNot{query: query})
+	p.push(&syntaxLogicalNot{
+		query:     query,
+		emptyList: []interface{}{struct{}{}},
+		fullList:  []interface{}{true},
+	})
 }
 
 func (p *jsonPathParser) _createBasicCompareQuery(
@@ -548,6 +553,7 @@ func (p *jsonPathParser) _createBasicCompareQuery(
 		leftParam:  leftParam,
 		rightParam: rightParam,
 		comparator: comparator,
+		emptyList:  []interface{}{struct{}{}},
 	}
 }
 
@@ -559,7 +565,9 @@ func (p *jsonPathParser) pushCompareEQ(
 func (p *jsonPathParser) pushCompareNE(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
 	p.push(&syntaxLogicalNot{
-		query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
+		query:     p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareEQ{}),
+		emptyList: []interface{}{struct{}{}},
+		fullList:  []interface{}{true},
 	})
 }
 
@@ -623,13 +631,16 @@ func (p *jsonPathParser) pushCompareParameterLiteral(text interface{}) {
 func (p *jsonPathParser) pushCompareParameterRoot(node syntaxNode) {
 	p.updateAccessorMode(node, false)
 	p.push(&syntaxQueryParamRoot{
-		param: node,
+		param:     node,
+		emptyList: []interface{}{struct{}{}},
+		fullList:  []interface{}{true},
 	})
 }
 
 func (p *jsonPathParser) pushCompareParameterCurrentRoot(node syntaxNode) {
 	p.updateAccessorMode(node, false)
 	p.push(&syntaxQueryParamCurrentRoot{
-		param: node,
+		param:     node,
+		emptyList: []interface{}{struct{}{}},
 	})
 }

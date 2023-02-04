@@ -4,6 +4,7 @@ type syntaxBasicCompareQuery struct {
 	leftParam  *syntaxBasicCompareParameter
 	rightParam *syntaxBasicCompareParameter
 	comparator syntaxComparator
+	emptyList  []interface{}
 }
 
 func (q *syntaxBasicCompareQuery) compute(
@@ -19,19 +20,19 @@ func (q *syntaxBasicCompareQuery) compute(
 		var hasValue bool
 		// The syntax parser always results in a literal value on the right side as input.
 		for leftIndex := range leftValues {
-			if leftValues[leftIndex] == emptyEntity {
+			if leftValues[leftIndex] == struct{}{} {
 				continue
 			}
 			if q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
 				hasValue = true
 			} else {
-				leftValues[leftIndex] = emptyEntity
+				leftValues[leftIndex] = struct{}{}
 			}
 		}
 		if hasValue {
 			return leftValues
 		}
-		return emptyList
+		return q.emptyList
 	}
 
 	// leftFound == false && rightFound == false
@@ -41,5 +42,5 @@ func (q *syntaxBasicCompareQuery) compute(
 		}
 	}
 
-	return emptyList
+	return q.emptyList
 }

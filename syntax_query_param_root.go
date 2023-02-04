@@ -1,7 +1,9 @@
 package jsonpath
 
 type syntaxQueryParamRoot struct {
-	param syntaxNode
+	param     syntaxNode
+	emptyList []interface{}
+	fullList  []interface{}
 }
 
 func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
@@ -14,12 +16,12 @@ func (e *syntaxQueryParamRoot) compute(
 	values := bufferContainer{}
 
 	if err := e.param.retrieve(root, root, &values); err != nil {
-		return emptyList
+		return e.emptyList
 	}
 
 	if len(values.result) == 1 {
 		return values.result
 	}
 
-	return fullList
+	return e.fullList
 }

@@ -3,6 +3,7 @@ package jsonpath
 type syntaxLogicalAnd struct {
 	leftQuery  syntaxQuery
 	rightQuery syntaxQuery
+	emptyList  []interface{}
 }
 
 func (l *syntaxLogicalAnd) compute(
@@ -10,7 +11,7 @@ func (l *syntaxLogicalAnd) compute(
 
 	leftComputedList := l.leftQuery.compute(root, currentList)
 	if len(leftComputedList) == 1 {
-		if leftComputedList[0] == emptyEntity {
+		if leftComputedList[0] == struct{}{} {
 			return leftComputedList
 		}
 		return l.rightQuery.compute(root, currentList)
@@ -18,7 +19,7 @@ func (l *syntaxLogicalAnd) compute(
 
 	rightComputedList := l.rightQuery.compute(root, currentList)
 	if len(rightComputedList) == 1 {
-		if rightComputedList[0] == emptyEntity {
+		if rightComputedList[0] == struct{}{} {
 			return rightComputedList
 		}
 		return leftComputedList
@@ -26,16 +27,16 @@ func (l *syntaxLogicalAnd) compute(
 
 	var hasValue bool
 	for index := range rightComputedList {
-		if rightComputedList[index] == emptyEntity {
-			leftComputedList[index] = emptyEntity
+		if rightComputedList[index] == struct{}{} {
+			leftComputedList[index] = struct{}{}
 			continue
 		}
-		if leftComputedList[index] != emptyEntity {
+		if leftComputedList[index] != struct{}{} {
 			hasValue = true
 		}
 	}
 	if hasValue {
 		return leftComputedList
 	}
-	return emptyList
+	return l.emptyList
 }

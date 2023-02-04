@@ -15,7 +15,7 @@ func (c *syntaxBasicNumericComparator) typeCast(values []interface{}) bool {
 			foundValue = true
 			values[index], _ = typedValue.Float64()
 		default:
-			values[index] = emptyEntity
+			values[index] = struct{}{}
 		}
 	}
 	return foundValue
