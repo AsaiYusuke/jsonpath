@@ -9,7 +9,7 @@ func (l *syntaxLogicalNot) compute(
 
 	computedList := l.query.compute(root, currentList)
 	if len(computedList) == 1 {
-		if computedList[0] == struct{}{} {
+		if computedList[0] == emptyEntity {
 			return fullList
 		}
 		return emptyList
@@ -17,11 +17,11 @@ func (l *syntaxLogicalNot) compute(
 
 	var hasValue bool
 	for index := range computedList {
-		if computedList[index] == struct{}{} {
+		if computedList[index] == emptyEntity {
 			computedList[index] = true
 			hasValue = true
 		} else {
-			computedList[index] = struct{}{}
+			computedList[index] = emptyEntity
 		}
 	}
 	if hasValue {

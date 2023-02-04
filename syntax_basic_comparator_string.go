@@ -11,7 +11,7 @@ func (c *syntaxBasicStringComparator) typeCast(values []interface{}) bool {
 			foundValue = true
 		case struct{}:
 		default:
-			values[index] = struct{}{}
+			values[index] = emptyEntity
 		}
 	}
 	return foundValue

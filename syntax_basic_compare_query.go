@@ -19,13 +19,13 @@ func (q *syntaxBasicCompareQuery) compute(
 		var hasValue bool
 		// The syntax parser always results in a literal value on the right side as input.
 		for leftIndex := range leftValues {
-			if leftValues[leftIndex] == struct{}{} {
+			if leftValues[leftIndex] == emptyEntity {
 				continue
 			}
 			if q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
 				hasValue = true
 			} else {
-				leftValues[leftIndex] = struct{}{}
+				leftValues[leftIndex] = emptyEntity
 			}
 		}
 		if hasValue {

@@ -17,7 +17,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 	var hasValue bool
 	for index := range currentList {
 		if err := e.param.retrieve(root, currentList[index], &containers[index]); err != nil {
-			result[index] = struct{}{}
+			result[index] = emptyEntity
 			continue
 		}
 		hasValue = true
