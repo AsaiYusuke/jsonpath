@@ -13,7 +13,7 @@ func (e *syntaxQueryParamRoot) compute(
 
 	values := bufferContainer{}
 
-	if err := e.param.retrieve(root, root, &values); err != nil {
+	if e.param.retrieve(root, root, &values) != nil {
 		return emptyList
 	}
 

@@ -16,7 +16,7 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 
 	var hasValue bool
 	for index := range currentList {
-		if err := e.param.retrieve(root, currentList[index], &containers[index]); err != nil {
+		if e.param.retrieve(root, currentList[index], &containers[index]) != nil {
 			result[index] = emptyEntity
 			continue
 		}
