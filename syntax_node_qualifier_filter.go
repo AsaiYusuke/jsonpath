@@ -37,7 +37,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	var deepestTextLen int
 	var deepestError errorRuntime
 
-	sortKeys := container.getSortedKeys(srcMap)
+	sortKeys := getSortedKeys(srcMap)
 
 	valueList := make([]interface{}, len(*sortKeys))
 	for index := range *sortKeys {
@@ -69,7 +69,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		}
 	}
 
-	container.putSortSlice(sortKeys)
+	putSortSlice(sortKeys)
 
 	if len(container.result) > 0 {
 		return nil

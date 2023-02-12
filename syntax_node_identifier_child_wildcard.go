@@ -37,7 +37,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	var deepestTextLen int
 	var deepestError errorRuntime
 
-	sortKeys := container.getSortedKeys(srcMap)
+	sortKeys := getSortedKeys(srcMap)
 
 	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
@@ -47,7 +47,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 		}
 	}
 
-	container.putSortSlice(sortKeys)
+	putSortSlice(sortKeys)
 
 	if len(container.result) > 0 {
 		return nil
