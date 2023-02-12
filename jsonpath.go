@@ -52,13 +52,21 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 
 	root := parser.jsonPathParser.root
 	return func(src interface{}) ([]interface{}, error) {
-		container := bufferContainer{}
+		container := getContainer()
+		defer func() {
+			putContainer(container)
+		}()
 
-		err := root.retrieve(src, src, &container)
-		if err != nil {
-			return container.result, err.(error)
+		if err := root.retrieve(src, src, container); err != nil {
+			return nil, err.(error)
 		}
-		return container.result, nil
+
+		result := make([]interface{}, len(container.result))
+		for index := range result {
+			result[index] = container.result[index]
+		}
+
+		return result, nil
 
 	}, nil
 }

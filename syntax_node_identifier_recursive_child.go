@@ -47,7 +47,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 				}
 			}
 
-			sortKeys := container.getSortedKeys(typedNodes)
+			sortKeys := getSortedKeys(typedNodes)
 			for index := len(typedNodes) - 1; index >= 0; index-- {
 				node := typedNodes[(*sortKeys)[index]]
 				switch node.(type) {
@@ -56,7 +56,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 				}
 			}
 
-			container.putSortSlice(sortKeys)
+			putSortSlice(sortKeys)
 
 		case []interface{}:
 			if i.nextListRequired {

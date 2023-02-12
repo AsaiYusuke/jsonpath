@@ -12,23 +12,29 @@ func (e *syntaxQueryParamCurrentRoot) compute(
 	root interface{}, currentList []interface{}) []interface{} {
 
 	result := make([]interface{}, len(currentList))
-	containers := make([]bufferContainer, len(currentList))
 
 	var hasValue bool
+
+	container := getContainer()
+	defer func() {
+		putContainer(container)
+	}()
+
 	for index := range currentList {
-		if e.param.retrieve(root, currentList[index], &containers[index]) != nil {
+		container.result = container.result[:0]
+		if e.param.retrieve(root, currentList[index], container) != nil {
 			result[index] = emptyEntity
 			continue
 		}
 		hasValue = true
-		if e.param.isValueGroup() {
-			result[index] = containers[index].result
-		} else {
-			result[index] = containers[index].result[0]
-		}
+		// If e.param.isValueGroup==true,
+		// Only the first element is returned because it is an existence check.
+		result[index] = container.result[0]
 	}
+
 	if hasValue {
 		return result
 	}
+
 	return emptyList
 }

@@ -11,9 +11,12 @@ func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
 func (e *syntaxQueryParamRoot) compute(
 	root interface{}, currentList []interface{}) []interface{} {
 
-	values := bufferContainer{}
+	values := getContainer()
+	defer func() {
+		putContainer(values)
+	}()
 
-	if e.param.retrieve(root, root, &values) != nil {
+	if e.param.retrieve(root, root, values) != nil {
 		return emptyList
 	}
 
