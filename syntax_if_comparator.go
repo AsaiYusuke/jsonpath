@@ -1,6 +1,6 @@
 package jsonpath
 
 type syntaxComparator interface {
-	comparator(left, right interface{}) bool
+	comparator(left []interface{}, right interface{}) bool
 	typeCast(values []interface{}) bool
 }

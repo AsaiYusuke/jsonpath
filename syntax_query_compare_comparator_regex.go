@@ -8,6 +8,17 @@ type syntaxCompareRegex struct {
 	regex *regexp.Regexp
 }
 
-func (r *syntaxCompareRegex) comparator(left, _ interface{}) bool {
-	return r.regex.MatchString(left.(string))
+func (r *syntaxCompareRegex) comparator(left []interface{}, _ interface{}) bool {
+	var hasValue bool
+	for leftIndex := range left {
+		if left[leftIndex] == emptyEntity {
+			continue
+		}
+		if r.regex.MatchString(left[leftIndex].(string)) {
+			hasValue = true
+		} else {
+			left[leftIndex] = emptyEntity
+		}
+	}
+	return hasValue
 }
