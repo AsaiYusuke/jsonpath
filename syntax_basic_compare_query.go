@@ -16,19 +16,8 @@ func (q *syntaxBasicCompareQuery) compute(
 	rightFound := q.comparator.typeCast(rightValues)
 
 	if leftFound && rightFound {
-		var hasValue bool
 		// The syntax parser always results in a literal value on the right side as input.
-		for leftIndex := range leftValues {
-			if leftValues[leftIndex] == emptyEntity {
-				continue
-			}
-			if q.comparator.comparator(leftValues[leftIndex], rightValues[0]) {
-				hasValue = true
-			} else {
-				leftValues[leftIndex] = emptyEntity
-			}
-		}
-		if hasValue {
+		if q.comparator.comparator(leftValues, rightValues[0]) {
 			return leftValues
 		}
 		return emptyList
