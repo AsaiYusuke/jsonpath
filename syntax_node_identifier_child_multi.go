@@ -22,20 +22,19 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 		}
 	}
 
-	srcMap, ok := current.(map[string]interface{})
-	if !ok {
-		foundType := msgTypeNull
-		if current != nil {
-			foundType = reflect.TypeOf(current).String()
-		}
-		return ErrorTypeUnmatched{
-			errorBasicRuntime: i.errorRuntime,
-			expectedType:      msgTypeObject,
-			foundType:         foundType,
-		}
+	if srcMap, ok := current.(map[string]interface{}); ok {
+		return i.retrieveMap(root, srcMap, container)
 	}
 
-	return i.retrieveMap(root, srcMap, container)
+	foundType := msgTypeNull
+	if current != nil {
+		foundType = reflect.TypeOf(current).String()
+	}
+	return ErrorTypeUnmatched{
+		errorBasicRuntime: i.errorRuntime,
+		expectedType:      msgTypeObject,
+		foundType:         foundType,
+	}
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
