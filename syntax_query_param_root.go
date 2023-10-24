@@ -21,7 +21,7 @@ func (e *syntaxQueryParamRoot) compute(
 	}
 
 	if len(values.result) == 1 {
-		return values.result
+		return []interface{}{values.result[0]}
 	}
 
 	return fullList
