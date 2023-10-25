@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -56,7 +57,7 @@ func createErrorFunctionFailed(text string, errorString string) ErrorFunctionFai
 	}
 }
 
-func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) ([]interface{}, error) {
+func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase, fileline string) ([]interface{}, error) {
 	jsonPath := testCase.jsonpath
 	hasConfig := false
 	config := Config{}
@@ -89,74 +90,80 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase) ([
 			fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
 			return nil, err
 		}
-		t.Errorf("expected error<%s> != actual error<%s>\n",
-			expectedError, err)
+		t.Errorf("%s: expected error<%s> != actual error<%s>\n", fileline, expectedError, err)
 		return nil, err
 	}
 	if expectedError != nil {
-		t.Errorf("expected error<%s> != actual error<none>\n", expectedError)
+		t.Errorf("%s: expected error<%s> != actual error<none>\n",
+			fileline, expectedError)
 		return nil, err
 	}
 
 	return actualObject, err
 }
 
-func execTestRetrieveTestGroups(t *testing.T, testGroup TestGroup) {
-	for testGroupName, testCases := range testGroup {
-		for _, testCase := range testCases {
-			testCase := testCase
-			jsonPath := testCase.jsonpath
-			srcJSON := testCase.inputJSON
-			expectedOutputJSON := testCase.expectedJSON
+func runTestCase(t *testing.T, testCase TestCase, fileline string) {
+	srcJSON := testCase.inputJSON
+	var src interface{}
+	var err error
 
+	if testCase.unmarshalFunc != nil {
+		err = testCase.unmarshalFunc(srcJSON, &src)
+	} else {
+		err = json.Unmarshal([]byte(srcJSON), &src)
+	}
+	if err != nil {
+		t.Errorf("%s: Error: %v", fileline, err)
+		return
+	}
+
+	actualObject, err := execTestRetrieve(t, src, testCase, fileline)
+	if t.Failed() {
+		return
+	}
+	if err != nil {
+		return
+	}
+
+	if testCase.resultValidator != nil {
+		err := testCase.resultValidator(src, actualObject)
+		if err != nil {
+			t.Errorf("%s: Error: %v", fileline, err)
+		}
+		return
+	}
+
+	actualOutputJSON, err := json.Marshal(actualObject)
+	if err != nil {
+		t.Errorf("%s: Error: %v", fileline, err)
+		return
+	}
+
+	if string(actualOutputJSON) != testCase.expectedJSON {
+		t.Errorf("%s: expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
+			fileline, testCase.expectedJSON, actualOutputJSON)
+		return
+	}
+}
+
+func runTestCases(t *testing.T, testGroupName string, testCases []TestCase) {
+	for _, testCase := range testCases {
+		testCase := testCase
+		if _, file, line, ok := runtime.Caller(2); ok {
+			fileline := fmt.Sprintf(`%s:%d`, file, line)
 			t.Run(
-				fmt.Sprintf(`%s <%s> <%s>`, testGroupName, jsonPath, srcJSON),
+				fmt.Sprintf(`%s_<%s>_<%s>`, testGroupName, testCase.jsonpath, testCase.inputJSON),
 				func(t *testing.T) {
 					t.Parallel()
-
-					var src interface{}
-					var err error
-					if testCase.unmarshalFunc != nil {
-						err = testCase.unmarshalFunc(srcJSON, &src)
-					} else {
-						err = json.Unmarshal([]byte(srcJSON), &src)
-					}
-					if err != nil {
-						t.Errorf("%s", err)
-						return
-					}
-
-					actualObject, err := execTestRetrieve(t, src, testCase)
-					if t.Failed() {
-						return
-					}
-
-					if err != nil {
-						return
-					}
-
-					if testCase.resultValidator != nil {
-						err := testCase.resultValidator(src, actualObject)
-						if err != nil {
-							t.Errorf("%s", err)
-						}
-						return
-					}
-
-					actualOutputJSON, err := json.Marshal(actualObject)
-					if err != nil {
-						t.Errorf("%s", err)
-						return
-					}
-
-					if string(actualOutputJSON) != expectedOutputJSON {
-						t.Errorf("expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
-							expectedOutputJSON, actualOutputJSON)
-						return
-					}
-
+					runTestCase(t, testCase, fileline)
 				})
 		}
+	}
+}
+
+func runTestGroups(t *testing.T, testGroups TestGroup) {
+	for testGroupName, testCases := range testGroups {
+		runTestCases(t, testGroupName, testCases)
 	}
 }
 
@@ -565,7 +572,7 @@ func TestRetrieve_dotNotation(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_recursiveDescent(t *testing.T) {
@@ -728,7 +735,7 @@ func TestRetrieve_recursiveDescent(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_dotNotation_wildcard(t *testing.T) {
@@ -887,7 +894,7 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_bracketNotation(t *testing.T) {
@@ -1310,7 +1317,7 @@ func TestRetrieve_bracketNotation(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
@@ -1547,7 +1554,7 @@ func TestRetrieve_bracketNotation_multiIdentifiers(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
@@ -1692,7 +1699,7 @@ func TestRetrieve_bracketNotation_wildcard(t *testing.T) {
 			},
 		}}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueType(t *testing.T) {
@@ -1793,7 +1800,7 @@ func TestRetrieve_valueType(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_arrayIndex(t *testing.T) {
@@ -1954,7 +1961,7 @@ func TestRetrieve_arrayIndex(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_arrayUnion(t *testing.T) {
@@ -2113,7 +2120,7 @@ func TestRetrieve_arrayUnion(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
@@ -2491,7 +2498,7 @@ func TestRetrieve_arraySlice_StartToEnd(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_arraySlice_Step(t *testing.T) {
@@ -2900,7 +2907,7 @@ func TestRetrieve_arraySlice_Step(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_filterExist(t *testing.T) {
@@ -3301,7 +3308,7 @@ func TestRetrieve_filterExist(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_filterCompare(t *testing.T) {
@@ -4142,7 +4149,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_filterSubFilter(t *testing.T) {
@@ -4173,7 +4180,7 @@ func TestRetrieve_filterSubFilter(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_filterRegex(t *testing.T) {
@@ -4363,7 +4370,7 @@ func TestRetrieve_filterRegex(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_filterLogicalCombination(t *testing.T) {
@@ -4609,7 +4616,7 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
@@ -4755,7 +4762,7 @@ func TestRetrieve_valueGroupCombination_Recursive_descent(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Multiple_identifier(t *testing.T) {
@@ -4921,7 +4928,7 @@ func TestRetrieve_valueGroupCombination_Multiple_identifier(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Wildcard_identifier(t *testing.T) {
@@ -5087,7 +5094,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_identifier(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
@@ -5253,7 +5260,7 @@ func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
@@ -5419,7 +5426,7 @@ func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
@@ -5585,7 +5592,7 @@ func TestRetrieve_valueGroupCombination_Union_in_qualifier(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
@@ -5746,7 +5753,7 @@ func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_space(t *testing.T) {
@@ -5830,7 +5837,7 @@ func TestRetrieve_space(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_invalidSyntax(t *testing.T) {
@@ -6564,7 +6571,7 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_invalidArgument(t *testing.T) {
@@ -6623,7 +6630,7 @@ func TestRetrieve_invalidArgument(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieve_notSupported(t *testing.T) {
@@ -6642,7 +6649,7 @@ func TestRetrieve_notSupported(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 var useJSONNumberDecoderFunction = func(srcJSON string, src *interface{}) error {
@@ -6695,7 +6702,7 @@ func TestRetrieve_jsonNumber(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 var twiceFunc = func(param interface{}) (interface{}, error) {
@@ -7147,7 +7154,7 @@ func TestRetrieve_configFunction(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func createAccessorModeValidator(
@@ -7511,7 +7518,7 @@ func TestRetrieve_configAccessorMode(t *testing.T) {
 		},
 	}
 
-	execTestRetrieveTestGroups(t, testGroups)
+	runTestGroups(t, testGroups)
 }
 
 func TestRetrieveExecTwice(t *testing.T) {
