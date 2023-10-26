@@ -3,7 +3,7 @@ package jsonpath
 import "regexp"
 
 type syntaxCompareRegex struct {
-	*syntaxBasicStringComparator
+	*syntaxBasicStringTypeValidator
 
 	regex *regexp.Regexp
 }

@@ -2,19 +2,21 @@ package jsonpath
 
 import "encoding/json"
 
-type syntaxBasicAnyValueComparator struct {
+type syntaxBasicNumericTypeValidator struct {
 }
 
-func (c *syntaxBasicAnyValueComparator) typeCast(values []interface{}) bool {
+func (c *syntaxBasicNumericTypeValidator) validate(values []interface{}) bool {
 	var foundValue bool
 	for index := range values {
 		switch typedValue := values[index].(type) {
+		case float64:
+			foundValue = true
 		case json.Number:
 			foundValue = true
 			values[index], _ = typedValue.Float64()
 		case struct{}:
 		default:
-			foundValue = true
+			values[index] = emptyEntity
 		}
 	}
 	return foundValue

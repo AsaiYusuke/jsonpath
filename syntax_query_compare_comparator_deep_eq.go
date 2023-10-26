@@ -2,11 +2,11 @@ package jsonpath
 
 import "reflect"
 
-type syntaxCompareEQ struct {
-	*syntaxBasicAnyValueComparator
+type syntaxCompareDeepEQ struct {
+	*syntaxBasicAnyValueTypeValidator
 }
 
-func (c *syntaxCompareEQ) comparator(left []interface{}, right interface{}) bool {
+func (c *syntaxCompareDeepEQ) comparator(left []interface{}, right interface{}) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {

@@ -57,7 +57,7 @@ func createErrorFunctionFailed(text string, errorString string) ErrorFunctionFai
 	}
 }
 
-func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase, fileline string) ([]interface{}, error) {
+func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase, fileLine string) ([]interface{}, error) {
 	jsonPath := testCase.jsonpath
 	hasConfig := false
 	config := Config{}
@@ -90,19 +90,19 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase, fi
 			fmt.Sprintf(`%s`, expectedError) == fmt.Sprintf(`%s`, err) {
 			return nil, err
 		}
-		t.Errorf("%s: expected error<%s> != actual error<%s>\n", fileline, expectedError, err)
+		t.Errorf("%s: expected error<%s> != actual error<%s>\n", fileLine, expectedError, err)
 		return nil, err
 	}
 	if expectedError != nil {
 		t.Errorf("%s: expected error<%s> != actual error<none>\n",
-			fileline, expectedError)
+			fileLine, expectedError)
 		return nil, err
 	}
 
 	return actualObject, err
 }
 
-func runTestCase(t *testing.T, testCase TestCase, fileline string) {
+func runTestCase(t *testing.T, testCase TestCase, fileLine string) {
 	srcJSON := testCase.inputJSON
 	var src interface{}
 	var err error
@@ -113,11 +113,11 @@ func runTestCase(t *testing.T, testCase TestCase, fileline string) {
 		err = json.Unmarshal([]byte(srcJSON), &src)
 	}
 	if err != nil {
-		t.Errorf("%s: Error: %v", fileline, err)
+		t.Errorf("%s: Error: %v", fileLine, err)
 		return
 	}
 
-	actualObject, err := execTestRetrieve(t, src, testCase, fileline)
+	actualObject, err := execTestRetrieve(t, src, testCase, fileLine)
 	if t.Failed() {
 		return
 	}
@@ -128,20 +128,20 @@ func runTestCase(t *testing.T, testCase TestCase, fileline string) {
 	if testCase.resultValidator != nil {
 		err := testCase.resultValidator(src, actualObject)
 		if err != nil {
-			t.Errorf("%s: Error: %v", fileline, err)
+			t.Errorf("%s: Error: %v", fileLine, err)
 		}
 		return
 	}
 
 	actualOutputJSON, err := json.Marshal(actualObject)
 	if err != nil {
-		t.Errorf("%s: Error: %v", fileline, err)
+		t.Errorf("%s: Error: %v", fileLine, err)
 		return
 	}
 
 	if string(actualOutputJSON) != testCase.expectedJSON {
 		t.Errorf("%s: expectedOutputJSON<%s> != actualOutputJSON<%s>\n",
-			fileline, testCase.expectedJSON, actualOutputJSON)
+			fileLine, testCase.expectedJSON, actualOutputJSON)
 		return
 	}
 }
@@ -150,12 +150,12 @@ func runTestCases(t *testing.T, testGroupName string, testCases []TestCase) {
 	for _, testCase := range testCases {
 		testCase := testCase
 		if _, file, line, ok := runtime.Caller(2); ok {
-			fileline := fmt.Sprintf(`%s:%d`, file, line)
+			fileLine := fmt.Sprintf(`%s:%d`, file, line)
 			t.Run(
 				fmt.Sprintf(`%s_<%s>_<%s>`, testGroupName, testCase.jsonpath, testCase.inputJSON),
 				func(t *testing.T) {
 					t.Parallel()
-					runTestCase(t, testCase, fileline)
+					runTestCase(t, testCase, fileLine)
 				})
 		}
 	}
@@ -3548,8 +3548,13 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`syntax-check::bool-literal`: []TestCase{
 			{
 				jsonpath:     `$[?(@.a==false)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
 				expectedJSON: `[{"a":false}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a!=false)]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
+				expectedJSON: `[{"a":null},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a==FALSE)]`,
@@ -3563,8 +3568,13 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			},
 			{
 				jsonpath:     `$[?(@.a==true)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":true}]`,
 				expectedJSON: `[{"a":true}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a!=true)]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
+				expectedJSON: `[{"a":null},{"a":false},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a==TRUE)]`,
@@ -3580,8 +3590,13 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`syntax-check::null-literal`: []TestCase{
 			{
 				jsonpath:     `$[?(@.a==null)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
 				expectedJSON: `[{"a":null}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a!=null)]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
+				expectedJSON: `[{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a==NULL)]`,
@@ -3656,12 +3671,12 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`jsonpath::start-from-root`: []TestCase{
 			{
 				jsonpath:     `$[?(@.a == $[2].b)]`,
-				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1}]`,
+				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1},{"b":1}]`,
 				expectedJSON: `[{"a":1}]`,
 			},
 			{
 				jsonpath:     `$[?($[2].b == @.a)]`,
-				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1}]`,
+				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1},{"b":1}]`,
 				expectedJSON: `[{"a":1}]`,
 			},
 			{
@@ -3963,7 +3978,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedErr: createErrorMemberNotExist(`[?(@[1]>1)]`),
 			},
 		},
-		`found-path-and-not-found-literal`: []TestCase{
+		`found-path-and-not-found-root-path`: []TestCase{
 			{
 				jsonpath:    `$[?(@.a == $.b)]`,
 				inputJSON:   `[{"a":0},{"a":1}]`,
@@ -4024,7 +4039,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedErr: createErrorMemberNotExist(`[?($.b >= @.a)]`),
 			},
 		},
-		`not-found-path-and-found-literal`: []TestCase{
+		`not-found-path-and-found-root-path`: []TestCase{
 			{
 				jsonpath:    `$[?(@.b == $[0].a)]`,
 				inputJSON:   `[{"a":0},{"a":1}]`,
@@ -4085,7 +4100,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedErr: createErrorMemberNotExist(`[?($[0].a >= @.b)]`),
 			},
 		},
-		`not-found-path-and-not-found-literal`: []TestCase{
+		`not-found-path-and-not-found-root-path`: []TestCase{
 			{
 				jsonpath:     `$[?(@.b == $.b)]`,
 				inputJSON:    `[{"a":0},{"a":1}]`,
