@@ -3590,13 +3590,13 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`syntax-check::null-literal`: []TestCase{
 			{
 				jsonpath:     `$[?(@.a==null)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
 				expectedJSON: `[{"a":null}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a!=null)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
-				expectedJSON: `[{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
+				expectedJSON: `[{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a==NULL)]`,
