@@ -3552,6 +3552,11 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedJSON: `[{"a":false}]`,
 			},
 			{
+				jsonpath:     `$[?(@.a!=false)]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
+				expectedJSON: `[{"a":null},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
+			},
+			{
 				jsonpath:     `$[?(@.a==FALSE)]`,
 				inputJSON:    `[{"a":false}]`,
 				expectedJSON: `[{"a":false}]`,
@@ -3565,6 +3570,11 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				jsonpath:     `$[?(@.a==true)]`,
 				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":true}]`,
 				expectedJSON: `[{"a":true}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a!=true)]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
+				expectedJSON: `[{"a":null},{"a":false},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a==TRUE)]`,
@@ -3582,6 +3592,11 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				jsonpath:     `$[?(@.a==null)]`,
 				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
 				expectedJSON: `[{"a":null}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a!=null)]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				expectedJSON: `[{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a==NULL)]`,
