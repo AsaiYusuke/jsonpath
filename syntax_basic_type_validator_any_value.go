@@ -2,10 +2,10 @@ package jsonpath
 
 import "encoding/json"
 
-type syntaxBasicAnyValueComparator struct {
+type syntaxBasicAnyValueTypeValidator struct {
 }
 
-func (c *syntaxBasicAnyValueComparator) typeCast(values []interface{}) bool {
+func (c *syntaxBasicAnyValueTypeValidator) validate(values []interface{}) bool {
 	var foundValue bool
 	for index := range values {
 		switch typedValue := values[index].(type) {

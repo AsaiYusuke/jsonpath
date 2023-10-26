@@ -1,7 +1,7 @@
 package jsonpath
 
 type syntaxCompareGE struct {
-	*syntaxBasicNumericComparator
+	*syntaxBasicNumericTypeValidator
 }
 
 func (c *syntaxCompareGE) comparator(left []interface{}, right interface{}) bool {
