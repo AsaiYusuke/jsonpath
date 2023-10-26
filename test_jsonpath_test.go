@@ -3671,12 +3671,12 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`jsonpath::start-from-root`: []TestCase{
 			{
 				jsonpath:     `$[?(@.a == $[2].b)]`,
-				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1}]`,
+				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1},{"b":1}]`,
 				expectedJSON: `[{"a":1}]`,
 			},
 			{
 				jsonpath:     `$[?($[2].b == @.a)]`,
-				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1}]`,
+				inputJSON:    `[{"a":0},{"a":1},{"a":2,"b":1},{"b":1}]`,
 				expectedJSON: `[{"a":1}]`,
 			},
 			{
