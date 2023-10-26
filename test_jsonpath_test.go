@@ -3548,7 +3548,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 		`syntax-check::bool-literal`: []TestCase{
 			{
 				jsonpath:     `$[?(@.a==false)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
 				expectedJSON: `[{"a":false}]`,
 			},
 			{
@@ -3563,7 +3563,7 @@ func TestRetrieve_filterCompare(t *testing.T) {
 			},
 			{
 				jsonpath:     `$[?(@.a==true)]`,
-				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"}]`,
+				inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":true}]`,
 				expectedJSON: `[{"a":true}]`,
 			},
 			{
