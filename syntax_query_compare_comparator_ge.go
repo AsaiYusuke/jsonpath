@@ -10,7 +10,7 @@ func (c *syntaxCompareGE) comparator(left []interface{}, right interface{}) bool
 		if left[leftIndex] == emptyEntity {
 			continue
 		}
-		if left[leftIndex].(float64) <= right.(float64) {
+		if left[leftIndex].(float64) >= right.(float64) {
 			hasValue = true
 		} else {
 			left[leftIndex] = emptyEntity
