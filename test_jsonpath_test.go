@@ -7696,5 +7696,8 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	parser.Buffer = ``
 	parser.PrintSyntaxTree()
 
+	memoizeFunc := DisableMemoize()
+	memoizeFunc(&parser)
+
 	os.Stdout = stdoutBackup
 }
