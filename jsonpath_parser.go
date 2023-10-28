@@ -555,6 +555,10 @@ func (p *jsonPathParser) _createBasicCompareQuery(
 
 func (p *jsonPathParser) pushCompareEQ(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
+	if leftParam.isLiteral {
+		rightParam, leftParam = leftParam, rightParam
+	}
+
 	if rightLiteralParam, ok := rightParam.param.(*syntaxQueryParamLiteral); ok {
 		switch rightLiteralParam.literal[0].(type) {
 		case float64:
@@ -583,59 +587,43 @@ func (p *jsonPathParser) pushCompareEQ(
 
 func (p *jsonPathParser) pushCompareNE(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
-	if rightLiteralParam, ok := rightParam.param.(*syntaxQueryParamLiteral); ok {
-		switch rightLiteralParam.literal[0].(type) {
-		case float64:
-			p.push(&syntaxLogicalNot{
-				query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-					syntaxTypeValidator: &syntaxBasicNumericTypeValidator{},
-				}),
-			})
-		case bool:
-			p.push(&syntaxLogicalNot{
-				query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-					syntaxTypeValidator: &syntaxBasicBoolTypeValidator{},
-				}),
-			})
-		case string:
-			p.push(&syntaxLogicalNot{
-				query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-					syntaxTypeValidator: &syntaxBasicStringTypeValidator{},
-				}),
-			})
-		case nil:
-			p.push(&syntaxLogicalNot{
-				query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-					syntaxTypeValidator: &syntaxBasicNilTypeValidator{},
-				}),
-			})
-		}
-
-		return
-	}
-
-	p.push(&syntaxLogicalNot{
-		query: p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareDeepEQ{}),
-	})
+	p.pushCompareEQ(leftParam, rightParam)
+	p.push(&syntaxLogicalNot{query: p.pop().(syntaxQuery)})
 }
 
 func (p *jsonPathParser) pushCompareGE(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
+	if leftParam.isLiteral {
+		p.pushCompareLE(rightParam, leftParam)
+		return
+	}
 	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGE{}))
 }
 
 func (p *jsonPathParser) pushCompareGT(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
+	if leftParam.isLiteral {
+		p.pushCompareLT(rightParam, leftParam)
+		return
+	}
 	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareGT{}))
 }
 
 func (p *jsonPathParser) pushCompareLE(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
+	if leftParam.isLiteral {
+		p.pushCompareGE(rightParam, leftParam)
+		return
+	}
 	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLE{}))
 }
 
 func (p *jsonPathParser) pushCompareLT(
 	leftParam, rightParam *syntaxBasicCompareParameter) {
+	if leftParam.isLiteral {
+		p.pushCompareGT(rightParam, leftParam)
+		return
+	}
 	p.push(p._createBasicCompareQuery(leftParam, rightParam, &syntaxCompareLT{}))
 }
 

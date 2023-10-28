@@ -618,61 +618,37 @@ func (p *pegJSONPathParser) Execute() {
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			if leftParam.isLiteral {
-				p.pushCompareEQ(rightParam, leftParam)
-			} else {
-				p.pushCompareEQ(leftParam, rightParam)
-			}
+			p.pushCompareEQ(leftParam, rightParam)
 
 		case ruleAction29:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			if leftParam.isLiteral {
-				p.pushCompareNE(rightParam, leftParam)
-			} else {
-				p.pushCompareNE(leftParam, rightParam)
-			}
+			p.pushCompareNE(leftParam, rightParam)
 
 		case ruleAction30:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			if leftParam.isLiteral {
-				p.pushCompareLE(rightParam, leftParam)
-			} else {
-				p.pushCompareGE(leftParam, rightParam)
-			}
+			p.pushCompareLE(leftParam, rightParam)
 
 		case ruleAction31:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			if leftParam.isLiteral {
-				p.pushCompareLT(rightParam, leftParam)
-			} else {
-				p.pushCompareGT(leftParam, rightParam)
-			}
+			p.pushCompareLT(leftParam, rightParam)
 
 		case ruleAction32:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			if leftParam.isLiteral {
-				p.pushCompareGE(rightParam, leftParam)
-			} else {
-				p.pushCompareLE(leftParam, rightParam)
-			}
+			p.pushCompareGE(leftParam, rightParam)
 
 		case ruleAction33:
 
 			rightParam := p.pop().(*syntaxBasicCompareParameter)
 			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			if leftParam.isLiteral {
-				p.pushCompareGT(rightParam, leftParam)
-			} else {
-				p.pushCompareLT(leftParam, rightParam)
-			}
+			p.pushCompareGT(leftParam, rightParam)
 
 		case ruleAction34:
 
@@ -3398,61 +3374,37 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		/* 89 Action28 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    if leftParam.isLiteral {
-		        p.pushCompareEQ(rightParam, leftParam)
-		    } else {
-		        p.pushCompareEQ(leftParam, rightParam)
-		    }
+		    p.pushCompareEQ(leftParam, rightParam)
 		}> */
 		nil,
 		/* 90 Action29 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    if leftParam.isLiteral {
-		        p.pushCompareNE(rightParam, leftParam)
-		    } else {
-		        p.pushCompareNE(leftParam, rightParam)
-		    }
+		    p.pushCompareNE(leftParam, rightParam)
 		}> */
 		nil,
 		/* 91 Action30 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    if leftParam.isLiteral {
-		        p.pushCompareLE(rightParam, leftParam)
-		    } else {
-		        p.pushCompareGE(leftParam, rightParam)
-		    }
+		    p.pushCompareLE(leftParam, rightParam)
 		}> */
 		nil,
 		/* 92 Action31 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    if leftParam.isLiteral {
-		        p.pushCompareLT(rightParam, leftParam)
-		    } else {
-		        p.pushCompareGT(leftParam, rightParam)
-		    }
+		    p.pushCompareLT(leftParam, rightParam)
 		}> */
 		nil,
 		/* 93 Action32 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    if leftParam.isLiteral {
-		        p.pushCompareGE(rightParam, leftParam)
-		    } else {
-		        p.pushCompareLE(leftParam, rightParam)
-		    }
+		    p.pushCompareGE(leftParam, rightParam)
 		}> */
 		nil,
 		/* 94 Action33 <- <{
 		    rightParam := p.pop().(*syntaxBasicCompareParameter)
 		    leftParam := p.pop().(*syntaxBasicCompareParameter)
-		    if leftParam.isLiteral {
-		        p.pushCompareGT(rightParam, leftParam)
-		    } else {
-		        p.pushCompareLT(leftParam, rightParam)
-		    }
+		    p.pushCompareGT(leftParam, rightParam)
 		}> */
 		nil,
 		/* 95 Action34 <- <{
