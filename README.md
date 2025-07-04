@@ -73,11 +73,11 @@ func main() {
 - The JSONPath syntax analysis functionality has been separated using [PEG](https://github.com/pointlander/peg), resulting in a more simplified source code.
 - Robust unit testing has been implemented to prevent bugs and ensure consistent outcomes.
 
-#### _User-Friendly Interface_
+### _User-Friendly Interface_
 
 - The library is equipped with a comprehensive error specification, allowing users to effectively handle any errors that may arise.
 
-#### _Unwavering Compatibility_
+### _Unwavering Compatibility_
 
 - The library has integrated a greater level of consensus behavior from [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison), ensuring seamless compatibility.
 
@@ -328,7 +328,7 @@ The benchmarks for various JSONPath libraries in Go language can be compared in 
   - [ ] testing
   - [ ] documentation
 - Future ToDo
-  - [ ] Refer to the something standard
+  - [x] Refer to the something standard
   - Go language affinity
     - [ ] retrieve with the object in struct unmarshal
     - [ ] retrieve with the struct tags
