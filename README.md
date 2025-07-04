@@ -17,7 +17,7 @@ The core JSONPath syntax on which this library based:
 - [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison)
 - [JSONPath Internet Draft Development](https://github.com/ietf-wg-jsonpath/draft-ietf-jsonpath-jsonpath)
 
-#### Note:
+## Note
 
 For syntax compatibility among other libraries, please check [:memo: my comparison results](https://asaiyusuke.github.io/jsonpath/cburgmer-json-path-comparison/docs/index.html).
 
@@ -36,13 +36,13 @@ For syntax compatibility among other libraries, please check [:memo: my comparis
 
 ## Getting started
 
-### Install:
+### Install
 
 ```bash
 go get github.com/AsaiYusuke/jsonpath
 ```
 
-### Simple example:
+### Simple example
 
 ```go
 package main
@@ -68,16 +68,16 @@ func main() {
 
 ## Basic design
 
-#### _Streamlined Development_
+### _Streamlined Development_
 
 - The JSONPath syntax analysis functionality has been separated using [PEG](https://github.com/pointlander/peg), resulting in a more simplified source code.
 - Robust unit testing has been implemented to prevent bugs and ensure consistent outcomes.
 
-#### _User-Friendly Interface_
+### _User-Friendly Interface_
 
 - The library is equipped with a comprehensive error specification, allowing users to effectively handle any errors that may arise.
 
-#### _Unwavering Compatibility_
+### _Unwavering Compatibility_
 
 - The library has integrated a greater level of consensus behavior from [Christoph Burgmer's json-path-comparison](https://github.com/cburgmer/json-path-comparison), ensuring seamless compatibility.
 
@@ -114,7 +114,7 @@ These error types define the corresponding symptom, as listed below:
 
 | Error type              | Message format                                     | Symptom                                                                                                          | Ex                                                                                        |
 | ----------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath.<br>The _reason_ including in this message will tell you more about it. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidSyntax)    |
+| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath. The _reason_ including in this message will tell you more about it. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidSyntax)    |
 | `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath treated as the invalid error in Go syntax.                                | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidArgument)  |
 | `ErrorFunctionNotFound` | `function not found (function=%s)`                 | The function specified in the JSONPath is not found.                                                             | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionNotFound) |
 | `ErrorNotSupported`     | `not supported (feature=%s, path=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                              | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorNotSupported)     |
@@ -172,7 +172,7 @@ This feature can get enabled by giving `Config.SetAccessorMode()`.
 
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAccessorMode)
 
-#### Note:
+#### Accessor limitations
 
 It is not possible to use _Setter_ for some results, such as for JSONPath including function syntax.
 
@@ -193,8 +193,10 @@ The following character types can be available for identifiers in dot-child nota
 
 | Character type                                                                                                                                                                | Available | Escape required |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------- |
-| \* Numbers and alphabets (`0-9` `A-Z` `a-z`)<br> \* Hyphen and underscore (`-` `_`)<br> \* Non-ASCII Unicode characters (`0x80 - 0x10FFFF`)                                     | Yes       | No              |
-| \* Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` <code>&#124;</code> `}` `~`) | Yes       | Yes             |
+| \* Numbers and alphabets (`0-9` `A-Z` `a-z`)| Yes       | No              |
+| \* Hyphen and underscore (`-` `_`)| Yes       | No              |
+| \* Non-ASCII Unicode characters (`0x80 - 0x10FFFF`)                                     | Yes       | No              |
+| \* Other printable symbols (`Space` `!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `` ` `` `{` `\|` `}` `~`) | Yes       | Yes             |
 | \* ~~Control code characters~~ (`0x00 - 0x1F`, `0x7F`)                                                                                                                        | No        | -               |
 
 The printable symbols except hyphen and underscore can use by escaping them.
@@ -326,7 +328,7 @@ The benchmarks for various JSONPath libraries in Go language can be compared in 
   - [ ] testing
   - [ ] documentation
 - Future ToDo
-  - [ ] Refer to the something standard
+  - [x] Refer to the something standard
   - Go language affinity
     - [ ] retrieve with the object in struct unmarshal
     - [ ] retrieve with the struct tags

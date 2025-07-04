@@ -1,14 +1,14 @@
 package jsonpath
 
-type syntaxQueryParamCurrentRoot struct {
+type syntaxQueryParamCurrentNode struct {
 	param syntaxNode
 }
 
-func (e *syntaxQueryParamCurrentRoot) isValueGroupParameter() bool {
+func (e *syntaxQueryParamCurrentNode) isValueGroupParameter() bool {
 	return e.param.isValueGroup()
 }
 
-func (e *syntaxQueryParamCurrentRoot) compute(
+func (e *syntaxQueryParamCurrentNode) compute(
 	root interface{}, currentList []interface{}) []interface{} {
 
 	result := make([]interface{}, len(currentList))

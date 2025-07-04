@@ -1,10 +1,10 @@
 package jsonpath
 
-type syntaxCurrentRootIdentifier struct {
+type syntaxCurrentNodeIdentifier struct {
 	*syntaxBasicNode
 }
 
-func (i *syntaxCurrentRootIdentifier) retrieve(
+func (i *syntaxCurrentNodeIdentifier) retrieve(
 	root, current interface{}, container *bufferContainer) errorRuntime {
 
 	return i.retrieveAnyValueNext(root, current, container)

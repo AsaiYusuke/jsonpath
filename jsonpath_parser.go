@@ -216,9 +216,9 @@ func (p *jsonPathParser) updateRootValueGroup() {
 	}
 }
 
-func (p *jsonPathParser) deleteRootIdentifier(targetNode syntaxNode) syntaxNode {
+func (p *jsonPathParser) deleteRootNodeIdentifier(targetNode syntaxNode) syntaxNode {
 	switch targetNode.(type) {
-	case *syntaxRootIdentifier, *syntaxCurrentRootIdentifier:
+	case *syntaxRootNodeIdentifier, *syntaxCurrentNodeIdentifier:
 		if targetNode.getNext() != nil {
 			if targetNode.isValueGroup() {
 				targetNode.getNext().setValueGroup()
@@ -230,7 +230,7 @@ func (p *jsonPathParser) deleteRootIdentifier(targetNode syntaxNode) syntaxNode 
 	}
 
 	if aggregateFunction, ok := targetNode.(*syntaxAggregateFunction); ok {
-		aggregateFunction.param = p.deleteRootIdentifier(aggregateFunction.param)
+		aggregateFunction.param = p.deleteRootNodeIdentifier(aggregateFunction.param)
 	}
 
 	return targetNode
@@ -293,8 +293,8 @@ func (p *jsonPathParser) pushFunction(text string, funcName string) {
 	})
 }
 
-func (p *jsonPathParser) pushRootIdentifier() {
-	p.push(&syntaxRootIdentifier{
+func (p *jsonPathParser) pushRootNodeIdentifier() {
+	p.push(&syntaxRootNodeIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         `$`,
 			accessorMode: p.accessorMode,
@@ -302,8 +302,8 @@ func (p *jsonPathParser) pushRootIdentifier() {
 	})
 }
 
-func (p *jsonPathParser) pushCurrentRootIdentifier() {
-	p.push(&syntaxCurrentRootIdentifier{
+func (p *jsonPathParser) pushCurrentNodeIdentifier() {
+	p.push(&syntaxCurrentNodeIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
 			text:         `@`,
 			accessorMode: p.accessorMode,
@@ -666,14 +666,14 @@ func (p *jsonPathParser) pushCompareParameterLiteral(text interface{}) {
 
 func (p *jsonPathParser) pushCompareParameterRoot(node syntaxNode) {
 	p.updateAccessorMode(node, false)
-	p.push(&syntaxQueryParamRoot{
+	p.push(&syntaxQueryParamRootNode{
 		param: node,
 	})
 }
 
-func (p *jsonPathParser) pushCompareParameterCurrentRoot(node syntaxNode) {
+func (p *jsonPathParser) pushCompareParameterCurrentNode(node syntaxNode) {
 	p.updateAccessorMode(node, false)
-	p.push(&syntaxQueryParamCurrentRoot{
+	p.push(&syntaxQueryParamCurrentNode{
 		param: node,
 	})
 }

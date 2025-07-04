@@ -22,7 +22,7 @@ jobs:
         run: go test -race -covermode atomic -coverprofile=covprofile ./...
 
       - name: Install goveralls
-        run: go get github.com/mattn/goveralls@latest
+        run: go install github.com/mattn/goveralls@latest
 
       - name: Send coveralls
         env:

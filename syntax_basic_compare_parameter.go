@@ -8,7 +8,7 @@ type syntaxBasicCompareParameter struct {
 func (p *syntaxBasicCompareParameter) compute(
 	root interface{}, currentList []interface{}) []interface{} {
 
-	if _, ok := p.param.(*syntaxQueryParamRoot); ok {
+	if _, ok := p.param.(*syntaxQueryParamRootNode); ok {
 		currentList = []interface{}{root}
 	}
 
