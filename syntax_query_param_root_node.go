@@ -1,14 +1,14 @@
 package jsonpath
 
-type syntaxQueryParamRoot struct {
+type syntaxQueryParamRootNode struct {
 	param syntaxNode
 }
 
-func (e *syntaxQueryParamRoot) isValueGroupParameter() bool {
+func (e *syntaxQueryParamRootNode) isValueGroupParameter() bool {
 	return e.param.isValueGroup()
 }
 
-func (e *syntaxQueryParamRoot) compute(
+func (e *syntaxQueryParamRootNode) compute(
 	root interface{}, _ []interface{}) []interface{} {
 
 	values := getContainer()

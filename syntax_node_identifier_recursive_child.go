@@ -35,9 +35,9 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	targetNodes[0] = current
 
 	for len(targetNodes) > 0 {
-		currentNode := targetNodes[len(targetNodes)-1]
+		currentTargetNode := targetNodes[len(targetNodes)-1]
 		targetNodes = targetNodes[:len(targetNodes)-1]
-		switch typedNodes := currentNode.(type) {
+		switch typedNodes := currentTargetNode.(type) {
 		case map[string]interface{}:
 			if i.nextMapRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {

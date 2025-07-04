@@ -53,7 +53,7 @@ func createErrorFunctionFailed(text string, errorString string) ErrorFunctionFai
 				text: text,
 			},
 		},
-		err: fmt.Errorf(errorString),
+		err: fmt.Errorf(`%s`, errorString),
 	}
 }
 
@@ -231,6 +231,11 @@ func TestRetrieve_dotNotation(t *testing.T) {
 				jsonpath:     `$.a.a2`,
 				inputJSON:    `{"a":{"a1":"1","a2":"2"},"b":{"b1":"3"}}`,
 				expectedJSON: `["2"]`,
+			},
+			{
+				jsonpath:     `.a`,
+				inputJSON:    `{"a":"b","c":{"d":"e"}}`,
+				expectedJSON: `["b"]`,
 			},
 		},
 		`terms-with-special-meanings`: []TestCase{
@@ -766,6 +771,11 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 				inputJSON:    `[{"a":1,"b":2,"c":3},{"a":4,"b":5,"d":6}]`,
 				expectedJSON: `[1,2,4,5]`,
 			},
+			{
+				jsonpath:     `*`,
+				inputJSON:    `[[1],[2,3],123,"a",{"b":"c"},[0,1],null]`,
+				expectedJSON: `[[1],[2,3],123,"a",{"b":"c"},[0,1],null]`,
+			},
 		},
 		`object`: []TestCase{
 			{
@@ -782,6 +792,11 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 				jsonpath:     `$..[*]`,
 				inputJSON:    `{"a":1,"b":[2,3],"c":{"d":"e","f":[4,5]}}`,
 				expectedJSON: `[1,[2,3],{"d":"e","f":[4,5]},2,3,"e",[4,5],4,5]`,
+			},
+			{
+				jsonpath:     `*`,
+				inputJSON:    `{"a":[1],"b":[2,3],"c":{"d":4}}`,
+				expectedJSON: `[[1],[2,3],{"d":4}]`,
 			},
 		},
 		`two-wildcards`: []TestCase{
@@ -858,6 +873,11 @@ func TestRetrieve_dotNotation_wildcard(t *testing.T) {
 				jsonpath:     `$..*`,
 				inputJSON:    `[{"b":2,"a":1}]`,
 				expectedJSON: `[{"a":1,"b":2},1,2]`,
+			},
+			{
+				jsonpath:     `..*`,
+				inputJSON:    `{"a":1}`,
+				expectedJSON: `[1]`,
 			},
 		},
 		`child-error`: []TestCase{
@@ -5869,12 +5889,19 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `$`},
 			},
 		},
-		`dot-child-identifier`: []TestCase{
+		`root-less-identifier`: []TestCase{
 			{
-				jsonpath:    `.c`,
-				inputJSON:   `{"a":"b","c":{"d":"e"}}`,
-				expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: `.c`},
+				jsonpath:    `a.`,
+				inputJSON:   `{"a":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.`},
 			},
+			{
+				jsonpath:    `b.`,
+				inputJSON:   `{"a":1}`,
+				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.`},
+			},
+		},
+		`dot-child-identifier`: []TestCase{
 			{
 				jsonpath:    `$a`,
 				inputJSON:   `{"a":1}`,

@@ -5,39 +5,63 @@ type pegJSONPathParser Peg {
 }
 
 expression <-
-    jsonpath END {
-        p.root = p.deleteRootIdentifier(p.pop().(syntaxNode))
+    (jsonpathQuery / rootlessQuery) END {
+        p.root = p.deleteRootNodeIdentifier(p.pop().(syntaxNode))
         p.setConnectedText(p.root)
     } /
 
-    jsonpath? < .* > END {
+    (jsonpathQuery / rootlessQuery)? < .* > END {
         panic(p.syntaxErr(
             begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
     }
 
 END <- !.
 
-jsonpath          <- space rootNode          continuedJsonpath
-jsonpathParameter <- space parameterRootNode continuedJsonpath
+jsonpathQuery     <- space rootIdentifier segments
+rootlessQuery     <- space rootlessNode segments
+jsonpathParameter <- space parameterRootNode segments
 
-continuedJsonpath <- childNode* function* space {
+rootIdentifier <-
+    '$' {
+        p.pushRootNodeIdentifier()
+    }
+
+rootlessNode <-
+    {
+        p.pushRootNodeIdentifier()
+    } ( bracketedSelection / memberNameShorthand / descendantSegment / childSegment )
+
+parameterRootNode <- rootIdentifier / currentNodeIdentifier
+
+currentNodeIdentifier <-
+    '@' {
+        p.pushCurrentNodeIdentifier()
+    }
+
+segments <- segment* function* space
+    {
         p.setNodeChain()
         p.updateRootValueGroup()
     }
 
-rootNode          <- rootIdentifier / bracketNode / dotChildIdentifier
-parameterRootNode <- rootIdentifier / currentRootIdentifier
+segment <- descendantSegment / childSegment
 
-childNode <-
-    '..' ( bracketNode / dotChildIdentifier ) {
+descendantSegment <-
+    '..' ( bracketedSelection / memberNameShorthand ) {
         p.pushRecursiveChildIdentifier(p.pop().(syntaxNode))
-    } /
+    }
 
-    < '.' dotChildIdentifier > {
+childSegment <-
+    < '.' memberNameShorthand > {
         p.setLastNodeText(text)
     } /
 
-    bracketNode
+    bracketedSelection
+
+bracketedSelection <-
+    < squareBracketStart ( selectors ) squareBracketEnd > {
+        p.setLastNodeText(text)
+    }
 
 function <-
     < '.' functionName '()' > {
@@ -49,23 +73,8 @@ functionName <-
         p.push(text)
     }
 
-bracketNode <-
-    < squareBracketStart ( bracketChildIdentifier / qualifier ) squareBracketEnd > {
-        p.setLastNodeText(text)
-    }
-
-rootIdentifier <-
-    '$' {
-        p.pushRootIdentifier()
-    }
-
-currentRootIdentifier <-
-    '@' {
-        p.pushCurrentRootIdentifier()
-    }
-
-dotChildIdentifier <-
-    wildcardIdentifier /
+memberNameShorthand <-
+    wildcardSelector /
 
     < ( '\\' signsWithoutHyphenUnderscore / ![\0x00-\0x1F\0x7F] !signsWithoutHyphenUnderscore . )+ > !'()' {
         p.pushChildSingleIdentifier(p.unescape(text))
@@ -73,33 +82,35 @@ dotChildIdentifier <-
 
 signsWithoutHyphenUnderscore <- [ -,./:-@[-^`{-~]
 
-bracketChildIdentifier <-
-    bracketNodeIdentifier (
-        sep bracketNodeIdentifier {
+selectors <- objectElementSelectors / arrayElementSelectors / filterSelector / scriptSelector
+
+objectElementSelectors <-
+    objectElementSelector (
+        sep objectElementSelector {
             identifier2 := p.pop().(syntaxNode)
             identifier1 := p.pop().(syntaxNode)
             p.pushChildMultiIdentifier(identifier1, identifier2)
         }
     )* !sep
 
-bracketNodeIdentifier <-
+objectElementSelector <-
     (
-        wildcardIdentifier /
-        singleQuotedNodeIdentifier /
-        doubleQuotedNodeIdentifier
+        wildcardSelector /
+        singleQuotedNameSelector /
+        doubleQuotedNameSelector
     )
 
-wildcardIdentifier <-
+wildcardSelector <-
     '*' {
         p.pushChildWildcardIdentifier()
     }
 
-singleQuotedNodeIdentifier <-
+singleQuotedNameSelector <-
     '\'' < ( '\\' ( ['/\\bfnrt] / hexDigits ) / [^'\\] )* > '\'' {
         p.pushChildSingleIdentifier(p.unescapeSingleQuotedString(text))
     }
 
-doubleQuotedNodeIdentifier <-
+doubleQuotedNameSelector <-
     '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' {
         p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
     }
@@ -107,11 +118,9 @@ doubleQuotedNodeIdentifier <-
 hexDigits <- 'u' hexDigit hexDigit hexDigit hexDigit
 hexDigit  <- [a-fA-F0-9]
 
-qualifier <- union / script / filter
-
-union <-
-    index (
-        sep index {
+arrayElementSelectors <-
+    arrayElementSelector (
+        sep arrayElementSelector {
             childIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion := p.pop().(*syntaxUnionQualifier)
             parentIndexUnion.merge(childIndexUnion)
@@ -120,9 +129,9 @@ union <-
         }
     )* !sep
 
-index <-
+arrayElementSelector <-
     (
-        slice {
+        arraySliceSelector {
             step  := p.pop().(*syntaxIndexSubscript)
             end   := p.pop().(*syntaxIndexSubscript)
             start := p.pop().(*syntaxIndexSubscript)
@@ -138,7 +147,7 @@ index <-
             }
         } /
 
-        < indexNumber > {
+        < indexSelector > {
             p.pushIndexSubscript(text)
         } /
 
@@ -149,9 +158,9 @@ index <-
         p.pushUnionQualifier(p.pop().(syntaxSubscript))
     }
 
-slice <-
-    anyIndex sepSlice anyIndex (
-        sepSlice anyIndex /
+arraySliceSelector <-
+    anyIndex sepArraySlice anyIndex (
+        sepArraySlice anyIndex /
         space {
             p.pushIndexSubscript(`1`)
         }
@@ -166,20 +175,23 @@ anyIndex <-
         }
     }
 
+indexSelector <-
+    indexNumber
+
 indexNumber <- [-+]? [0-9]+
 
-sep      <- space ',' space
-sepSlice <- space ':' space
+sep           <- space ',' space
+sepArraySlice <- space ':' space
 
-script <-
-    scriptStart < command > scriptEnd {
+scriptSelector <-
+    scriptSelectorStart < command > scriptSelectorEnd {
         p.pushScriptQualifier(text)
     }
 
-command <- ( !scriptEnd . )+
+command <- ( !scriptSelectorEnd . )+
 
-filter <-
-    filterStart query filterEnd {
+filterSelector <-
+    filterSelectorStart query filterSelectorEnd {
         p.pushFilterQualifier(p.pop().(syntaxQuery))
     }
 
@@ -212,9 +224,9 @@ basicQuery <-
             query = (*logicalNot).query
         }
         if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-            _, leftIsCurrentRoot := checkQuery.leftParam.param.(*syntaxQueryParamCurrentRoot)
-            _, rightIsCurrentRoot := checkQuery.rightParam.param.(*syntaxQueryParamCurrentRoot)
-            if leftIsCurrentRoot && rightIsCurrentRoot {
+            _, leftIsCurrentNode := checkQuery.leftParam.param.(*syntaxQueryParamCurrentNode)
+            _, rightIsCurrentNode := checkQuery.rightParam.param.(*syntaxQueryParamCurrentNode)
+            if leftIsCurrentNode && rightIsCurrentNode {
                 panic(p.syntaxErr(
                     begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
             }
@@ -322,16 +334,17 @@ jsonpathFilter <-
         }
 
         switch checkNode.(type) {
-        case *syntaxRootIdentifier:
-            p.pushCompareParameterRoot(p.deleteRootIdentifier(node))
+        case *syntaxRootNodeIdentifier:
+            p.pushCompareParameterRoot(p.deleteRootNodeIdentifier(node))
             p.push(true)
-        case *syntaxCurrentRootIdentifier:
-            p.pushCompareParameterCurrentRoot(p.deleteRootIdentifier(node))
+        case *syntaxCurrentNodeIdentifier:
+            p.pushCompareParameterCurrentNode(p.deleteRootNodeIdentifier(node))
             p.push(false)
         }
     }
 
-lNumber <- < [-+]? [0-9] [-+.0-9a-zA-Z]* > {
+lNumber <-
+    < [-+]? [0-9] [-+.0-9a-zA-Z]* > {
         p.push(p.toFloat(text))
     }
 
@@ -353,7 +366,8 @@ lString <-
         p.push(p.unescape(text))
     }
 
-lNull <- ( 'null' / 'Null' / 'NULL' ) {
+lNull <-
+    ( 'null' / 'Null' / 'NULL' ) {
         p.push(nil)
     }
 
@@ -362,11 +376,11 @@ regex <- ( '\\' [\\/] / [^/] )*
 squareBracketStart <- '[' space
 squareBracketEnd   <- space ']'
 
-scriptStart <- '(' space
-scriptEnd   <- space ')'
+scriptSelectorStart <- '(' space
+scriptSelectorEnd   <- space ')'
 
-filterStart <- '?(' space
-filterEnd   <- space ')'
+filterSelectorStart <- '?(' space
+filterSelectorEnd   <- space ')'
 
 subQueryStart <- '(' space
 subQueryEnd   <- space ')'
