@@ -5869,6 +5869,11 @@ func TestRetrieve_space(t *testing.T) {
 				inputJSON:    `[{"a":1},{"b":2}]`,
 				expectedJSON: `[{"b":2}]`,
 			},
+			{
+				jsonpath:     `$[ ?( ( @.a ) ) ]`,
+				inputJSON:    `[{"a":1},{"b":2}]`,
+				expectedJSON: `[{"a":1}]`,
+			},
 		},
 	}
 
