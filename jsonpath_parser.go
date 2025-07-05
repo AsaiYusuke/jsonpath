@@ -677,3 +677,9 @@ func (p *jsonPathParser) pushCompareParameterCurrentNode(node syntaxNode) {
 		param: node,
 	})
 }
+
+func (p *jsonPathParser) pushBooleanLiteralQuery(value bool) {
+	p.push(&syntaxQueryBooleanLiteral{
+		value: value,
+	})
+}

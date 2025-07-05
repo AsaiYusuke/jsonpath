@@ -233,6 +233,16 @@ basicQuery <-
         } else {
             p.push(jsonpathFilter)
         }
+    } /
+
+    < lBool > {
+        boolValue := p.pop().(bool)
+        p.pushBooleanLiteralQuery(boolValue)
+    } /
+
+    logicNot < lBool > {
+        boolValue := p.pop().(bool)
+        p.pushBooleanLiteralQuery(!boolValue)
     }
 
 logicOr  <- space '||' space

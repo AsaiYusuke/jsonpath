@@ -4245,6 +4245,57 @@ func TestRetrieve_filterCompare(t *testing.T) {
 	runTestGroups(t, testGroups)
 }
 
+func TestRetrieve_filterBoolLiteral(t *testing.T) {
+	testGroups := TestGroup{
+		`bool-literal`: []TestCase{
+			{
+				jsonpath:     `$[?(true)]`,
+				inputJSON:    `[0,1,false,true,null,{},[]]`,
+				expectedJSON: `[0,1,false,true,null,{},[]]`,
+			},
+			{
+				jsonpath:     `$[?(True)]`,
+				inputJSON:    `[0,1,false,true,null,{},[]]`,
+				expectedJSON: `[0,1,false,true,null,{},[]]`,
+			},
+			{
+				jsonpath:     `$[?(TRUE)]`,
+				inputJSON:    `[0,1,false,true,null,{},[]]`,
+				expectedJSON: `[0,1,false,true,null,{},[]]`,
+			},
+			{
+				jsonpath:    `$[?(false)]`,
+				inputJSON:   `[0,1,false,true,null,{},[]]`,
+				expectedErr: createErrorMemberNotExist(`[?(false)]`),
+			},
+			{
+				jsonpath:    `$[?(False)]`,
+				inputJSON:   `[0,1,false,true,null,{},[]]`,
+				expectedErr: createErrorMemberNotExist(`[?(False)]`),
+			},
+			{
+				jsonpath:    `$[?(FALSE)]`,
+				inputJSON:   `[0,1,false,true,null,{},[]]`,
+				expectedErr: createErrorMemberNotExist(`[?(FALSE)]`),
+			},
+		},
+		`not-bool-literal`: []TestCase{
+			{
+				jsonpath:    `$[?(!true)]`,
+				inputJSON:   `[0,1,false,true,null,{},[]]`,
+				expectedErr: createErrorMemberNotExist(`[?(!true)]`),
+			},
+			{
+				jsonpath:     `$[?(!false)]`,
+				inputJSON:    `[0,1,false,true,null,{},[]]`,
+				expectedJSON: `[0,1,false,true,null,{},[]]`,
+			},
+		},
+	}
+
+	runTestGroups(t, testGroups)
+}
+
 func TestRetrieve_filterSubFilter(t *testing.T) {
 	testGroups := TestGroup{
 		`allowed`: []TestCase{
@@ -4705,6 +4756,48 @@ func TestRetrieve_filterLogicalCombination(t *testing.T) {
 				jsonpath:     `$[?(@.b == 2 && @.a =~ /a/)]`,
 				inputJSON:    `[{"a":"a"},{"a":"a","b":2}]`,
 				expectedJSON: `[{"a":"a","b":2}]`,
+			},
+		},
+		`bool-literal`: []TestCase{
+			{
+				jsonpath:    `$[?(@.a>1 && false)]`,
+				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a>1 && false)]`),
+			},
+			{
+				jsonpath:    `$[?(@.a>1 && ! true)]`,
+				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a>1 && ! true)]`),
+			},
+			{
+				jsonpath:     `$[?(@.a>1 && true)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 && ! false)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 || false)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 || ! true)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 || true)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":1},{"a":2},{"a":3}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a>1 || ! false)]`,
+				inputJSON:    `[{"a":1},{"a":2},{"a":3}]`,
+				expectedJSON: `[{"a":1},{"a":2},{"a":3}]`,
 			},
 		},
 	}
@@ -6331,18 +6424,6 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 		},
 		`qualifier::literal`: []TestCase{
 			{
-				jsonpath:     `$[?(false)]`,
-				inputJSON:    `[0,1,false,true,null,{},[]]`,
-				expectedJSON: `[]`,
-				expectedErr:  ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(false)]`},
-			},
-			{
-				jsonpath:     `$[?(true)]`,
-				inputJSON:    `[0,1,false,true,null,{},[]]`,
-				expectedJSON: `[]`,
-				expectedErr:  ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(true)]`},
-			},
-			{
 				jsonpath:     `$[?(null)]`,
 				inputJSON:    `[0,1,false,true,null,{},[]]`,
 				expectedJSON: `[]`,
@@ -6573,26 +6654,6 @@ func TestRetrieve_invalidSyntax(t *testing.T) {
 				jsonpath:    `$[?( || @.a>1 )]`,
 				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
 				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?( || @.a>1 )]`},
-			},
-			{
-				jsonpath:    `$[?(@.a>1 && false)]`,
-				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(@.a>1 && false)]`},
-			},
-			{
-				jsonpath:    `$[?(@.a>1 && true)]`,
-				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(@.a>1 && true)]`},
-			},
-			{
-				jsonpath:    `$[?(@.a>1 || false)]`,
-				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(@.a>1 || false)]`},
-			},
-			{
-				jsonpath:    `$[?(@.a>1 || true)]`,
-				inputJSON:   `[{"a":1},{"a":2},{"a":3}]`,
-				expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `[?(@.a>1 || true)]`},
 			},
 			{
 				jsonpath:    `$[?(@.a>1 && ())]`,
