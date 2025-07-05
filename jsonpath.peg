@@ -96,8 +96,7 @@ objectElementSelectors <-
 objectElementSelector <-
     (
         wildcardSelector /
-        singleQuotedNameSelector /
-        doubleQuotedNameSelector
+        nameSelector
     )
 
 wildcardSelector <-
@@ -105,18 +104,10 @@ wildcardSelector <-
         p.pushChildWildcardIdentifier()
     }
 
-singleQuotedNameSelector <-
-    '\'' < ( '\\' ( ['/\\bfnrt] / hexDigits ) / [^'\\] )* > '\'' {
-        p.pushChildSingleIdentifier(p.unescapeSingleQuotedString(text))
+nameSelector <-
+    lString {
+        p.pushChildSingleIdentifier(p.pop().(string))
     }
-
-doubleQuotedNameSelector <-
-    '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' {
-        p.pushChildSingleIdentifier(p.unescapeDoubleQuotedString(text))
-    }
-
-hexDigits <- 'u' hexDigit hexDigit hexDigit hexDigit
-hexDigit  <- [a-fA-F0-9]
 
 arrayElementSelectors <-
     arrayElementSelector (
@@ -358,13 +349,16 @@ lBool <-
     }
 
 lString <-
-    '\'' < ( '\\' [\\'] / [^'] )* > '\'' {
-        p.push(p.unescape(text))
+    '\'' < ( '\\' ( ['/\\bfnrt] / hexDigits ) / [^'\\] )* > '\'' {
+        p.push(p.unescapeSingleQuotedString(text))
     } /
 
-    '"' < ( '\\' [\\"] / [^"] )* > '"' {
-        p.push(p.unescape(text))
+    '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' {
+        p.push(p.unescapeDoubleQuotedString(text))
     }
+
+hexDigits <- 'u' hexDigit hexDigit hexDigit hexDigit
+hexDigit  <- [a-fA-F0-9]
 
 lNull <-
     ( 'null' / 'Null' / 'NULL' ) {
