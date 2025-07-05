@@ -3487,14 +3487,19 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedJSON: `[["a","a'b"]]`,
 			},
 			{
-				jsonpath:     `$[?(@.a=='a\b')]`,
-				inputJSON:    `[{"a":"ab"}]`,
-				expectedJSON: `[{"a":"ab"}]`,
+				jsonpath:     `$[?(@.a=='a\'b')]`,
+				inputJSON:    `[{"a":"a'b"},{"b":1}]`,
+				expectedJSON: `[{"a":"a'b"}]`,
 			},
 			{
-				jsonpath:     `$[?(@.a=="a\b")]`,
-				inputJSON:    `[{"a":"ab"}]`,
-				expectedJSON: `[{"a":"ab"}]`,
+				jsonpath:    `$[?(@.a=='a\b')]`,
+				inputJSON:   `[{"a":"ab"}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a=='a\b')]`),
+			},
+			{
+				jsonpath:    `$[?(@.a=="a\b")]`,
+				inputJSON:   `[{"a":"ab"}]`,
+				expectedErr: createErrorMemberNotExist(`[?(@.a=="a\b")]`),
 			},
 			{
 				// The character ['&','<','>'] is encoded to [\u0026,\u003c,\u003e] using Go's json.Marshal()
@@ -3507,6 +3512,59 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				jsonpath:     `$[?(@.a=='~!@#$%^&*()-_=+[]\\{}|;\':",./<>?')]`,
 				inputJSON:    `[{"a":"~!@#$%^&*()-_=+[]\\{}|;':\",./<>?"}]`,
 				expectedJSON: `[{"a":"~!@#$%^\u0026*()-_=+[]\\{}|;':\",./\u003c\u003e?"}]`,
+			},
+			{
+				// The character \/ is encoded to / using Go's json.Marshal()
+				jsonpath:     `$[?(@.a=='a\/b')]`,
+				inputJSON:    `[{"a":"a\/b"},{"b":1}]`,
+				expectedJSON: `[{"a":"a/b"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='a\\b')]`,
+				inputJSON:    `[{"a":"a\\b"},{"b":1}]`,
+				expectedJSON: `[{"a":"a\\b"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='a\bb')]`,
+				inputJSON:    `[{"a":"a\bb"},{"b":1}]`,
+				expectedJSON: `[{"a":"a\bb"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='a\fb')]`,
+				inputJSON:    `[{"a":"a\fb"},{"b":1}]`,
+				expectedJSON: `[{"a":"a\fb"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='a\nb')]`,
+				inputJSON:    `[{"a":"a\nb"},{"b":1}]`,
+				expectedJSON: `[{"a":"a\nb"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='a\rb')]`,
+				inputJSON:    `[{"a":"a\rb"},{"b":1}]`,
+				expectedJSON: `[{"a":"a\rb"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='a\tb')]`,
+				inputJSON:    `[{"a":"a\tb"},{"b":1}]`,
+				expectedJSON: `[{"a":"a\tb"}]`,
+			},
+			{
+				jsonpath:     `$[?(@.a=='\u0000')]`,
+				inputJSON:    `[{"a":"\u0000"},{"b":1}]`,
+				expectedJSON: `[{"a":"\u0000"}]`,
+			},
+			{
+				// The character \uABCD is encoded to ꯍ using Go's json.Marshal()
+				jsonpath:     `$[?(@.a=='\uABCD')]`,
+				inputJSON:    `[{"a":"\uabcd"},{"b":1}]`,
+				expectedJSON: `[{"a":"ꯍ"}]`,
+			},
+			{
+				// The character \uabcd is encoded to ꯍ using Go's json.Marshal()
+				jsonpath:     `$[?(@.a=='\uabcd')]`,
+				inputJSON:    `[{"a":"\uABCD"},{"b":1}]`,
+				expectedJSON: `[{"a":"ꯍ"}]`,
 			},
 		},
 		`syntax-check::number-literal`: []TestCase{

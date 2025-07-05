@@ -1,3 +1,3 @@
 module github.com/AsaiYusuke/jsonpath
 
-go 1.24.1
+go 1.24
