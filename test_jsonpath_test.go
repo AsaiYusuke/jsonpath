@@ -3525,16 +3525,14 @@ func TestRetrieve_filterCompare(t *testing.T) {
 				expectedJSON: `[{"a":"a\\b"}]`,
 			},
 			{
-				// The character \b is encoded to \u0008 using Go's json.Marshal()
 				jsonpath:     `$[?(@.a=='a\bb')]`,
 				inputJSON:    `[{"a":"a\bb"},{"b":1}]`,
-				expectedJSON: `[{"a":"a\u0008b"}]`,
+				expectedJSON: `[{"a":"a\bb"}]`,
 			},
 			{
-				// The character \f is encoded to \u000c using Go's json.Marshal()
 				jsonpath:     `$[?(@.a=='a\fb')]`,
 				inputJSON:    `[{"a":"a\fb"},{"b":1}]`,
-				expectedJSON: `[{"a":"a\u000cb"}]`,
+				expectedJSON: `[{"a":"a\fb"}]`,
 			},
 			{
 				jsonpath:     `$[?(@.a=='a\nb')]`,
