@@ -4,219 +4,218 @@ import (
 	"testing"
 )
 
-func TestRetrieve_space_basic_space(t *testing.T) {
+func TestSpecialChars_BasicSpaceHandling(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     ` $.a `,
 		inputJSON:    `{"a":123}`,
 		expectedJSON: `[123]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_basic_space")
+	runTestCase(t, testCase, "TestSpecialChars_basic_space")
 }
 
-func TestRetrieve_space_tab_invalid(t *testing.T) {
+func TestSpecialChars_InvalidTabCharacters(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    "\t" + `$.a` + "\t",
 		inputJSON:   `{"a":123}`,
 		expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: "\t" + `$.a` + "\t"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_tab_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_tab_invalid")
 }
 
-func TestRetrieve_space_newline_invalid(t *testing.T) {
+func TestSpecialChars_InvalidNewlineCharacters(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.a` + "\n",
 		inputJSON:   `{"a":123}`,
 		expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: "\n"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_newline_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_newline_invalid")
 }
 
-func TestRetrieve_space_bracket_notation_multi_identifier(t *testing.T) {
+func TestSpecialChars_BracketNotationMultiIdentifier(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ "a" , "c" ]`,
 		inputJSON:    `{"a":1,"b":2,"c":3}`,
 		expectedJSON: `[1,3]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_bracket_notation_multi_identifier")
+	runTestCase(t, testCase, "TestSpecialChars_BracketNotationMultiIdentifier")
 }
 
-func TestRetrieve_space_bracket_notation_slice_union(t *testing.T) {
+func TestSpecialChars_BracketNotationSliceUnion(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ 0 , 2 : 4 , * ]`,
 		inputJSON:    `[1,2,3,4,5]`,
 		expectedJSON: `[1,3,4,1,2,3,4,5]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_bracket_notation_slice_union")
+	runTestCase(t, testCase, "TestSpecialChars_BracketNotationSliceUnion")
 }
 
-func TestRetrieve_space_filter_equal(t *testing.T) {
+func TestSpecialChars_FilterEqual(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a == 1 ) ]`,
 		inputJSON:    `[{"a":1}]`,
 		expectedJSON: `[{"a":1}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_equal")
+	runTestCase(t, testCase, "TestSpecialChars_FilterEqual")
 }
 
-func TestRetrieve_space_filter_not_equal(t *testing.T) {
+func TestSpecialChars_FilterNotEqual(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a != 1 ) ]`,
 		inputJSON:    `[{"a":2}]`,
 		expectedJSON: `[{"a":2}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_not_equal")
+	runTestCase(t, testCase, "TestSpecialChars_FilterNotEqual")
 }
 
-func TestRetrieve_space_filter_less_equal(t *testing.T) {
+func TestSpecialChars_FilterLessEqual(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a <= 1 ) ]`,
 		inputJSON:    `[{"a":1}]`,
 		expectedJSON: `[{"a":1}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_less_equal")
+	runTestCase(t, testCase, "TestSpecialChars_FilterLessEqual")
 }
 
-func TestRetrieve_space_filter_less_than(t *testing.T) {
+func TestSpecialChars_FilterLessThan(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a < 1 ) ]`,
 		inputJSON:    `[{"a":0}]`,
 		expectedJSON: `[{"a":0}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_less_than")
+	runTestCase(t, testCase, "TestSpecialChars_FilterLessThan")
 }
 
-func TestRetrieve_space_filter_greater_equal(t *testing.T) {
+func TestSpecialChars_FilterGreaterEqual(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a >= 1 ) ]`,
 		inputJSON:    `[{"a":1}]`,
 		expectedJSON: `[{"a":1}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_greater_equal")
+	runTestCase(t, testCase, "TestSpecialChars_FilterGreaterEqual")
 }
 
-func TestRetrieve_space_filter_greater_than(t *testing.T) {
+func TestSpecialChars_FilterGreaterThan(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a > 1 ) ]`,
 		inputJSON:    `[{"a":2}]`,
 		expectedJSON: `[{"a":2}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_greater_than")
+	runTestCase(t, testCase, "TestSpecialChars_FilterGreaterThan")
 }
 
-func TestRetrieve_space_filter_regex(t *testing.T) {
+func TestSpecialChars_FilterRegex(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a =~ /a/ ) ]`,
 		inputJSON:    `[{"a":"abc"}]`,
 		expectedJSON: `[{"a":"abc"}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_regex")
+	runTestCase(t, testCase, "TestSpecialChars_FilterRegex")
 }
 
-func TestRetrieve_space_filter_logical_and(t *testing.T) {
+func TestSpecialChars_FilterLogicalAnd(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a == 1 && @.b == 2 ) ]`,
 		inputJSON:    `[{"a":1,"b":2}]`,
 		expectedJSON: `[{"a":1,"b":2}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_logical_and")
+	runTestCase(t, testCase, "TestSpecialChars_FilterLogicalAnd")
 }
 
-func TestRetrieve_space_filter_logical_or(t *testing.T) {
+func TestSpecialChars_FilterLogicalOr(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( @.a == 1 || @.b == 2 ) ]`,
 		inputJSON:    `[{"a":1},{"b":2}]`,
 		expectedJSON: `[{"a":1},{"b":2}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_logical_or")
+	runTestCase(t, testCase, "TestSpecialChars_FilterLogicalOr")
 }
 
-func TestRetrieve_space_filter_logical_not(t *testing.T) {
+func TestSpecialChars_FilterLogicalNot(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( ! @.a ) ]`,
 		inputJSON:    `[{"a":1},{"b":2}]`,
 		expectedJSON: `[{"b":2}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_logical_not")
+	runTestCase(t, testCase, "TestSpecialChars_FilterLogicalNot")
 }
 
-func TestRetrieve_space_filter_parentheses(t *testing.T) {
+func TestSpecialChars_FilterParentheses(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[ ?( ( @.a ) ) ]`,
 		inputJSON:    `[{"a":1},{"b":2}]`,
 		expectedJSON: `[{"a":1}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_filter_parentheses")
+	runTestCase(t, testCase, "TestSpecialChars_FilterParentheses")
 }
 
-// Control character tests
-func TestRetrieve_space_tab_character_invalid(t *testing.T) {
+func TestSpecialChars_TabCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.` + "\x09",
 		inputJSON:   `{"\t":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x09"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_tab_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_TabCharacterInvalid")
 }
 
-func TestRetrieve_space_escaped_tab_character_invalid(t *testing.T) {
+func TestSpecialChars_EscapedTabCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.\` + "\x09",
 		inputJSON:   `{"\t":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\` + "\x09"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_escaped_tab_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_EscapedTabCharacterInvalid")
 }
 
-func TestRetrieve_space_cr_character_invalid(t *testing.T) {
+func TestSpecialChars_CrCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.` + "\x0d",
 		inputJSON:   `{"\n":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x0d"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_cr_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_CrCharacterInvalid")
 }
 
-func TestRetrieve_space_escaped_cr_character_invalid(t *testing.T) {
+func TestSpecialChars_EscapedCrCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.\` + "\x0d",
 		inputJSON:   `{"\n":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\` + "\x0d"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_escaped_cr_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_EscapedCrCharacterInvalid")
 }
 
-func TestRetrieve_space_control_character_1f_invalid(t *testing.T) {
+func TestSpecialChars_ControlCharacter1fInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.` + "\x1f",
 		inputJSON:   `{"a":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x1f"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_control_character_1f_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_ControlCharacter1fInvalid")
 }
 
-func TestRetrieve_space_del_character_invalid(t *testing.T) {
+func TestSpecialChars_DelCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.` + "\x7F",
 		inputJSON:   `{"` + "\x7F" + `":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.` + "\x7F"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_del_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_DelCharacterInvalid")
 }
 
-func TestRetrieve_space_escaped_del_character_invalid(t *testing.T) {
+func TestSpecialChars_EscapedDelCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.\` + "\x7F",
 		inputJSON:   `{"` + "\x7F" + `":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\` + "\x7F"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_escaped_del_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_EscapedDelCharacterInvalid")
 }
 
-func TestRetrieve_space_property_with_del_character_invalid(t *testing.T) {
+func TestSpecialChars_PropertyWithDelCharacterInvalid(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$.a` + "\x7F",
 		inputJSON:   `{"a` + "\x7F" + `":1}`,
 		expectedErr: ErrorInvalidSyntax{position: 3, reason: `unrecognized input`, near: "\x7F"},
 	}
-	runTestCase(t, testCase, "TestRetrieve_space_property_with_del_character_invalid")
+	runTestCase(t, testCase, "TestSpecialChars_PropertyWithDelCharacterInvalid")
 }

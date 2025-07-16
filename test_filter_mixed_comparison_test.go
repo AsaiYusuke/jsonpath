@@ -20,7 +20,7 @@ func TestFilterComparison_DecimalNumbers(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("DecimalNumbers_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_DecimalNumbers_%d", i), test)
 	}
 }
 
@@ -34,7 +34,7 @@ func TestFilterComparison_StringEquality(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("StringEquality_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_StringEquality_%d", i), test)
 	}
 }
 
@@ -68,7 +68,7 @@ func TestFilterRoot_ComplexSelectors(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("ComplexSelectors_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterRoot_ComplexSelectors_%d", i), test)
 	}
 }
 
@@ -102,7 +102,7 @@ func TestFilterComparison_StringComparisons(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("StringComparisons_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_StringComparisons_%d", i), test)
 	}
 }
 
@@ -121,7 +121,7 @@ func TestFilterComparison_InequalityOperators(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("InequalityOperators_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_InequalityOperators_%d", i), test)
 	}
 }
 
@@ -175,7 +175,7 @@ func TestFilterComparison_NumericComparisons(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("NumericComparisons_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_NumericComparisons_%d", i), test)
 	}
 }
 
@@ -194,7 +194,7 @@ func TestFilterComparison_StringLiterals(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("StringLiterals_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_StringLiterals_%d", i), test)
 	}
 }
 
@@ -442,21 +442,99 @@ func TestFilterComparison_EscapeSequences(t *testing.T) {
 }
 
 func TestFilterComparison_InvalidSyntaxCases(t *testing.T) {
-	testCases := []TestCase{
-		// スライス操作の基本的なケースのみ保持
+	tests := []TestCase{
+		{
+			jsonpath:    `$[?(@.a == $.b)]`,
+			inputJSON:   `[{"a":1},{"a":2}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a == $.b)]`),
+		},
+		{
+			jsonpath:    `$[?($.b == @.a)]`,
+			inputJSON:   `[{"a":1},{"a":2}]`,
+			expectedErr: createErrorMemberNotExist(`[?($.b == @.a)]`),
+		},
 	}
 
-	for _, testCase := range testCases {
-		runSingleTestCase(t, "TestFilterComparison_InvalidSyntaxCases", testCase)
+	for i, test := range tests {
+		runSingleTestCase(t, fmt.Sprintf("TestFilterComparison_InvalidSyntaxCases_%d", i), test)
 	}
 }
 
 func TestFilterComparison_InvalidSyntaxRegexCases(t *testing.T) {
-	testCases := []TestCase{
-		// 基本的な動作テストのみ保持
+	tests := []TestCase{
+		{
+			jsonpath:    `$[?(@[0:1]==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0:1]==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@[0:2]==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0:2]==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@[0:2].a==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0:2].a==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@.a[0:2]==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[0:2]==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@[0,1]==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0,1]==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@[0,1].a==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0,1].a==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@.a[0,1]==1)]`,
+			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[0,1]==1)]`},
+		},
+		{
+			jsonpath:    `$[?(@..a==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@..a==123)]`},
+		},
+		{
+			jsonpath:    `$[?(@..a.b==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@..a.b==123)]`},
+		},
+		{
+			jsonpath:    `$[?(@.a..b==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a..b==123)]`},
+		},
+		{
+			jsonpath:    `$[?(@..a..b==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@..a..b==123)]`},
+		},
+		{
+			jsonpath:    `$[?(@['a','b']==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a','b']==123)]`},
+		},
+		{
+			jsonpath:    `$[?(@['a','b','c']==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a','b','c']==123)]`},
+		},
+		{
+			jsonpath:    `$[?(@['a','b']['a']==123)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a','b']['a']==123)]`},
+		},
 	}
 
-	for _, testCase := range testCases {
-		runSingleTestCase(t, "TestFilterComparison_InvalidSyntaxRegexCases", testCase)
+	for i, test := range tests {
+		runSingleTestCase(t, fmt.Sprintf("InvalidSyntaxRegexCases_%d", i), test)
 	}
 }

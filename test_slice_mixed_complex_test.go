@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-// TestRetrieve_sliceComplexNestedDeleted tests deleted complex slice operations
 func TestRetrieve_sliceComplexNestedDeleted(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -145,7 +144,6 @@ func TestRetrieve_sliceComplexNestedDeleted(t *testing.T) {
 	}
 }
 
-// TestRetrieve_sliceWildcardDeleted tests deleted wildcard slice operations
 func TestRetrieve_sliceWildcardDeleted(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -298,7 +296,6 @@ func TestRetrieve_sliceWildcardDeleted(t *testing.T) {
 	}
 }
 
-// TestRetrieve_sliceUnionDeleted tests deleted union slice operations
 func TestRetrieve_sliceUnionDeleted(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -325,7 +322,6 @@ func TestRetrieve_sliceUnionDeleted(t *testing.T) {
 	}
 }
 
-// TestRetrieve_sliceUnionAdditional tests remaining deleted union slice operations
 func TestRetrieve_sliceUnionAdditional(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -370,7 +366,6 @@ func TestRetrieve_sliceUnionAdditional(t *testing.T) {
 	}
 }
 
-// TestRetrieve_sliceUnionWildcard tests remaining deleted union slice wildcard operations
 func TestRetrieve_sliceUnionWildcard(t *testing.T) {
 	testCases := []TestCase{
 		{

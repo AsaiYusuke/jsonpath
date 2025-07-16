@@ -4,8 +4,6 @@ import (
 	"testing"
 )
 
-// Compound array access tests - restoring deleted tests from $[0,1][0:2] pattern group
-
 func TestRetrieve_compound_array_union_slice_success(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[0,1][0:2]`,

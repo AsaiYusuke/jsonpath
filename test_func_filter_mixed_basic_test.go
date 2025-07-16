@@ -5,8 +5,7 @@ import (
 	"testing"
 )
 
-// TestFilterFunctionDeletedCases tests deleted filter function cases
-func TestFilterFunctionDeletedCases(t *testing.T) {
+func TestFilterFunction_ChainedOperations(t *testing.T) {
 	testCases := []TestCase{
 		{
 			jsonpath:     `$.*.twice()`,
@@ -42,6 +41,15 @@ func TestFilterFunctionDeletedCases(t *testing.T) {
 				`quarter`: quarterFunc,
 			},
 		},
+	}
+
+	for i, testCase := range testCases {
+		runSingleTestCase(t, fmt.Sprintf("TestFilterFunction_ChainedOperations_%d", i), testCase)
+	}
+}
+
+func TestFilterFunction_FilterOperations(t *testing.T) {
+	testCases := []TestCase{
 		{
 			jsonpath:     `$[?(@.twice())]`,
 			inputJSON:    `[123.456,256]`,
@@ -74,51 +82,19 @@ func TestFilterFunctionDeletedCases(t *testing.T) {
 				`twice`: twiceFunc,
 			},
 		},
-		{
-			jsonpath:     `$.*.unknown()`,
-			inputJSON:    `[123.456,256]`,
-			expectedJSON: ``,
-			expectedErr:  ErrorFunctionNotFound{function: `.unknown()`},
-		},
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("FilterFunctionDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestFilterFunction_FilterOperations_%d", i), testCase)
 	}
 }
 
-// TestAggregateFunctionDeletedCases tests deleted aggregate function cases
-func TestAggregateFunctionDeletedCases(t *testing.T) {
-	testCases := []TestCase{
-		{
-			jsonpath:     `$.*.max().max()`,
-			inputJSON:    `[122.345,123.45,123.456]`,
-			expectedJSON: `[123.456]`,
-			aggregates: map[string]func([]interface{}) (interface{}, error){
-				`max`: maxFunc,
-			},
-		},
-		{
-			jsonpath:     `$.*.max().min()`,
-			inputJSON:    `[122.345,123.45,123.456]`,
-			expectedJSON: `[123.456]`,
-			aggregates: map[string]func([]interface{}) (interface{}, error){
-				`max`: maxFunc,
-				`min`: minFunc,
-			},
-		},
-		{
-			jsonpath:     `$.*.min().max()`,
-			inputJSON:    `[122.345,123.45,123.456]`,
-			expectedJSON: `[122.345]`,
-			aggregates: map[string]func([]interface{}) (interface{}, error){
-				`max`: maxFunc,
-				`min`: minFunc,
-			},
-		},
+func TestFilterFunction_ErrorCases(t *testing.T) {
+	testCase := TestCase{
+		jsonpath:     `$.*.unknown()`,
+		inputJSON:    `[123.456,256]`,
+		expectedJSON: ``,
+		expectedErr:  ErrorFunctionNotFound{function: `.unknown()`},
 	}
-
-	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("AggregateFunctionDeleted_%d", i), testCase)
-	}
+	runSingleTestCase(t, "TestFilterFunction_ErrorCases_UnknownFunction", testCase)
 }

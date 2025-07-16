@@ -42,7 +42,7 @@ func createAccessorModeValidatorOrig(
 	}
 }
 
-func TestRetrieve_configAccessorMode(t *testing.T) {
+func TestConfig_AccessorModeOperations(t *testing.T) {
 	testGroups := TestGroup{
 		`getter-setter`: []TestCase{
 			{

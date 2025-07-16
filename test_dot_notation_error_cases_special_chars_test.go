@@ -7,14 +7,12 @@ import (
 
 func TestInvalidDotNotationSpecialCharacters(t *testing.T) {
 	tests := []TestCase{
-		// Root symbol (@) at start
 		{
 			jsonpath:    `@`,
 			inputJSON:   `{"@":1}`,
 			expectedErr: ErrorInvalidSyntax{position: 0, reason: `unrecognized input`, near: `@`},
 		},
 
-		// Backslash escape sequences
 		{
 			jsonpath:    `$.\a`,
 			inputJSON:   `{"a":1}`,
@@ -36,14 +34,12 @@ func TestInvalidDotNotationSpecialCharacters(t *testing.T) {
 			expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.\_`},
 		},
 
-		// Quoted key with backslash
 		{
 			jsonpath:    `$.'a\.b'`,
 			inputJSON:   `{"'a.b'":1,"a":{"b":2},"'a'":{"'b'":3},"'a":{"b'":4}}`,
 			expectedErr: ErrorInvalidSyntax{position: 1, reason: `unrecognized input`, near: `.'a\.b'`},
 		},
 
-		// Special characters after dot
 		{
 			jsonpath:    `$. `,
 			inputJSON:   `{" ":1}`,

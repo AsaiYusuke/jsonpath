@@ -4,8 +4,6 @@ import (
 	"testing"
 )
 
-// Invalid operator syntax tests - restoring deleted tests from operator error patterns
-
 func TestRetrieve_invalid_operator_double_not_equal_error(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$[?(@.a!!=1)]`,

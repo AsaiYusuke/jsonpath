@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestRetrieve_valueGroupCombination_Wildcard_qualifier(t *testing.T) {
+func TestMixed_ValueGroupCombinationWildcardQualifier(t *testing.T) {
 	testGroups := TestGroup{
 		`Recursive-descent`: []TestCase{
 			{

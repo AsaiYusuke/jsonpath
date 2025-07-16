@@ -5,9 +5,8 @@ import (
 	"testing"
 )
 
-func TestFilterWildcard(t *testing.T) {
+func TestFilter_WildcardValueGroupProhibitions(t *testing.T) {
 	testCases := []TestCase{
-		// Wildcard array element filtering with value groups
 		{
 			jsonpath:    `$[?(@[*]==1)]`,
 			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
@@ -24,7 +23,6 @@ func TestFilterWildcard(t *testing.T) {
 			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[*]==1)]`},
 		},
 
-		// Wildcard property filtering with value groups
 		{
 			jsonpath:    `$[?(@.*==2)]`,
 			inputJSON:   `[[1,2],[2,3],[1],[2],[1,2,3],1,2,3]`,
@@ -45,8 +43,6 @@ func TestFilterWildcard(t *testing.T) {
 			inputJSON:   `[[1,2],[2,3],[1],[2],[1,2,3],1,2,3]`,
 			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a.*==2)]`},
 		},
-
-		// Array literal comparisons with wildcards
 		{
 			jsonpath:    `$[?(@.*==[1,2])]`,
 			inputJSON:   `[[1,2],[2,3],[1],[2],[1,2,3],1,2,3]`,
@@ -60,6 +56,6 @@ func TestFilterWildcard(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		runTestCase(t, tc, fmt.Sprintf("TestFilterWildcard_case_%d", i))
+		runTestCase(t, tc, fmt.Sprintf("TestFilter_WildcardValueGroupProhibitions[%d]", i))
 	}
 }

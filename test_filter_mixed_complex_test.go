@@ -1,104 +1,248 @@
 package jsonpath
 
 import (
-	"fmt"
 	"testing"
 )
 
-func TestAdvancedFilterOperations(t *testing.T) {
+func TestRetrieve_filterComplexNestedDeleted(t *testing.T) {
 	testCases := []TestCase{
-		// Root node comparison with member access
 		{
-			jsonpath:    `$[?(@.a == $.b)]`,
-			inputJSON:   `[{"a":1},{"a":2}]`,
-			expectedErr: createErrorMemberNotExist(`[?(@.a == $.b)]`),
+			jsonpath:     `$[?(@[1][0]>1)]`,
+			inputJSON:    `[1,[21,[221,[222]]]]`,
+			expectedJSON: `[[21,[221,[222]]]]`,
 		},
 		{
-			jsonpath:    `$[?($.b == @.a)]`,
-			inputJSON:   `[{"a":1},{"a":2}]`,
-			expectedErr: createErrorMemberNotExist(`[?($.b == @.a)]`),
-		},
-
-		// Array slice operations in filters
-		{
-			jsonpath:    `$[?(@[0:1]==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0:1]==1)]`},
+			jsonpath:     `$[?(@[1][0]>1)][?(@[1][0]>1)]`,
+			inputJSON:    `[1,[21,[221,[222]]]]`,
+			expectedJSON: `[[221,[222]]]`,
 		},
 		{
-			jsonpath:    `$[?(@[0:2]==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0:2]==1)]`},
+			jsonpath:     `$[?(@[1][0]>1)][?(@[1][0]>1)][?(@[0]>1)]`,
+			inputJSON:    `[1,[21,[221,[222]]]]`,
+			expectedJSON: `[[222]]`,
 		},
 		{
-			jsonpath:    `$[?(@[0:2].a==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0:2].a==1)]`},
-		},
-		{
-			jsonpath:    `$[?(@.a[0:2]==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[0:2]==1)]`},
-		},
-
-		// Multi-index operations in filters
-		{
-			jsonpath:    `$[?(@[0,1]==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0,1]==1)]`},
-		},
-		{
-			jsonpath:    `$[?(@[0,1].a==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@[0,1].a==1)]`},
-		},
-		{
-			jsonpath:    `$[?(@.a[0,1]==1)]`,
-			inputJSON:   `[[1,2,3],[1],[2,3],1,2]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a[0,1]==1)]`},
-		},
-
-		// Recursive descent operations in filters
-		{
-			jsonpath:    `$[?(@..a==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@..a==123)]`},
-		},
-		{
-			jsonpath:    `$[?(@..a.b==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@..a.b==123)]`},
-		},
-		{
-			jsonpath:    `$[?(@.a..b==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a..b==123)]`},
-		},
-		{
-			jsonpath:    `$[?(@..a..b==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@..a..b==123)]`},
-		},
-
-		// Quoted key operations in filters
-		{
-			jsonpath:    `$[?(@['a','b']==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a','b']==123)]`},
-		},
-		{
-			jsonpath:    `$[?(@['a','b','c']==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a','b','c']==123)]`},
-		},
-		{
-			jsonpath:    `$[?(@['a','b']['a']==123)]`,
-			inputJSON:   `[{"a":"123"},{"a":123}]`,
-			expectedErr: ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a','b']['a']==123)]`},
+			jsonpath:     `$[?(@[1][0]>1)][?(@[1][0]>1)][?(@[1]>1)]`,
+			inputJSON:    `[1,[21,[221,[222]]]]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@[1]>1)]`),
 		},
 	}
 
-	for i, tc := range testCases {
-		runTestCase(t, tc, fmt.Sprintf("TestAdvancedFilterOperations_case_%d", i))
+	for i, testCase := range testCases {
+		runTestCase(t, testCase, "TestRetrieve_filterComplexNestedDeleted_case_"+string(rune('A'+i)))
+	}
+}
+
+func TestRetrieve_filterRootComparisonErrors(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[?(@.a == $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.a == $.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.a != $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: `[{"a":0},{"a":1}]`,
+		},
+		{
+			jsonpath:     `$[?(@.a <= $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.a <= $.b)]`),
+		},
+		{
+			jsonpath:     `$[?($.b == @.a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b == @.a)]`),
+		},
+	}
+
+	for i, testCase := range testCases {
+		runTestCase(t, testCase, "TestRetrieve_filterRootComparisonErrors_case_"+string(rune('A'+i)))
+	}
+}
+
+func TestRetrieve_filterRootComparisonMore(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[?($.b != @.a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: `[{"a":0},{"a":1}]`,
+		},
+		{
+			jsonpath:     `$[?(@.b != $[0].a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: `[{"a":0},{"a":1}]`,
+		},
+		{
+			jsonpath:     `$[?($[0].a != @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: `[{"a":0},{"a":1}]`,
+		},
+		{
+			jsonpath:     `$[?(@.b == $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: `[{"a":0},{"a":1}]`,
+		},
+		{
+			jsonpath:     `$[?($.b == @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: `[{"a":0},{"a":1}]`,
+		},
+		{
+			jsonpath:     `$[?($.b < @.a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b < @.a)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b < $[0].a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b < $[0].a)]`),
+		},
+		{
+			jsonpath:     `$[?($[0].a < @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($[0].a < @.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b != $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b != $.b)]`),
+		},
+		{
+			jsonpath:     `$[?($.b != @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b != @.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b < $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b < $.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b <= $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b <= $.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b > $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b > $.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b >= $.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b >= $.b)]`),
+		},
+		{
+			jsonpath:     `$[?($.b < @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b < @.b)]`),
+		},
+		{
+			jsonpath:     `$[?($.b <= @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b <= @.b)]`),
+		},
+		{
+			jsonpath:     `$[?($.b > @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b > @.b)]`),
+		},
+		{
+			jsonpath:     `$[?($.b >= @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b >= @.b)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b == $[0].a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b == $[0].a)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b <= $[0].a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b <= $[0].a)]`),
+		},
+		{
+			jsonpath:     `$[?(@.b > $[0].a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?(@.b > $[0].a)]`),
+		},
+		{
+			jsonpath:     `$[?($[0].a == @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($[0].a == @.b)]`),
+		},
+		{
+			jsonpath:     `$[?($[0].a <= @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($[0].a <= @.b)]`),
+		},
+		{
+			jsonpath:     `$[?($[0].a > @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($[0].a > @.b)]`),
+		},
+		{
+			jsonpath:     `$[?($[0].a >= @.b)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($[0].a >= @.b)]`),
+		},
+	}
+
+	for i, testCase := range testCases {
+		runTestCase(t, testCase, "TestRetrieve_filterRootComparisonMore_case_"+string(rune('A'+i)))
+	}
+}
+
+func TestRetrieve_filterRootComparisonAdditional(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[?($.b <= @.a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b <= @.a)]`),
+		},
+		{
+			jsonpath:     `$[?($.b > @.a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b > @.a)]`),
+		},
+		{
+			jsonpath:     `$[?($.b >= @.a)]`,
+			inputJSON:    `[{"a":0},{"a":1}]`,
+			expectedJSON: ``,
+			expectedErr:  createErrorMemberNotExist(`[?($.b >= @.a)]`),
+		},
+	}
+
+	for i, testCase := range testCases {
+		runTestCase(t, testCase, "TestRetrieve_filterRootComparisonAdditional_case_"+string(rune('A'+i)))
 	}
 }

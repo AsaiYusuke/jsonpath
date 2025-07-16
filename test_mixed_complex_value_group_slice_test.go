@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestRetrieve_valueGroupCombination_Slice_qualifier(t *testing.T) {
+func TestMixed_ValueGroupCombinationSliceQualifier(t *testing.T) {
 	testGroups := TestGroup{
 		`Recursive-descent`: []TestCase{
 			{

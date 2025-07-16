@@ -5,9 +5,8 @@ import (
 	"testing"
 )
 
-func TestUnionBasic_SimpleUnion(t *testing.T) {
+func TestUnion_BasicOperations(t *testing.T) {
 	tests := []TestCase{
-		// Basic union tests
 		{
 			jsonpath:     `$[0,3]`,
 			inputJSON:    `["first","second","third"]`,
@@ -21,13 +20,12 @@ func TestUnionBasic_SimpleUnion(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("SimpleUnion_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestUnion_BasicOperations_%d", i), test)
 	}
 }
 
-func TestUnionBasic_SliceUnion(t *testing.T) {
+func TestUnion_SliceOperations(t *testing.T) {
 	tests := []TestCase{
-		// Slice with union tests (including the first deleted test case)
 		{
 			jsonpath:     `$[:2,0]`,
 			inputJSON:    `["first","second","third"]`,
@@ -36,6 +34,6 @@ func TestUnionBasic_SliceUnion(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("SliceUnion_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestUnion_SliceOperations_%d", i), test)
 	}
 }

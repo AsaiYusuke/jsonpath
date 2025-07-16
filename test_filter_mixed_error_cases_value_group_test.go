@@ -5,29 +5,26 @@ import (
 	"testing"
 )
 
-// TestRetrieve_valueGroupFilterInvalidSyntax tests invalid syntax where value group is prohibited in filter
-func TestRetrieve_valueGroupFilterInvalidSyntax(t *testing.T) {
+func TestFilter_ValueGroupInvalidSyntax(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[?(@['a']['a','b']==123)]`,
 		inputJSON:    `[{"a":"123"},{"a":123}]`,
 		expectedJSON: ``,
 		expectedErr:  ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a']['a','b']==123)]`},
 	}
-	runTestCase(t, testCase, "TestRetrieve_valueGroupFilterInvalidSyntax")
+	runTestCase(t, testCase, "TestFilter_ValueGroupInvalidSyntax")
 }
 
-// TestRetrieve_filterRecursiveDescentDeleted tests deleted recursive descent filter cases
-func TestRetrieve_filterRecursiveDescentDeleted(t *testing.T) {
+func TestFilter_RecursiveDescentDeleted(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.z[?($.*)]`,
 		inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
 		expectedJSON: `[{"b":1},{"b":2},{"b":3}]`,
 	}
-	runTestCase(t, testCase, "TestRetrieve_filterRecursiveDescentDeleted")
+	runTestCase(t, testCase, "TestFilter_RecursiveDescentDeleted")
 }
 
-// TestRetrieve_valueGroupFilterInvalidSyntaxDeletedCases tests deleted value group invalid syntax cases
-func TestRetrieve_valueGroupFilterInvalidSyntaxDeletedCases(t *testing.T) {
+func TestFilter_ValueGroupInvalidSyntaxDeletedCases(t *testing.T) {
 	testCases := []TestCase{
 		{
 			jsonpath:     `$.x[?(@[*]>=$.y.a[0:1])]`,
@@ -155,7 +152,6 @@ func TestRetrieve_valueGroupFilterInvalidSyntaxDeletedCases(t *testing.T) {
 			expectedJSON: ``,
 			expectedErr:  ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@['a']['a','b']=~/123/)]`},
 		},
-		// Value group errors with wildcard operators
 		{
 			jsonpath:     `$[?(@.*=~/123/)]`,
 			inputJSON:    `[{"b":"123"},{"a":"123"}]`,
@@ -181,7 +177,6 @@ func TestRetrieve_valueGroupFilterInvalidSyntaxDeletedCases(t *testing.T) {
 			expectedErr:  ErrorInvalidSyntax{position: 4, reason: `JSONPath that returns a value group is prohibited`, near: `@.a.*=~/123/)]`},
 		},
 
-		// Value group errors with sub-filters
 		{
 			jsonpath:     `$[?(@.a[?(@.b)]=~/123/)]`,
 			inputJSON:    `[{"b":"123"},{"a":"123"}]`,
@@ -197,6 +192,6 @@ func TestRetrieve_valueGroupFilterInvalidSyntaxDeletedCases(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("ValueGroupInvalidSyntaxDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestFilter_ValueGroupInvalidSyntaxDeletedCases_%d", i), testCase)
 	}
 }

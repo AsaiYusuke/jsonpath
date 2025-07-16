@@ -33,3 +33,17 @@ func TestInvalidSyntax_BracketNotationErrors(t *testing.T) {
 		runSingleTestCase(t, fmt.Sprintf("BracketNotationErrors_%d", i), test)
 	}
 }
+
+func TestInvalidSyntax_FunctionErrors(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:    `$.func(`,
+			inputJSON:   `{}`,
+			expectedErr: ErrorInvalidSyntax{position: 6, reason: `unrecognized input`, near: `(`},
+		},
+	}
+
+	for i, testCase := range testCases {
+		runSingleTestCase(t, fmt.Sprintf("FunctionError_%d", i), testCase)
+	}
+}

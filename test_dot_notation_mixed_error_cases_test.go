@@ -5,9 +5,8 @@ import (
 	"testing"
 )
 
-func TestDotNotationMemberNotExist(t *testing.T) {
+func TestDotNotation_MemberNotExistErrors(t *testing.T) {
 	tests := []TestCase{
-		// Member does not exist in object
 		{
 			jsonpath:    `$.d`,
 			inputJSON:   `{"a":"b","c":{"d":"e"}}`,
@@ -16,13 +15,12 @@ func TestDotNotationMemberNotExist(t *testing.T) {
 	}
 
 	for i, tc := range tests {
-		runTestCase(t, tc, fmt.Sprintf("TestDotNotationMemberNotExist_case_%d", i))
+		runTestCase(t, tc, fmt.Sprintf("TestDotNotation_MemberNotExistErrors_case_%d", i))
 	}
 }
 
-func TestDotNotationArrayTypeError(t *testing.T) {
+func TestDotNotation_ArrayTypeErrors(t *testing.T) {
 	tests := []TestCase{
-		// Dot notation on array should fail
 		{
 			jsonpath:    `$.2`,
 			inputJSON:   `["a","b",{"2":1}]`,
@@ -46,13 +44,12 @@ func TestDotNotationArrayTypeError(t *testing.T) {
 	}
 
 	for i, tc := range tests {
-		runTestCase(t, tc, fmt.Sprintf("TestDotNotationArrayTypeError_case_%d", i))
+		runTestCase(t, tc, fmt.Sprintf("TestDotNotation_ArrayTypeErrors_case_%d", i))
 	}
 }
 
-func TestDotNotationNestedTypeError(t *testing.T) {
+func TestDotNotation_NestedTypeErrors(t *testing.T) {
 	tests := []TestCase{
-		// Dot notation on non-object types
 		{
 			jsonpath:    `$.a.d`,
 			inputJSON:   `{"a":"b","c":{"d":"e"}}`,
@@ -76,6 +73,6 @@ func TestDotNotationNestedTypeError(t *testing.T) {
 	}
 
 	for i, tc := range tests {
-		runTestCase(t, tc, fmt.Sprintf("TestDotNotationNestedTypeError_case_%d", i))
+		runTestCase(t, tc, fmt.Sprintf("TestDotNotation_NestedTypeErrors_case_%d", i))
 	}
 }

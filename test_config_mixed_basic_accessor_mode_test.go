@@ -4,40 +4,37 @@ import (
 	"testing"
 )
 
-func TestRetrieve_accessor_mode_logical_or_property(t *testing.T) {
+func TestConfig_AccessorModeLogicalOrProperty(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[?(@.a==11||@.a==33)].a`,
 		inputJSON:       `[{"a":11},{"a":22},{"a":33}]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_logical_or_property")
+	runTestCase(t, testCase, "TestConfig_AccessorModeLogicalOrProperty")
 }
 
-func TestRetrieve_accessor_mode_self_reference_comparison(t *testing.T) {
+func TestConfig_AccessorModeSelfReferenceComparison(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[?(@==$[1])]`,
 		inputJSON:       `[11,22,33]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_self_reference_comparison")
+	runTestCase(t, testCase, "TestConfig_AccessorModeSelfReferenceComparison")
 }
 
-// TestRetrieve_accessorModeDeleted tests deleted accessor mode test cases
-
-// Get-only validator tests
-func TestRetrieve_accessorModeDeleted_get_only_root(t *testing.T) {
+func TestConfig_AccessorModeDeletedGetOnlyRoot(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$`,
 		inputJSON:       `[1,2,3]`,
 		accessorMode:    true,
 		resultValidator: getOnlyValidator,
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessorModeDeleted_get_only_root")
+	runTestCase(t, testCase, "TestConfig_AccessorModeDeletedGetOnlyRoot")
 }
 
-func TestRetrieve_accessorModeDeleted_get_only_echo(t *testing.T) {
+func TestConfig_AccessorModeDeletedGetOnlyEcho(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.echo()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -47,168 +44,165 @@ func TestRetrieve_accessorModeDeleted_get_only_echo(t *testing.T) {
 		},
 		resultValidator: getOnlyValidator,
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessorModeDeleted_get_only_echo")
+	runTestCase(t, testCase, "TestConfig_AccessorModeDeletedGetOnlyEcho")
 }
 
-// Struct changed result validator tests
-func TestRetrieve_accessorModeDeleted_slice_struct_changed(t *testing.T) {
+func TestConfig_AccessorModeDeletedSliceStructChanged(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[1]`,
 		inputJSON:       `[1,2,3]`,
 		accessorMode:    true,
 		resultValidator: sliceStructChangedResultValidator,
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessorModeDeleted_slice_struct_changed")
+	runTestCase(t, testCase, "TestConfig_AccessorModeDeletedSliceStructChanged")
 }
 
-func TestRetrieve_accessorModeDeleted_map_struct_changed(t *testing.T) {
+func TestConfig_AccessorModeDeletedMapStructChanged(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$.a`,
 		inputJSON:       `{"a":1}`,
 		accessorMode:    true,
 		resultValidator: mapStructChangedResultValidator,
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessorModeDeleted_map_struct_changed")
+	runTestCase(t, testCase, "TestConfig_AccessorModeDeletedMapStructChanged")
 }
 
-// Additional accessor mode tests that were deleted from the original test suite
-
-func TestRetrieve_accessor_mode_basic_property_b_test(t *testing.T) {
+func TestConfig_AccessorModeBasicPropertyB(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$.b`,
 		inputJSON:       `{"a":11,"b":22,"c":33}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_basic_property_b_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeBasicPropertyB")
 }
 
-func TestRetrieve_accessor_mode_bracket_property_b_test(t *testing.T) {
+func TestConfig_AccessorModeBracketPropertyB(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$['b']`,
 		inputJSON:       `{"a":123,"b":456,"c":789}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_bracket_property_b_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeBracketPropertyB")
 }
 
-func TestRetrieve_accessor_mode_simple_property_b_test(t *testing.T) {
+func TestConfig_AccessorModeSimplePropertyB(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `b`,
 		inputJSON:       `{"a":11,"b":22,"c":33}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_simple_property_b_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeSimplePropertyB")
 }
 
-func TestRetrieve_accessor_mode_multi_property_test(t *testing.T) {
+func TestConfig_AccessorModeMultiProperty(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$['a','b','c']`,
 		inputJSON:       `{"a":11,"b":22}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_multi_property_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeMultiProperty")
 }
 
-func TestRetrieve_accessor_mode_wildcard_object_test(t *testing.T) {
+func TestConfig_AccessorModeWildcardObject(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$.*`,
 		inputJSON:       `{"a":11,"b":22,"c":33}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_wildcard_object_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeWildcardObject")
 }
 
-func TestRetrieve_accessor_mode_wildcard_array_test(t *testing.T) {
+func TestConfig_AccessorModeWildcardArray(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$.*`,
 		inputJSON:       `[11,22,33]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_wildcard_array_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeWildcardArray")
 }
 
-func TestRetrieve_accessor_mode_recursive_descent_test(t *testing.T) {
+func TestConfig_AccessorModeRecursiveDescent(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$..a`,
 		inputJSON:       `{"b":{"a":11}, "c":66, "a":77}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_recursive_descent_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeRecursiveDescent")
 }
 
-func TestRetrieve_accessor_mode_array_index_test(t *testing.T) {
+func TestConfig_AccessorModeArrayIndex(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[1]`,
 		inputJSON:       `[123.456,256,789]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_array_index_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeArrayIndex")
 }
 
-func TestRetrieve_accessor_mode_array_multi_index_test(t *testing.T) {
+func TestConfig_AccessorModeArrayMultiIndex(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[2,1]`,
 		inputJSON:       `[123.456,256,789]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_array_multi_index_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeArrayMultiIndex")
 }
 
-func TestRetrieve_accessor_mode_array_slice_test(t *testing.T) {
+func TestConfig_AccessorModeArraySlice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[0:2]`,
 		inputJSON:       `[11,22,33,44]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_array_slice_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeArraySlice")
 }
 
-func TestRetrieve_accessor_mode_array_wildcard_test(t *testing.T) {
+func TestConfig_AccessorModeArrayWildcard(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[*]`,
 		inputJSON:       `[11,22]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_array_wildcard_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeArrayWildcard")
 }
 
-func TestRetrieve_accessor_mode_slice_with_property_test(t *testing.T) {
+func TestConfig_AccessorModeSliceWithProperty(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[0:2].a`,
 		inputJSON:       `[{"a":11},{"a":22},{"a":33}]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_slice_with_property_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeSliceWithProperty")
 }
 
-func TestRetrieve_accessor_mode_filter_object_test(t *testing.T) {
+func TestConfig_AccessorModeFilterObject(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[?(@==11||@==33)]`,
 		inputJSON:       `{"a":11,"b":22,"c":33}`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_filter_object_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeFilterObject")
 }
 
-func TestRetrieve_accessor_mode_filter_array_test(t *testing.T) {
+func TestConfig_AccessorModeFilterArray(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:        `$[?(@==11||@==33)]`,
 		inputJSON:       `[11,22,33]`,
 		accessorMode:    true,
 		resultValidator: createAccessorModeValidator(),
 	}
-	runTestCase(t, testCase, "TestRetrieve_accessor_mode_filter_array_test")
+	runTestCase(t, testCase, "TestConfig_AccessorModeFilterArray")
 }

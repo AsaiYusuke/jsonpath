@@ -15,7 +15,7 @@ type UnsupportedStructParent struct {
 	A UnsupportedStructChild
 }
 
-func TestRetrieve_unsupportedStruct(t *testing.T) {
+func TestError_UnsupportedStruct(t *testing.T) {
 	inputJSON := UnsupportedStructParent{A: UnsupportedStructChild{B: `test`, C: 123}}
 	jsonpath := `$.A.B`
 	expectedError := createErrorTypeUnmatched(`.A`, `object`, `jsonpath.UnsupportedStructParent`)

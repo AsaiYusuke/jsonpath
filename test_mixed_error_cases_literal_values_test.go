@@ -4,8 +4,6 @@ import (
 	"testing"
 )
 
-// Invalid literal value tests - restoring deleted tests from literal value error patterns
-
 func TestRetrieve_invalid_literal_false_case_variations_error_1(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$[?(@.a==fAlse)]`,

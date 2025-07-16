@@ -4,20 +4,20 @@ import (
 	"testing"
 )
 
-func TestRetrieve_mixedNotation_array_index_dot_notation(t *testing.T) {
+func TestMixed_ArrayIndexDotNotation(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$[0].[1]`,
 		inputJSON:   `[["a","b"],["c"],["d"]]`,
 		expectedErr: ErrorInvalidSyntax{position: 4, reason: `unrecognized input`, near: `.[1]`},
 	}
-	runTestCase(t, testCase, "TestRetrieve_mixedNotation_array_index_dot_notation")
+	runTestCase(t, testCase, "TestMixed_ArrayIndexDotNotation")
 }
 
-func TestRetrieve_mixedNotation_array_index_slice(t *testing.T) {
+func TestMixed_ArrayIndexSlice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:    `$[0].[1:3]`,
 		inputJSON:   `[["11","12","13"],["21","22","23"],["31","32","33"]]`,
 		expectedErr: ErrorInvalidSyntax{position: 4, reason: `unrecognized input`, near: `.[1:3]`},
 	}
-	runTestCase(t, testCase, "TestRetrieve_mixedNotation_array_index_slice")
+	runTestCase(t, testCase, "TestMixed_ArrayIndexSlice")
 }

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBracketNotationWildcard_SimpleWildcard(t *testing.T) {
+func TestBracketNotation_WildcardSimple(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:    `$[*]`,
@@ -20,11 +20,11 @@ func TestBracketNotationWildcard_SimpleWildcard(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("SimpleWildcard_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestBracketNotation_WildcardSimple_%d", i), test)
 	}
 }
 
-func TestBracketNotationWildcard_ComplexWildcardCombinations(t *testing.T) {
+func TestBracketNotation_WildcardComplexCombinations(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:     `$[*]`,
@@ -89,11 +89,11 @@ func TestBracketNotationWildcard_ComplexWildcardCombinations(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("ComplexWildcardCombinations_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestBracketNotation_WildcardComplexCombinations_%d", i), test)
 	}
 }
 
-func TestBracketNotationWildcard_ArraySliceWithWildcard(t *testing.T) {
+func TestBracketNotation_WildcardArraySlice(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:     `$[0:2][*]`,
@@ -103,11 +103,11 @@ func TestBracketNotationWildcard_ArraySliceWithWildcard(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("ArraySliceWithWildcard_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestBracketNotation_WildcardArraySlice_%d", i), test)
 	}
 }
 
-func TestBracketNotationWildcard_NestedWildcardAccess(t *testing.T) {
+func TestBracketNotation_WildcardNestedAccess(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:     `$[*].a`,
@@ -132,11 +132,11 @@ func TestBracketNotationWildcard_NestedWildcardAccess(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("NestedWildcardAccess_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestBracketNotation_WildcardNestedAccess_%d", i), test)
 	}
 }
 
-func TestBracketNotationWildcard_NestedErrorCases(t *testing.T) {
+func TestBracketNotation_WildcardNestedErrors(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:    `$[*].a.b`,
@@ -151,11 +151,11 @@ func TestBracketNotationWildcard_NestedErrorCases(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("NestedErrorCases_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestBracketNotation_WildcardNestedErrors_%d", i), test)
 	}
 }
 
-func TestBracketNotationWildcard_DeepNestedErrorCases(t *testing.T) {
+func TestBracketNotation_WildcardDeepNestedErrors(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:    `$[*].a.b.c`,
@@ -180,6 +180,6 @@ func TestBracketNotationWildcard_DeepNestedErrorCases(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		runSingleTestCase(t, fmt.Sprintf("DeepNestedErrorCases_%d", i), test)
+		runSingleTestCase(t, fmt.Sprintf("TestBracketNotation_WildcardDeepNestedErrors_%d", i), test)
 	}
 }

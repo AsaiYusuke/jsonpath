@@ -14,7 +14,7 @@ var useJSONNumberDecoderFunction = func(srcJSON string, src *interface{}) error 
 	return decoder.Decode(src)
 }
 
-func TestRetrieve_jsonNumber_filter(t *testing.T) {
+func TestDotNotation_JsonNumberFilter(t *testing.T) {
 	testCases := []TestCase{
 		{
 			jsonpath:      `$[?(@.a > 123)].a`,

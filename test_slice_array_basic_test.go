@@ -7,7 +7,6 @@ import (
 
 func TestSliceBasic_SimpleSlice(t *testing.T) {
 	tests := []TestCase{
-		// Basic slice tests
 		{
 			jsonpath:     `$[0:1]`,
 			inputJSON:    `["first","second","third"]`,
@@ -47,7 +46,6 @@ func TestSliceBasic_SimpleSlice(t *testing.T) {
 
 func TestSliceBasic_EmptySlice(t *testing.T) {
 	tests := []TestCase{
-		// Empty slice tests (should return error)
 		{
 			jsonpath:    `$[0:0]`,
 			inputJSON:   `["first","second","third"]`,
@@ -72,7 +70,6 @@ func TestSliceBasic_EmptySlice(t *testing.T) {
 
 func TestSliceBasic_NegativeIndices(t *testing.T) {
 	tests := []TestCase{
-		// Negative indices tests
 		{
 			jsonpath:     `$[-2:-1]`,
 			inputJSON:    `["first","second","third"]`,
@@ -97,7 +94,6 @@ func TestSliceBasic_NegativeIndices(t *testing.T) {
 
 func TestSliceBasic_ReverseSlice(t *testing.T) {
 	tests := []TestCase{
-		// Reverse slice tests (should return error)
 		{
 			jsonpath:    `$[2:1]`,
 			inputJSON:   `["first","second","third"]`,

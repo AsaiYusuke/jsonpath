@@ -7,7 +7,6 @@ import (
 
 func TestRecursiveBasic_ConditionalRecursive(t *testing.T) {
 	tests := []TestCase{
-		// Recursive search with conditions
 		{
 			jsonpath:     `$.z[?($..x)]`,
 			inputJSON:    `{"x":[], "y":{"x":[]}, "z":[{"b":1},{"b":2},{"b":3}]}`,
@@ -27,7 +26,6 @@ func TestRecursiveBasic_ConditionalRecursive(t *testing.T) {
 
 func TestRecursiveBasic_FilterWithRecursive(t *testing.T) {
 	tests := []TestCase{
-		// Recursive search with filter operations
 		{
 			jsonpath:    `$..*[?(@.a>2)]`,
 			inputJSON:   `[{"b":"1","a":1},{"c":"2","a":2},{"d":"3","a":3}]`,

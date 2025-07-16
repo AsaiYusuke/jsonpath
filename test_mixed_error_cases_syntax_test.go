@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-// TestInvalidSyntax_wildcardAccessorDeletedCases tests deleted invalid syntax cases for wildcard accessor
 func TestInvalidSyntax_wildcardAccessorDeletedCases(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -35,11 +34,10 @@ func TestInvalidSyntax_wildcardAccessorDeletedCases(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("WildcardAccessorDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestInvalidSyntax_wildcardAccessorDeletedCases_%d", i), testCase)
 	}
 }
 
-// TestInvalidSyntax_filterChainDeletedCases tests deleted invalid syntax cases for filter chains
 func TestInvalidSyntax_filterChainDeletedCases(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -87,11 +85,10 @@ func TestInvalidSyntax_filterChainDeletedCases(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("FilterChainDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestInvalidSyntax_filterChainDeletedCases_%d", i), testCase)
 	}
 }
 
-// TestInvalidSyntax_basicSyntaxDeletedCases tests deleted invalid syntax cases for basic syntax errors
 func TestInvalidSyntax_basicSyntaxDeletedCases(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -175,11 +172,10 @@ func TestInvalidSyntax_basicSyntaxDeletedCases(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("BasicSyntaxDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestInvalidSyntax_basicSyntaxDeletedCases_%d", i), testCase)
 	}
 }
 
-// TestInvalidSyntax_bracketNotationDeletedCases tests deleted invalid syntax cases for bracket notation
 func TestInvalidSyntax_bracketNotationDeletedCases(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -251,11 +247,10 @@ func TestInvalidSyntax_bracketNotationDeletedCases(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("BracketNotationDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestInvalidSyntax_bracketNotationDeletedCases_%d", i), testCase)
 	}
 }
 
-// TestInvalidSyntax_filterInvalidDeletedCases tests deleted invalid syntax cases for filter expressions
 func TestInvalidSyntax_filterInvalidDeletedCases(t *testing.T) {
 	testCases := []TestCase{
 		{
@@ -321,6 +316,6 @@ func TestInvalidSyntax_filterInvalidDeletedCases(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		runSingleTestCase(t, fmt.Sprintf("FilterInvalidDeleted_%d", i), testCase)
+		runSingleTestCase(t, fmt.Sprintf("TestInvalidSyntax_filterInvalidDeletedCases_%d", i), testCase)
 	}
 }

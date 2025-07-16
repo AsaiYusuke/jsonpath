@@ -408,3 +408,22 @@ func TestRetrieve_filterExist_nested_filter_basic(t *testing.T) {
 	}
 	runTestCase(t, testCase, "TestRetrieve_filterExist_nested_filter_basic")
 }
+
+func TestRetrieve_filterExistsFromDeleted(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[?(@)]`,
+			inputJSON:    `{"a":1,"b":null}`,
+			expectedJSON: `[1,null]`,
+		},
+		{
+			jsonpath:     `$[?(@.a)]`,
+			inputJSON:    `{"a":{"a":1},"b":{"b":2}}`,
+			expectedJSON: `[{"a":1}]`,
+		},
+	}
+
+	for i, testCase := range testCases {
+		runTestCase(t, testCase, "TestRetrieve_filterExistsFromDeleted_case_"+string(rune('A'+i)))
+	}
+}

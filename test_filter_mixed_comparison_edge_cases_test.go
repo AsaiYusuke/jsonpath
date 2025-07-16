@@ -5,9 +5,8 @@ import (
 	"testing"
 )
 
-func TestFilterComparisonEdgeCases(t *testing.T) {
+func TestFilter_ComparisonEdgeCases(t *testing.T) {
 	testCases := []TestCase{
-		// Numeric precision edge cases
 		{
 			jsonpath:     `$[?(1 > @.a)]`,
 			inputJSON:    `[{"a":-9999999},{"a":0.999999},{"a":1.0000000},{"a":1.0000001},{"a":2},{"a":"0.9"},{"a":{}},{"a":[]},{"a":true},{"a":null},{"b":"c"}]`,
@@ -24,7 +23,6 @@ func TestFilterComparisonEdgeCases(t *testing.T) {
 			expectedErr: createErrorMemberNotExist(`[?(1.000001 <= @.a)]`),
 		},
 
-		// Special character handling in string comparisons
 		{
 			jsonpath:     `$[?(@.a=='~!@#$%^&*()-_=+[]\\{}|;\':",./<>?')]`,
 			inputJSON:    `[{"a":"~!@#$%^&*()-_=+[]\\{}|;':\",./<>?"}]`,
@@ -36,14 +34,12 @@ func TestFilterComparisonEdgeCases(t *testing.T) {
 			expectedJSON: `[{"a":"a\bb"}]`,
 		},
 
-		// Numeric literal formats
 		{
 			jsonpath:     `$[?(@.a==010)]`,
 			inputJSON:    `[{"a":10},{"a":0},{"a":"010"},{"a":"10"}]`,
 			expectedJSON: `[{"a":10}]`,
 		},
 
-		// Boolean value comparisons
 		{
 			jsonpath:     `$[?(@.a==false)]`,
 			inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":false}]`,
@@ -85,7 +81,6 @@ func TestFilterComparisonEdgeCases(t *testing.T) {
 			expectedJSON: `[{"a":true}]`,
 		},
 
-		// Null value comparisons
 		{
 			jsonpath:     `$[?(@.a!=null)]`,
 			inputJSON:    `[{"a":null},{"a":false},{"a":true},{"a":0},{"a":1},{"a":"false"},{"b":null}]`,
@@ -104,6 +99,6 @@ func TestFilterComparisonEdgeCases(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		runTestCase(t, tc, fmt.Sprintf("TestFilterComparisonEdgeCases_case_%d", i))
+		runTestCase(t, tc, fmt.Sprintf("TestFilter_ComparisonEdgeCases_case_%d", i))
 	}
 }

@@ -1,10 +1,11 @@
 package jsonpath
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestRetrieve_aggregate_function_max(t *testing.T) {
+func TestAggregateFunction_MaxFunction(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.max()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -13,10 +14,10 @@ func TestRetrieve_aggregate_function_max(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_function_max")
+	runTestCase(t, testCase, "TestAggregateFunction_MaxFunction")
 }
 
-func TestRetrieve_filter_aggregate_max_in_condition(t *testing.T) {
+func TestAggregateFunction_FilterMaxInCondition(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[?(@.max())]`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -25,10 +26,10 @@ func TestRetrieve_filter_aggregate_max_in_condition(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_aggregate_max_in_condition")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMaxInCondition")
 }
 
-func TestRetrieve_filter_aggregate_max_equal_comparison(t *testing.T) {
+func TestAggregateFunction_FilterMaxEqualComparison(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[?(@.max() == 123.45)]`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -37,10 +38,10 @@ func TestRetrieve_filter_aggregate_max_equal_comparison(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_aggregate_max_equal_comparison")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMaxEqualComparison")
 }
 
-func TestRetrieve_filter_aggregate_max_not_equal_comparison(t *testing.T) {
+func TestAggregateFunction_FilterMaxNotEqualComparison(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[?(123.45 != @.max())]`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -49,10 +50,10 @@ func TestRetrieve_filter_aggregate_max_not_equal_comparison(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_aggregate_max_not_equal_comparison")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMaxNotEqualComparison")
 }
 
-func TestRetrieve_filter_aggregate_max_array_comparison(t *testing.T) {
+func TestAggregateFunction_FilterMaxArrayComparison(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[?(@.max() != 123.45)]`,
 		inputJSON:    `[[122.345,123.45,123.456],[122.345,123.45]]`,
@@ -61,10 +62,10 @@ func TestRetrieve_filter_aggregate_max_array_comparison(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_aggregate_max_array_comparison")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMaxArrayComparison")
 }
 
-func TestRetrieve_filter_aggregate_max_cross_array_comparison(t *testing.T) {
+func TestAggregateFunction_FilterMaxCrossArrayComparison(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$[?(@.max() == $[1].max())]`,
 		inputJSON:    `[[122.345,123.45,123.456],[122.345,123.45]]`,
@@ -73,10 +74,10 @@ func TestRetrieve_filter_aggregate_max_cross_array_comparison(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_aggregate_max_cross_array_comparison")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMaxCrossArrayComparison")
 }
 
-func TestRetrieve_aggregate_filter_mix_max_twice(t *testing.T) {
+func TestAggregateFunction_FilterMixMaxTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.max().twice()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -88,10 +89,10 @@ func TestRetrieve_aggregate_filter_mix_max_twice(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_filter_mix_max_twice")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMixMaxTwice")
 }
 
-func TestRetrieve_filter_aggregate_mix_twice_max(t *testing.T) {
+func TestAggregateFunction_FilterMixTwiceMax(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.twice().max()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
@@ -103,10 +104,10 @@ func TestRetrieve_filter_aggregate_mix_twice_max(t *testing.T) {
 			`max`: maxFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_aggregate_mix_twice_max")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterMixTwiceMax")
 }
 
-func TestRetrieve_filter_error_simple(t *testing.T) {
+func TestAggregateFunction_FilterErrorSimple(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -115,10 +116,10 @@ func TestRetrieve_filter_error_simple(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_simple")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorSimple")
 }
 
-func TestRetrieve_filter_error_wildcard(t *testing.T) {
+func TestAggregateFunction_FilterErrorWildcard(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -127,10 +128,10 @@ func TestRetrieve_filter_error_wildcard(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_wildcard")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorWildcard")
 }
 
-func TestRetrieve_filter_error_after_max(t *testing.T) {
+func TestAggregateFunction_FilterErrorAfterMax(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -142,10 +143,10 @@ func TestRetrieve_filter_error_after_max(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_after_max")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorAfterMax")
 }
 
-func TestRetrieve_filter_error_after_twice(t *testing.T) {
+func TestAggregateFunction_FilterErrorAfterTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.twice().errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -155,10 +156,10 @@ func TestRetrieve_filter_error_after_twice(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_after_twice")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorAfterTwice")
 }
 
-func TestRetrieve_filter_error_before_twice(t *testing.T) {
+func TestAggregateFunction_FilterErrorBeforeTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errFilter().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -168,10 +169,10 @@ func TestRetrieve_filter_error_before_twice(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_before_twice")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorBeforeTwice")
 }
 
-func TestRetrieve_filter_error_complex_chain(t *testing.T) {
+func TestAggregateFunction_FilterErrorComplexChain(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errFilter().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -184,10 +185,10 @@ func TestRetrieve_filter_error_complex_chain(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_complex_chain")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorComplexChain")
 }
 
-func TestRetrieve_aggregate_error_simple(t *testing.T) {
+func TestAggregateFunction_ErrorSimple(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errAggregate()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -196,10 +197,10 @@ func TestRetrieve_aggregate_error_simple(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_error_simple")
+	runTestCase(t, testCase, "TestAggregateFunction_ErrorSimple")
 }
 
-func TestRetrieve_aggregate_error_after_max(t *testing.T) {
+func TestAggregateFunction_ErrorAfterMax(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errAggregate()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -209,10 +210,10 @@ func TestRetrieve_aggregate_error_after_max(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_error_after_max")
+	runTestCase(t, testCase, "TestAggregateFunction_ErrorAfterMax")
 }
 
-func TestRetrieve_aggregate_error_after_twice(t *testing.T) {
+func TestAggregateFunction_ErrorAfterTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.twice().errAggregate()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -224,10 +225,10 @@ func TestRetrieve_aggregate_error_after_twice(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_error_after_twice")
+	runTestCase(t, testCase, "TestAggregateFunction_ErrorAfterTwice")
 }
 
-func TestRetrieve_aggregate_error_before_twice(t *testing.T) {
+func TestAggregateFunction_ErrorBeforeTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errAggregate().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -239,10 +240,10 @@ func TestRetrieve_aggregate_error_before_twice(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_error_before_twice")
+	runTestCase(t, testCase, "TestAggregateFunction_ErrorBeforeTwice")
 }
 
-func TestRetrieve_aggregate_error_complex_chain(t *testing.T) {
+func TestAggregateFunction_ErrorComplexChain(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errAggregate().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
@@ -255,10 +256,10 @@ func TestRetrieve_aggregate_error_complex_chain(t *testing.T) {
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_error_complex_chain")
+	runTestCase(t, testCase, "TestAggregateFunction_ErrorComplexChain")
 }
 
-func TestRetrieve_aggregate_missing_member(t *testing.T) {
+func TestAggregateFunction_MissingMember(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.a.max()`,
 		inputJSON: `{}`,
@@ -267,10 +268,10 @@ func TestRetrieve_aggregate_missing_member(t *testing.T) {
 		},
 		expectedErr: createErrorMemberNotExist(`.a`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_missing_member")
+	runTestCase(t, testCase, "TestAggregateFunction_MissingMember")
 }
 
-func TestRetrieve_aggregate_missing_member_with_path(t *testing.T) {
+func TestAggregateFunction_MissingMember_with_path(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.x.*.errAggregate()`,
 		inputJSON: `{"a":[122.345,123.45,123.456]}`,
@@ -279,10 +280,10 @@ func TestRetrieve_aggregate_missing_member_with_path(t *testing.T) {
 		},
 		expectedErr: createErrorMemberNotExist(`.x`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_missing_member_with_path")
+	runTestCase(t, testCase, "TestAggregateFunction_MissingMember_with_path")
 }
 
-func TestRetrieve_filter_error_nested_path(t *testing.T) {
+func TestAggregateFunction_FilterErrornested_path(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errFilter()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
@@ -291,10 +292,10 @@ func TestRetrieve_filter_error_nested_path(t *testing.T) {
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_nested_path")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrornested_path")
 }
 
-func TestRetrieve_filter_error_multiple_filters(t *testing.T) {
+func TestAggregateFunction_FilterErrormultiple_filters(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errFilter1().errFilter2()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
@@ -304,10 +305,10 @@ func TestRetrieve_filter_error_multiple_filters(t *testing.T) {
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_filter_error_multiple_filters")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrormultiple_filters")
 }
 
-func TestRetrieve_aggregate_filter_error_nested_aggregate(t *testing.T) {
+func TestAggregateFunction_FilterErrorNestedAggregate(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errAggregate()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
@@ -316,10 +317,10 @@ func TestRetrieve_aggregate_filter_error_nested_aggregate(t *testing.T) {
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_filter_error_nested_aggregate")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorNestedAggregate")
 }
 
-func TestRetrieve_aggregate_filter_error_multiple_aggregates(t *testing.T) {
+func TestAggregateFunction_FilterErrorMultipleAggregates(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errAggregate1().errAggregate2()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
@@ -329,10 +330,10 @@ func TestRetrieve_aggregate_filter_error_multiple_aggregates(t *testing.T) {
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_filter_error_multiple_aggregates")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorMultipleAggregates")
 }
 
-func TestRetrieve_aggregate_filter_error_mixed_aggregate_filter(t *testing.T) {
+func TestAggregateFunction_FilterErrorMixedAggregateFilter(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errAggregate().errFilter()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
@@ -344,10 +345,10 @@ func TestRetrieve_aggregate_filter_error_mixed_aggregate_filter(t *testing.T) {
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_filter_error_mixed_aggregate_filter")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorMixedAggregateFilter")
 }
 
-func TestRetrieve_aggregate_filter_error_mixed_filter_aggregate(t *testing.T) {
+func TestAggregateFunction_FilterErrorMixedFilterAggregate(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errFilter().errAggregate()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
@@ -359,10 +360,10 @@ func TestRetrieve_aggregate_filter_error_mixed_filter_aggregate(t *testing.T) {
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestRetrieve_aggregate_filter_error_mixed_filter_aggregate")
+	runTestCase(t, testCase, "TestAggregateFunction_FilterErrorMixedFilterAggregate")
 }
 
-func TestRetrieve_function_syntax_uppercase_name(t *testing.T) {
+func TestAggregateFunction_FunctionSyntaxUppercaseName(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.TWICE()`,
 		inputJSON:    `[123.456,256]`,
@@ -371,10 +372,10 @@ func TestRetrieve_function_syntax_uppercase_name(t *testing.T) {
 			`TWICE`: twiceFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_function_syntax_uppercase_name")
+	runTestCase(t, testCase, "TestAggregateFunction_FunctionSyntaxUppercaseName")
 }
 
-func TestRetrieve_function_syntax_numeric_name(t *testing.T) {
+func TestAggregateFunction_FunctionSyntaxNumericName(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.123()`,
 		inputJSON:    `[123.456,256]`,
@@ -383,10 +384,10 @@ func TestRetrieve_function_syntax_numeric_name(t *testing.T) {
 			`123`: twiceFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_function_syntax_numeric_name")
+	runTestCase(t, testCase, "TestAggregateFunction_FunctionSyntaxNumericName")
 }
 
-func TestRetrieve_function_syntax_dash_name(t *testing.T) {
+func TestAggregateFunction_FunctionSyntaxDashName(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.--()`,
 		inputJSON:    `[123.456,256]`,
@@ -395,10 +396,10 @@ func TestRetrieve_function_syntax_dash_name(t *testing.T) {
 			`--`: twiceFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_function_syntax_dash_name")
+	runTestCase(t, testCase, "TestAggregateFunction_FunctionSyntaxDashName")
 }
 
-func TestRetrieve_function_syntax_underscore_name(t *testing.T) {
+func TestAggregateFunction_FunctionSyntaxUnderscoreName(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:     `$.*.__()`,
 		inputJSON:    `[123.456,256]`,
@@ -407,5 +408,40 @@ func TestRetrieve_function_syntax_underscore_name(t *testing.T) {
 			`__`: twiceFunc,
 		},
 	}
-	runTestCase(t, testCase, "TestRetrieve_function_syntax_underscore_name")
+	runTestCase(t, testCase, "TestAggregateFunction_FunctionSyntaxUnderscoreName")
+}
+
+func TestAggregateFunction_ChainedOperations(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$.*.max().max()`,
+			inputJSON:    `[122.345,123.45,123.456]`,
+			expectedJSON: `[123.456]`,
+			aggregates: map[string]func([]interface{}) (interface{}, error){
+				`max`: maxFunc,
+			},
+		},
+		{
+			jsonpath:     `$.*.max().min()`,
+			inputJSON:    `[122.345,123.45,123.456]`,
+			expectedJSON: `[123.456]`,
+			aggregates: map[string]func([]interface{}) (interface{}, error){
+				`max`: maxFunc,
+				`min`: minFunc,
+			},
+		},
+		{
+			jsonpath:     `$.*.min().max()`,
+			inputJSON:    `[122.345,123.45,123.456]`,
+			expectedJSON: `[122.345]`,
+			aggregates: map[string]func([]interface{}) (interface{}, error){
+				`max`: maxFunc,
+				`min`: minFunc,
+			},
+		},
+	}
+
+	for i, testCase := range testCases {
+		runSingleTestCase(t, fmt.Sprintf("TestAggregateFunction_ChainedOperations_%d", i), testCase)
+	}
 }

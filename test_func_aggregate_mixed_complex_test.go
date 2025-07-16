@@ -4,10 +4,9 @@ import (
 	"testing"
 )
 
-func TestRetrieve_advanced_aggregate_filter_cases_correct(t *testing.T) {
+func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 	testGroups := map[string][]TestCase{
 		"advanced-aggregate-filter": {
-			// Max with filter functions
 			{
 				jsonpath:     `$.*.max().twice()`,
 				inputJSON:    `[122.345,123.45,123.456]`,
@@ -52,7 +51,6 @@ func TestRetrieve_advanced_aggregate_filter_cases_correct(t *testing.T) {
 					`twice`: twiceFilter,
 				},
 			},
-			// Test cases with successful results from backup
 			{
 				jsonpath:     `$.*.max().twice()`,
 				inputJSON:    `[122.345,123.45,123.456]`,
@@ -64,7 +62,6 @@ func TestRetrieve_advanced_aggregate_filter_cases_correct(t *testing.T) {
 					`twice`: twiceFilter,
 				},
 			},
-			// Error cases from backup
 			{
 				jsonpath:    `$.*.max().errFilter()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
@@ -142,7 +139,6 @@ func TestRetrieve_advanced_aggregate_filter_cases_correct(t *testing.T) {
 					`twice`: twiceFilter,
 				},
 			},
-			// Aggregate functions on missing properties
 			{
 				jsonpath:    `$.a.max()`,
 				inputJSON:   `{}`,
@@ -162,7 +158,6 @@ func TestRetrieve_advanced_aggregate_filter_cases_correct(t *testing.T) {
 					`twice`: twiceFilter,
 				},
 			},
-			// Missing array cases
 			{
 				jsonpath:    `$.a.max()`,
 				inputJSON:   `{"a": null}`,
@@ -179,7 +174,6 @@ func TestRetrieve_advanced_aggregate_filter_cases_correct(t *testing.T) {
 					`max`: maxAggregate,
 				},
 			},
-			// End of array access
 			{
 				jsonpath:    `$.*.max()[-1]`,
 				inputJSON:   `[122.345,123.45,123.456]`,

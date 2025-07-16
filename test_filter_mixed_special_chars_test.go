@@ -7,7 +7,6 @@ import (
 
 func TestFilterSpecialCharacters(t *testing.T) {
 	testCases := []TestCase{
-		// Arithmetic operators in property names (escaped) - these actually work as property names
 		{
 			jsonpath:     `$[?(@.a\+10==20)]`,
 			inputJSON:    `[{"a":10},{"a":20},{"a":30},{"a+10":20}]`,
@@ -29,7 +28,6 @@ func TestFilterSpecialCharacters(t *testing.T) {
 			expectedJSON: `[{"a/10":5}]`,
 		},
 
-		// Special characters in bracket notation
 		{
 			jsonpath:     `$[?(@['a']<2.1)]`,
 			inputJSON:    `[{"a":1.9},{"a":2},{"a":2.1},{"a":3},{"a":"test"}]`,
@@ -55,7 +53,6 @@ func TestFilterSpecialCharacters(t *testing.T) {
 			inputJSON:    `[{"a<=b":1.9},{"a":2},{"a":2.1},{"b":3},{"a<=b":"test"}]`,
 			expectedJSON: `[{"a\u003c=b":1.9}]`,
 		},
-		// Special characters comparison with escaped quotes
 		{
 			jsonpath:     `$[?(@.a=="~!@#$%^&*()-_=+[]\\{}|;':\",./<>?")]`,
 			inputJSON:    `[{"a":"~!@#$%^&*()-_=+[]\\{}|;':\",./<>?"}]`,
