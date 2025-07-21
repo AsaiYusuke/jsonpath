@@ -7,16 +7,8 @@ type errorRuntimeAdapter struct {
 	node *syntaxBasicNode
 }
 
-func (e errorRuntimeAdapter) Error() string {
-	return e.err.Error()
-}
-
 func (e errorRuntimeAdapter) getSyntaxNode() *syntaxBasicNode {
 	return e.node
-}
-
-func (e errorRuntimeAdapter) Unwrap() error {
-	return e.err
 }
 
 func newErrorTypeUnmatched(node *syntaxBasicNode, expectedType, foundType string) errorRuntime {
