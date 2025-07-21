@@ -19,7 +19,7 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Run Unit tests
-        run: go test -race -covermode atomic -coverprofile=covprofile ./...
+        run: go test -race -covermode atomic -coverprofile=covprofile -coverpkg=.,./internal/syntax,./errors ./...
 
       - name: Install goveralls
         run: go install github.com/mattn/goveralls@latest
