@@ -221,7 +221,7 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				jsonpath:        `$`,
 				inputJSON:       `[1,2,3]`,
 				accessorMode:    true,
-				resultValidator: getOnlyValidator,
+				resultValidator: createGetOnlyValidator([]interface{}{1.0, 2.0, 3.0}),
 			},
 			{
 				jsonpath:     `$.echo()`,
@@ -230,7 +230,7 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`echo`: echoAggregateFunc,
 				},
-				resultValidator: getOnlyValidator,
+				resultValidator: createGetOnlyValidator([]interface{}{122.345, 123.45, 123.456}),
 			},
 		},
 		`convert-srcJSON`: []TestCase{

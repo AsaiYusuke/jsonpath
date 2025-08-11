@@ -26,15 +26,15 @@ type TestCase struct {
 }
 
 func createErrorFunctionFailed(functionName string, errorString string) errors.ErrorFunctionFailed {
-	return errors.NewErrorFunctionFailed(functionName, errorString)
+	return errors.NewErrorFunctionFailed(functionName, len(functionName), errorString)
 }
 
 func createErrorMemberNotExist(path string) errors.ErrorMemberNotExist {
-	return errors.NewErrorMemberNotExist(path)
+	return errors.NewErrorMemberNotExist(path, len(path))
 }
 
 func createErrorTypeUnmatched(path string, expected string, found string) errors.ErrorTypeUnmatched {
-	return errors.NewErrorTypeUnmatched(path, expected, found)
+	return errors.NewErrorTypeUnmatched(path, len(path), expected, found)
 }
 
 func createErrorInvalidSyntax(position int, reason string, near string) errors.ErrorInvalidSyntax {
@@ -273,15 +273,81 @@ func createAccessorModeValidator(
 	}
 }
 
-var getOnlyValidator = func(result interface{}, expected []interface{}) error {
+func createGetOnlyValidator(expected interface{}) func(interface{}, []interface{}) error {
+	return func(src interface{}, actualObject []interface{}) error {
+		accessor, ok := actualObject[0].(jsonpath.Accessor)
+		if !ok {
+			return fmt.Errorf("result[0] is not Accessor: %T", actualObject[0])
+		}
+		got := accessor.Get()
+		if !reflect.DeepEqual(got, expected) {
+			return fmt.Errorf("get-only: expected %#v, got %#v", expected, got)
+		}
+		if accessor.Set != nil {
+			return fmt.Errorf("get-only: accessor.Set expected nil, got non-nil")
+		}
+		return nil
+	}
+}
+
+var sliceStructChangedResultValidator = func(src interface{}, actualObject []interface{}) error {
+	srcArray := src.([]interface{})
+	accessor := actualObject[0].(jsonpath.Accessor)
+
+	accessor.Set(4) // srcArray:[1,4,3] , accessor:[1,4,3]
+	if len(srcArray) != 3 || srcArray[1] != 4 {
+		return fmt.Errorf(`set -> src : expect<%d> != actual<%d>`, 4, srcArray[1])
+	}
+	srcArray = append(srcArray[:1], srcArray[2:]...) // srcArray:[1,3] , accessor:[1,3,3]
+	if len(srcArray) != 2 || accessor.Get() != 3.0 { // Go's marshal returns float value
+		return fmt.Errorf(`del -> get : expect<%f> != actual<%f>`, 3.0, accessor.Get())
+	}
+	accessor.Set(5) // srcArray:[1,5] , accessor:[1,5,3]
+	if len(srcArray) != 2 || srcArray[1] != 5 {
+		return fmt.Errorf(`del -> set -> src : expect<%d> != actual<%d>`, 5, srcArray[1])
+	}
+	srcArray = append(srcArray[:1], srcArray[2:]...) // srcArray:[1] , accessor:[1,5,3]
+	if len(srcArray) != 1 || accessor.Get() != 5 {
+		return fmt.Errorf(`del x2 -> get : expect<%d> != actual<%d>`, 5, accessor.Get())
+	}
+	accessor.Set(6) // srcArray:[1] , accessor:[1,6,3]
+	if len(srcArray) != 1 {
+		return fmt.Errorf(`del x2 -> set -> len : expect<%d> != actual<%d>`, 1, len(srcArray))
+	}
+	srcArray = append(srcArray, 7) // srcArray:[1,7] , accessor:[1,7,3]
+	if len(srcArray) != 2 || accessor.Get() != 7 {
+		return fmt.Errorf(`del x2 -> add -> get : expect<%d> != actual<%d>`, 7, accessor.Get())
+	}
+	srcArray = append(srcArray, 8) // srcArray:[1,7,8]    , accessor:[1,7,8]
+	srcArray = append(srcArray, 9) // srcArray:[1,7,8,9]  , accessor:[1,7,8,9]
+	srcArray[1] = 10               // srcArray:[1,10,8,9] , accessor:[1,10,8,9]
+	if len(srcArray) != 4 || accessor.Get() != 10 {
+		return fmt.Errorf(`del x2 -> add x3 -> update -> get : expect<%d> != actual<%d>`, 10, accessor.Get())
+	}
 	return nil
 }
 
-var sliceStructChangedResultValidator = func(result interface{}, expected []interface{}) error {
-	return nil
-}
+var mapStructChangedResultValidator = func(src interface{}, actualObject []interface{}) error {
+	srcMap := src.(map[string]interface{})
+	accessor := actualObject[0].(jsonpath.Accessor)
 
-var mapStructChangedResultValidator = func(result interface{}, expected []interface{}) error {
+	accessor.Set(2) // srcMap:{"a":2} , accessor:{"a":2}
+	if len(srcMap) != 1 || srcMap[`a`] != 2 {
+		return fmt.Errorf(`set -> src : expect<%d> != actual<%d>`, 2, srcMap[`a`])
+	}
+	delete(srcMap, `a`) // srcMap:{} , accessor:{}
+	if accessor.Get() != nil {
+		return fmt.Errorf(`del -> get : expect<%v> != actual<%d>`, nil, accessor.Get())
+	}
+	accessor.Set(3) // srcMap:{"a":3} , accessor:{"a":3}
+	if len(srcMap) != 1 || srcMap[`a`] != 3 {
+		return fmt.Errorf(`del -> set -> len : expect<%d> != actual<%d>`, 0, len(srcMap))
+	}
+	delete(srcMap, `a`) // srcMap:{} , accessor:{}
+	srcMap[`a`] = 4     // srcMap:{"a":4} , accessor:{"a":4}
+	if accessor.Get() != 4 {
+		return fmt.Errorf(`del -> update -> get : expect<%v> != actual<%d>`, 4, accessor.Get())
+	}
 	return nil
 }
 

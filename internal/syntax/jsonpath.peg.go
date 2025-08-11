@@ -462,7 +462,7 @@ func (p *pegJSONPathParser) Execute() {
 		case ruleAction0:
 
 			p.root = p.deleteRootNodeIdentifier(p.pop().(syntaxNode))
-			p.setConnectedText(p.root)
+			p.setConnectedPath(p.root)
 
 		case ruleAction1:
 
@@ -492,11 +492,11 @@ func (p *pegJSONPathParser) Execute() {
 
 		case ruleAction7:
 
-			p.setLastNodeText(text)
+			p.setLastNodePath(text)
 
 		case ruleAction8:
 
-			p.setLastNodeText(text)
+			p.setLastNodePath(text)
 
 		case ruleAction9:
 
@@ -3219,7 +3219,7 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		},
 		/* 63 Action0 <- <{
 		    p.root = p.deleteRootNodeIdentifier(p.pop().(syntaxNode))
-		    p.setConnectedText(p.root)
+		    p.setConnectedPath(p.root)
 		}> */
 		nil,
 		nil,
@@ -3250,11 +3250,11 @@ func (p *pegJSONPathParser) Init(options ...func(*pegJSONPathParser) error) erro
 		}> */
 		nil,
 		/* 71 Action7 <- <{
-		    p.setLastNodeText(text)
+		    p.setLastNodePath(text)
 		}> */
 		nil,
 		/* 72 Action8 <- <{
-		    p.setLastNodeText(text)
+		    p.setLastNodePath(text)
 		}> */
 		nil,
 		/* 73 Action9 <- <{

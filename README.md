@@ -116,16 +116,16 @@ These error types define the corresponding symptom, as listed below:
 | ----------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The invalid syntax found in the JSONPath. The _reason_ including in this message will tell you more about it. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidSyntax)    |
 | `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | The argument specified in the JSONPath treated as the invalid error in Go syntax.                                | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidArgument)  |
-| `ErrorFunctionNotFound` | `function not found (function=%s)`                 | The function specified in the JSONPath is not found.                                                             | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionNotFound) |
-| `ErrorNotSupported`     | `not supported (feature=%s, path=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                              | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorNotSupported)     |
+| `ErrorFunctionNotFound` | `function not found (path=%s)`                 | The function specified in the JSONPath is not found.                                                             | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionNotFound) |
+| `ErrorNotSupported`     | `not supported (path=%s, feature=%s)`              | The unsupported syntaxes specified in the JSONPath.                                                              | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorNotSupported)     |
 
 #### Runtime errors from `Retrieve`, _`parser-functions`_
 
 | Error type            | Message format                                    | Symptom                                                                             | Ex                                                                                      |
 | --------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `ErrorMemberNotExist` | `member did not exist (path=%s)`                  | The object/array member specified in the JSONPath did not exist in the JSON object. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorMemberNotExist) |
-| `ErrorTypeUnmatched`  | `type unmatched (expected=%s, found=%s, path=%s)` | The node type specified in the JSONPath did not exist in the JSON object.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorTypeUnmatched)  |
-| `ErrorFunctionFailed` | `function failed (function=%s, error=%s)`         | The function specified in the JSONPath failed.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionFailed) |
+| `ErrorTypeUnmatched`  | `type unmatched (path=%s, expected=%s, found=%s)` | The node type specified in the JSONPath did not exist in the JSON object.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorTypeUnmatched)  |
+| `ErrorFunctionFailed` | `function failed (path=%s, error=%s)`         | The function specified in the JSONPath failed.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionFailed) |
 
 The type checking is convenient to recognize which error happened.
 

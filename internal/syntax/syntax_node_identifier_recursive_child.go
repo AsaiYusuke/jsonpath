@@ -2,6 +2,8 @@ package syntax
 
 import (
 	"reflect"
+
+	"github.com/AsaiYusuke/jsonpath/errors"
 )
 
 type syntaxRecursiveChildIdentifier struct {
@@ -12,7 +14,7 @@ type syntaxRecursiveChildIdentifier struct {
 }
 
 func (i *syntaxRecursiveChildIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errorRuntime {
+	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	switch current.(type) {
 	case map[string]interface{}, []interface{}:
@@ -21,11 +23,10 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
-		return newErrorTypeUnmatched(i.errorRuntime.node, msgTypeObjectOrArray, foundType)
+		return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObjectOrArray, foundType)
 	}
 
-	var deepestTextLen int
-	var deepestError errorRuntime
+	var deepestError errors.ErrorRuntime
 
 	targetNodes := make([]interface{}, 1, 5)
 	targetNodes[0] = current
@@ -38,7 +39,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			if i.nextMapRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
 					if len(container.result) == 0 {
-						deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
+						deepestError = i.getMostResolvedError(err, deepestError)
 					}
 				}
 			}
@@ -58,7 +59,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			if i.nextListRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
 					if len(container.result) == 0 {
-						deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
+						deepestError = i.getMostResolvedError(err, deepestError)
 					}
 				}
 			}
@@ -78,7 +79,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	}
 
 	if deepestError == nil {
-		return newErrorMemberNotExist(i.errorRuntime.node)
+		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
 	}
 
 	return deepestError

@@ -1,6 +1,10 @@
 package syntax
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/AsaiYusuke/jsonpath/errors"
+)
 
 type syntaxUnionQualifier struct {
 	*syntaxBasicNode
@@ -9,7 +13,7 @@ type syntaxUnionQualifier struct {
 }
 
 func (u *syntaxUnionQualifier) retrieve(
-	root, current interface{}, container *bufferContainer) errorRuntime {
+	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	srcArray, ok := current.([]interface{})
 	if !ok {
@@ -17,17 +21,16 @@ func (u *syntaxUnionQualifier) retrieve(
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
-		return newErrorTypeUnmatched(u.errorRuntime.node, msgTypeArray, foundType)
+		return errors.NewErrorTypeUnmatched(u.path, u.remainingPathLen, msgTypeArray, foundType)
 	}
 
-	var deepestTextLen int
-	var deepestError errorRuntime
+	var deepestError errors.ErrorRuntime
 
 	for _, subscript := range u.subscripts {
 		for _, index := range subscript.getIndexes(len(srcArray)) {
 			if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
 				if len(container.result) == 0 {
-					deepestTextLen, deepestError = u.addDeepestError(err, deepestTextLen, deepestError)
+					deepestError = u.getMostResolvedError(err, deepestError)
 				}
 			}
 		}
@@ -38,7 +41,7 @@ func (u *syntaxUnionQualifier) retrieve(
 	}
 
 	if deepestError == nil {
-		return newErrorMemberNotExist(u.errorRuntime.node)
+		return errors.NewErrorMemberNotExist(u.path, u.remainingPathLen)
 	}
 
 	return deepestError

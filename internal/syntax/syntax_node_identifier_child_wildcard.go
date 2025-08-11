@@ -2,6 +2,8 @@ package syntax
 
 import (
 	"reflect"
+
+	"github.com/AsaiYusuke/jsonpath/errors"
 )
 
 type syntaxChildWildcardIdentifier struct {
@@ -9,7 +11,7 @@ type syntaxChildWildcardIdentifier struct {
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errorRuntime {
+	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	switch typedNodes := current.(type) {
 	case map[string]interface{}:
@@ -23,22 +25,21 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 		if current != nil {
 			foundType = reflect.TypeOf(current).String()
 		}
-		return newErrorTypeUnmatched(i.errorRuntime.node, msgTypeObjectOrArray, foundType)
+		return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObjectOrArray, foundType)
 	}
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errorRuntime {
+	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errors.ErrorRuntime {
 
-	var deepestTextLen int
-	var deepestError errorRuntime
+	var deepestError errors.ErrorRuntime
 
 	sortKeys := getSortedKeys(srcMap)
 
 	for _, key := range *sortKeys {
 		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
 			if len(container.result) == 0 {
-				deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
+				deepestError = i.getMostResolvedError(err, deepestError)
 			}
 		}
 	}
@@ -50,22 +51,21 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	}
 
 	if deepestError == nil {
-		return newErrorMemberNotExist(i.errorRuntime.node)
+		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
 	}
 
 	return deepestError
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveList(
-	root interface{}, srcList []interface{}, container *bufferContainer) errorRuntime {
+	root interface{}, srcList []interface{}, container *bufferContainer) errors.ErrorRuntime {
 
-	var deepestTextLen int
-	var deepestError errorRuntime
+	var deepestError errors.ErrorRuntime
 
 	for index := range srcList {
 		if err := i.retrieveListNext(root, srcList, index, container); err != nil {
 			if len(container.result) == 0 {
-				deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
+				deepestError = i.getMostResolvedError(err, deepestError)
 			}
 		}
 	}
@@ -75,7 +75,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 	}
 
 	if deepestError == nil {
-		return newErrorMemberNotExist(i.errorRuntime.node)
+		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
 	}
 
 	return deepestError

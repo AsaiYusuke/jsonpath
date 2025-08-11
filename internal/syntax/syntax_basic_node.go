@@ -3,20 +3,20 @@ package syntax
 import "github.com/AsaiYusuke/jsonpath/errors"
 
 type syntaxBasicNode struct {
-	text          string
-	connectedText string
-	valueGroup    bool
-	next          syntaxNode
-	accessorMode  bool
-	errorRuntime  *errorBasicRuntime
+	path             string
+	remainingPath    string
+	remainingPathLen int
+	valueGroup       bool
+	next             syntaxNode
+	accessorMode     bool
 }
 
-func (i *syntaxBasicNode) setText(text string) {
-	i.text = text
+func (i *syntaxBasicNode) setPath(path string) {
+	i.path = path
 }
 
-func (i *syntaxBasicNode) getText() string {
-	return i.text
+func (i *syntaxBasicNode) getPath() string {
+	return i.path
 }
 
 func (i *syntaxBasicNode) setValueGroup() {
@@ -27,12 +27,13 @@ func (i *syntaxBasicNode) isValueGroup() bool {
 	return i.valueGroup
 }
 
-func (i *syntaxBasicNode) setConnectedText(text string) {
-	i.connectedText = text
+func (i *syntaxBasicNode) setRemainingPath(path string) {
+	i.remainingPath = path
+	i.remainingPathLen = len(path)
 }
 
-func (i *syntaxBasicNode) getConnectedText() string {
-	return i.connectedText
+func (i *syntaxBasicNode) getRemainingPath() string {
+	return i.remainingPath
 }
 
 func (i *syntaxBasicNode) setNext(next syntaxNode) {
@@ -48,7 +49,7 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
-	root interface{}, nextSrc interface{}, container *bufferContainer) errorRuntime {
+	root interface{}, nextSrc interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.next != nil {
 		return i.next.retrieve(root, nextSrc, container)
@@ -67,11 +68,11 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 }
 
 func (i *syntaxBasicNode) retrieveMapNext(
-	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) errorRuntime {
+	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) errors.ErrorRuntime {
 
 	nextNode, ok := currentMap[key]
 	if !ok {
-		return newErrorMemberNotExist(i.errorRuntime.node)
+		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
 	}
 
 	if i.next != nil {
@@ -91,7 +92,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 }
 
 func (i *syntaxBasicNode) retrieveListNext(
-	root interface{}, currentList []interface{}, index int, container *bufferContainer) errorRuntime {
+	root interface{}, currentList []interface{}, index int, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.next != nil {
 		return i.next.retrieve(root, currentList[index], container)
@@ -113,22 +114,25 @@ func (i *syntaxBasicNode) setAccessorMode(mode bool) {
 	i.accessorMode = mode
 }
 
-func (i *syntaxBasicNode) addDeepestError(
-	err errorRuntime, deepestTextLen int, deepestError errorRuntime) (int, errorRuntime) {
+func (i *syntaxBasicNode) getMostResolvedError(
+	newError errors.ErrorRuntime, currentMostResolvedError errors.ErrorRuntime) errors.ErrorRuntime {
 
-	textLength := len(err.getSyntaxNode().getConnectedText())
-
-	if deepestTextLen == 0 || deepestTextLen > textLength {
-		return textLength, err
+	if currentMostResolvedError == nil {
+		return newError
 	}
 
-	if deepestTextLen == textLength {
-		if adapter, ok := deepestError.(errorRuntimeAdapter); ok {
-			if _, isTypeUnmatched := adapter.err.(errors.ErrorTypeUnmatched); isTypeUnmatched {
-				return deepestTextLen, err
-			}
+	newPathLength := newError.GetRemainingPathLen()
+	currentMostResolvedPathLen := currentMostResolvedError.GetRemainingPathLen()
+
+	if currentMostResolvedPathLen > newPathLength {
+		return newError
+	}
+
+	if currentMostResolvedPathLen == newPathLength {
+		if _, ok := currentMostResolvedError.(errors.ErrorTypeUnmatched); ok {
+			return newError
 		}
 	}
 
-	return deepestTextLen, deepestError
+	return currentMostResolvedError
 }

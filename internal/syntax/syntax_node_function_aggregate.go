@@ -1,5 +1,7 @@
 package syntax
 
+import "github.com/AsaiYusuke/jsonpath/errors"
+
 type syntaxAggregateFunction struct {
 	*syntaxBasicNode
 
@@ -8,7 +10,7 @@ type syntaxAggregateFunction struct {
 }
 
 func (f *syntaxAggregateFunction) retrieve(
-	root, current interface{}, container *bufferContainer) errorRuntime {
+	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	values := getContainer()
 	defer func() {
@@ -28,7 +30,7 @@ func (f *syntaxAggregateFunction) retrieve(
 
 	filteredValue, err := f.function(result)
 	if err != nil {
-		return newErrorFunctionFailed(f.errorRuntime.node, err.Error())
+		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err.Error())
 	}
 
 	return f.retrieveAnyValueNext(root, filteredValue, container)

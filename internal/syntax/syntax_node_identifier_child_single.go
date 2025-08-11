@@ -1,6 +1,10 @@
 package syntax
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/AsaiYusuke/jsonpath/errors"
+)
 
 type syntaxChildSingleIdentifier struct {
 	*syntaxBasicNode
@@ -9,7 +13,7 @@ type syntaxChildSingleIdentifier struct {
 }
 
 func (i *syntaxChildSingleIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errorRuntime {
+	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	if srcMap, ok := current.(map[string]interface{}); ok {
 		return i.retrieveMapNext(root, srcMap, i.identifier, container)
@@ -19,5 +23,5 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 	if current != nil {
 		foundType = reflect.TypeOf(current).String()
 	}
-	return newErrorTypeUnmatched(i.errorRuntime.node, msgTypeObject, foundType)
+	return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObject, foundType)
 }

@@ -1,6 +1,10 @@
 package syntax
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/AsaiYusuke/jsonpath/errors"
+)
 
 type syntaxChildMultiIdentifier struct {
 	*syntaxBasicNode
@@ -11,7 +15,7 @@ type syntaxChildMultiIdentifier struct {
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errorRuntime {
+	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.isAllWildcard {
 		if _, ok := current.([]interface{}); ok {
@@ -30,14 +34,13 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 	if current != nil {
 		foundType = reflect.TypeOf(current).String()
 	}
-	return newErrorTypeUnmatched(i.errorRuntime.node, msgTypeObject, foundType)
+	return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObject, foundType)
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errorRuntime {
+	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errors.ErrorRuntime {
 
-	var deepestTextLen int
-	var deepestError errorRuntime
+	var deepestError errors.ErrorRuntime
 
 	for _, identifier := range i.identifiers {
 		if singleIdentifier, ok := identifier.(*syntaxChildSingleIdentifier); ok {
@@ -48,7 +51,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 
 		if err := identifier.retrieve(root, srcMap, container); err != nil {
 			if len(container.result) == 0 {
-				deepestTextLen, deepestError = i.addDeepestError(err, deepestTextLen, deepestError)
+				deepestError = i.getMostResolvedError(err, deepestError)
 			}
 		}
 	}
@@ -58,7 +61,7 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	}
 
 	if deepestError == nil {
-		return newErrorMemberNotExist(i.errorRuntime.node)
+		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
 	}
 
 	return deepestError

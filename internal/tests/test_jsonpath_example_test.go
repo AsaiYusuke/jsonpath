@@ -107,7 +107,7 @@ func ExampleErrorFunctionNotFound() {
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorFunctionNotFound, function not found (function=.unknown())
+	// errors.ErrorFunctionNotFound, function not found (path=.unknown())
 }
 
 func ExampleErrorNotSupported() {
@@ -122,7 +122,7 @@ func ExampleErrorNotSupported() {
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorNotSupported, not supported (feature=script, path=[(command)])
+	// errors.ErrorNotSupported, not supported (path=[(command)], feature=script)
 }
 
 func ExampleErrorMemberNotExist() {
@@ -152,7 +152,7 @@ func ExampleErrorTypeUnmatched() {
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorTypeUnmatched, type unmatched (expected=object, found=[]interface {}, path=.a)
+	// errors.ErrorTypeUnmatched, type unmatched (path=.a, expected=object, found=[]interface {})
 }
 
 func ExampleErrorFunctionFailed() {
@@ -171,7 +171,7 @@ func ExampleErrorFunctionFailed() {
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorFunctionFailed, function failed (function=.invalid(), error=invalid function executed)
+	// errors.ErrorFunctionFailed, function failed (path=.invalid(), error=invalid function executed)
 }
 
 func ExampleConfig_SetFilterFunction() {

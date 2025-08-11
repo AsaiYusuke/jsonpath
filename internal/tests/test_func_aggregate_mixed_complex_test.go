@@ -54,7 +54,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.*.max().errFilter()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
-				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (function=errFilter, error=test error)"),
+				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (path=errFilter, error=test error)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},
@@ -65,7 +65,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.*.max().errFilter().max()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
-				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (function=errFilter, error=test error)"),
+				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (path=errFilter, error=test error)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},
@@ -76,7 +76,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.*.max().errFilter().twice()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
-				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (function=errFilter, error=test error)"),
+				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (path=errFilter, error=test error)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},
@@ -88,7 +88,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.*.max().errFilter().twice().max()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
-				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (function=errFilter, error=test error)"),
+				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (path=errFilter, error=test error)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},
@@ -100,7 +100,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.*.twice().errFilter()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
-				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (function=errFilter, error=test error)"),
+				expectedErr: createErrorFunctionFailed(".errFilter()", "function failed (path=errFilter, error=test error)"),
 				filters: map[string]func(interface{}) (interface{}, error){
 					`errFilter`: errorFilter,
 					`twice`:     twiceFilter,
@@ -109,7 +109,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.*.max().twice()`,
 				inputJSON:   `[122.345,123.45,123.456]`,
-				expectedErr: createErrorFunctionFailed(".twice()", "function failed (function=errFilter, error=test error)"),
+				expectedErr: createErrorFunctionFailed(".twice()", "function failed (path=errFilter, error=test error)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},
@@ -139,7 +139,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.a.max()`,
 				inputJSON:   `{"a": null}`,
-				expectedErr: createErrorFunctionFailed(".max()", "function failed (function=max, error=non-numeric value)"),
+				expectedErr: createErrorFunctionFailed(".max()", "function failed (path=max, error=non-numeric value)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},
@@ -147,7 +147,7 @@ func TestAggregateFunction_MixedComplexCases(t *testing.T) {
 			{
 				jsonpath:    `$.a.max()`,
 				inputJSON:   `{"a": "string"}`,
-				expectedErr: createErrorFunctionFailed(".max()", "function failed (function=max, error=non-numeric value)"),
+				expectedErr: createErrorFunctionFailed(".max()", "function failed (path=max, error=non-numeric value)"),
 				aggregates: map[string]func([]interface{}) (interface{}, error){
 					`max`: maxAggregate,
 				},

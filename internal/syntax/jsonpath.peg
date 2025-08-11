@@ -7,10 +7,10 @@ type pegJSONPathParser Peg {
 expression <-
     (jsonpathQuery / rootlessQuery) END {
         p.root = p.deleteRootNodeIdentifier(p.pop().(syntaxNode))
-        p.setConnectedText(p.root)
+        p.setConnectedPath(p.root)
     } /
 
-    (jsonpathQuery / rootlessQuery)? < .* > END {
+    (jsonpathQuery / rootlessQuery)? < .* > {
         panic(p.syntaxErr(
             begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
     }
@@ -53,14 +53,14 @@ descendantSegment <-
 
 childSegment <-
     < '.' memberNameShorthand > {
-        p.setLastNodeText(text)
+        p.setLastNodePath(text)
     } /
 
     bracketedSelection
 
 bracketedSelection <-
     < squareBracketStart ( selectors ) squareBracketEnd > {
-        p.setLastNodeText(text)
+        p.setLastNodePath(text)
     }
 
 function <-

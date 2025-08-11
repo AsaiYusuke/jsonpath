@@ -166,27 +166,27 @@ func (p *jsonPathParser) setNodeChain() {
 	}
 }
 
-func (p *jsonPathParser) setConnectedText(targetNode syntaxNode, postfix ...string) {
-	appendText := ``
+func (p *jsonPathParser) setConnectedPath(targetNode syntaxNode, postfix ...string) {
+	appendPath := ``
 	if targetNode.getNext() != nil {
-		p.setConnectedText(targetNode.getNext(), postfix...)
-		appendText = targetNode.getNext().getConnectedText()
+		p.setConnectedPath(targetNode.getNext(), postfix...)
+		appendPath = targetNode.getNext().getRemainingPath()
 	} else {
 		if len(postfix) > 0 {
-			appendText = postfix[0]
+			appendPath = postfix[0]
 		}
 	}
 
-	targetNode.setConnectedText(targetNode.getText() + appendText)
+	targetNode.setRemainingPath(targetNode.getPath() + appendPath)
 
 	if multiIdentifier, ok := targetNode.(*syntaxChildMultiIdentifier); ok {
 		if multiIdentifier.isAllWildcard {
-			multiIdentifier.unionQualifier.setConnectedText(targetNode.getConnectedText())
+			multiIdentifier.unionQualifier.setRemainingPath(targetNode.getRemainingPath())
 		}
 	}
 
 	if aggregate, ok := targetNode.(*syntaxAggregateFunction); ok {
-		p.setConnectedText(aggregate.param, aggregate.getConnectedText())
+		p.setConnectedPath(aggregate.param, aggregate.getRemainingPath())
 	}
 }
 
@@ -222,13 +222,13 @@ func (p *jsonPathParser) deleteRootNodeIdentifier(targetNode syntaxNode) syntaxN
 	return targetNode
 }
 
-func (p *jsonPathParser) setLastNodeText(text string) {
+func (p *jsonPathParser) setLastNodePath(path string) {
 	node := p.params[len(p.params)-1].(syntaxNode)
-	node.setText(text)
+	node.setPath(path)
 
 	if multiIdentifier, ok := node.(*syntaxChildMultiIdentifier); ok {
 		if multiIdentifier.isAllWildcard {
-			multiIdentifier.unionQualifier.setText(text)
+			multiIdentifier.unionQualifier.setPath(path)
 		}
 	}
 }
@@ -240,18 +240,14 @@ func (p *jsonPathParser) updateAccessorMode(checkNode syntaxNode, mode bool) {
 	}
 }
 
-func (p *jsonPathParser) pushFunction(text string, funcName string) {
+func (p *jsonPathParser) pushFunction(path string, funcName string) {
 	if function, ok := p.filterFunctions[funcName]; ok {
 		functionNode := syntaxFilterFunction{
 			syntaxBasicNode: &syntaxBasicNode{
-				text:         text,
+				path:         path,
 				accessorMode: p.accessorMode,
 			},
 			function: function,
-		}
-
-		functionNode.errorRuntime = &errorBasicRuntime{
-			node: functionNode.syntaxBasicNode,
 		}
 
 		p.push(&functionNode)
@@ -260,27 +256,23 @@ func (p *jsonPathParser) pushFunction(text string, funcName string) {
 	if function, ok := p.aggregateFunctions[funcName]; ok {
 		functionNode := syntaxAggregateFunction{
 			syntaxBasicNode: &syntaxBasicNode{
-				text:         text,
+				path:         path,
 				accessorMode: p.accessorMode,
 			},
 			function: function,
-		}
-
-		functionNode.errorRuntime = &errorBasicRuntime{
-			node: functionNode.syntaxBasicNode,
 		}
 
 		p.push(&functionNode)
 		return
 	}
 
-	panic(errors.NewErrorFunctionNotFound(text))
+	panic(errors.NewErrorFunctionNotFound(path))
 }
 
 func (p *jsonPathParser) pushRootNodeIdentifier() {
 	p.push(&syntaxRootNodeIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:         `$`,
+			path:         `$`,
 			accessorMode: p.accessorMode,
 		},
 	})
@@ -289,24 +281,20 @@ func (p *jsonPathParser) pushRootNodeIdentifier() {
 func (p *jsonPathParser) pushCurrentNodeIdentifier() {
 	p.push(&syntaxCurrentNodeIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:         `@`,
+			path:         `@`,
 			accessorMode: p.accessorMode,
 		},
 	})
 }
 
-func (p *jsonPathParser) pushChildSingleIdentifier(text string) {
+func (p *jsonPathParser) pushChildSingleIdentifier(path string) {
 	identifier := syntaxChildSingleIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:         text,
+			path:         path,
 			valueGroup:   false,
 			accessorMode: p.accessorMode,
 		},
-		identifier: text,
-	}
-
-	identifier.errorRuntime = &errorBasicRuntime{
-		node: identifier.syntaxBasicNode,
+		identifier: path,
 	}
 
 	p.push(&identifier)
@@ -349,10 +337,6 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 		isAllWildcard: isNodeWildcard && isAppendNodeWildcard,
 	}
 
-	identifier.errorRuntime = &errorBasicRuntime{
-		node: identifier.syntaxBasicNode,
-	}
-
 	if identifier.isAllWildcard {
 		identifier.unionQualifier = syntaxUnionQualifier{
 			syntaxBasicNode: &syntaxBasicNode{
@@ -365,9 +349,6 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 			},
 		}
 
-		identifier.unionQualifier.errorRuntime = &errorBasicRuntime{
-			node: identifier.unionQualifier.syntaxBasicNode,
-		}
 	}
 
 	p.push(&identifier)
@@ -376,14 +357,10 @@ func (p *jsonPathParser) pushChildMultiIdentifier(
 func (p *jsonPathParser) pushChildWildcardIdentifier() {
 	identifier := syntaxChildWildcardIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:         `*`,
+			path:         `*`,
 			valueGroup:   true,
 			accessorMode: p.accessorMode,
 		},
-	}
-
-	identifier.errorRuntime = &errorBasicRuntime{
-		node: identifier.syntaxBasicNode,
 	}
 
 	p.push(&identifier)
@@ -403,17 +380,13 @@ func (p *jsonPathParser) pushRecursiveChildIdentifier(node syntaxNode) {
 
 	identifier := syntaxRecursiveChildIdentifier{
 		syntaxBasicNode: &syntaxBasicNode{
-			text:         `..`,
+			path:         `..`,
 			valueGroup:   true,
 			next:         node,
 			accessorMode: p.accessorMode,
 		},
 		nextMapRequired:  nextMapRequired,
 		nextListRequired: nextListRequired,
-	}
-
-	identifier.errorRuntime = &errorBasicRuntime{
-		node: identifier.syntaxBasicNode,
 	}
 
 	p.push(&identifier)
@@ -428,10 +401,6 @@ func (p *jsonPathParser) pushUnionQualifier(subscript syntaxSubscript) {
 		subscripts: []syntaxSubscript{subscript},
 	}
 
-	qualifier.errorRuntime = &errorBasicRuntime{
-		node: qualifier.syntaxBasicNode,
-	}
-
 	p.push(&qualifier)
 }
 
@@ -442,10 +411,6 @@ func (p *jsonPathParser) pushFilterQualifier(query syntaxQuery) {
 			accessorMode: p.accessorMode,
 		},
 		query: query,
-	}
-
-	qualifier.errorRuntime = &errorBasicRuntime{
-		node: qualifier.syntaxBasicNode,
 	}
 
 	p.push(&qualifier)

@@ -16,6 +16,11 @@ func TestAggregateFunction_SyntaxErrors(t *testing.T) {
 			inputJSON:   `{}`,
 			expectedErr: createErrorInvalidSyntax(6, `unrecognized input`, `(a)`),
 		},
+		{
+			jsonpath:    `$.func@()`,
+			inputJSON:   `{}`,
+			expectedErr: createErrorInvalidSyntax(6, `unrecognized input`, `@()`),
+		},
 	}
 
 	runTestCases(t, "TestAggregateFunction_SyntaxErrors", testCases)

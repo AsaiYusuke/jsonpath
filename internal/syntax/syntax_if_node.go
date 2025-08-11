@@ -1,13 +1,15 @@
 package syntax
 
+import "github.com/AsaiYusuke/jsonpath/errors"
+
 type syntaxNode interface {
-	retrieve(root, current interface{}, container *bufferContainer) errorRuntime
-	setText(text string)
-	getText() string
+	retrieve(root, current interface{}, container *bufferContainer) errors.ErrorRuntime
+	setPath(path string)
+	getPath() string
 	setValueGroup()
 	isValueGroup() bool
-	setConnectedText(text string)
-	getConnectedText() string
+	setRemainingPath(path string)
+	getRemainingPath() string
 	setNext(next syntaxNode)
 	getNext() syntaxNode
 	setAccessorMode(mode bool)

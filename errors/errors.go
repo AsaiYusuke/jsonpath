@@ -45,7 +45,7 @@ type ErrorNotSupported struct {
 }
 
 func (e ErrorNotSupported) Error() string {
-	return fmt.Sprintf(`not supported (feature=%s, path=%s)`, e.Feature, e.Path)
+	return fmt.Sprintf(`not supported (path=%s, feature=%s)`, e.Path, e.Feature)
 }
 
 func NewErrorNotSupported(feature string, path string) ErrorNotSupported {
@@ -61,7 +61,7 @@ type ErrorFunctionNotFound struct {
 }
 
 func (e ErrorFunctionNotFound) Error() string {
-	return fmt.Sprintf(`function not found (function=%s)`, e.Function)
+	return fmt.Sprintf(`function not found (path=%s)`, e.Function)
 }
 
 func NewErrorFunctionNotFound(function string) ErrorFunctionNotFound {
@@ -72,51 +72,51 @@ func NewErrorFunctionNotFound(function string) ErrorFunctionNotFound {
 
 // ErrorTypeUnmatched represents the error that the node type specified in the JSONPath did not exist in the JSON object.
 type ErrorTypeUnmatched struct {
-	Path         string
+	*ErrorBasicRuntime
 	ExpectedType string
 	FoundType    string
 }
 
 func (e ErrorTypeUnmatched) Error() string {
-	return fmt.Sprintf(`type unmatched (expected=%s, found=%s, path=%s)`, e.ExpectedType, e.FoundType, e.Path)
+	return fmt.Sprintf(`type unmatched (path=%s, expected=%s, found=%s)`, e.ErrorBasicRuntime.GetPath(), e.ExpectedType, e.FoundType)
 }
 
-func NewErrorTypeUnmatched(path string, expected string, found string) ErrorTypeUnmatched {
+func NewErrorTypeUnmatched(path string, remainingPathLen int, expected string, found string) ErrorTypeUnmatched {
 	return ErrorTypeUnmatched{
-		Path:         path,
-		ExpectedType: expected,
-		FoundType:    found,
+		ErrorBasicRuntime: &ErrorBasicRuntime{path: path, remainingPathLen: remainingPathLen},
+		ExpectedType:      expected,
+		FoundType:         found,
 	}
 }
 
 // ErrorMemberNotExist represents the error that the member specified in the JSONPath did not exist in the JSON object.
 type ErrorMemberNotExist struct {
-	Path string
+	*ErrorBasicRuntime
 }
 
 func (e ErrorMemberNotExist) Error() string {
-	return fmt.Sprintf(`member did not exist (path=%s)`, e.Path)
+	return fmt.Sprintf(`member did not exist (path=%s)`, e.ErrorBasicRuntime.GetPath())
 }
 
-func NewErrorMemberNotExist(path string) ErrorMemberNotExist {
+func NewErrorMemberNotExist(path string, remainingPathLen int) ErrorMemberNotExist {
 	return ErrorMemberNotExist{
-		Path: path,
+		ErrorBasicRuntime: &ErrorBasicRuntime{path: path, remainingPathLen: remainingPathLen},
 	}
 }
 
 // ErrorFunctionFailed represents the error that function execution failed in the JSONPath.
 type ErrorFunctionFailed struct {
-	FunctionName string
-	Err          error
+	*ErrorBasicRuntime
+	Err error
 }
 
 func (e ErrorFunctionFailed) Error() string {
-	return fmt.Sprintf(`function failed (function=%s, error=%s)`, e.FunctionName, e.Err)
+	return fmt.Sprintf(`function failed (path=%s, error=%s)`, e.ErrorBasicRuntime.GetPath(), e.Err)
 }
 
-func NewErrorFunctionFailed(functionName string, errorString string) ErrorFunctionFailed {
+func NewErrorFunctionFailed(path string, remainingPathLen int, errorString string) ErrorFunctionFailed {
 	return ErrorFunctionFailed{
-		FunctionName: functionName,
-		Err:          fmt.Errorf(`%s`, errorString),
+		ErrorBasicRuntime: &ErrorBasicRuntime{path: path, remainingPathLen: remainingPathLen},
+		Err:               fmt.Errorf(`%s`, errorString),
 	}
 }
