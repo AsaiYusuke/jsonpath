@@ -10,7 +10,7 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	stdoutBackup := os.Stdout
 	os.Stdout = nil
 
-	parser := pegJSONPathParser{Buffer: `$`}
+	parser := pegJSONPathParser[uint32]{Buffer: `$`}
 	parser.Init()
 	parser.Parse()
 	parser.Execute()
@@ -20,7 +20,7 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	parser.PrintSyntaxTree()
 	parser.SprintSyntaxTree()
 
-	err := parseError{p: &parser, max: token32{begin: 0, end: 1}}
+	err := parseError[uint32]{p: &parser, maxToken: token[uint32]{begin: 0, end: 1}}
 	_ = err.Error()
 
 	parser.buffer = []rune{'\n'}
@@ -29,21 +29,21 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 	parser.Parse(1)
 	parser.Parse(3)
 
-	Pretty(true)(&parser)
+	Pretty[uint32](true)(&parser)
 	parser.PrintSyntaxTree()
 
 	_ = err.Error()
 
-	Size(10)(&parser)
+	Size[uint32](10)(&parser)
 
-	parser.Init(func(p *pegJSONPathParser) error {
+	parser.Init(func(p *pegJSONPathParser[uint32]) error {
 		return fmt.Errorf(`test error`)
 	})
 
 	parser.Buffer = ``
 	parser.PrintSyntaxTree()
 
-	memoizeFunc := DisableMemoize()
+	memoizeFunc := DisableMemoize[uint32]()
 	memoizeFunc(&parser)
 
 	os.Stdout = stdoutBackup
