@@ -114,9 +114,9 @@ func (e ErrorFunctionFailed) Error() string {
 	return fmt.Sprintf(`function failed (path=%s, error=%s)`, e.ErrorBasicRuntime.GetPath(), e.Err)
 }
 
-func NewErrorFunctionFailed(path string, remainingPathLen int, errorString string) ErrorFunctionFailed {
+func NewErrorFunctionFailed(path string, remainingPathLen int, err error) ErrorFunctionFailed {
 	return ErrorFunctionFailed{
 		ErrorBasicRuntime: &ErrorBasicRuntime{path: path, remainingPathLen: remainingPathLen},
-		Err:               fmt.Errorf(`%s`, errorString),
+		Err:               err,
 	}
 }

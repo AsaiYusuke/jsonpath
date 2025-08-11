@@ -30,7 +30,7 @@ func (f *syntaxAggregateFunction) retrieve(
 
 	filteredValue, err := f.function(result)
 	if err != nil {
-		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err.Error())
+		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err)
 	}
 
 	return f.retrieveAnyValueNext(root, filteredValue, container)

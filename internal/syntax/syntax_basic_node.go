@@ -3,12 +3,13 @@ package syntax
 import "github.com/AsaiYusuke/jsonpath/errors"
 
 type syntaxBasicNode struct {
-	path             string
-	remainingPath    string
-	remainingPathLen int
-	valueGroup       bool
-	next             syntaxNode
-	accessorMode     bool
+	path                 string
+	remainingPath        string
+	remainingPathLen     int
+	valueGroup           bool
+	next                 syntaxNode
+	accessorMode         bool
+	preErrMemberNotExist errors.ErrorMemberNotExist
 }
 
 func (i *syntaxBasicNode) setPath(path string) {
@@ -48,6 +49,13 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 	return i.next
 }
 
+func (i *syntaxBasicNode) newErrMemberNotExist() errors.ErrorMemberNotExist {
+	if i.preErrMemberNotExist.ErrorBasicRuntime == nil {
+		i.preErrMemberNotExist = errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
+	}
+	return i.preErrMemberNotExist
+}
+
 func (i *syntaxBasicNode) retrieveAnyValueNext(
 	root interface{}, nextSrc interface{}, container *bufferContainer) errors.ErrorRuntime {
 
@@ -72,7 +80,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 
 	nextNode, ok := currentMap[key]
 	if !ok {
-		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
+		return i.newErrMemberNotExist()
 	}
 
 	if i.next != nil {

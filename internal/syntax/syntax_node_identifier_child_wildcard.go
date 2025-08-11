@@ -51,7 +51,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 	}
 
 	if deepestError == nil {
-		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
+		return i.newErrMemberNotExist()
 	}
 
 	return deepestError
@@ -75,7 +75,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 	}
 
 	if deepestError == nil {
-		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
+		return i.newErrMemberNotExist()
 	}
 
 	return deepestError

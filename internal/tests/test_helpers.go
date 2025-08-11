@@ -26,7 +26,7 @@ type TestCase struct {
 }
 
 func createErrorFunctionFailed(functionName string, errorString string) errors.ErrorFunctionFailed {
-	return errors.NewErrorFunctionFailed(functionName, len(functionName), errorString)
+	return errors.NewErrorFunctionFailed(functionName, len(functionName), fmt.Errorf("%s", errorString))
 }
 
 func createErrorMemberNotExist(path string) errors.ErrorMemberNotExist {

@@ -13,7 +13,7 @@ func (f *syntaxFilterFunction) retrieve(
 
 	filteredValue, err := f.function(current)
 	if err != nil {
-		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err.Error())
+		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err)
 	}
 
 	return f.retrieveAnyValueNext(root, filteredValue, container)

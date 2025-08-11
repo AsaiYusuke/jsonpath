@@ -41,7 +41,7 @@ func (u *syntaxUnionQualifier) retrieve(
 	}
 
 	if deepestError == nil {
-		return errors.NewErrorMemberNotExist(u.path, u.remainingPathLen)
+		return u.newErrMemberNotExist()
 	}
 
 	return deepestError

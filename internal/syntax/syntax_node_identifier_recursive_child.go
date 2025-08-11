@@ -79,7 +79,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	}
 
 	if deepestError == nil {
-		return errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
+		return i.newErrMemberNotExist()
 	}
 
 	return deepestError

@@ -49,7 +49,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 	if !isEachResult {
 		if valueList[0] == emptyEntity {
-			return errors.NewErrorMemberNotExist(f.path, f.remainingPathLen)
+			return f.newErrMemberNotExist()
 		}
 	}
 
@@ -73,7 +73,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 	}
 
 	if deepestError == nil {
-		return errors.NewErrorMemberNotExist(f.path, f.remainingPathLen)
+		return f.newErrMemberNotExist()
 	}
 
 	return deepestError
@@ -90,7 +90,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 
 	if !isEachResult {
 		if valueList[0] == emptyEntity {
-			return errors.NewErrorMemberNotExist(f.path, f.remainingPathLen)
+			return f.newErrMemberNotExist()
 		}
 	}
 
@@ -112,7 +112,7 @@ func (f *syntaxFilterQualifier) retrieveList(
 	}
 
 	if deepestError == nil {
-		return errors.NewErrorMemberNotExist(f.path, f.remainingPathLen)
+		return f.newErrMemberNotExist()
 	}
 
 	return deepestError
