@@ -1,0 +1,382 @@
+package syntax
+
+type pegJSONPathParser Peg {
+    jsonPathParser
+}
+
+expression <-
+    (jsonpathQuery / rootlessQuery) END {
+        p.root = p.deleteRootNodeIdentifier(p.pop().(syntaxNode))
+        p.setConnectedPath(p.root)
+    } /
+
+    (jsonpathQuery / rootlessQuery)? < .* > {
+        panic(p.syntaxErr(
+            begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
+    }
+
+END <- !.
+
+jsonpathQuery     <- space rootIdentifier segments
+rootlessQuery     <- space rootlessNode segments
+jsonpathParameter <- space parameterRootNode segments
+
+rootIdentifier <-
+    '$' {
+        p.pushRootNodeIdentifier()
+    }
+
+rootlessNode <-
+    {
+        p.pushRootNodeIdentifier()
+    } ( bracketedSelection / memberNameShorthand / descendantSegment / childSegment )
+
+parameterRootNode <- rootIdentifier / currentNodeIdentifier
+
+currentNodeIdentifier <-
+    '@' {
+        p.pushCurrentNodeIdentifier()
+    }
+
+segments <- segment* function* space
+    {
+        p.setNodeChain()
+        p.updateRootValueGroup()
+    }
+
+segment <- descendantSegment / childSegment
+
+descendantSegment <-
+    '..' ( bracketedSelection / memberNameShorthand ) {
+        p.pushRecursiveChildIdentifier(p.pop().(syntaxNode))
+    }
+
+childSegment <-
+    < '.' memberNameShorthand > {
+        p.setLastNodePath(text)
+    } /
+
+    bracketedSelection
+
+bracketedSelection <-
+    < squareBracketStart ( selectors ) squareBracketEnd > {
+        p.setLastNodePath(text)
+    }
+
+function <-
+    < '.' functionName '()' > {
+        p.pushFunction(text, p.pop().(string))
+    }
+
+functionName <-
+    < [-_a-zA-Z0-9]+ > {
+        p.push(text)
+    }
+
+memberNameShorthand <-
+    wildcardSelector /
+
+    < ( '\\' signsWithoutHyphenUnderscore / ![\0x00-\0x1F\0x7F] !signsWithoutHyphenUnderscore . )+ > !'()' {
+        p.pushChildSingleIdentifier(p.unescape(text))
+    }
+
+signsWithoutHyphenUnderscore <- [ -,./:-@[-^`{-~]
+
+selectors <- objectElementSelectors / arrayElementSelectors / filterSelector / scriptSelector
+
+objectElementSelectors <-
+    objectElementSelector (
+        sep objectElementSelector {
+            identifier2 := p.pop().(syntaxNode)
+            identifier1 := p.pop().(syntaxNode)
+            p.pushChildMultiIdentifier(identifier1, identifier2)
+        }
+    )* !sep
+
+objectElementSelector <-
+    (
+        wildcardSelector /
+        nameSelector
+    )
+
+wildcardSelector <-
+    '*' {
+        p.pushChildWildcardIdentifier()
+    }
+
+nameSelector <-
+    lString {
+        p.pushChildSingleIdentifier(p.pop().(string))
+    }
+
+arrayElementSelectors <-
+    arrayElementSelector (
+        sep arrayElementSelector {
+            childIndexUnion := p.pop().(*syntaxUnionQualifier)
+            parentIndexUnion := p.pop().(*syntaxUnionQualifier)
+            parentIndexUnion.merge(childIndexUnion)
+            parentIndexUnion.setValueGroup()
+            p.push(parentIndexUnion)
+        }
+    )* !sep
+
+arrayElementSelector <-
+    (
+        arraySliceSelector {
+            step  := p.pop().(*syntaxIndexSubscript)
+            end   := p.pop().(*syntaxIndexSubscript)
+            start := p.pop().(*syntaxIndexSubscript)
+
+            if step.isOmitted {
+                step.number = 1
+            }
+
+            if step.number >= 0 {
+                p.pushSlicePositiveStepSubscript(start, end, step)
+            } else {
+                p.pushSliceNegativeStepSubscript(start, end, step)
+            }
+        } /
+
+        < indexSelector > {
+            p.pushIndexSubscript(text)
+        } /
+
+        '*' {
+            p.pushWildcardSubscript()
+        }
+    ) {
+        p.pushUnionQualifier(p.pop().(syntaxSubscript))
+    }
+
+arraySliceSelector <-
+    anyIndex sepArraySlice anyIndex (
+        sepArraySlice anyIndex /
+        space {
+            p.pushIndexSubscript(`1`)
+        }
+    )
+
+anyIndex <-
+    < indexNumber? > {
+        if len(text) > 0 {
+            p.pushIndexSubscript(text)
+        } else {
+            p.pushOmittedIndexSubscript(`0`)
+        }
+    }
+
+indexSelector <-
+    indexNumber
+
+indexNumber <- [-+]? [0-9]+
+
+sep           <- space ',' space
+sepArraySlice <- space ':' space
+
+scriptSelector <-
+    scriptSelectorStart < command > scriptSelectorEnd {
+        p.pushScriptQualifier(text)
+    }
+
+command <- ( !scriptSelectorEnd . )+
+
+filterSelector <-
+    filterSelectorStart query filterSelectorEnd {
+        p.pushFilterQualifier(p.pop().(syntaxQuery))
+    }
+
+query <-
+    andQuery (
+        logicOr andQuery {
+            rightQuery := p.pop().(syntaxQuery)
+            leftQuery := p.pop().(syntaxQuery)
+            p.pushLogicalOr(leftQuery, rightQuery)
+        }
+    )*
+
+andQuery <-
+    basicQuery (
+        logicAnd basicQuery {
+            rightQuery := p.pop().(syntaxQuery)
+            leftQuery := p.pop().(syntaxQuery)
+            p.pushLogicalAnd(leftQuery, rightQuery)
+        }
+    )*
+
+basicQuery <-
+    subQueryStart query subQueryEnd /
+
+    < comparator > {
+        query := p.pop()
+        p.push(query)
+
+        if logicalNot, ok := query.(*syntaxLogicalNot); ok {
+            query = (*logicalNot).query
+        }
+        if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+            _, leftIsCurrentNode := checkQuery.leftParam.param.(*syntaxQueryParamCurrentNode)
+            _, rightIsCurrentNode := checkQuery.rightParam.param.(*syntaxQueryParamCurrentNode)
+            if leftIsCurrentNode && rightIsCurrentNode {
+                panic(p.syntaxErr(
+                    begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
+            }
+        }
+    } /
+
+    < logicNot? jsonpathFilter > {
+        _ = p.pop()
+        jsonpathFilter := p.pop().(syntaxQuery)
+
+        if text[0:1] == `!` {
+            p.pushLogicalNot(jsonpathFilter)
+        } else {
+            p.push(jsonpathFilter)
+        }
+    }
+
+logicOr  <- space '||' space
+logicAnd <- space '&&' space
+logicNot <- '!' space
+
+comparator <-
+    qParam space (
+        '==' space qParam {
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.pushCompareEQ(leftParam, rightParam)
+        } /
+
+        '!=' space qParam {
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.pushCompareNE(leftParam, rightParam)
+        }
+    ) /
+
+    qNumericParam space (
+        '<=' space qNumericParam {
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.pushCompareLE(leftParam, rightParam)
+        } /
+
+        '<' space qNumericParam {
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.pushCompareLT(leftParam, rightParam)
+        } /
+
+        '>=' space qNumericParam {
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.pushCompareGE(leftParam, rightParam)
+        } /
+
+        '>' space qNumericParam {
+            rightParam := p.pop().(*syntaxBasicCompareParameter)
+            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            p.pushCompareGT(leftParam, rightParam)
+        }
+    ) /
+
+    singleJsonpathFilter space '=~' space '/' < regex > '/' {
+        leftParam := p.pop().(*syntaxBasicCompareParameter)
+        p.pushCompareRegex(leftParam, text)
+    }
+
+qParam <-
+    qLiteral {
+        p.pushCompareParameterLiteral(p.pop())
+    } /
+
+    singleJsonpathFilter
+
+qNumericParam <-
+    lNumber {
+        p.pushCompareParameterLiteral(p.pop())
+    } /
+
+    singleJsonpathFilter
+
+qLiteral <- lNumber / lBool / lString / lNull
+
+singleJsonpathFilter <-
+    < jsonpathFilter > {
+        isLiteral := p.pop().(bool)
+        param := p.pop().(syntaxQueryJSONPathParameter)
+        if param.isValueGroupParameter() {
+            panic(p.syntaxErr(
+                begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
+        }
+        p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
+    }
+
+jsonpathFilter <-
+    {
+        p.saveParams()
+    } jsonpathParameter {
+        p.loadParams()
+
+        node := p.pop().(syntaxNode)
+        checkNode := node
+        if aggregateFunction, ok := node.(*syntaxAggregateFunction); ok {
+            checkNode = aggregateFunction.param
+        }
+
+        switch checkNode.(type) {
+        case *syntaxRootNodeIdentifier:
+            p.pushCompareParameterRoot(p.deleteRootNodeIdentifier(node))
+            p.push(true)
+        case *syntaxCurrentNodeIdentifier:
+            p.pushCompareParameterCurrentNode(p.deleteRootNodeIdentifier(node))
+            p.push(false)
+        }
+    }
+
+lNumber <-
+    < [-+]? [0-9] [-+.0-9a-zA-Z]* > {
+        p.push(p.toFloat(text))
+    }
+
+lBool <-
+    ( 'true' / 'True' / 'TRUE' ) {
+        p.push(true)
+    } /
+
+    ( 'false' / 'False' / 'FALSE' ) {
+        p.push(false)
+    }
+
+lString <-
+    '\'' < ( '\\' ( ['/\\bfnrt] / hexDigits ) / [^'\\] )* > '\'' {
+        p.push(p.unescapeSingleQuotedString(text))
+    } /
+
+    '"' < ( '\\' ( ["/\\bfnrt] / hexDigits ) / [^"\\] )* > '"' {
+        p.push(p.unescapeDoubleQuotedString(text))
+    }
+
+hexDigits <- 'u' hexDigit hexDigit hexDigit hexDigit
+hexDigit  <- [a-fA-F0-9]
+
+lNull <-
+    ( 'null' / 'Null' / 'NULL' ) {
+        p.push(nil)
+    }
+
+regex <- ( '\\' [\\/] / [^/] )*
+
+squareBracketStart <- '[' space
+squareBracketEnd   <- space ']'
+
+scriptSelectorStart <- '(' space
+scriptSelectorEnd   <- space ')'
+
+filterSelectorStart <- '?(' space
+filterSelectorEnd   <- space ')'
+
+subQueryStart <- '(' space
+subQueryEnd   <- space ')'
+
+space <- ' ' *
