@@ -35,13 +35,11 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 
 	var deepestError errors.ErrorRuntime
 
-	sortKeys := getSortedKeys(srcMap)
+	sortKeys, keyLength := getSortedKeys(srcMap)
 
-	for _, key := range *sortKeys {
-		if err := i.retrieveMapNext(root, srcMap, key, container); err != nil {
-			if len(container.result) == 0 {
-				deepestError = i.getMostResolvedError(err, deepestError)
-			}
+	for index := range keyLength {
+		if err := i.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); len(container.result) == 0 && err != nil {
+			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
 
@@ -64,10 +62,8 @@ func (i *syntaxChildWildcardIdentifier) retrieveList(
 	var deepestError errors.ErrorRuntime
 
 	for index := range srcList {
-		if err := i.retrieveListNext(root, srcList, index, container); err != nil {
-			if len(container.result) == 0 {
-				deepestError = i.getMostResolvedError(err, deepestError)
-			}
+		if err := i.retrieveListNext(root, srcList, index, container); len(container.result) == 0 && err != nil {
+			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
 

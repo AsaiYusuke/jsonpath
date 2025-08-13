@@ -60,10 +60,8 @@ func (f *syntaxFilterQualifier) retrieveMap(
 				continue
 			}
 		}
-		if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); err != nil {
-			if len(container.result) == 0 {
-				deepestError = f.getMostResolvedError(err, deepestError)
-			}
+		if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); len(container.result) == 0 && err != nil {
+			deepestError = f.getMostResolvedError(err, deepestError)
 		}
 	}
 
@@ -101,10 +99,8 @@ func (f *syntaxFilterQualifier) retrieveList(
 				continue
 			}
 		}
-		if err := f.retrieveListNext(root, srcList, index, container); err != nil {
-			if len(container.result) == 0 {
-				deepestError = f.getMostResolvedError(err, deepestError)
-			}
+		if err := f.retrieveListNext(root, srcList, index, container); len(container.result) == 0 && err != nil {
+			deepestError = f.getMostResolvedError(err, deepestError)
 		}
 	}
 

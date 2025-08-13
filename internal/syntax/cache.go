@@ -13,24 +13,49 @@ var resultSyncPool = &sync.Pool{
 	New: func() any { return new(bufferContainer) },
 }
 
+var targetNodesPool = &sync.Pool{
+	New: func() any {
+		slice := make([]any, 0, 10)
+		return &slice
+	},
 }
 
-func getSortedKeys(srcMap map[string]interface{}) *sort.StringSlice {
-	length := len(srcMap)
+func getSortedKeys(srcMap map[string]any) (*sort.StringSlice, int) {
+	mapLength := len(srcMap)
 	sortKeys := sortSliceSyncPool.Get().(*sort.StringSlice)
-	if cap(*sortKeys) < length {
-		*sortKeys = make(sort.StringSlice, length)
+	if cap(*sortKeys) < mapLength {
+		*sortKeys = make(sort.StringSlice, mapLength)
 	}
-	*sortKeys = (*sortKeys)[:length]
+	*sortKeys = (*sortKeys)[:mapLength]
 	index := 0
 	for key := range srcMap {
 		(*sortKeys)[index] = key
 		index++
 	}
-	if length > 1 {
-		sortKeys.Sort()
+	if mapLength > 1 {
+		sort.Sort(sortKeys)
 	}
-	return sortKeys
+	return sortKeys, mapLength
+}
+
+func getSortedRecursiveKeys(srcMap map[string]any) (*sort.StringSlice, int) {
+	mapLength := len(srcMap)
+	sortKeys := sortSliceSyncPool.Get().(*sort.StringSlice)
+	if cap(*sortKeys) < mapLength {
+		*sortKeys = make(sort.StringSlice, mapLength)
+	}
+	*sortKeys = (*sortKeys)[:0]
+	for key, value := range srcMap {
+		switch value.(type) {
+		case map[string]any, []any:
+			*sortKeys = append(*sortKeys, key)
+		}
+	}
+	keyLength := len(*sortKeys)
+	if keyLength > 1 {
+		sort.Sort(sortKeys)
+	}
+	return sortKeys, keyLength
 }
 
 func putSortSlice(sortKeys *sort.StringSlice) {
@@ -46,4 +71,11 @@ func getContainer() *bufferContainer {
 func putContainer(container *bufferContainer) {
 	container.result = container.result[:0]
 	resultSyncPool.Put(container)
+}
+
+func getTargetNodes() *[]any { return targetNodesPool.Get().(*[]any) }
+
+func putTargetNodes(nodes *[]any) {
+	*nodes = (*nodes)[:0]
+	targetNodesPool.Put(nodes)
 }

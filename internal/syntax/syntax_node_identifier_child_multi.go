@@ -50,10 +50,8 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 			}
 		}
 
-		if err := identifier.retrieve(root, srcMap, container); err != nil {
-			if len(container.result) == 0 {
-				deepestError = i.getMostResolvedError(err, deepestError)
-			}
+		if err := identifier.retrieve(root, srcMap, container); len(container.result) == 0 && err != nil {
+			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
 
