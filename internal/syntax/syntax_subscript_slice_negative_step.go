@@ -9,45 +9,39 @@ type syntaxSliceNegativeStepSubscript struct {
 }
 
 func (s *syntaxSliceNegativeStepSubscript) getIndexes(srcLength int) []int {
-	loopStart := s.getLoopStart(srcLength)
-	loopEnd := s.getLoopEnd(srcLength)
-
 	index, result := 0, make([]int, srcLength)
-	if s.step.number < 0 {
-		for i := loopStart; i > loopEnd; i += s.step.number {
-			result[index] = i
-			index++
-		}
+
+	for i := s.getLoopStart(srcLength); i > s.getLoopEnd(srcLength); i += s.step.number {
+		result[index] = i
+		index++
 	}
 
 	return result[:index]
 }
 
 func (s *syntaxSliceNegativeStepSubscript) getLoopStart(srcLength int) int {
-	loopStart := s.start.number
 	if s.start.isOmitted {
-		loopStart = srcLength - 1
+		return s.getNormalizedValue(srcLength-1, srcLength)
 	}
-	return s.getNormalizedValue(loopStart, srcLength)
+	return s.getNormalizedValue(s.start.number, srcLength)
 }
 
 func (s *syntaxSliceNegativeStepSubscript) getLoopEnd(srcLength int) int {
-	loopEnd := s.end.number
 	if s.end.isOmitted {
-		loopEnd = -srcLength - 1
+		return s.getNormalizedValue(-srcLength-1, srcLength)
 	}
-	return s.getNormalizedValue(loopEnd, srcLength)
+	return s.getNormalizedValue(s.end.number, srcLength)
 }
 
 func (s *syntaxSliceNegativeStepSubscript) getNormalizedValue(value int, srcLength int) int {
-	if value < 0 {
-		value += srcLength
-		if value < -1 {
-			value = -1
-		}
-	}
 	if value > srcLength-1 {
-		value = srcLength - 1
+		return srcLength - 1
+	}
+	if value < -srcLength-1 {
+		return -1
+	}
+	if value < 0 {
+		return value + srcLength
 	}
 	return value
 }
