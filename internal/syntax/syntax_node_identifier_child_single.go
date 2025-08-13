@@ -13,9 +13,9 @@ type syntaxChildSingleIdentifier struct {
 }
 
 func (i *syntaxChildSingleIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
-	if srcMap, ok := current.(map[string]interface{}); ok {
+	if srcMap, ok := current.(map[string]any); ok {
 		return i.retrieveMapNext(root, srcMap, i.identifier, container)
 	}
 

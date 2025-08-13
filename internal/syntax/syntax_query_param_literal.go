@@ -1,11 +1,11 @@
 package syntax
 
 type syntaxQueryParamLiteral struct {
-	literal []interface{}
+	literal []any
 }
 
 func (l *syntaxQueryParamLiteral) compute(
-	_ interface{}, _ []interface{}) []interface{} {
+	_ any, _ []any) []any {
 
 	return l.literal
 }

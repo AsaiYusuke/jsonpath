@@ -5,11 +5,11 @@ import "github.com/AsaiYusuke/jsonpath/errors"
 type syntaxFilterFunction struct {
 	*syntaxBasicNode
 
-	function func(interface{}) (interface{}, error)
+	function func(any) (any, error)
 }
 
 func (f *syntaxFilterFunction) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	filteredValue, err := f.function(current)
 	if err != nil {

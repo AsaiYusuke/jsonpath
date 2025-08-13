@@ -11,13 +11,13 @@ type syntaxChildWildcardIdentifier struct {
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	switch typedNodes := current.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return i.retrieveMap(root, typedNodes, container)
 
-	case []interface{}:
+	case []any:
 		return i.retrieveList(root, typedNodes, container)
 
 	default:
@@ -30,7 +30,7 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcMap map[string]any, container *bufferContainer) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 
@@ -58,7 +58,7 @@ func (i *syntaxChildWildcardIdentifier) retrieveMap(
 }
 
 func (i *syntaxChildWildcardIdentifier) retrieveList(
-	root interface{}, srcList []interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcList []any, container *bufferContainer) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 

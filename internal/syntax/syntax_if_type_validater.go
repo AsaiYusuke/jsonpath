@@ -1,5 +1,5 @@
 package syntax
 
 type syntaxTypeValidator interface {
-	validate(values []interface{}) bool
+	validate(values []any) bool
 }

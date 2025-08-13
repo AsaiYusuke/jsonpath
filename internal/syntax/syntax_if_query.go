@@ -1,5 +1,5 @@
 package syntax
 
 type syntaxQuery interface {
-	compute(root interface{}, currentList []interface{}) []interface{}
+	compute(root any, currentList []any) []any
 }

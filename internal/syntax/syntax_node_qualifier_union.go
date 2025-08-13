@@ -13,9 +13,9 @@ type syntaxUnionQualifier struct {
 }
 
 func (u *syntaxUnionQualifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
-	srcArray, ok := current.([]interface{})
+	srcArray, ok := current.([]any)
 	if !ok {
 		foundType := msgTypeNull
 		if current != nil {

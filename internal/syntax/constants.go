@@ -12,5 +12,5 @@ const (
 )
 
 var emptyEntity = struct{}{}
-var emptyList = []interface{}{emptyEntity}
-var fullList = []interface{}{true}
+var emptyList = []any{emptyEntity}
+var fullList = []any{true}

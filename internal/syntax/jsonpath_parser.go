@@ -10,11 +10,11 @@ import (
 
 type jsonPathParser struct {
 	root               syntaxNode
-	paramsList         [][]interface{}
-	params             []interface{}
+	paramsList         [][]any
+	params             []any
 	unescapeRegex      *regexp.Regexp
-	filterFunctions    map[string]func(interface{}) (interface{}, error)
-	aggregateFunctions map[string]func([]interface{}) (interface{}, error)
+	filterFunctions    map[string]func(any) (any, error)
+	aggregateFunctions map[string]func([]any) (any, error)
 	accessorMode       bool
 }
 
@@ -32,12 +32,12 @@ func (p *jsonPathParser) loadParams() {
 	}
 }
 
-func (p *jsonPathParser) push(param interface{}) {
+func (p *jsonPathParser) push(param any) {
 	p.params = append(p.params, param)
 }
 
-func (p *jsonPathParser) pop() interface{} {
-	var param interface{}
+func (p *jsonPathParser) pop() any {
+	var param any
 	param, p.params = p.params[len(p.params)-1], p.params[:len(p.params)-1]
 	return param
 }
@@ -162,7 +162,7 @@ func (p *jsonPathParser) setNodeChain() {
 
 			last = nextNode
 		}
-		p.params = []interface{}{root}
+		p.params = []any{root}
 	}
 }
 
@@ -583,7 +583,7 @@ func (p *jsonPathParser) pushCompareRegex(
 	p.push(p._createBasicCompareQuery(
 		leftParam, &syntaxBasicCompareParameter{
 			param: &syntaxQueryParamLiteral{
-				literal: []interface{}{`regex`},
+				literal: []any{`regex`},
 			},
 			isLiteral: true,
 		},
@@ -600,10 +600,10 @@ func (p *jsonPathParser) pushBasicCompareParameter(
 	})
 }
 
-func (p *jsonPathParser) pushCompareParameterLiteral(text interface{}) {
+func (p *jsonPathParser) pushCompareParameterLiteral(text any) {
 	p.pushBasicCompareParameter(
 		&syntaxQueryParamLiteral{
-			literal: []interface{}{text},
+			literal: []any{text},
 		}, true)
 }
 

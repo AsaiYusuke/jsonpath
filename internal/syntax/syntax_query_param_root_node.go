@@ -9,7 +9,7 @@ func (e *syntaxQueryParamRootNode) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamRootNode) compute(
-	root interface{}, _ []interface{}) []interface{} {
+	root any, _ []any) []any {
 
 	values := getContainer()
 	defer func() {
@@ -21,7 +21,7 @@ func (e *syntaxQueryParamRootNode) compute(
 	}
 
 	if len(values.result) == 1 {
-		return []interface{}{values.result[0]}
+		return []any{values.result[0]}
 	}
 
 	return fullList

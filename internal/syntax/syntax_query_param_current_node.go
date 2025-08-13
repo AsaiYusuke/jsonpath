@@ -9,9 +9,9 @@ func (e *syntaxQueryParamCurrentNode) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamCurrentNode) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root any, currentList []any) []any {
 
-	result := make([]interface{}, len(currentList))
+	result := make([]any, len(currentList))
 
 	var hasValue bool
 

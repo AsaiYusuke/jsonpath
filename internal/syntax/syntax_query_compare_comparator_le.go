@@ -4,7 +4,7 @@ type syntaxCompareLE struct {
 	*syntaxBasicNumericTypeValidator
 }
 
-func (c *syntaxCompareLE) comparator(left []interface{}, right interface{}) bool {
+func (c *syntaxCompareLE) comparator(left []any, right any) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {

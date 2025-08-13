@@ -14,10 +14,10 @@ type syntaxRecursiveChildIdentifier struct {
 }
 
 func (i *syntaxRecursiveChildIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	switch current.(type) {
-	case map[string]interface{}, []interface{}:
+	case map[string]any, []any:
 	default:
 		foundType := msgTypeNull
 		if current != nil {
@@ -35,7 +35,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		currentTargetNode := targetNodes[len(targetNodes)-1]
 		targetNodes = targetNodes[:len(targetNodes)-1]
 		switch typedNodes := currentTargetNode.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			if i.nextMapRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
 					if len(container.result) == 0 {
@@ -55,7 +55,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 			putSortSlice(sortKeys)
 
-		case []interface{}:
+		case []any:
 			if i.nextListRequired {
 				if err := i.next.retrieve(root, typedNodes, container); err != nil {
 					if len(container.result) == 0 {

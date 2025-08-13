@@ -15,10 +15,10 @@ type syntaxChildMultiIdentifier struct {
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.isAllWildcard {
-		if _, ok := current.([]interface{}); ok {
+		if _, ok := current.([]any); ok {
 			// If the "current" variable points to the array structure
 			// and only wildcards are specified for qualifier,
 			// then switch to syntaxUnionQualifier.
@@ -26,7 +26,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 		}
 	}
 
-	if srcMap, ok := current.(map[string]interface{}); ok {
+	if srcMap, ok := current.(map[string]any); ok {
 		return i.retrieveMap(root, srcMap, container)
 	}
 
@@ -38,7 +38,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcMap map[string]any, container *bufferContainer) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 

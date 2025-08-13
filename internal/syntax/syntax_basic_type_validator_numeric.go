@@ -5,7 +5,7 @@ import "encoding/json"
 type syntaxBasicNumericTypeValidator struct {
 }
 
-func (c *syntaxBasicNumericTypeValidator) validate(values []interface{}) bool {
+func (c *syntaxBasicNumericTypeValidator) validate(values []any) bool {
 	var foundValue bool
 	for index := range values {
 		switch typedValue := values[index].(type) {

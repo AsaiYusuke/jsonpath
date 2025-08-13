@@ -3,7 +3,7 @@ package syntax
 type syntaxBasicBoolTypeValidator struct {
 }
 
-func (c *syntaxBasicBoolTypeValidator) validate(values []interface{}) bool {
+func (c *syntaxBasicBoolTypeValidator) validate(values []any) bool {
 	var foundValue bool
 	for index := range values {
 		switch values[index].(type) {

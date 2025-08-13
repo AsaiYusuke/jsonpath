@@ -7,7 +7,7 @@ type syntaxBasicCompareQuery struct {
 }
 
 func (q *syntaxBasicCompareQuery) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root any, currentList []any) []any {
 
 	leftValues := q.leftParam.compute(root, currentList)
 	leftFound := q.comparator.validate(leftValues)

@@ -13,13 +13,13 @@ type syntaxFilterQualifier struct {
 }
 
 func (f *syntaxFilterQualifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	switch typedNodes := current.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return f.retrieveMap(root, typedNodes, container)
 
-	case []interface{}:
+	case []any:
 		return f.retrieveList(root, typedNodes, container)
 
 	default:
@@ -32,13 +32,13 @@ func (f *syntaxFilterQualifier) retrieve(
 }
 
 func (f *syntaxFilterQualifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcMap map[string]any, container *bufferContainer) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 
-	sortKeys := getSortedKeys(srcMap)
+	sortKeys, keyLength := getSortedKeys(srcMap)
 
-	valueList := make([]interface{}, len(*sortKeys))
+	valueList := make([]any, keyLength)
 	for index := range *sortKeys {
 		valueList[index] = srcMap[(*sortKeys)[index]]
 	}
@@ -80,7 +80,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 }
 
 func (f *syntaxFilterQualifier) retrieveList(
-	root interface{}, srcList []interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcList []any, container *bufferContainer) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 

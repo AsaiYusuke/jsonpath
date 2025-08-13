@@ -1,6 +1,6 @@
 package syntax
 
 type syntaxComparator interface {
-	comparator(left []interface{}, right interface{}) bool
-	validate(values []interface{}) bool
+	comparator(left []any, right any) bool
+	validate(values []any) bool
 }

@@ -13,11 +13,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 22.0, 33.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`b`]
+					func(src any) any {
+						return src.(map[string]any)[`b`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`b`] = value
+					func(src, value any) {
+						src.(map[string]any)[`b`] = value
 					}),
 			},
 			{
@@ -26,11 +26,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 456.0, 246.0, 369.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`b`]
+					func(src any) any {
+						return src.(map[string]any)[`b`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`b`] = value
+					func(src, value any) {
+						src.(map[string]any)[`b`] = value
 					}),
 			},
 			{
@@ -39,11 +39,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 22.0, 33.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`b`]
+					func(src any) any {
+						return src.(map[string]any)[`b`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`b`] = value
+					func(src, value any) {
+						src.(map[string]any)[`b`] = value
 					}),
 			},
 			{
@@ -52,11 +52,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 22.0, 44.0, 55.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`b`]
+					func(src any) any {
+						return src.(map[string]any)[`b`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`b`] = value
+					func(src, value any) {
+						src.(map[string]any)[`b`] = value
 					}),
 			},
 			{
@@ -65,11 +65,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 22.0, 33.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`b`]
+					func(src any) any {
+						return src.(map[string]any)[`b`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`b`] = value
+					func(src, value any) {
+						src.(map[string]any)[`b`] = value
 					}),
 			},
 			{
@@ -78,11 +78,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 22.0, 33.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[1]
+					func(src any) any {
+						return src.([]any)[1]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[1] = value
+					func(src, value any) {
+						src.([]any)[1] = value
 					}),
 			},
 			{
@@ -91,11 +91,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 11.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`b`].(map[string]interface{})[`a`]
+					func(src any) any {
+						return src.(map[string]any)[`b`].(map[string]any)[`a`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`b`].(map[string]interface{})[`a`] = value
+					func(src, value any) {
+						src.(map[string]any)[`b`].(map[string]any)[`a`] = value
 					}),
 			},
 			{
@@ -104,11 +104,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 256.0, 512.0, 1024.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[1]
+					func(src any) any {
+						return src.([]any)[1]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[1] = value
+					func(src, value any) {
+						src.([]any)[1] = value
 					}),
 			},
 			{
@@ -117,11 +117,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 256.0, 512.0, 1024.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[1]
+					func(src any) any {
+						return src.([]any)[1]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[1] = value
+					func(src, value any) {
+						src.([]any)[1] = value
 					}),
 			},
 			{
@@ -130,11 +130,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 11.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[0]
+					func(src any) any {
+						return src.([]any)[0]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[0] = value
+					func(src, value any) {
+						src.([]any)[0] = value
 					}),
 			},
 			{
@@ -143,11 +143,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 11.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[0]
+					func(src any) any {
+						return src.([]any)[0]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[0] = value
+					func(src, value any) {
+						src.([]any)[0] = value
 					}),
 			},
 			{
@@ -156,11 +156,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 11.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[0].(map[string]interface{})[`a`]
+					func(src any) any {
+						return src.([]any)[0].(map[string]any)[`a`]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[0].(map[string]interface{})[`a`] = value
+					func(src, value any) {
+						src.([]any)[0].(map[string]any)[`a`] = value
 					}),
 			},
 			{
@@ -169,11 +169,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 33.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.(map[string]interface{})[`c`]
+					func(src any) any {
+						return src.(map[string]any)[`c`]
 					},
-					func(src, value interface{}) {
-						src.(map[string]interface{})[`c`] = value
+					func(src, value any) {
+						src.(map[string]any)[`c`] = value
 					}),
 			},
 			{
@@ -182,11 +182,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 33.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[2]
+					func(src any) any {
+						return src.([]any)[2]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[2] = value
+					func(src, value any) {
+						src.([]any)[2] = value
 					}),
 			},
 			{
@@ -195,11 +195,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					1, 33.0, 22.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[2].(map[string]interface{})[`a`]
+					func(src any) any {
+						return src.([]any)[2].(map[string]any)[`a`]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[2].(map[string]interface{})[`a`] = value
+					func(src, value any) {
+						src.([]any)[2].(map[string]any)[`a`] = value
 					}),
 			},
 			{
@@ -208,11 +208,11 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				accessorMode: true,
 				resultValidator: createAccessorModeValidator(
 					0, 22.0, 33.0, 44.0,
-					func(src interface{}) interface{} {
-						return src.([]interface{})[1]
+					func(src any) any {
+						return src.([]any)[1]
 					},
-					func(src, value interface{}) {
-						src.([]interface{})[1] = value
+					func(src, value any) {
+						src.([]any)[1] = value
 					}),
 			},
 		},
@@ -221,16 +221,16 @@ func TestConfig_AccessorModeOperations(t *testing.T) {
 				jsonpath:        `$`,
 				inputJSON:       `[1,2,3]`,
 				accessorMode:    true,
-				resultValidator: createGetOnlyValidator([]interface{}{1.0, 2.0, 3.0}),
+				resultValidator: createGetOnlyValidator([]any{1.0, 2.0, 3.0}),
 			},
 			{
 				jsonpath:     `$.echo()`,
 				inputJSON:    `[122.345,123.45,123.456]`,
 				accessorMode: true,
-				aggregates: map[string]func([]interface{}) (interface{}, error){
+				aggregates: map[string]func([]any) (any, error){
 					`echo`: echoAggregateFunc,
 				},
-				resultValidator: createGetOnlyValidator([]interface{}{122.345, 123.45, 123.456}),
+				resultValidator: createGetOnlyValidator([]any{122.345, 123.45, 123.456}),
 			},
 		},
 		`convert-srcJSON`: []TestCase{

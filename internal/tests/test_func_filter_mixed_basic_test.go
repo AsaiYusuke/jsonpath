@@ -10,7 +10,7 @@ func TestFilterFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.twice()`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[246.912,512]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`: twiceFunc,
 			},
 		},
@@ -18,7 +18,7 @@ func TestFilterFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.twice().twice()`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[493.824,1024]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`: twiceFunc,
 			},
 		},
@@ -26,7 +26,7 @@ func TestFilterFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.twice().quarter()`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[61.728,128]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`:   twiceFunc,
 				`quarter`: quarterFunc,
 			},
@@ -35,7 +35,7 @@ func TestFilterFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.quarter().twice()`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[61.728,128]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`:   twiceFunc,
 				`quarter`: quarterFunc,
 			},
@@ -51,7 +51,7 @@ func TestFilterFunction_FilterOperations(t *testing.T) {
 			jsonpath:     `$[?(@.twice())]`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[123.456,256]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`: twiceFunc,
 			},
 		},
@@ -59,7 +59,7 @@ func TestFilterFunction_FilterOperations(t *testing.T) {
 			jsonpath:     `$[?(@.twice() == 512)]`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[256]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`: twiceFunc,
 			},
 		},
@@ -67,7 +67,7 @@ func TestFilterFunction_FilterOperations(t *testing.T) {
 			jsonpath:     `$[?(512 != @.twice())]`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[123.456]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`: twiceFunc,
 			},
 		},
@@ -75,7 +75,7 @@ func TestFilterFunction_FilterOperations(t *testing.T) {
 			jsonpath:     `$[?(@.twice() == $[0].twice())]`,
 			inputJSON:    `[123.456,256]`,
 			expectedJSON: `[123.456]`,
-			filters: map[string]func(interface{}) (interface{}, error){
+			filters: map[string]func(any) (any, error){
 				`twice`: twiceFunc,
 			},
 		},

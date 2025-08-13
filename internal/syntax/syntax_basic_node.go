@@ -57,7 +57,7 @@ func (i *syntaxBasicNode) newErrMemberNotExist() errors.ErrorMemberNotExist {
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
-	root interface{}, nextSrc interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, nextSrc any, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.next != nil {
 		return i.next.retrieve(root, nextSrc, container)
@@ -65,7 +65,7 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 
 	if i.accessorMode {
 		container.result = append(container.result, Accessor{
-			Get: func() interface{} { return nextSrc },
+			Get: func() any { return nextSrc },
 			Set: nil,
 		})
 	} else {
@@ -76,7 +76,7 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 }
 
 func (i *syntaxBasicNode) retrieveMapNext(
-	root interface{}, currentMap map[string]interface{}, key string, container *bufferContainer) errors.ErrorRuntime {
+	root any, currentMap map[string]any, key string, container *bufferContainer) errors.ErrorRuntime {
 
 	nextNode, ok := currentMap[key]
 	if !ok {
@@ -89,8 +89,8 @@ func (i *syntaxBasicNode) retrieveMapNext(
 
 	if i.accessorMode {
 		container.result = append(container.result, Accessor{
-			Get: func() interface{} { return currentMap[key] },
-			Set: func(value interface{}) { currentMap[key] = value },
+			Get: func() any { return currentMap[key] },
+			Set: func(value any) { currentMap[key] = value },
 		})
 	} else {
 		container.result = append(container.result, nextNode)
@@ -100,7 +100,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 }
 
 func (i *syntaxBasicNode) retrieveListNext(
-	root interface{}, currentList []interface{}, index int, container *bufferContainer) errors.ErrorRuntime {
+	root any, currentList []any, index int, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.next != nil {
 		return i.next.retrieve(root, currentList[index], container)
@@ -108,8 +108,8 @@ func (i *syntaxBasicNode) retrieveListNext(
 
 	if i.accessorMode {
 		container.result = append(container.result, Accessor{
-			Get: func() interface{} { return currentList[index] },
-			Set: func(value interface{}) { currentList[index] = value },
+			Get: func() any { return currentList[index] },
+			Set: func(value any) { currentList[index] = value },
 		})
 	} else {
 		container.result = append(container.result, currentList[index])

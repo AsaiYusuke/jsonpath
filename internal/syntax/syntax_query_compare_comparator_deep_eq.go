@@ -6,7 +6,7 @@ type syntaxCompareDeepEQ struct {
 	*syntaxBasicAnyValueTypeValidator
 }
 
-func (c *syntaxCompareDeepEQ) comparator(left []interface{}, right interface{}) bool {
+func (c *syntaxCompareDeepEQ) comparator(left []any, right any) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {

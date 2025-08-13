@@ -6,11 +6,13 @@ import (
 )
 
 var sortSliceSyncPool = &sync.Pool{
-	New: func() interface{} { return new(sort.StringSlice) },
+	New: func() any { return new(sort.StringSlice) },
 }
 
 var resultSyncPool = &sync.Pool{
-	New: func() interface{} { return new(bufferContainer) },
+	New: func() any { return new(bufferContainer) },
+}
+
 }
 
 func getSortedKeys(srcMap map[string]interface{}) *sort.StringSlice {

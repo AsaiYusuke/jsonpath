@@ -10,7 +10,7 @@ var parser = pegJSONPathParser[uint32]{}
 var unescapeRegex = regexp.MustCompile(`\\(.)`)
 
 // Retrieve returns the retrieved JSON using the given JSONPath.
-func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}, error) {
+func Retrieve(jsonPath string, src any, config ...Config) ([]any, error) {
 	jsonPathFunc, err := Parse(jsonPath, config...)
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func Retrieve(jsonPath string, src interface{}, config ...Config) ([]interface{}
 }
 
 // Parse returns the parser function using the given JSONPath.
-func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interface{}, error), err error) {
+func Parse(jsonPath string, config ...Config) (f func(src any) ([]any, error), err error) {
 	parseMutex.Lock()
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -52,7 +52,7 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 	parser.Execute()
 
 	root := parser.jsonPathParser.root
-	return func(src interface{}) ([]interface{}, error) {
+	return func(src any) ([]any, error) {
 		container := getContainer()
 		defer func() {
 			putContainer(container)
@@ -62,7 +62,7 @@ func Parse(jsonPath string, config ...Config) (f func(src interface{}) ([]interf
 			return nil, err
 		}
 
-		result := make([]interface{}, len(container.result))
+		result := make([]any, len(container.result))
 		for index := range result {
 			result[index] = container.result[index]
 		}

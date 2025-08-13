@@ -5,7 +5,7 @@ type syntaxLogicalNot struct {
 }
 
 func (l *syntaxLogicalNot) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root any, currentList []any) []any {
 
 	computedList := l.query.compute(root, currentList)
 	if len(computedList) == 1 {

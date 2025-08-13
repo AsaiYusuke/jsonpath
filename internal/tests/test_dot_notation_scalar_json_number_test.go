@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var useJSONNumberDecoderFunction = func(srcJSON string, src *interface{}) error {
+var useJSONNumberDecoderFunction = func(srcJSON string, src *any) error {
 	reader := strings.NewReader(srcJSON)
 	decoder := json.NewDecoder(reader)
 	decoder.UseNumber()
