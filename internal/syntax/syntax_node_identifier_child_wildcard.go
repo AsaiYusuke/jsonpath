@@ -21,11 +21,12 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 		return i.retrieveList(root, typedNodes, container)
 
 	default:
-		foundType := msgTypeNull
 		if current != nil {
-			foundType = reflect.TypeOf(current).String()
+			return errors.NewErrorTypeUnmatched(
+				i.path, i.remainingPathLen, msgTypeObjectOrArray, reflect.TypeOf(current).String())
 		}
-		return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObjectOrArray, foundType)
+		return errors.NewErrorTypeUnmatched(
+			i.path, i.remainingPathLen, msgTypeObjectOrArray, msgTypeNull)
 	}
 }
 

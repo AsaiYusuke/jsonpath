@@ -19,11 +19,12 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	switch current.(type) {
 	case map[string]any, []any:
 	default:
-		foundType := msgTypeNull
 		if current != nil {
-			foundType = reflect.TypeOf(current).String()
+			return errors.NewErrorTypeUnmatched(
+				i.path, i.remainingPathLen, msgTypeObjectOrArray, reflect.TypeOf(current).String())
 		}
-		return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObjectOrArray, foundType)
+		return errors.NewErrorTypeUnmatched(
+			i.path, i.remainingPathLen, msgTypeObjectOrArray, msgTypeNull)
 	}
 
 	var deepestError errors.ErrorRuntime

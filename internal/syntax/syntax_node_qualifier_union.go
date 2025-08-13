@@ -17,11 +17,12 @@ func (u *syntaxUnionQualifier) retrieve(
 
 	srcArray, ok := current.([]any)
 	if !ok {
-		foundType := msgTypeNull
 		if current != nil {
-			foundType = reflect.TypeOf(current).String()
+			return errors.NewErrorTypeUnmatched(
+				u.path, u.remainingPathLen, msgTypeArray, reflect.TypeOf(current).String())
 		}
-		return errors.NewErrorTypeUnmatched(u.path, u.remainingPathLen, msgTypeArray, foundType)
+		return errors.NewErrorTypeUnmatched(
+			u.path, u.remainingPathLen, msgTypeArray, msgTypeNull)
 	}
 
 	var deepestError errors.ErrorRuntime

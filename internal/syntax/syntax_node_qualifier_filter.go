@@ -23,11 +23,12 @@ func (f *syntaxFilterQualifier) retrieve(
 		return f.retrieveList(root, typedNodes, container)
 
 	default:
-		foundType := msgTypeNull
 		if current != nil {
-			foundType = reflect.TypeOf(current).String()
+			return errors.NewErrorTypeUnmatched(
+				f.path, f.remainingPathLen, msgTypeObjectOrArray, reflect.TypeOf(current).String())
 		}
-		return errors.NewErrorTypeUnmatched(f.path, f.remainingPathLen, msgTypeObjectOrArray, foundType)
+		return errors.NewErrorTypeUnmatched(
+			f.path, f.remainingPathLen, msgTypeObjectOrArray, msgTypeNull)
 	}
 }
 

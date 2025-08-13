@@ -19,9 +19,10 @@ func (i *syntaxChildSingleIdentifier) retrieve(
 		return i.retrieveMapNext(root, srcMap, i.identifier, container)
 	}
 
-	foundType := msgTypeNull
 	if current != nil {
-		foundType = reflect.TypeOf(current).String()
+		return errors.NewErrorTypeUnmatched(
+			i.path, i.remainingPathLen, msgTypeObject, reflect.TypeOf(current).String())
 	}
-	return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObject, foundType)
+	return errors.NewErrorTypeUnmatched(
+		i.path, i.remainingPathLen, msgTypeObject, msgTypeNull)
 }
