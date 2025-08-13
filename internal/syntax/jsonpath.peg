@@ -29,7 +29,7 @@ rootIdentifier <-
 rootlessNode <-
     {
         p.pushRootNodeIdentifier()
-    } ( bracketedSelection / memberNameShorthand / descendantSegment / childSegment )
+    } ( segment / memberNameShorthand )
 
 parameterRootNode <- rootIdentifier / currentNodeIdentifier
 
@@ -59,7 +59,7 @@ childSegment <-
     bracketedSelection
 
 bracketedSelection <-
-    < squareBracketStart ( selectors ) squareBracketEnd > {
+    < squareBracketStart selectors squareBracketEnd > {
         p.setLastNodePath(text)
     }
 
@@ -69,18 +69,20 @@ function <-
     }
 
 functionName <-
-    < [-_a-zA-Z0-9]+ > {
+    < nameChars+ > {
         p.push(text)
     }
 
 memberNameShorthand <-
     wildcardSelector /
 
-    < ( '\\' signsWithoutHyphenUnderscore / ![\0x00-\0x1F\0x7F] !signsWithoutHyphenUnderscore . )+ > !'()' {
+    < ( '\\' signsWithoutHyphenUnderscore / !(controlCodeChars / signsWithoutHyphenUnderscore) . )+ > !'()' {
         p.pushChildSingleIdentifier(p.unescape(text))
     }
 
-signsWithoutHyphenUnderscore <- [ -,./:-@[-^`{-~]
+nameChars <- [-_a-zA-Z0-9]
+signsWithoutHyphenUnderscore <- !nameChars [ -~]
+controlCodeChars <- [\0x00-\0x1F\0x7F]
 
 selectors <- objectElementSelectors / arrayElementSelectors / filterSelector / scriptSelector
 
@@ -93,11 +95,7 @@ objectElementSelectors <-
         }
     )* !sep
 
-objectElementSelector <-
-    (
-        wildcardSelector /
-        nameSelector
-    )
+objectElementSelector <- ( wildcardSelector / nameSelector )
 
 wildcardSelector <-
     '*' {
@@ -138,9 +136,7 @@ arrayElementSelector <-
             }
         } /
 
-        < indexSelector > {
-            p.pushIndexSubscript(text)
-        } /
+        indexSelector /
 
         '*' {
             p.pushWildcardSubscript()
@@ -150,26 +146,21 @@ arrayElementSelector <-
     }
 
 arraySliceSelector <-
-    anyIndex sepArraySlice anyIndex (
-        sepArraySlice anyIndex /
-        space {
-            p.pushIndexSubscript(`1`)
-        }
-    )
+    anyIndex sepArraySlice anyIndex ( sepArraySlice anyIndex / omittedIndex )
 
-anyIndex <-
-    < indexNumber? > {
-        if len(text) > 0 {
-            p.pushIndexSubscript(text)
-        } else {
-            p.pushOmittedIndexSubscript(`0`)
-        }
+anyIndex <- indexNumber / omittedIndex
+
+omittedIndex <-
+    {
+        p.pushOmittedIndexSubscript()
     }
 
-indexSelector <-
-    indexNumber
+indexSelector <- indexNumber
 
-indexNumber <- [-+]? [0-9]+
+indexNumber <- < [-+]? [0-9]+ >
+    {
+        p.pushIndexSubscript(text)
+    }
 
 sep           <- space ',' space
 sepArraySlice <- space ':' space
@@ -224,16 +215,16 @@ basicQuery <-
         }
     } /
 
-    < logicNot? jsonpathFilter > {
-        _ = p.pop()
-        jsonpathFilter := p.pop().(syntaxQuery)
-
-        if text[0:1] == `!` {
+    (
+        logicNot jsonpathFilter {
+            _ = p.pop()
+            jsonpathFilter := p.pop().(syntaxQuery)
             p.pushLogicalNot(jsonpathFilter)
-        } else {
-            p.push(jsonpathFilter)
+        } /
+        jsonpathFilter {
+            _ = p.pop()
         }
-    }
+    )
 
 logicOr  <- space '||' space
 logicAnd <- space '&&' space
@@ -365,7 +356,7 @@ lNull <-
         p.push(nil)
     }
 
-regex <- ( '\\' [\\/] / [^/] )*
+regex <- ( [^/\\] / '\\' . )*
 
 squareBracketStart <- '[' space
 squareBracketEnd   <- space ']'

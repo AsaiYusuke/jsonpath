@@ -428,3 +428,25 @@ func TestSlice_ChildAccessErrors(t *testing.T) {
 
 	runTestCases(t, "TestSlice_ChildAccessErrors", testCases)
 }
+
+func TestSlice_IncludeSpace(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[ 0 : 3 : 1 ]`,
+			inputJSON:    `["first","second","third"]`,
+			expectedJSON: `["first","second","third"]`,
+		},
+		{
+			jsonpath:     `$[ 0 : 3 : 2 ]`,
+			inputJSON:    `["first","second","third"]`,
+			expectedJSON: `["first","third"]`,
+		},
+		{
+			jsonpath:     `$[ 0 : 3 : 3 ]`,
+			inputJSON:    `["first","second","third"]`,
+			expectedJSON: `["first"]`,
+		},
+	}
+
+	runTestCases(t, "TestSlice_IncludeSpace", testCases)
+}

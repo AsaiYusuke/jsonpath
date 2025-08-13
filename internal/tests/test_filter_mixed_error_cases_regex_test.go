@@ -24,6 +24,18 @@ func TestFilterRegexErrors(t *testing.T) {
 			inputJSON:   `[{"a":"case"},{"a":"CASE"},{"a":"Case"},{"a":"abc"}]`,
 			expectedErr: createErrorInvalidArgument(`(?x)CASE`, fmt.Errorf("error parsing regexp: invalid or unsupported Perl syntax: `(?x`")),
 		},
+
+		{
+			jsonpath:    `$[?(@.a=~/\q/)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: createErrorInvalidArgument(`\q`, fmt.Errorf("error parsing regexp: invalid escape sequence: `\\q`")),
+		},
+
+		{
+			jsonpath:    `$[?(@.a=~/\/)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: createErrorInvalidSyntax(1, `unrecognized input`, `[?(@.a=~/\/)]`),
+		},
 	}
 
 	runTestCases(t, "TestFilterRegexErrors", testCases)

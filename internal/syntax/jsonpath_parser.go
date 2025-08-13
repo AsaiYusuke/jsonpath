@@ -456,8 +456,8 @@ func (p *jsonPathParser) pushIndexSubscript(text string) {
 	p._pushIndexSubscript(text, false)
 }
 
-func (p *jsonPathParser) pushOmittedIndexSubscript(text string) {
-	p._pushIndexSubscript(text, true)
+func (p *jsonPathParser) pushOmittedIndexSubscript() {
+	p._pushIndexSubscript(`0`, true)
 }
 
 func (p *jsonPathParser) pushWildcardSubscript() {
