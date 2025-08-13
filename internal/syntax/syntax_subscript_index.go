@@ -8,15 +8,17 @@ type syntaxIndexSubscript struct {
 }
 
 func (i *syntaxIndexSubscript) getIndexes(srcLength int) []int {
-	index := i.number
+	return []int{}
+}
 
-	if index < 0 {
-		index += srcLength
+func (i *syntaxIndexSubscript) getIndex(srcLength int) int {
+	if i.number < -srcLength || i.number >= srcLength {
+		return -1
 	}
 
-	if index < 0 || index >= srcLength {
-		return []int{}
+	if i.number < 0 {
+		return i.number + srcLength
 	}
 
-	return []int{index}
+	return i.number
 }
