@@ -256,22 +256,58 @@ func TestWildcard_ChildErrorArrayMissingMember(t *testing.T) {
 	runTestCase(t, testCase, "TestWildcard_ChildErrorArrayMissingMember")
 }
 
-func TestWildcard_ChildErrorObjectTypeMismatch(t *testing.T) {
+func TestWildcard_ChildErrorMostResolvedObjectTypeMismatch(t *testing.T) {
 	testCase := TestCase{
-		jsonpath:    `$.*.a.b.c`,
+		jsonpath:    `$.*.a.b`,
 		inputJSON:   `{"a":{"b":1},"b":{"a":2}}`,
 		expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestWildcard_ChildErrorObjectTypeMismatch")
+	runTestCase(t, testCase, "TestWildcard_ChildErrorMostResolvedObjectTypeMismatch")
 }
 
-func TestWildcard_ChildErrorArrayTypeMismatch(t *testing.T) {
+func TestWildcard_ChildErrorMostResolvedArrayTypeMismatch(t *testing.T) {
 	testCase := TestCase{
-		jsonpath:    `$.*.a.b.c`,
+		jsonpath:    `$.*.a.b`,
 		inputJSON:   `[{"b":1},{"a":2}]`,
 		expectedErr: createErrorTypeUnmatched(`.b`, `object`, `float64`),
 	}
-	runTestCase(t, testCase, "TestWildcard_ChildErrorArrayTypeMismatch")
+	runTestCase(t, testCase, "TestWildcard_ChildErrorMostResolvedArrayTypeMismatch")
+}
+
+func TestWildcard_ChildErrorNumberTypeMismatch(t *testing.T) {
+	testCase := TestCase{
+		jsonpath:    `$.*`,
+		inputJSON:   `123`,
+		expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `float64`),
+	}
+	runTestCase(t, testCase, "TestWildcard_ChildErrorFloatTypeMismatch")
+}
+
+func TestWildcard_ChildErrorBooleanTypeMismatch(t *testing.T) {
+	testCase := TestCase{
+		jsonpath:    `$.*`,
+		inputJSON:   `true`,
+		expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `bool`),
+	}
+	runTestCase(t, testCase, "TestWildcard_ChildErrorBooleanTypeMismatch")
+}
+
+func TestWildcard_ChildErrorStringTypeMismatch(t *testing.T) {
+	testCase := TestCase{
+		jsonpath:    `$.*`,
+		inputJSON:   `""`,
+		expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `string`),
+	}
+	runTestCase(t, testCase, "TestWildcard_ChildErrorStringTypeMismatch")
+}
+
+func TestWildcard_ChildErrorNilTypeMismatch(t *testing.T) {
+	testCase := TestCase{
+		jsonpath:    `$.*`,
+		inputJSON:   `null`,
+		expectedErr: createErrorTypeUnmatched(`.*`, `object/array`, `null`),
+	}
+	runTestCase(t, testCase, "TestWildcard_ChildErrorNilTypeMismatch")
 }
 
 func TestWildcard_ChildErrorObjectMissingNested(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestRecursiveDescentDeletedCases(t *testing.T) {
+func TestRecursive_BasicCases(t *testing.T) {
 	tests := []TestCase{
 		{
 			jsonpath:     `$..a`,

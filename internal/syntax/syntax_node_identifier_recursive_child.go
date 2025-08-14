@@ -30,7 +30,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 	var deepestError errors.ErrorRuntime
 
-	pooledNodes := getTargetNodes()
+	pooledNodes := getNodeSlice()
 	targetNodes := *pooledNodes
 	targetNodes = append(targetNodes, current)
 
@@ -89,7 +89,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	}
 
 	*pooledNodes = targetNodes
-	putTargetNodes(pooledNodes)
+	putNodeSlice(pooledNodes)
 
 	if len(container.result) > 0 {
 		return nil

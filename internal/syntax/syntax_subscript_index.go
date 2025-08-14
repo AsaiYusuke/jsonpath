@@ -7,8 +7,9 @@ type syntaxIndexSubscript struct {
 	isOmitted bool
 }
 
+// Dummy to satisfy syntaxSubscript; not used in normal paths.
 func (i *syntaxIndexSubscript) getIndexes(srcLength int) []int {
-	return []int{}
+	return nil
 }
 
 func (i *syntaxIndexSubscript) getIndex(srcLength int) int {

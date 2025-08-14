@@ -2,6 +2,8 @@ package tests
 
 import (
 	"testing"
+
+	syntax "github.com/AsaiYusuke/jsonpath/internal/syntax"
 )
 
 func TestRecursiveBasic_ConditionalRecursive(t *testing.T) {
@@ -46,4 +48,46 @@ func TestRecursiveBasic_FilterWithRecursive(t *testing.T) {
 	}
 
 	runTestCases(t, "TestRecursiveBasic_FilterWithRecursive", tests)
+}
+
+func TestRecursiveBasic_RecursiveChildSlicesGrow(t *testing.T) {
+	tests := []TestCase{
+		// Map case 1: number of child elements exceeds the initial capacity 10 (11 elements).
+		{
+			jsonpath:     `$..*`,
+			inputJSON:    `{"1":[],"2":[],"3":[],"4":[],"5":[],"6":[],"7":[],"8":[],"9":[],"10":[],"11":[]}`,
+			expectedJSON: `[[],[],[],[],[],[],[],[],[],[],[]]`,
+			//              1  2  3  4  5  6  7  8  9  10 11
+		},
+		// Map case 2: number of child elements exceeds twice the initial capacity 10 (21 elements).
+		{
+			jsonpath: `$..*`,
+			inputJSON: `{
+							"01":[],"02":[],"03":[],"04":[],"05":[],"06":[],"07":[],"08":[],"09":[],"10":[],
+							"11":[],"12":[],"13":[],"14":[],"15":[],"16":[],"17":[],"18":[],"19":[],"20":[],
+							"21":[]
+						}`,
+			expectedJSON: `[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]`,
+			//              1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21
+		},
+		// Array case 1: number of child elements exceeds the initial capacity 10 (11 elements).
+		{
+			jsonpath:     `$..*`,
+			inputJSON:    `[{},{},{},{},{},{},{},{},{},{},{}]`,
+			expectedJSON: `[{},{},{},{},{},{},{},{},{},{},{}]`,
+			//              1  2  3  4  5  6  7  8  9  10 11
+		},
+		// Array case 2: number of child elements exceeds twice the initial capacity 10 (21 elements).
+		{
+			jsonpath:     `$..*`,
+			inputJSON:    `[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]`,
+			expectedJSON: `[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]`,
+			//              1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21
+		},
+	}
+
+	// Isolate from other tests that may have enlarged the pool
+	runTestCasesSerial(t, "TestRecursiveBasic_RecursiveChildSlicesGrow", tests, func() {
+		syntax.ResetNodeSliceSyncPool()
+	})
 }

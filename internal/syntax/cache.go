@@ -13,7 +13,7 @@ var resultSyncPool = &sync.Pool{
 	New: func() any { return new(bufferContainer) },
 }
 
-var targetNodesPool = &sync.Pool{
+var nodeSliceSyncPool = &sync.Pool{
 	New: func() any {
 		slice := make([]any, 0, 10)
 		return &slice
@@ -73,9 +73,18 @@ func putContainer(container *bufferContainer) {
 	resultSyncPool.Put(container)
 }
 
-func getTargetNodes() *[]any { return targetNodesPool.Get().(*[]any) }
+func getNodeSlice() *[]any { return nodeSliceSyncPool.Get().(*[]any) }
 
-func putTargetNodes(nodes *[]any) {
+func putNodeSlice(nodes *[]any) {
 	*nodes = (*nodes)[:0]
-	targetNodesPool.Put(nodes)
+	nodeSliceSyncPool.Put(nodes)
+}
+
+func ResetNodeSliceSyncPool() {
+	nodeSliceSyncPool = &sync.Pool{
+		New: func() any {
+			slice := make([]any, 0, 10)
+			return &slice
+		},
+	}
 }

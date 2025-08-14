@@ -155,9 +155,24 @@ func TestRetrieve_valueGroupCombination_Filter_qualifier(t *testing.T) {
 				expectedErr: createErrorMemberNotExist(`[?(@.a)]`),
 			},
 			{
-				jsonpath:    `$[?(@.a)][?(@.b)]`,
+				jsonpath:    `$[?(@.a)]`,
 				inputJSON:   `"x"`,
 				expectedErr: createErrorTypeUnmatched(`[?(@.a)]`, `object/array`, `string`),
+			},
+			{
+				jsonpath:    `$[?(@.a)]`,
+				inputJSON:   `123`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.a)]`, `object/array`, `float64`),
+			},
+			{
+				jsonpath:    `$[?(@.a)]`,
+				inputJSON:   `true`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.a)]`, `object/array`, `bool`),
+			},
+			{
+				jsonpath:    `$[?(@.a)]`,
+				inputJSON:   `null`,
+				expectedErr: createErrorTypeUnmatched(`[?(@.a)]`, `object/array`, `null`),
 			},
 		},
 	}

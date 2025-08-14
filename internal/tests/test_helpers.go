@@ -158,6 +158,22 @@ func runTestCases(t *testing.T, testGroupName string, testCases []TestCase) {
 	}
 }
 
+// runTestCasesSerial runs the given test cases sequentially without t.Parallel.
+func runTestCasesSerial(t *testing.T, testGroupName string, testCases []TestCase, init func()) {
+	for i, testCase := range testCases {
+		if _, file, line, ok := runtime.Caller(2); ok {
+			fileLine := fmt.Sprintf(`%s:%d`, file, line)
+			testName := fmt.Sprintf(`%s_case_%d_jsonpath_%s`, testGroupName, i+1, testCase.jsonpath)
+			t.Run(testName, func(t *testing.T) {
+				if init != nil {
+					init()
+				}
+				runTestCase(t, testCase, fileLine)
+			})
+		}
+	}
+}
+
 func runTestGroups(t *testing.T, testGroups TestGroup) {
 	for testGroupName, testCases := range testGroups {
 		runTestCases(t, testGroupName, testCases)
