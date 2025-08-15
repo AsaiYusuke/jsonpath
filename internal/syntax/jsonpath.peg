@@ -205,7 +205,7 @@ basicQuery <-
         if logicalNot, ok := query.(*syntaxLogicalNot); ok {
             query = (*logicalNot).query
         }
-        if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+        if checkQuery, ok := query.(*syntaxCompareQuery); ok {
             leftIsCurrentNode := false
             switch checkQuery.leftParam.(type) {
             case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:

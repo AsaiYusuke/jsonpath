@@ -3,7 +3,7 @@ package syntax
 import "regexp"
 
 type syntaxCompareRegex struct {
-	*syntaxBasicStringTypeValidator
+	*syntaxStringTypeValidator
 
 	regex *regexp.Regexp
 }

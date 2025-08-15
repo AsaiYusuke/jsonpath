@@ -1,9 +1,9 @@
 package syntax
 
-type syntaxBasicStringTypeValidator struct {
+type syntaxStringTypeValidator struct {
 }
 
-func (c *syntaxBasicStringTypeValidator) validate(values []any) bool {
+func (c *syntaxStringTypeValidator) validate(values []any) bool {
 	var foundValue bool
 	for index := range values {
 		switch values[index].(type) {

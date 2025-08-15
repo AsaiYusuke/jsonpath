@@ -2,10 +2,10 @@ package syntax
 
 import "encoding/json"
 
-type syntaxBasicNumericTypeValidator struct {
+type syntaxNumericTypeValidator struct {
 }
 
-func (c *syntaxBasicNumericTypeValidator) validate(values []any) bool {
+func (c *syntaxNumericTypeValidator) validate(values []any) bool {
 	var foundValue bool
 	for index := range values {
 		switch typedValue := values[index].(type) {

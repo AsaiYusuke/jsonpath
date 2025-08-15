@@ -1,12 +1,12 @@
 package syntax
 
-type syntaxBasicCompareQuery struct {
+type syntaxCompareQuery struct {
 	leftParam  syntaxCompareParameter
 	rightParam syntaxCompareParameter
 	comparator syntaxComparator
 }
 
-func (q *syntaxBasicCompareQuery) compute(
+func (q *syntaxCompareQuery) compute(
 	root any, currentList []any) []any {
 
 	leftValues := q.leftParam.compute(root, currentList)

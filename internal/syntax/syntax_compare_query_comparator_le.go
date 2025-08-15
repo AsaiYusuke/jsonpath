@@ -1,16 +1,16 @@
 package syntax
 
-type syntaxCompareGE struct {
-	*syntaxBasicNumericTypeValidator
+type syntaxCompareLE struct {
+	*syntaxNumericTypeValidator
 }
 
-func (c *syntaxCompareGE) comparator(left []any, right any) bool {
+func (c *syntaxCompareLE) comparator(left []any, right any) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {
 			continue
 		}
-		if left[leftIndex].(float64) >= right.(float64) {
+		if left[leftIndex].(float64) <= right.(float64) {
 			hasValue = true
 		} else {
 			left[leftIndex] = emptyEntity

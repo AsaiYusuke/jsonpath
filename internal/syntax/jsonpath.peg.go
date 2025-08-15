@@ -612,7 +612,7 @@ func (p *pegJSONPathParser[_]) Execute() {
 			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
 				query = (*logicalNot).query
 			}
-			if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+			if checkQuery, ok := query.(*syntaxCompareQuery); ok {
 				leftIsCurrentNode := false
 				switch checkQuery.leftParam.(type) {
 				case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
@@ -3289,7 +3289,7 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 		    if logicalNot, ok := query.(*syntaxLogicalNot); ok {
 		        query = (*logicalNot).query
 		    }
-		    if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
+		    if checkQuery, ok := query.(*syntaxCompareQuery); ok {
 		        leftIsCurrentNode := false
 		        switch checkQuery.leftParam.(type) {
 		        case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
