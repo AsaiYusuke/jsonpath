@@ -8,8 +8,8 @@ type syntaxIndexSubscript struct {
 }
 
 // Dummy to satisfy syntaxSubscript; not used in normal paths.
-func (i *syntaxIndexSubscript) getIndexes(srcLength int) []int {
-	return nil
+func (i *syntaxIndexSubscript) forEachIndex(_ int, _ func(_ int)) {
+	// no-op
 }
 
 func (i *syntaxIndexSubscript) getIndex(srcLength int) int {

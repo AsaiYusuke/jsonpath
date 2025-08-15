@@ -14,7 +14,6 @@ func (c *syntaxBasicNumericTypeValidator) validate(values []any) bool {
 		case json.Number:
 			foundValue = true
 			values[index], _ = typedValue.Float64()
-		case struct{}:
 		default:
 			values[index] = emptyEntity
 		}

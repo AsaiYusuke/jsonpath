@@ -9,7 +9,6 @@ func (c *syntaxBasicStringTypeValidator) validate(values []any) bool {
 		switch values[index].(type) {
 		case string:
 			foundValue = true
-		case struct{}:
 		default:
 			values[index] = emptyEntity
 		}

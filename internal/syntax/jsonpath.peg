@@ -206,8 +206,17 @@ basicQuery <-
             query = (*logicalNot).query
         }
         if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-            _, leftIsCurrentNode := checkQuery.leftParam.param.(*syntaxQueryParamCurrentNode)
-            _, rightIsCurrentNode := checkQuery.rightParam.param.(*syntaxQueryParamCurrentNode)
+            leftIsCurrentNode := false
+            switch checkQuery.leftParam.(type) {
+            case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
+                leftIsCurrentNode = true
+            }
+
+            rightIsCurrentNode := false
+            switch checkQuery.rightParam.(type) {
+            case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
+                rightIsCurrentNode = true
+            }
             if leftIsCurrentNode && rightIsCurrentNode {
                 panic(p.syntaxErr(
                     begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
@@ -215,16 +224,12 @@ basicQuery <-
         }
     } /
 
-    (
-        logicNot jsonpathFilter {
-            _ = p.pop()
-            jsonpathFilter := p.pop().(syntaxQuery)
-            p.pushLogicalNot(jsonpathFilter)
-        } /
-        jsonpathFilter {
-            _ = p.pop()
-        }
-    )
+    logicNot jsonpathFilter {
+        jsonpathFilter := p.pop().(syntaxQuery)
+        p.pushLogicalNot(jsonpathFilter)
+    } /
+
+    jsonpathFilter
 
 logicOr  <- space '||' space
 logicAnd <- space '&&' space
@@ -233,46 +238,46 @@ logicNot <- '!' space
 comparator <-
     qParam space (
         '==' space qParam {
-            rightParam := p.pop().(*syntaxBasicCompareParameter)
-            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            rightParam := p.pop().(syntaxCompareParameter)
+            leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareEQ(leftParam, rightParam)
         } /
 
         '!=' space qParam {
-            rightParam := p.pop().(*syntaxBasicCompareParameter)
-            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            rightParam := p.pop().(syntaxCompareParameter)
+            leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareNE(leftParam, rightParam)
         }
     ) /
 
     qNumericParam space (
         '<=' space qNumericParam {
-            rightParam := p.pop().(*syntaxBasicCompareParameter)
-            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            rightParam := p.pop().(syntaxCompareParameter)
+            leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareLE(leftParam, rightParam)
         } /
 
         '<' space qNumericParam {
-            rightParam := p.pop().(*syntaxBasicCompareParameter)
-            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            rightParam := p.pop().(syntaxCompareParameter)
+            leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareLT(leftParam, rightParam)
         } /
 
         '>=' space qNumericParam {
-            rightParam := p.pop().(*syntaxBasicCompareParameter)
-            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            rightParam := p.pop().(syntaxCompareParameter)
+            leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareGE(leftParam, rightParam)
         } /
 
         '>' space qNumericParam {
-            rightParam := p.pop().(*syntaxBasicCompareParameter)
-            leftParam := p.pop().(*syntaxBasicCompareParameter)
+            rightParam := p.pop().(syntaxCompareParameter)
+            leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareGT(leftParam, rightParam)
         }
     ) /
 
     singleJsonpathFilter space '=~' space '/' < regex > '/' {
-        leftParam := p.pop().(*syntaxBasicCompareParameter)
+        leftParam := p.pop().(syntaxCompareParameter)
         p.pushCompareRegex(leftParam, text)
     }
 
@@ -293,15 +298,16 @@ qNumericParam <-
 qLiteral <- lNumber / lBool / lString / lNull
 
 singleJsonpathFilter <-
-    < jsonpathFilter > {
-        isLiteral := p.pop().(bool)
+    < &( rootWithSegment / currentNodeIdentifier ) jsonpathFilter > {
         param := p.pop().(syntaxQueryJSONPathParameter)
         if param.isValueGroupParameter() {
             panic(p.syntaxErr(
                 begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
         }
-        p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
+        p.push(param)
     }
+
+rootWithSegment <- rootIdentifier ( segment / function )
 
 jsonpathFilter <-
     {
@@ -318,10 +324,8 @@ jsonpathFilter <-
         switch checkNode.(type) {
         case *syntaxRootNodeIdentifier:
             p.pushCompareParameterRoot(p.deleteRootNodeIdentifier(node))
-            p.push(true)
         case *syntaxCurrentNodeIdentifier:
             p.pushCompareParameterCurrentNode(p.deleteRootNodeIdentifier(node))
-            p.push(false)
         }
     }
 

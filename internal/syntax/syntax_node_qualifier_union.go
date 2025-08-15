@@ -36,11 +36,11 @@ func (u *syntaxUnionQualifier) retrieve(
 			}
 			continue
 		}
-		for _, index := range subscript.getIndexes(len(srcArray)) {
+		subscript.forEachIndex(len(srcArray), func(index int) {
 			if err := u.retrieveListNext(root, srcArray, index, container); len(container.result) == 0 && err != nil {
 				deepestError = u.getMostResolvedError(err, deepestError)
 			}
-		}
+		})
 	}
 
 	if len(container.result) > 0 {

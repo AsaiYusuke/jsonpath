@@ -9,7 +9,6 @@ func (c *syntaxBasicNilTypeValidator) validate(values []any) bool {
 		switch values[index].(type) {
 		case nil:
 			foundValue = true
-		case struct{}:
 		default:
 			values[index] = emptyEntity
 		}

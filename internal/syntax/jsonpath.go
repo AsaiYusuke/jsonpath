@@ -63,9 +63,7 @@ func Parse(jsonPath string, config ...Config) (f func(src any) ([]any, error), e
 		}
 
 		result := make([]any, len(container.result))
-		for index := range result {
-			result[index] = container.result[index]
-		}
+		copy(result, container.result)
 
 		return result, nil
 

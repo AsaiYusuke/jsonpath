@@ -170,6 +170,11 @@ func TestFilterComparison_RootReferenceErrors(t *testing.T) {
 			inputJSON:   `[{"a":0},{"a":1}]`,
 			expectedErr: createErrorMemberNotExist(`[?($.b >= @.b)]`),
 		},
+		{
+			jsonpath:    `$[?($ >= 1)]`,
+			inputJSON:   `[{"a":0},{"a":1}]`,
+			expectedErr: createErrorInvalidSyntax(1, `unrecognized input`, `[?($ >= 1)]`),
+		},
 	}
 
 	runTestCases(t, "TestFilterComparison_RootReferenceErrors", testCases)

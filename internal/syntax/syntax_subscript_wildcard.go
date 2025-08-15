@@ -4,11 +4,8 @@ type syntaxWildcardSubscript struct {
 	*syntaxBasicSubscript
 }
 
-func (*syntaxWildcardSubscript) getIndexes(srcLength int) []int {
-	result := make([]int, srcLength)
-
+func (*syntaxWildcardSubscript) forEachIndex(srcLength int, handleIndex func(index int)) {
 	for index := range srcLength {
-		result[index] = index
+		handleIndex(index)
 	}
-	return result
 }
