@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/AsaiYusuke/jsonpath"
-	"github.com/AsaiYusuke/jsonpath/errors"
+	"github.com/AsaiYusuke/jsonpath/v2"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
 type TestGroup map[string][]TestCase

@@ -1,6 +1,6 @@
 package syntax
 
-import "github.com/AsaiYusuke/jsonpath/errors"
+import "github.com/AsaiYusuke/jsonpath/v2/errors"
 
 type syntaxBasicNode struct {
 	path                 string

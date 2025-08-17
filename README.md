@@ -1,9 +1,9 @@
 # AsaiYusuke/JSONPath
 
 [![Test](https://github.com/AsaiYusuke/jsonpath/actions/workflows/test.yml/badge.svg)](https://github.com/AsaiYusuke/jsonpath/actions/workflows/test.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AsaiYusuke/jsonpath)](https://goreportcard.com/report/github.com/AsaiYusuke/jsonpath)
+[![Go Report Card](https://goreportcard.com/badge/github.com/AsaiYusuke/jsonpath/v2)](https://goreportcard.com/report/github.com/AsaiYusuke/jsonpath/v2)
 [![Coverage Status](https://coveralls.io/repos/github/AsaiYusuke/jsonpath/badge.svg?branch=main)](https://coveralls.io/github/AsaiYusuke/jsonpath?branch=main)
-[![Go Reference](https://pkg.go.dev/badge/github.com/AsaiYusuke/jsonpath.svg)](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath)
+[![Go Reference](https://pkg.go.dev/badge/github.com/AsaiYusuke/jsonpath/v2.svg)](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2)
 [![Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go#query-language)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -39,7 +39,7 @@ For details on syntax compatibility with other libraries, see [:memo: my compari
 ### Install
 
 ```bash
-go get github.com/AsaiYusuke/jsonpath
+go get github.com/AsaiYusuke/jsonpath/v2
 ```
 
 ### Simple example
@@ -51,7 +51,7 @@ import (
   "encoding/json"
   "fmt"
 
-  "github.com/AsaiYusuke/jsonpath"
+  "github.com/AsaiYusuke/jsonpath/v2"
 )
 
 func main() {
@@ -127,8 +127,8 @@ If an error occurs during API execution, a specific error type is returned. The 
 Type checking makes it easy to determine which error occurred.
 
 ```go
-import jsonpath "github.com/AsaiYusuke/jsonpath"
-import errors "github.com/AsaiYusuke/jsonpath/errors"
+import jsonpath "github.com/AsaiYusuke/jsonpath/v2"
+import errors "github.com/AsaiYusuke/jsonpath/v2/errors"
 
 _, err := jsonpath.Retrieve(jsonPath, srcJSON)
 switch err.(type) {

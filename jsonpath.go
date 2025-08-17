@@ -1,7 +1,7 @@
 package jsonpath
 
 import (
-	"github.com/AsaiYusuke/jsonpath/internal/syntax"
+	"github.com/AsaiYusuke/jsonpath/v2/internal/syntax"
 )
 
 func Retrieve(jsonPath string, src any, config ...Config) ([]any, error) {

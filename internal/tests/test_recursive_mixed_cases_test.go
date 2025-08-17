@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	syntax "github.com/AsaiYusuke/jsonpath/internal/syntax"
+	syntax "github.com/AsaiYusuke/jsonpath/v2/internal/syntax"
 )
 
 func TestRecursiveBasic_ConditionalRecursive(t *testing.T) {
