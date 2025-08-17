@@ -2,6 +2,7 @@ package syntax
 
 import (
 	"reflect"
+	"slices"
 
 	"github.com/AsaiYusuke/jsonpath/errors"
 )
@@ -14,65 +15,81 @@ type syntaxRecursiveChildIdentifier struct {
 }
 
 func (i *syntaxRecursiveChildIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	switch current.(type) {
-	case map[string]interface{}, []interface{}:
+	case map[string]any, []any:
 	default:
-		foundType := msgTypeNull
 		if current != nil {
-			foundType = reflect.TypeOf(current).String()
+			return errors.NewErrorTypeUnmatched(
+				i.path, i.remainingPathLen, msgTypeObjectOrArray, reflect.TypeOf(current).String())
 		}
-		return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObjectOrArray, foundType)
+		return errors.NewErrorTypeUnmatched(
+			i.path, i.remainingPathLen, msgTypeObjectOrArray, msgTypeNull)
 	}
 
 	var deepestError errors.ErrorRuntime
 
-	targetNodes := make([]interface{}, 1, 5)
-	targetNodes[0] = current
+	pooledNodes := getNodeSlice()
+	targetNodes := *pooledNodes
+	targetNodes = append(targetNodes, current)
 
 	for len(targetNodes) > 0 {
 		currentTargetNode := targetNodes[len(targetNodes)-1]
 		targetNodes = targetNodes[:len(targetNodes)-1]
 		switch typedNodes := currentTargetNode.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			if i.nextMapRequired {
-				if err := i.next.retrieve(root, typedNodes, container); err != nil {
-					if len(container.result) == 0 {
-						deepestError = i.getMostResolvedError(err, deepestError)
-					}
+				if err := i.next.retrieve(root, typedNodes, container); len(container.result) == 0 && err != nil {
+					deepestError = i.getMostResolvedError(err, deepestError)
 				}
 			}
 
-			sortKeys := getSortedKeys(typedNodes)
-			for index := len(typedNodes) - 1; index >= 0; index-- {
-				node := typedNodes[(*sortKeys)[index]]
-				switch node.(type) {
-				case map[string]interface{}, []interface{}:
-					targetNodes = append(targetNodes, node)
+			sortKeys, keyLength := getSortedRecursiveKeys(typedNodes)
+			if len(targetNodes)+keyLength > cap(targetNodes) {
+				if cap(targetNodes)*2 > len(targetNodes)+keyLength {
+					targetNodes = slices.Grow(targetNodes, cap(targetNodes)*2)
+				} else {
+					targetNodes = slices.Grow(targetNodes, len(targetNodes)+keyLength)
 				}
+			}
+			oldLength := len(targetNodes)
+			targetNodes = targetNodes[:oldLength+keyLength]
+
+			appendIndex := oldLength
+			for index := keyLength - 1; index >= 0; index-- {
+				targetNodes[appendIndex] = typedNodes[(*sortKeys)[index]]
+				appendIndex++
 			}
 
 			putSortSlice(sortKeys)
 
-		case []interface{}:
+		case []any:
 			if i.nextListRequired {
-				if err := i.next.retrieve(root, typedNodes, container); err != nil {
-					if len(container.result) == 0 {
-						deepestError = i.getMostResolvedError(err, deepestError)
-					}
+				if err := i.next.retrieve(root, typedNodes, container); len(container.result) == 0 && err != nil {
+					deepestError = i.getMostResolvedError(err, deepestError)
+				}
+			}
+
+			if len(targetNodes)+len(typedNodes) > cap(targetNodes) {
+				if cap(targetNodes)*2 > len(targetNodes)+len(typedNodes) {
+					targetNodes = slices.Grow(targetNodes, cap(targetNodes)*2)
+				} else {
+					targetNodes = slices.Grow(targetNodes, len(targetNodes)+len(typedNodes))
 				}
 			}
 
 			for index := len(typedNodes) - 1; index >= 0; index-- {
-				node := typedNodes[index]
-				switch node.(type) {
-				case map[string]interface{}, []interface{}:
-					targetNodes = append(targetNodes, node)
+				switch typedNodes[index].(type) {
+				case map[string]any, []any:
+					targetNodes = append(targetNodes, typedNodes[index])
 				}
 			}
 		}
 	}
+
+	*pooledNodes = targetNodes
+	putNodeSlice(pooledNodes)
 
 	if len(container.result) > 0 {
 		return nil

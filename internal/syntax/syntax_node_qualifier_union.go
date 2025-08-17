@@ -13,27 +13,34 @@ type syntaxUnionQualifier struct {
 }
 
 func (u *syntaxUnionQualifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
-	srcArray, ok := current.([]interface{})
+	srcArray, ok := current.([]any)
 	if !ok {
-		foundType := msgTypeNull
 		if current != nil {
-			foundType = reflect.TypeOf(current).String()
+			return errors.NewErrorTypeUnmatched(
+				u.path, u.remainingPathLen, msgTypeArray, reflect.TypeOf(current).String())
 		}
-		return errors.NewErrorTypeUnmatched(u.path, u.remainingPathLen, msgTypeArray, foundType)
+		return errors.NewErrorTypeUnmatched(
+			u.path, u.remainingPathLen, msgTypeArray, msgTypeNull)
 	}
 
 	var deepestError errors.ErrorRuntime
 
 	for _, subscript := range u.subscripts {
-		for _, index := range subscript.getIndexes(len(srcArray)) {
-			if err := u.retrieveListNext(root, srcArray, index, container); err != nil {
-				if len(container.result) == 0 {
+		if singleIndexProvider, ok := subscript.(syntaxSingleIndexProvider); ok {
+			if index := singleIndexProvider.getIndex(len(srcArray)); index >= 0 {
+				if err := u.retrieveListNext(root, srcArray, index, container); len(container.result) == 0 && err != nil {
 					deepestError = u.getMostResolvedError(err, deepestError)
 				}
 			}
+			continue
 		}
+		subscript.forEachIndex(len(srcArray), func(index int) {
+			if err := u.retrieveListNext(root, srcArray, index, container); len(container.result) == 0 && err != nil {
+				deepestError = u.getMostResolvedError(err, deepestError)
+			}
+		})
 	}
 
 	if len(container.result) > 0 {

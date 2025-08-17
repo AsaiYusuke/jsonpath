@@ -7,7 +7,7 @@ type syntaxCurrentNodeIdentifier struct {
 }
 
 func (i *syntaxCurrentNodeIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	return i.retrieveAnyValueNext(root, current, container)
 }

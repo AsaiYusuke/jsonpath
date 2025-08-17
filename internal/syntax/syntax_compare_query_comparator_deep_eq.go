@@ -1,16 +1,17 @@
 package syntax
 
-type syntaxCompareGE struct {
-	*syntaxBasicNumericTypeValidator
+import "reflect"
+
+type syntaxCompareDeepEQ struct {
 }
 
-func (c *syntaxCompareGE) comparator(left []interface{}, right interface{}) bool {
+func (c *syntaxCompareDeepEQ) comparator(left []any, right any) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {
 			continue
 		}
-		if left[leftIndex].(float64) >= right.(float64) {
+		if reflect.DeepEqual(left[leftIndex], right) {
 			hasValue = true
 		} else {
 			left[leftIndex] = emptyEntity

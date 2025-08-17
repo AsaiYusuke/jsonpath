@@ -8,7 +8,7 @@ import (
 )
 
 func execParserFunc(jsonPath, srcJSON string, b *testing.B) {
-	var src interface{}
+	var src any
 	if err := json.Unmarshal([]byte(srcJSON), &src); err != nil {
 		b.Errorf(`%s`, err)
 		return
@@ -20,7 +20,7 @@ func execParserFunc(jsonPath, srcJSON string, b *testing.B) {
 		return
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		if _, err := parserFunc(src); err != nil {
 			b.Errorf(`%s`, err)
 		}
@@ -148,7 +148,7 @@ func BenchmarkParserFunc_filter_regex(b *testing.B) {
 	execParserFunc(jsonPath, srcJSON, b)
 }
 
-func BenchmarkParserFunc_recursive(b *testing.B) {
+func BenchmarkParserFunc_recursive_name(b *testing.B) {
 	jsonPath := `$..price`
 	srcJSON := `{ "store": {
 		"book": [ 
@@ -178,6 +178,22 @@ func BenchmarkParserFunc_recursive(b *testing.B) {
 		"bicycle": {
 		  "color": "red",
 		  "price": 19.95
+		}
+	  }
+	}`
+
+	execParserFunc(jsonPath, srcJSON, b)
+}
+
+func BenchmarkParserFunc_recursive_index(b *testing.B) {
+	jsonPath := `$..[0]`
+	srcJSON := `{ "store": {
+		"bicycle": {
+		  "gearRatios": [2.1, 2.5, 3.0, 3.5],
+		  "tirePressuresPSI": [60, 65, 70, 75],
+		  "serviceMileageHistoryKm": [500, 1200, 1800, 2500],
+		  "frameSizeOptionsCm": [48, 50, 52, 54],
+		  "wheelDiameterOptionsMm": [622, 630, 635, 584]
 		}
 	  }
 	}`

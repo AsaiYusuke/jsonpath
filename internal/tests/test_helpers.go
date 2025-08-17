@@ -18,11 +18,11 @@ type TestCase struct {
 	inputJSON       string
 	expectedJSON    string
 	expectedErr     error
-	unmarshalFunc   func(string, *interface{}) error
-	filters         map[string]func(interface{}) (interface{}, error)
-	aggregates      map[string]func([]interface{}) (interface{}, error)
+	unmarshalFunc   func(string, *any) error
+	filters         map[string]func(any) (any, error)
+	aggregates      map[string]func([]any) (any, error)
 	accessorMode    bool
-	resultValidator func(interface{}, []interface{}) error
+	resultValidator func(any, []any) error
 }
 
 func createErrorFunctionFailed(functionName string, errorString string) errors.ErrorFunctionFailed {
@@ -53,12 +53,12 @@ func createErrorFunctionNotFound(function string) errors.ErrorFunctionNotFound {
 	return errors.NewErrorFunctionNotFound(function)
 }
 
-func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase, fileLine string) ([]interface{}, error) {
+func execTestRetrieve(t *testing.T, inputJSON any, testCase TestCase, fileLine string) ([]any, error) {
 	jsonPath := testCase.jsonpath
 	hasConfig := false
 	config := jsonpath.Config{}
 	expectedError := testCase.expectedErr
-	var actualObject []interface{}
+	var actualObject []any
 	var err error
 
 	if len(testCase.filters) > 0 {
@@ -103,7 +103,7 @@ func execTestRetrieve(t *testing.T, inputJSON interface{}, testCase TestCase, fi
 
 func runTestCase(t *testing.T, testCase TestCase, fileLine string) {
 	srcJSON := testCase.inputJSON
-	var src interface{}
+	var src any
 	var err error
 
 	if testCase.unmarshalFunc != nil {
@@ -158,6 +158,22 @@ func runTestCases(t *testing.T, testGroupName string, testCases []TestCase) {
 	}
 }
 
+// runTestCasesSerial runs the given test cases sequentially without t.Parallel.
+func runTestCasesSerial(t *testing.T, testGroupName string, testCases []TestCase, init func()) {
+	for i, testCase := range testCases {
+		if _, file, line, ok := runtime.Caller(2); ok {
+			fileLine := fmt.Sprintf(`%s:%d`, file, line)
+			testName := fmt.Sprintf(`%s_case_%d_jsonpath_%s`, testGroupName, i+1, testCase.jsonpath)
+			t.Run(testName, func(t *testing.T) {
+				if init != nil {
+					init()
+				}
+				runTestCase(t, testCase, fileLine)
+			})
+		}
+	}
+}
+
 func runTestGroups(t *testing.T, testGroups TestGroup) {
 	for testGroupName, testCases := range testGroups {
 		runTestCases(t, testGroupName, testCases)
@@ -174,29 +190,29 @@ func runSingleTestCase(t *testing.T, name string, testCase TestCase) {
 	}
 }
 
-var twiceFunc = func(param interface{}) (interface{}, error) {
+var twiceFunc = func(param any) (any, error) {
 	if input, ok := param.(float64); ok {
 		return input * 2, nil
 	}
 	return nil, fmt.Errorf(`type error`)
 }
 
-var quarterFunc = func(param interface{}) (interface{}, error) {
+var quarterFunc = func(param any) (any, error) {
 	if input, ok := param.(float64); ok {
 		return input / 4, nil
 	}
 	return nil, fmt.Errorf(`type error`)
 }
 
-var errAggregateFunc = func(param []interface{}) (interface{}, error) {
+var errAggregateFunc = func(param []any) (any, error) {
 	return nil, fmt.Errorf("aggregate error")
 }
 
-var errFilterFunc = func(param interface{}) (interface{}, error) {
+var errFilterFunc = func(param any) (any, error) {
 	return nil, fmt.Errorf("filter error")
 }
 
-var maxFunc = func(param []interface{}) (interface{}, error) {
+var maxFunc = func(param []any) (any, error) {
 	if len(param) == 0 {
 		return nil, fmt.Errorf("empty array")
 	}
@@ -214,7 +230,7 @@ var maxFunc = func(param []interface{}) (interface{}, error) {
 	return max, nil
 }
 
-var minFunc = func(param []interface{}) (interface{}, error) {
+var minFunc = func(param []any) (any, error) {
 	if len(param) == 0 {
 		return nil, fmt.Errorf("empty array")
 	}
@@ -232,16 +248,16 @@ var minFunc = func(param []interface{}) (interface{}, error) {
 	return min, nil
 }
 
-var echoAggregateFunc = func(param []interface{}) (interface{}, error) {
+var echoAggregateFunc = func(param []any) (any, error) {
 	return param, nil
 }
 
 func createAccessorModeValidator(
 	resultIndex int,
-	expectedValue1, expectedValue2, expectedValue3 interface{},
-	srcGetter func(interface{}) interface{},
-	srcSetter func(interface{}, interface{})) func(interface{}, []interface{}) error {
-	return func(src interface{}, actualObject []interface{}) error {
+	expectedValue1, expectedValue2, expectedValue3 any,
+	srcGetter func(any) any,
+	srcSetter func(any, any)) func(any, []any) error {
+	return func(src any, actualObject []any) error {
 		accessor := actualObject[resultIndex].(jsonpath.Accessor)
 
 		getValue := accessor.Get()
@@ -273,8 +289,8 @@ func createAccessorModeValidator(
 	}
 }
 
-func createGetOnlyValidator(expected interface{}) func(interface{}, []interface{}) error {
-	return func(src interface{}, actualObject []interface{}) error {
+func createGetOnlyValidator(expected any) func(any, []any) error {
+	return func(src any, actualObject []any) error {
 		accessor, ok := actualObject[0].(jsonpath.Accessor)
 		if !ok {
 			return fmt.Errorf("result[0] is not Accessor: %T", actualObject[0])
@@ -290,8 +306,8 @@ func createGetOnlyValidator(expected interface{}) func(interface{}, []interface{
 	}
 }
 
-var sliceStructChangedResultValidator = func(src interface{}, actualObject []interface{}) error {
-	srcArray := src.([]interface{})
+var sliceStructChangedResultValidator = func(src any, actualObject []any) error {
+	srcArray := src.([]any)
 	accessor := actualObject[0].(jsonpath.Accessor)
 
 	accessor.Set(4) // srcArray:[1,4,3] , accessor:[1,4,3]
@@ -327,8 +343,8 @@ var sliceStructChangedResultValidator = func(src interface{}, actualObject []int
 	return nil
 }
 
-var mapStructChangedResultValidator = func(src interface{}, actualObject []interface{}) error {
-	srcMap := src.(map[string]interface{})
+var mapStructChangedResultValidator = func(src any, actualObject []any) error {
+	srcMap := src.(map[string]any)
 	accessor := actualObject[0].(jsonpath.Accessor)
 
 	accessor.Set(2) // srcMap:{"a":2} , accessor:{"a":2}
@@ -351,7 +367,7 @@ var mapStructChangedResultValidator = func(src interface{}, actualObject []inter
 	return nil
 }
 
-func maxAggregate(items []interface{}) (interface{}, error) {
+func maxAggregate(items []any) (any, error) {
 	if len(items) == 0 {
 		return nil, createErrorFunctionFailed("max", "empty array")
 	}
@@ -369,13 +385,13 @@ func maxAggregate(items []interface{}) (interface{}, error) {
 	return max, nil
 }
 
-func twiceFilter(item interface{}) (interface{}, error) {
+func twiceFilter(item any) (any, error) {
 	if val, ok := item.(float64); ok {
 		return val * 2, nil
 	}
 	return nil, createErrorFunctionFailed("twice", "non-numeric value")
 }
 
-func errorFilter(item interface{}) (interface{}, error) {
+func errorFilter(item any) (any, error) {
 	return nil, createErrorFunctionFailed("errFilter", "test error")
 }

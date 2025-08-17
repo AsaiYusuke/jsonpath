@@ -15,10 +15,10 @@ type syntaxChildMultiIdentifier struct {
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	if i.isAllWildcard {
-		if _, ok := current.([]interface{}); ok {
+		if _, ok := current.([]any); ok {
 			// If the "current" variable points to the array structure
 			// and only wildcards are specified for qualifier,
 			// then switch to syntaxUnionQualifier.
@@ -26,19 +26,20 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 		}
 	}
 
-	if srcMap, ok := current.(map[string]interface{}); ok {
+	if srcMap, ok := current.(map[string]any); ok {
 		return i.retrieveMap(root, srcMap, container)
 	}
 
-	foundType := msgTypeNull
 	if current != nil {
-		foundType = reflect.TypeOf(current).String()
+		return errors.NewErrorTypeUnmatched(
+			i.path, i.remainingPathLen, msgTypeObject, reflect.TypeOf(current).String())
 	}
-	return errors.NewErrorTypeUnmatched(i.path, i.remainingPathLen, msgTypeObject, foundType)
+	return errors.NewErrorTypeUnmatched(
+		i.path, i.remainingPathLen, msgTypeObject, msgTypeNull)
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
-	root interface{}, srcMap map[string]interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcMap map[string]any, container *bufferContainer) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 
@@ -49,10 +50,8 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 			}
 		}
 
-		if err := identifier.retrieve(root, srcMap, container); err != nil {
-			if len(container.result) == 0 {
-				deepestError = i.getMostResolvedError(err, deepestError)
-			}
+		if err := identifier.retrieve(root, srcMap, container); len(container.result) == 0 && err != nil {
+			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
 

@@ -10,7 +10,7 @@ import (
 
 func Example() {
 	jsonPath, srcJSON := `$.key`, `{"key":"value"}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, _ := jsonpath.Retrieve(jsonPath, src)
 	outputJSON, _ := json.Marshal(output)
@@ -21,7 +21,7 @@ func Example() {
 
 func ExampleRetrieve() {
 	jsonPath, srcJSON := `$.key`, `{"key":"value"}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -43,7 +43,7 @@ func ExampleParse() {
 		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
 		return
 	}
-	var src1, src2 interface{}
+	var src1, src2 any
 	json.Unmarshal([]byte(srcJSON1), &src1)
 	json.Unmarshal([]byte(srcJSON2), &src2)
 	output1, err := jsonPathParser(src1)
@@ -67,7 +67,7 @@ func ExampleParse() {
 
 func ExampleErrorInvalidSyntax() {
 	jsonPath, srcJSON := `$.`, `{}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -82,7 +82,7 @@ func ExampleErrorInvalidSyntax() {
 
 func ExampleErrorInvalidArgument() {
 	jsonPath, srcJSON := `$[?(1.0.0>0)]`, `{}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -97,7 +97,7 @@ func ExampleErrorInvalidArgument() {
 
 func ExampleErrorFunctionNotFound() {
 	jsonPath, srcJSON := `$.unknown()`, `{}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -112,7 +112,7 @@ func ExampleErrorFunctionNotFound() {
 
 func ExampleErrorNotSupported() {
 	jsonPath, srcJSON := `$[(command)]`, `{}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -127,7 +127,7 @@ func ExampleErrorNotSupported() {
 
 func ExampleErrorMemberNotExist() {
 	jsonPath, srcJSON := `$.none`, `{}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -142,7 +142,7 @@ func ExampleErrorMemberNotExist() {
 
 func ExampleErrorTypeUnmatched() {
 	jsonPath, srcJSON := `$.a`, `[]`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
@@ -157,11 +157,11 @@ func ExampleErrorTypeUnmatched() {
 
 func ExampleErrorFunctionFailed() {
 	config := jsonpath.Config{}
-	config.SetFilterFunction(`invalid`, func(param interface{}) (interface{}, error) {
+	config.SetFilterFunction(`invalid`, func(param any) (any, error) {
 		return nil, fmt.Errorf(`invalid function executed`)
 	})
 	jsonPath, srcJSON := `$.invalid()`, `{}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
 	if err != nil {
@@ -176,14 +176,14 @@ func ExampleErrorFunctionFailed() {
 
 func ExampleConfig_SetFilterFunction() {
 	config := jsonpath.Config{}
-	config.SetFilterFunction(`twice`, func(param interface{}) (interface{}, error) {
+	config.SetFilterFunction(`twice`, func(param any) (any, error) {
 		if floatParam, ok := param.(float64); ok {
 			return floatParam * 2, nil
 		}
 		return nil, fmt.Errorf(`type error`)
 	})
 	jsonPath, srcJSON := `$[*].twice()`, `[1,3]`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
 	if err != nil {
@@ -198,7 +198,7 @@ func ExampleConfig_SetFilterFunction() {
 
 func ExampleConfig_SetAggregateFunction() {
 	config := jsonpath.Config{}
-	config.SetAggregateFunction(`max`, func(params []interface{}) (interface{}, error) {
+	config.SetAggregateFunction(`max`, func(params []any) (any, error) {
 		var result float64
 		for _, param := range params {
 			if floatParam, ok := param.(float64); ok {
@@ -212,7 +212,7 @@ func ExampleConfig_SetAggregateFunction() {
 		return result, nil
 	})
 	jsonPath, srcJSON := `$[*].max()`, `[1,3]`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
 	if err != nil {
@@ -229,7 +229,7 @@ func ExampleConfig_SetAccessorMode() {
 	config := jsonpath.Config{}
 	config.SetAccessorMode()
 	jsonPath, srcJSON := `$.a`, `{"a":1,"b":0}`
-	var src interface{}
+	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
 	if err != nil {
@@ -237,7 +237,7 @@ func ExampleConfig_SetAccessorMode() {
 		return
 	}
 	accessor := output[0].(jsonpath.Accessor)
-	srcMap := src.(map[string]interface{})
+	srcMap := src.(map[string]any)
 
 	fmt.Printf("Get : %v\n", accessor.Get())
 

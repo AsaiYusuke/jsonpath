@@ -1,5 +1,5 @@
 package syntax
 
-type syntaxQuery interface {
+type syntaxCompareParameter interface {
 	compute(root any, currentList []any) []any
 }

@@ -9,7 +9,7 @@ func TestAggregateFunction_MaxFunction(t *testing.T) {
 		jsonpath:     `$.*.max()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
 		expectedJSON: `[123.456]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -21,7 +21,7 @@ func TestAggregateFunction_FilterMaxInCondition(t *testing.T) {
 		jsonpath:     `$[?(@.max())]`,
 		inputJSON:    `[122.345,123.45,123.456]`,
 		expectedJSON: `[122.345,123.45,123.456]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -33,7 +33,7 @@ func TestAggregateFunction_FilterMaxEqualComparison(t *testing.T) {
 		jsonpath:     `$[?(@.max() == 123.45)]`,
 		inputJSON:    `[122.345,123.45,123.456]`,
 		expectedJSON: `[123.45]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -45,7 +45,7 @@ func TestAggregateFunction_FilterMaxNotEqualComparison(t *testing.T) {
 		jsonpath:     `$[?(123.45 != @.max())]`,
 		inputJSON:    `[122.345,123.45,123.456]`,
 		expectedJSON: `[122.345,123.456]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -57,7 +57,7 @@ func TestAggregateFunction_FilterMaxArrayComparison(t *testing.T) {
 		jsonpath:     `$[?(@.max() != 123.45)]`,
 		inputJSON:    `[[122.345,123.45,123.456],[122.345,123.45]]`,
 		expectedJSON: `[[122.345,123.45,123.456]]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -69,7 +69,7 @@ func TestAggregateFunction_FilterMaxCrossArrayComparison(t *testing.T) {
 		jsonpath:     `$[?(@.max() == $[1].max())]`,
 		inputJSON:    `[[122.345,123.45,123.456],[122.345,123.45]]`,
 		expectedJSON: `[[122.345,123.45]]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -81,10 +81,10 @@ func TestAggregateFunction_FilterMixMaxTwice(t *testing.T) {
 		jsonpath:     `$.*.max().twice()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
 		expectedJSON: `[246.912]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`twice`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -96,10 +96,10 @@ func TestAggregateFunction_FilterMixTwiceMax(t *testing.T) {
 		jsonpath:     `$.*.twice().max()`,
 		inputJSON:    `[122.345,123.45,123.456]`,
 		expectedJSON: `[246.912]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`twice`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 	}
@@ -110,7 +110,7 @@ func TestAggregateFunction_FilterErrorSimple(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
@@ -122,7 +122,7 @@ func TestAggregateFunction_FilterErrorWildcard(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
@@ -134,10 +134,10 @@ func TestAggregateFunction_FilterErrorAfterMax(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
@@ -149,7 +149,7 @@ func TestAggregateFunction_FilterErrorAfterTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.twice().errFilter()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 			`twice`:     twiceFunc,
 		},
@@ -162,7 +162,7 @@ func TestAggregateFunction_FilterErrorBeforeTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errFilter().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 			`twice`:     twiceFunc,
 		},
@@ -175,11 +175,11 @@ func TestAggregateFunction_FilterErrorComplexChain(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errFilter().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 			`twice`:     twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errFilter()`, `filter error`),
@@ -191,7 +191,7 @@ func TestAggregateFunction_ErrorSimple(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errAggregate()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
@@ -203,7 +203,7 @@ func TestAggregateFunction_ErrorAfterMax(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errAggregate()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 			`max`:          maxFunc,
 		},
@@ -216,10 +216,10 @@ func TestAggregateFunction_ErrorAfterTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.twice().errAggregate()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`twice`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
@@ -231,10 +231,10 @@ func TestAggregateFunction_ErrorBeforeTwice(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.errAggregate().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`twice`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorFunctionFailed(`.errAggregate()`, `aggregate error`),
@@ -246,10 +246,10 @@ func TestAggregateFunction_ErrorComplexChain(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.max().errAggregate().twice()`,
 		inputJSON: `[122.345,123.45,123.456]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`twice`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 			`max`:          maxFunc,
 		},
@@ -262,7 +262,7 @@ func TestAggregateFunction_MissingMember(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.a.max()`,
 		inputJSON: `{}`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`max`: maxFunc,
 		},
 		expectedErr: createErrorMemberNotExist(`.a`),
@@ -274,7 +274,7 @@ func TestAggregateFunction_MissingMember_with_path(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.x.*.errAggregate()`,
 		inputJSON: `{"a":[122.345,123.45,123.456]}`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorMemberNotExist(`.x`),
@@ -286,7 +286,7 @@ func TestAggregateFunction_FilterErrornested_path(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errFilter()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: errFilterFunc,
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
@@ -298,7 +298,7 @@ func TestAggregateFunction_FilterErrormultiple_filters(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errFilter1().errFilter2()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter1`: errFilterFunc,
 			`errFilter2`: errFilterFunc,
 		},
@@ -311,7 +311,7 @@ func TestAggregateFunction_FilterErrorNestedAggregate(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errAggregate()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
@@ -323,7 +323,7 @@ func TestAggregateFunction_FilterErrorMultipleAggregates(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errAggregate1().errAggregate2()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate1`: errAggregateFunc,
 			`errAggregate2`: errAggregateFunc,
 		},
@@ -336,10 +336,10 @@ func TestAggregateFunction_FilterErrorMixedAggregateFilter(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errAggregate().errFilter()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
@@ -351,10 +351,10 @@ func TestAggregateFunction_FilterErrorMixedFilterAggregate(t *testing.T) {
 	testCase := TestCase{
 		jsonpath:  `$.*.a.b.c.errFilter().errAggregate()`,
 		inputJSON: `[{"a":{"b":1}},{"a":2}]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`errFilter`: twiceFunc,
 		},
-		aggregates: map[string]func([]interface{}) (interface{}, error){
+		aggregates: map[string]func([]any) (any, error){
 			`errAggregate`: errAggregateFunc,
 		},
 		expectedErr: createErrorTypeUnmatched(`.c`, `object`, `float64`),
@@ -367,7 +367,7 @@ func TestAggregateFunction_FunctionSyntaxUppercaseName(t *testing.T) {
 		jsonpath:     `$.*.TWICE()`,
 		inputJSON:    `[123.456,256]`,
 		expectedJSON: `[246.912,512]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`TWICE`: twiceFunc,
 		},
 	}
@@ -379,7 +379,7 @@ func TestAggregateFunction_FunctionSyntaxNumericName(t *testing.T) {
 		jsonpath:     `$.*.123()`,
 		inputJSON:    `[123.456,256]`,
 		expectedJSON: `[246.912,512]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`123`: twiceFunc,
 		},
 	}
@@ -391,7 +391,7 @@ func TestAggregateFunction_FunctionSyntaxDashName(t *testing.T) {
 		jsonpath:     `$.*.--()`,
 		inputJSON:    `[123.456,256]`,
 		expectedJSON: `[246.912,512]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`--`: twiceFunc,
 		},
 	}
@@ -403,7 +403,7 @@ func TestAggregateFunction_FunctionSyntaxUnderscoreName(t *testing.T) {
 		jsonpath:     `$.*.__()`,
 		inputJSON:    `[123.456,256]`,
 		expectedJSON: `[246.912,512]`,
-		filters: map[string]func(interface{}) (interface{}, error){
+		filters: map[string]func(any) (any, error){
 			`__`: twiceFunc,
 		},
 	}
@@ -416,7 +416,7 @@ func TestAggregateFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.max().max()`,
 			inputJSON:    `[122.345,123.45,123.456]`,
 			expectedJSON: `[123.456]`,
-			aggregates: map[string]func([]interface{}) (interface{}, error){
+			aggregates: map[string]func([]any) (any, error){
 				`max`: maxFunc,
 			},
 		},
@@ -424,7 +424,7 @@ func TestAggregateFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.max().min()`,
 			inputJSON:    `[122.345,123.45,123.456]`,
 			expectedJSON: `[123.456]`,
-			aggregates: map[string]func([]interface{}) (interface{}, error){
+			aggregates: map[string]func([]any) (any, error){
 				`max`: maxFunc,
 				`min`: minFunc,
 			},
@@ -433,7 +433,7 @@ func TestAggregateFunction_ChainedOperations(t *testing.T) {
 			jsonpath:     `$.*.min().max()`,
 			inputJSON:    `[122.345,123.45,123.456]`,
 			expectedJSON: `[122.345]`,
-			aggregates: map[string]func([]interface{}) (interface{}, error){
+			aggregates: map[string]func([]any) (any, error){
 				`max`: maxFunc,
 				`min`: minFunc,
 			},

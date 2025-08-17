@@ -45,6 +45,7 @@ func TestPegParserExecuteFunctions(t *testing.T) {
 
 	memoizeFunc := DisableMemoize[uint32]()
 	memoizeFunc(&parser)
+	parser.Parse(1)
 
 	os.Stdout = stdoutBackup
 }

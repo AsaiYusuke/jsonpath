@@ -1,6 +1,6 @@
 package syntax
 
 type syntaxSubscript interface {
-	getIndexes(srcLength int) []int
+	forEachIndex(srcLength int, handleIndex func(index int))
 	isValueGroup() bool
 }

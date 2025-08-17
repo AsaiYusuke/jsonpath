@@ -35,7 +35,9 @@ const (
 	rulefunction
 	rulefunctionName
 	rulememberNameShorthand
+	rulenameChars
 	rulesignsWithoutHyphenUnderscore
+	rulecontrolCodeChars
 	ruleselectors
 	ruleobjectElementSelectors
 	ruleobjectElementSelector
@@ -45,6 +47,7 @@ const (
 	rulearrayElementSelector
 	rulearraySliceSelector
 	ruleanyIndex
+	ruleomittedIndex
 	ruleindexSelector
 	ruleindexNumber
 	rulesep
@@ -63,6 +66,7 @@ const (
 	ruleqNumericParam
 	ruleqLiteral
 	rulesingleJsonpathFilter
+	rulerootWithSegment
 	rulejsonpathFilter
 	rulelNumber
 	rulelBool
@@ -126,7 +130,6 @@ const (
 	ruleAction42
 	ruleAction43
 	ruleAction44
-	ruleAction45
 )
 
 var rul3s = [...]string{
@@ -148,7 +151,9 @@ var rul3s = [...]string{
 	"function",
 	"functionName",
 	"memberNameShorthand",
+	"nameChars",
 	"signsWithoutHyphenUnderscore",
+	"controlCodeChars",
 	"selectors",
 	"objectElementSelectors",
 	"objectElementSelector",
@@ -158,6 +163,7 @@ var rul3s = [...]string{
 	"arrayElementSelector",
 	"arraySliceSelector",
 	"anyIndex",
+	"omittedIndex",
 	"indexSelector",
 	"indexNumber",
 	"sep",
@@ -176,6 +182,7 @@ var rul3s = [...]string{
 	"qNumericParam",
 	"qLiteral",
 	"singleJsonpathFilter",
+	"rootWithSegment",
 	"jsonpathFilter",
 	"lNumber",
 	"lBool",
@@ -239,7 +246,6 @@ var rul3s = [...]string{
 	"Action42",
 	"Action43",
 	"Action44",
-	"Action45",
 }
 
 type Uint interface {
@@ -364,7 +370,7 @@ type pegJSONPathParser[U Uint] struct {
 
 	Buffer         string
 	buffer         []rune
-	rules          [110]func() bool
+	rules          [113]func() bool
 	parse          func(rule ...int) error
 	reset          func()
 	Pretty         bool
@@ -564,49 +570,41 @@ func (p *pegJSONPathParser[_]) Execute() {
 
 		case ruleAction17:
 
-			p.pushIndexSubscript(text)
+			p.pushWildcardSubscript()
 
 		case ruleAction18:
 
-			p.pushWildcardSubscript()
+			p.pushUnionQualifier(p.pop().(syntaxSubscript))
 
 		case ruleAction19:
 
-			p.pushUnionQualifier(p.pop().(syntaxSubscript))
+			p.pushOmittedIndexSubscript()
 
 		case ruleAction20:
 
-			p.pushIndexSubscript(`1`)
+			p.pushIndexSubscript(text)
 
 		case ruleAction21:
 
-			if len(text) > 0 {
-				p.pushIndexSubscript(text)
-			} else {
-				p.pushOmittedIndexSubscript(`0`)
-			}
+			p.pushScriptQualifier(text)
 
 		case ruleAction22:
 
-			p.pushScriptQualifier(text)
-
-		case ruleAction23:
-
 			p.pushFilterQualifier(p.pop().(syntaxQuery))
 
-		case ruleAction24:
+		case ruleAction23:
 
 			rightQuery := p.pop().(syntaxQuery)
 			leftQuery := p.pop().(syntaxQuery)
 			p.pushLogicalOr(leftQuery, rightQuery)
 
-		case ruleAction25:
+		case ruleAction24:
 
 			rightQuery := p.pop().(syntaxQuery)
 			leftQuery := p.pop().(syntaxQuery)
 			p.pushLogicalAnd(leftQuery, rightQuery)
 
-		case ruleAction26:
+		case ruleAction25:
 
 			query := p.pop()
 			p.push(query)
@@ -614,66 +612,73 @@ func (p *pegJSONPathParser[_]) Execute() {
 			if logicalNot, ok := query.(*syntaxLogicalNot); ok {
 				query = (*logicalNot).query
 			}
-			if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-				_, leftIsCurrentNode := checkQuery.leftParam.param.(*syntaxQueryParamCurrentNode)
-				_, rightIsCurrentNode := checkQuery.rightParam.param.(*syntaxQueryParamCurrentNode)
+			if checkQuery, ok := query.(*syntaxCompareQuery); ok {
+				leftIsCurrentNode := false
+				switch checkQuery.leftParam.(type) {
+				case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
+					leftIsCurrentNode = true
+				}
+
+				rightIsCurrentNode := false
+				switch checkQuery.rightParam.(type) {
+				case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
+					rightIsCurrentNode = true
+				}
 				if leftIsCurrentNode && rightIsCurrentNode {
 					panic(p.syntaxErr(
 						begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
 				}
 			}
 
+		case ruleAction26:
+
+			jsonpathFilter := p.pop().(syntaxQuery)
+			p.pushLogicalNot(jsonpathFilter)
+
 		case ruleAction27:
 
-			_ = p.pop()
-			jsonpathFilter := p.pop().(syntaxQuery)
-
-			if text[0:1] == `!` {
-				p.pushLogicalNot(jsonpathFilter)
-			} else {
-				p.push(jsonpathFilter)
-			}
+			rightParam := p.pop().(syntaxCompareParameter)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareEQ(leftParam, rightParam)
 
 		case ruleAction28:
 
-			rightParam := p.pop().(*syntaxBasicCompareParameter)
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareEQ(leftParam, rightParam)
+			rightParam := p.pop().(syntaxCompareParameter)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareNE(leftParam, rightParam)
 
 		case ruleAction29:
 
-			rightParam := p.pop().(*syntaxBasicCompareParameter)
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareNE(leftParam, rightParam)
+			rightParam := p.pop().(syntaxCompareParameter)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareLE(leftParam, rightParam)
 
 		case ruleAction30:
 
-			rightParam := p.pop().(*syntaxBasicCompareParameter)
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareLE(leftParam, rightParam)
+			rightParam := p.pop().(syntaxCompareParameter)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareLT(leftParam, rightParam)
 
 		case ruleAction31:
 
-			rightParam := p.pop().(*syntaxBasicCompareParameter)
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareLT(leftParam, rightParam)
+			rightParam := p.pop().(syntaxCompareParameter)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareGE(leftParam, rightParam)
 
 		case ruleAction32:
 
-			rightParam := p.pop().(*syntaxBasicCompareParameter)
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareGE(leftParam, rightParam)
+			rightParam := p.pop().(syntaxCompareParameter)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareGT(leftParam, rightParam)
 
 		case ruleAction33:
 
-			rightParam := p.pop().(*syntaxBasicCompareParameter)
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareGT(leftParam, rightParam)
+			leftParam := p.pop().(syntaxCompareParameter)
+			p.pushCompareRegex(leftParam, text)
 
 		case ruleAction34:
 
-			leftParam := p.pop().(*syntaxBasicCompareParameter)
-			p.pushCompareRegex(leftParam, text)
+			p.pushCompareParameterLiteral(p.pop())
 
 		case ruleAction35:
 
@@ -681,23 +686,18 @@ func (p *pegJSONPathParser[_]) Execute() {
 
 		case ruleAction36:
 
-			p.pushCompareParameterLiteral(p.pop())
-
-		case ruleAction37:
-
-			isLiteral := p.pop().(bool)
 			param := p.pop().(syntaxQueryJSONPathParameter)
 			if param.isValueGroupParameter() {
 				panic(p.syntaxErr(
 					begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
 			}
-			p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
+			p.push(param)
 
-		case ruleAction38:
+		case ruleAction37:
 
 			p.saveParams()
 
-		case ruleAction39:
+		case ruleAction38:
 
 			p.loadParams()
 
@@ -710,33 +710,31 @@ func (p *pegJSONPathParser[_]) Execute() {
 			switch checkNode.(type) {
 			case *syntaxRootNodeIdentifier:
 				p.pushCompareParameterRoot(p.deleteRootNodeIdentifier(node))
-				p.push(true)
 			case *syntaxCurrentNodeIdentifier:
 				p.pushCompareParameterCurrentNode(p.deleteRootNodeIdentifier(node))
-				p.push(false)
 			}
 
-		case ruleAction40:
+		case ruleAction39:
 
 			p.push(p.toFloat(text))
 
-		case ruleAction41:
+		case ruleAction40:
 
 			p.push(true)
 
-		case ruleAction42:
+		case ruleAction41:
 
 			p.push(false)
 
-		case ruleAction43:
+		case ruleAction42:
 
 			p.push(p.unescapeSingleQuotedString(text))
 
-		case ruleAction44:
+		case ruleAction43:
 
 			p.push(p.unescapeDoubleQuotedString(text))
 
-		case ruleAction45:
+		case ruleAction44:
 
 			p.push(nil)
 
@@ -990,25 +988,13 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 					}
 					{
 						position24, tokenIndex24 := position, tokenIndex
-						if !_rules[rulebracketedSelection]() {
+						if !_rules[rulesegment]() {
 							goto l25
 						}
 						goto l24
 					l25:
 						position, tokenIndex = position24, tokenIndex24
 						if !_rules[rulememberNameShorthand]() {
-							goto l26
-						}
-						goto l24
-					l26:
-						position, tokenIndex = position24, tokenIndex24
-						if !_rules[ruledescendantSegment]() {
-							goto l27
-						}
-						goto l24
-					l27:
-						position, tokenIndex = position24, tokenIndex24
-						if !_rules[rulechildSegment]() {
 							goto l20
 						}
 					}
@@ -1032,31 +1018,53 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 			if memoized, ok := memoization[memoKey[U]{5, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position29, tokenIndex29 := position, tokenIndex
+			position27, tokenIndex27 := position, tokenIndex
 			{
-				position30 := position
+				position28 := position
 				if buffer[position] != '$' {
-					goto l29
+					goto l27
 				}
 				position++
 				{
 					add(ruleAction2, position)
 				}
-				add(rulerootIdentifier, position30)
+				add(rulerootIdentifier, position28)
 			}
-			memoize(5, position29, tokenIndex29, true)
+			memoize(5, position27, tokenIndex27, true)
 			return true
-		l29:
-			memoize(5, position29, tokenIndex29, false)
-			position, tokenIndex = position29, tokenIndex29
+		l27:
+			memoize(5, position27, tokenIndex27, false)
+			position, tokenIndex = position27, tokenIndex27
 			return false
 		},
-		/* 6 rootlessNode <- <(Action3 (bracketedSelection / memberNameShorthand / descendantSegment / childSegment))> */
+		/* 6 rootlessNode <- <(Action3 (segment / memberNameShorthand))> */
 		nil,
 		/* 7 parameterRootNode <- <(rootIdentifier / currentNodeIdentifier)> */
 		nil,
 		/* 8 currentNodeIdentifier <- <('@' Action4)> */
-		nil,
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{8, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position32, tokenIndex32 := position, tokenIndex
+			{
+				position33 := position
+				if buffer[position] != '@' {
+					goto l32
+				}
+				position++
+				{
+					add(ruleAction4, position)
+				}
+				add(rulecurrentNodeIdentifier, position33)
+			}
+			memoize(8, position32, tokenIndex32, true)
+			return true
+		l32:
+			memoize(8, position32, tokenIndex32, false)
+			position, tokenIndex = position32, tokenIndex32
+			return false
+		},
 		/* 9 segments <- <(segment* function* space Action5)> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{9, position}]; ok {
@@ -1068,110 +1076,22 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 			l37:
 				{
 					position38, tokenIndex38 := position, tokenIndex
-					{
-						position39 := position
-						{
-							position40, tokenIndex40 := position, tokenIndex
-							if !_rules[ruledescendantSegment]() {
-								goto l41
-							}
-							goto l40
-						l41:
-							position, tokenIndex = position40, tokenIndex40
-							if !_rules[rulechildSegment]() {
-								goto l38
-							}
-						}
-					l40:
-						add(rulesegment, position39)
+					if !_rules[rulesegment]() {
+						goto l38
 					}
 					goto l37
 				l38:
 					position, tokenIndex = position38, tokenIndex38
 				}
-			l42:
+			l39:
 				{
-					position43, tokenIndex43 := position, tokenIndex
-					{
-						position44 := position
-						{
-							position45 := position
-							if buffer[position] != '.' {
-								goto l43
-							}
-							position++
-							{
-								position46 := position
-								{
-									position47 := position
-									{
-										switch buffer[position] {
-										case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-											position++
-										case 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
-											position++
-										case '_':
-											position++
-										case '-':
-											position++
-										default:
-											if c := buffer[position]; c < 'a' || c > 'z' {
-												goto l43
-											}
-											position++
-										}
-									}
-
-								l48:
-									{
-										position49, tokenIndex49 := position, tokenIndex
-										{
-											switch buffer[position] {
-											case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-												position++
-											case 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
-												position++
-											case '_':
-												position++
-											case '-':
-												position++
-											default:
-												if c := buffer[position]; c < 'a' || c > 'z' {
-													goto l49
-												}
-												position++
-											}
-										}
-
-										goto l48
-									l49:
-										position, tokenIndex = position49, tokenIndex49
-									}
-									add(rulePegText, position47)
-								}
-								{
-									add(ruleAction10, position)
-								}
-								add(rulefunctionName, position46)
-							}
-							if buffer[position] != '(' {
-								goto l43
-							}
-							position++
-							if buffer[position] != ')' {
-								goto l43
-							}
-							position++
-							add(rulePegText, position45)
-						}
-						{
-							add(ruleAction9, position)
-						}
-						add(rulefunction, position44)
+					position40, tokenIndex40 := position, tokenIndex
+					if !_rules[rulefunction]() {
+						goto l40
 					}
-					goto l42
-				l43:
-					position, tokenIndex = position43, tokenIndex43
+					goto l39
+				l40:
+					position, tokenIndex = position40, tokenIndex40
 				}
 				_rules[rulespace]()
 				{
@@ -1183,370 +1103,433 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 			return true
 		},
 		/* 10 segment <- <(descendantSegment / childSegment)> */
-		nil,
-		/* 11 descendantSegment <- <('.' '.' (bracketedSelection / memberNameShorthand) Action6)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{11, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{10, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position56, tokenIndex56 := position, tokenIndex
+			position42, tokenIndex42 := position, tokenIndex
 			{
-				position57 := position
-				if buffer[position] != '.' {
-					goto l56
-				}
-				position++
-				if buffer[position] != '.' {
-					goto l56
-				}
-				position++
+				position43 := position
 				{
-					position58, tokenIndex58 := position, tokenIndex
-					if !_rules[rulebracketedSelection]() {
-						goto l59
-					}
-					goto l58
-				l59:
-					position, tokenIndex = position58, tokenIndex58
-					if !_rules[rulememberNameShorthand]() {
-						goto l56
-					}
-				}
-			l58:
-				{
-					add(ruleAction6, position)
-				}
-				add(ruledescendantSegment, position57)
-			}
-			memoize(11, position56, tokenIndex56, true)
-			return true
-		l56:
-			memoize(11, position56, tokenIndex56, false)
-			position, tokenIndex = position56, tokenIndex56
-			return false
-		},
-		/* 12 childSegment <- <((<('.' memberNameShorthand)> Action7) / bracketedSelection)> */
-		func() bool {
-			if memoized, ok := memoization[memoKey[U]{12, position}]; ok {
-				return memoizedResult(memoized)
-			}
-			position61, tokenIndex61 := position, tokenIndex
-			{
-				position62 := position
-				{
-					position63, tokenIndex63 := position, tokenIndex
+					position44, tokenIndex44 := position, tokenIndex
 					{
-						position65 := position
+						position46 := position
 						if buffer[position] != '.' {
-							goto l64
+							goto l45
 						}
 						position++
-						if !_rules[rulememberNameShorthand]() {
-							goto l64
+						if buffer[position] != '.' {
+							goto l45
 						}
-						add(rulePegText, position65)
+						position++
+						{
+							position47, tokenIndex47 := position, tokenIndex
+							if !_rules[rulebracketedSelection]() {
+								goto l48
+							}
+							goto l47
+						l48:
+							position, tokenIndex = position47, tokenIndex47
+							if !_rules[rulememberNameShorthand]() {
+								goto l45
+							}
+						}
+					l47:
+						{
+							add(ruleAction6, position)
+						}
+						add(ruledescendantSegment, position46)
 					}
+					goto l44
+				l45:
+					position, tokenIndex = position44, tokenIndex44
 					{
-						add(ruleAction7, position)
-					}
-					goto l63
-				l64:
-					position, tokenIndex = position63, tokenIndex63
-					if !_rules[rulebracketedSelection]() {
-						goto l61
+						position50 := position
+						{
+							position51, tokenIndex51 := position, tokenIndex
+							{
+								position53 := position
+								if buffer[position] != '.' {
+									goto l52
+								}
+								position++
+								if !_rules[rulememberNameShorthand]() {
+									goto l52
+								}
+								add(rulePegText, position53)
+							}
+							{
+								add(ruleAction7, position)
+							}
+							goto l51
+						l52:
+							position, tokenIndex = position51, tokenIndex51
+							if !_rules[rulebracketedSelection]() {
+								goto l42
+							}
+						}
+					l51:
+						add(rulechildSegment, position50)
 					}
 				}
-			l63:
-				add(rulechildSegment, position62)
+			l44:
+				add(rulesegment, position43)
 			}
-			memoize(12, position61, tokenIndex61, true)
+			memoize(10, position42, tokenIndex42, true)
 			return true
-		l61:
-			memoize(12, position61, tokenIndex61, false)
-			position, tokenIndex = position61, tokenIndex61
+		l42:
+			memoize(10, position42, tokenIndex42, false)
+			position, tokenIndex = position42, tokenIndex42
 			return false
 		},
+		/* 11 descendantSegment <- <('.' '.' (bracketedSelection / memberNameShorthand) Action6)> */
+		nil,
+		/* 12 childSegment <- <((<('.' memberNameShorthand)> Action7) / bracketedSelection)> */
+		nil,
 		/* 13 bracketedSelection <- <(<(squareBracketStart selectors squareBracketEnd)> Action8)> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{13, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position67, tokenIndex67 := position, tokenIndex
+			position57, tokenIndex57 := position, tokenIndex
 			{
-				position68 := position
+				position58 := position
 				{
-					position69 := position
+					position59 := position
 					{
-						position70 := position
+						position60 := position
 						if buffer[position] != '[' {
-							goto l67
+							goto l57
 						}
 						position++
 						_rules[rulespace]()
-						add(rulesquareBracketStart, position70)
+						add(rulesquareBracketStart, position60)
 					}
 					{
-						position71 := position
+						position61 := position
 						{
-							position72, tokenIndex72 := position, tokenIndex
+							position62, tokenIndex62 := position, tokenIndex
 							{
-								position74 := position
+								position64 := position
 								if !_rules[ruleobjectElementSelector]() {
-									goto l73
+									goto l63
 								}
-							l75:
+							l65:
 								{
-									position76, tokenIndex76 := position, tokenIndex
+									position66, tokenIndex66 := position, tokenIndex
 									if !_rules[rulesep]() {
-										goto l76
+										goto l66
 									}
 									if !_rules[ruleobjectElementSelector]() {
-										goto l76
+										goto l66
 									}
 									{
 										add(ruleAction12, position)
 									}
-									goto l75
-								l76:
-									position, tokenIndex = position76, tokenIndex76
+									goto l65
+								l66:
+									position, tokenIndex = position66, tokenIndex66
 								}
 								{
-									position78, tokenIndex78 := position, tokenIndex
+									position68, tokenIndex68 := position, tokenIndex
 									if !_rules[rulesep]() {
-										goto l78
+										goto l68
 									}
-									goto l73
-								l78:
-									position, tokenIndex = position78, tokenIndex78
+									goto l63
+								l68:
+									position, tokenIndex = position68, tokenIndex68
 								}
-								add(ruleobjectElementSelectors, position74)
+								add(ruleobjectElementSelectors, position64)
 							}
-							goto l72
-						l73:
-							position, tokenIndex = position72, tokenIndex72
+							goto l62
+						l63:
+							position, tokenIndex = position62, tokenIndex62
 							{
 								switch buffer[position] {
 								case '(':
 									{
-										position80 := position
+										position70 := position
 										{
-											position81 := position
+											position71 := position
 											position++
 											_rules[rulespace]()
-											add(rulescriptSelectorStart, position81)
+											add(rulescriptSelectorStart, position71)
 										}
 										{
-											position82 := position
+											position72 := position
 											{
-												position83 := position
+												position73 := position
 												{
-													position86, tokenIndex86 := position, tokenIndex
+													position76, tokenIndex76 := position, tokenIndex
 													if !_rules[rulescriptSelectorEnd]() {
-														goto l86
+														goto l76
 													}
-													goto l67
-												l86:
-													position, tokenIndex = position86, tokenIndex86
+													goto l57
+												l76:
+													position, tokenIndex = position76, tokenIndex76
 												}
 												if !matchDot() {
-													goto l67
+													goto l57
 												}
-											l84:
+											l74:
 												{
-													position85, tokenIndex85 := position, tokenIndex
+													position75, tokenIndex75 := position, tokenIndex
 													{
-														position87, tokenIndex87 := position, tokenIndex
+														position77, tokenIndex77 := position, tokenIndex
 														if !_rules[rulescriptSelectorEnd]() {
-															goto l87
+															goto l77
 														}
-														goto l85
-													l87:
-														position, tokenIndex = position87, tokenIndex87
+														goto l75
+													l77:
+														position, tokenIndex = position77, tokenIndex77
 													}
 													if !matchDot() {
-														goto l85
+														goto l75
 													}
-													goto l84
-												l85:
-													position, tokenIndex = position85, tokenIndex85
+													goto l74
+												l75:
+													position, tokenIndex = position75, tokenIndex75
 												}
-												add(rulecommand, position83)
+												add(rulecommand, position73)
 											}
-											add(rulePegText, position82)
+											add(rulePegText, position72)
 										}
 										if !_rules[rulescriptSelectorEnd]() {
-											goto l67
+											goto l57
+										}
+										{
+											add(ruleAction21, position)
+										}
+										add(rulescriptSelector, position70)
+									}
+								case '?':
+									{
+										position79 := position
+										{
+											position80 := position
+											position++
+											if buffer[position] != '(' {
+												goto l57
+											}
+											position++
+											_rules[rulespace]()
+											add(rulefilterSelectorStart, position80)
+										}
+										if !_rules[rulequery]() {
+											goto l57
+										}
+										{
+											position81 := position
+											_rules[rulespace]()
+											if buffer[position] != ')' {
+												goto l57
+											}
+											position++
+											add(rulefilterSelectorEnd, position81)
 										}
 										{
 											add(ruleAction22, position)
 										}
-										add(rulescriptSelector, position80)
-									}
-								case '?':
-									{
-										position89 := position
-										{
-											position90 := position
-											position++
-											if buffer[position] != '(' {
-												goto l67
-											}
-											position++
-											_rules[rulespace]()
-											add(rulefilterSelectorStart, position90)
-										}
-										if !_rules[rulequery]() {
-											goto l67
-										}
-										{
-											position91 := position
-											_rules[rulespace]()
-											if buffer[position] != ')' {
-												goto l67
-											}
-											position++
-											add(rulefilterSelectorEnd, position91)
-										}
-										{
-											add(ruleAction23, position)
-										}
-										add(rulefilterSelector, position89)
+										add(rulefilterSelector, position79)
 									}
 								default:
 									{
-										position93 := position
+										position83 := position
 										if !_rules[rulearrayElementSelector]() {
-											goto l67
+											goto l57
 										}
-									l94:
+									l84:
 										{
-											position95, tokenIndex95 := position, tokenIndex
+											position85, tokenIndex85 := position, tokenIndex
 											if !_rules[rulesep]() {
-												goto l95
+												goto l85
 											}
 											if !_rules[rulearrayElementSelector]() {
-												goto l95
+												goto l85
 											}
 											{
 												add(ruleAction15, position)
 											}
-											goto l94
-										l95:
-											position, tokenIndex = position95, tokenIndex95
+											goto l84
+										l85:
+											position, tokenIndex = position85, tokenIndex85
 										}
 										{
-											position97, tokenIndex97 := position, tokenIndex
+											position87, tokenIndex87 := position, tokenIndex
 											if !_rules[rulesep]() {
-												goto l97
+												goto l87
 											}
-											goto l67
-										l97:
-											position, tokenIndex = position97, tokenIndex97
+											goto l57
+										l87:
+											position, tokenIndex = position87, tokenIndex87
 										}
-										add(rulearrayElementSelectors, position93)
+										add(rulearrayElementSelectors, position83)
 									}
 								}
 							}
 
 						}
-					l72:
-						add(ruleselectors, position71)
+					l62:
+						add(ruleselectors, position61)
 					}
 					{
-						position98 := position
+						position88 := position
 						_rules[rulespace]()
 						if buffer[position] != ']' {
-							goto l67
+							goto l57
 						}
 						position++
-						add(rulesquareBracketEnd, position98)
+						add(rulesquareBracketEnd, position88)
 					}
-					add(rulePegText, position69)
+					add(rulePegText, position59)
 				}
 				{
 					add(ruleAction8, position)
 				}
-				add(rulebracketedSelection, position68)
+				add(rulebracketedSelection, position58)
 			}
-			memoize(13, position67, tokenIndex67, true)
+			memoize(13, position57, tokenIndex57, true)
 			return true
-		l67:
-			memoize(13, position67, tokenIndex67, false)
-			position, tokenIndex = position67, tokenIndex67
+		l57:
+			memoize(13, position57, tokenIndex57, false)
+			position, tokenIndex = position57, tokenIndex57
 			return false
 		},
 		/* 14 function <- <(<('.' functionName ('(' ')'))> Action9)> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{14, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position90, tokenIndex90 := position, tokenIndex
+			{
+				position91 := position
+				{
+					position92 := position
+					if buffer[position] != '.' {
+						goto l90
+					}
+					position++
+					{
+						position93 := position
+						{
+							position94 := position
+							if !_rules[rulenameChars]() {
+								goto l90
+							}
+						l95:
+							{
+								position96, tokenIndex96 := position, tokenIndex
+								if !_rules[rulenameChars]() {
+									goto l96
+								}
+								goto l95
+							l96:
+								position, tokenIndex = position96, tokenIndex96
+							}
+							add(rulePegText, position94)
+						}
+						{
+							add(ruleAction10, position)
+						}
+						add(rulefunctionName, position93)
+					}
+					if buffer[position] != '(' {
+						goto l90
+					}
+					position++
+					if buffer[position] != ')' {
+						goto l90
+					}
+					position++
+					add(rulePegText, position92)
+				}
+				{
+					add(ruleAction9, position)
+				}
+				add(rulefunction, position91)
+			}
+			memoize(14, position90, tokenIndex90, true)
+			return true
+		l90:
+			memoize(14, position90, tokenIndex90, false)
+			position, tokenIndex = position90, tokenIndex90
+			return false
+		},
+		/* 15 functionName <- <(<nameChars+> Action10)> */
 		nil,
-		/* 15 functionName <- <(<((&('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') [0-9]) | (&('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z') [A-Z]) | (&('_') '_') | (&('-') '-') | (&('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z') [a-z]))+> Action10)> */
-		nil,
-		/* 16 memberNameShorthand <- <(wildcardSelector / (<(('\\' signsWithoutHyphenUnderscore) / (!([\x00-\x1f] / '\x7f') !signsWithoutHyphenUnderscore .))+> !('(' ')') Action11))> */
+		/* 16 memberNameShorthand <- <(wildcardSelector / (<(('\\' signsWithoutHyphenUnderscore) / (!(controlCodeChars / signsWithoutHyphenUnderscore) .))+> !('(' ')') Action11))> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{16, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position102, tokenIndex102 := position, tokenIndex
+			position100, tokenIndex100 := position, tokenIndex
 			{
-				position103 := position
+				position101 := position
 				{
-					position104, tokenIndex104 := position, tokenIndex
+					position102, tokenIndex102 := position, tokenIndex
 					if !_rules[rulewildcardSelector]() {
-						goto l105
+						goto l103
 					}
-					goto l104
-				l105:
-					position, tokenIndex = position104, tokenIndex104
+					goto l102
+				l103:
+					position, tokenIndex = position102, tokenIndex102
 					{
-						position106 := position
+						position104 := position
 						{
-							position109, tokenIndex109 := position, tokenIndex
+							position107, tokenIndex107 := position, tokenIndex
 							if buffer[position] != '\\' {
-								goto l110
+								goto l108
 							}
 							position++
 							if !_rules[rulesignsWithoutHyphenUnderscore]() {
-								goto l110
+								goto l108
 							}
-							goto l109
-						l110:
-							position, tokenIndex = position109, tokenIndex109
+							goto l107
+						l108:
+							position, tokenIndex = position107, tokenIndex107
 							{
-								position111, tokenIndex111 := position, tokenIndex
+								position109, tokenIndex109 := position, tokenIndex
 								{
-									position112, tokenIndex112 := position, tokenIndex
-									if c := buffer[position]; c < '\x00' || c > '\x1f' {
-										goto l113
+									position110, tokenIndex110 := position, tokenIndex
+									{
+										position112 := position
+										{
+											position113, tokenIndex113 := position, tokenIndex
+											if c := buffer[position]; c < '\x00' || c > '\x1f' {
+												goto l114
+											}
+											position++
+											goto l113
+										l114:
+											position, tokenIndex = position113, tokenIndex113
+											if buffer[position] != '\x7f' {
+												goto l111
+											}
+											position++
+										}
+									l113:
+										add(rulecontrolCodeChars, position112)
 									}
-									position++
-									goto l112
-								l113:
-									position, tokenIndex = position112, tokenIndex112
-									if buffer[position] != '\x7f' {
-										goto l111
+									goto l110
+								l111:
+									position, tokenIndex = position110, tokenIndex110
+									if !_rules[rulesignsWithoutHyphenUnderscore]() {
+										goto l109
 									}
-									position++
 								}
-							l112:
-								goto l102
-							l111:
-								position, tokenIndex = position111, tokenIndex111
-							}
-							{
-								position114, tokenIndex114 := position, tokenIndex
-								if !_rules[rulesignsWithoutHyphenUnderscore]() {
-									goto l114
-								}
-								goto l102
-							l114:
-								position, tokenIndex = position114, tokenIndex114
+							l110:
+								goto l100
+							l109:
+								position, tokenIndex = position109, tokenIndex109
 							}
 							if !matchDot() {
-								goto l102
+								goto l100
 							}
 						}
-					l109:
 					l107:
+					l105:
 						{
-							position108, tokenIndex108 := position, tokenIndex
+							position106, tokenIndex106 := position, tokenIndex
 							{
 								position115, tokenIndex115 := position, tokenIndex
 								if buffer[position] != '\\' {
@@ -1563,117 +1546,114 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 									position117, tokenIndex117 := position, tokenIndex
 									{
 										position118, tokenIndex118 := position, tokenIndex
-										if c := buffer[position]; c < '\x00' || c > '\x1f' {
-											goto l119
+										{
+											position120 := position
+											{
+												position121, tokenIndex121 := position, tokenIndex
+												if c := buffer[position]; c < '\x00' || c > '\x1f' {
+													goto l122
+												}
+												position++
+												goto l121
+											l122:
+												position, tokenIndex = position121, tokenIndex121
+												if buffer[position] != '\x7f' {
+													goto l119
+												}
+												position++
+											}
+										l121:
+											add(rulecontrolCodeChars, position120)
 										}
-										position++
 										goto l118
 									l119:
 										position, tokenIndex = position118, tokenIndex118
-										if buffer[position] != '\x7f' {
+										if !_rules[rulesignsWithoutHyphenUnderscore]() {
 											goto l117
 										}
-										position++
 									}
 								l118:
-									goto l108
+									goto l106
 								l117:
 									position, tokenIndex = position117, tokenIndex117
 								}
-								{
-									position120, tokenIndex120 := position, tokenIndex
-									if !_rules[rulesignsWithoutHyphenUnderscore]() {
-										goto l120
-									}
-									goto l108
-								l120:
-									position, tokenIndex = position120, tokenIndex120
-								}
 								if !matchDot() {
-									goto l108
+									goto l106
 								}
 							}
 						l115:
-							goto l107
-						l108:
-							position, tokenIndex = position108, tokenIndex108
+							goto l105
+						l106:
+							position, tokenIndex = position106, tokenIndex106
 						}
-						add(rulePegText, position106)
+						add(rulePegText, position104)
 					}
 					{
-						position121, tokenIndex121 := position, tokenIndex
+						position123, tokenIndex123 := position, tokenIndex
 						if buffer[position] != '(' {
-							goto l121
+							goto l123
 						}
 						position++
 						if buffer[position] != ')' {
-							goto l121
+							goto l123
 						}
 						position++
-						goto l102
-					l121:
-						position, tokenIndex = position121, tokenIndex121
+						goto l100
+					l123:
+						position, tokenIndex = position123, tokenIndex123
 					}
 					{
 						add(ruleAction11, position)
 					}
 				}
-			l104:
-				add(rulememberNameShorthand, position103)
+			l102:
+				add(rulememberNameShorthand, position101)
 			}
-			memoize(16, position102, tokenIndex102, true)
+			memoize(16, position100, tokenIndex100, true)
 			return true
-		l102:
-			memoize(16, position102, tokenIndex102, false)
-			position, tokenIndex = position102, tokenIndex102
+		l100:
+			memoize(16, position100, tokenIndex100, false)
+			position, tokenIndex = position100, tokenIndex100
 			return false
 		},
-		/* 17 signsWithoutHyphenUnderscore <- <((&('{' | '|' | '}' | '~') [{-~]) | (&('`') '`') | (&('[' | '\\' | ']' | '^') [[-^]) | (&(':' | ';' | '<' | '=' | '>' | '?' | '@') [:-@]) | (&('/') '/') | (&('.') '.') | (&(' ' | '!' | '"' | '#' | '$' | '%' | '&' | '\'' | '(' | ')' | '*' | '+' | ',') [ -,]))> */
+		/* 17 nameChars <- <((&('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') [0-9]) | (&('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z') [A-Z]) | (&('_') '_') | (&('-') '-') | (&('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z') [a-z]))> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{17, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position123, tokenIndex123 := position, tokenIndex
+			position125, tokenIndex125 := position, tokenIndex
 			{
-				position124 := position
+				position126 := position
 				{
 					switch buffer[position] {
-					case '{', '|', '}', '~':
+					case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 						position++
-					case '`':
+					case 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
 						position++
-					case '[', '\\', ']', '^':
+					case '_':
 						position++
-					case ':', ';', '<', '=', '>', '?', '@':
-						position++
-					case '/':
-						position++
-					case '.':
+					case '-':
 						position++
 					default:
-						if c := buffer[position]; c < ' ' || c > ',' {
-							goto l123
+						if c := buffer[position]; c < 'a' || c > 'z' {
+							goto l125
 						}
 						position++
 					}
 				}
 
-				add(rulesignsWithoutHyphenUnderscore, position124)
+				add(rulenameChars, position126)
 			}
-			memoize(17, position123, tokenIndex123, true)
+			memoize(17, position125, tokenIndex125, true)
 			return true
-		l123:
-			memoize(17, position123, tokenIndex123, false)
-			position, tokenIndex = position123, tokenIndex123
+		l125:
+			memoize(17, position125, tokenIndex125, false)
+			position, tokenIndex = position125, tokenIndex125
 			return false
 		},
-		/* 18 selectors <- <(objectElementSelectors / ((&('(') scriptSelector) | (&('?') filterSelector) | (&(' ' | '*' | '+' | '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | ':') arrayElementSelectors)))> */
-		nil,
-		/* 19 objectElementSelectors <- <(objectElementSelector (sep objectElementSelector Action12)* !sep)> */
-		nil,
-		/* 20 objectElementSelector <- <(wildcardSelector / nameSelector)> */
+		/* 18 signsWithoutHyphenUnderscore <- <(!nameChars [ -~])> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{20, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{18, position}]; ok {
 				return memoizedResult(memoized)
 			}
 			position128, tokenIndex128 := position, tokenIndex
@@ -1681,335 +1661,331 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 				position129 := position
 				{
 					position130, tokenIndex130 := position, tokenIndex
-					if !_rules[rulewildcardSelector]() {
-						goto l131
+					if !_rules[rulenameChars]() {
+						goto l130
 					}
-					goto l130
-				l131:
+					goto l128
+				l130:
 					position, tokenIndex = position130, tokenIndex130
-					{
-						position132 := position
-						if !_rules[rulelString]() {
-							goto l128
-						}
-						{
-							add(ruleAction14, position)
-						}
-						add(rulenameSelector, position132)
-					}
 				}
-			l130:
-				add(ruleobjectElementSelector, position129)
+				if c := buffer[position]; c < ' ' || c > '~' {
+					goto l128
+				}
+				position++
+				add(rulesignsWithoutHyphenUnderscore, position129)
 			}
-			memoize(20, position128, tokenIndex128, true)
+			memoize(18, position128, tokenIndex128, true)
 			return true
 		l128:
-			memoize(20, position128, tokenIndex128, false)
+			memoize(18, position128, tokenIndex128, false)
 			position, tokenIndex = position128, tokenIndex128
 			return false
 		},
-		/* 21 wildcardSelector <- <('*' Action13)> */
+		/* 19 controlCodeChars <- <([\x00-\x1f] / '\x7f')> */
+		nil,
+		/* 20 selectors <- <(objectElementSelectors / ((&('(') scriptSelector) | (&('?') filterSelector) | (&(' ' | '*' | '+' | '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | ':') arrayElementSelectors)))> */
+		nil,
+		/* 21 objectElementSelectors <- <(objectElementSelector (sep objectElementSelector Action12)* !sep)> */
+		nil,
+		/* 22 objectElementSelector <- <(wildcardSelector / nameSelector)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{21, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{22, position}]; ok {
 				return memoizedResult(memoized)
 			}
 			position134, tokenIndex134 := position, tokenIndex
 			{
 				position135 := position
+				{
+					position136, tokenIndex136 := position, tokenIndex
+					if !_rules[rulewildcardSelector]() {
+						goto l137
+					}
+					goto l136
+				l137:
+					position, tokenIndex = position136, tokenIndex136
+					{
+						position138 := position
+						if !_rules[rulelString]() {
+							goto l134
+						}
+						{
+							add(ruleAction14, position)
+						}
+						add(rulenameSelector, position138)
+					}
+				}
+			l136:
+				add(ruleobjectElementSelector, position135)
+			}
+			memoize(22, position134, tokenIndex134, true)
+			return true
+		l134:
+			memoize(22, position134, tokenIndex134, false)
+			position, tokenIndex = position134, tokenIndex134
+			return false
+		},
+		/* 23 wildcardSelector <- <('*' Action13)> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{23, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position140, tokenIndex140 := position, tokenIndex
+			{
+				position141 := position
 				if buffer[position] != '*' {
-					goto l134
+					goto l140
 				}
 				position++
 				{
 					add(ruleAction13, position)
 				}
-				add(rulewildcardSelector, position135)
+				add(rulewildcardSelector, position141)
 			}
-			memoize(21, position134, tokenIndex134, true)
+			memoize(23, position140, tokenIndex140, true)
 			return true
-		l134:
-			memoize(21, position134, tokenIndex134, false)
-			position, tokenIndex = position134, tokenIndex134
+		l140:
+			memoize(23, position140, tokenIndex140, false)
+			position, tokenIndex = position140, tokenIndex140
 			return false
 		},
-		/* 22 nameSelector <- <(lString Action14)> */
+		/* 24 nameSelector <- <(lString Action14)> */
 		nil,
-		/* 23 arrayElementSelectors <- <(arrayElementSelector (sep arrayElementSelector Action15)* !sep)> */
+		/* 25 arrayElementSelectors <- <(arrayElementSelector (sep arrayElementSelector Action15)* !sep)> */
 		nil,
-		/* 24 arrayElementSelector <- <(((arraySliceSelector Action16) / (<indexSelector> Action17) / ('*' Action18)) Action19)> */
-		func() bool {
-			if memoized, ok := memoization[memoKey[U]{24, position}]; ok {
-				return memoizedResult(memoized)
-			}
-			position139, tokenIndex139 := position, tokenIndex
-			{
-				position140 := position
-				{
-					position141, tokenIndex141 := position, tokenIndex
-					{
-						position143 := position
-						_rules[ruleanyIndex]()
-						if !_rules[rulesepArraySlice]() {
-							goto l142
-						}
-						_rules[ruleanyIndex]()
-						{
-							position144, tokenIndex144 := position, tokenIndex
-							if !_rules[rulesepArraySlice]() {
-								goto l145
-							}
-							_rules[ruleanyIndex]()
-							goto l144
-						l145:
-							position, tokenIndex = position144, tokenIndex144
-							_rules[rulespace]()
-							{
-								add(ruleAction20, position)
-							}
-						}
-					l144:
-						add(rulearraySliceSelector, position143)
-					}
-					{
-						add(ruleAction16, position)
-					}
-					goto l141
-				l142:
-					position, tokenIndex = position141, tokenIndex141
-					{
-						position149 := position
-						{
-							position150 := position
-							if !_rules[ruleindexNumber]() {
-								goto l148
-							}
-							add(ruleindexSelector, position150)
-						}
-						add(rulePegText, position149)
-					}
-					{
-						add(ruleAction17, position)
-					}
-					goto l141
-				l148:
-					position, tokenIndex = position141, tokenIndex141
-					if buffer[position] != '*' {
-						goto l139
-					}
-					position++
-					{
-						add(ruleAction18, position)
-					}
-				}
-			l141:
-				{
-					add(ruleAction19, position)
-				}
-				add(rulearrayElementSelector, position140)
-			}
-			memoize(24, position139, tokenIndex139, true)
-			return true
-		l139:
-			memoize(24, position139, tokenIndex139, false)
-			position, tokenIndex = position139, tokenIndex139
-			return false
-		},
-		/* 25 arraySliceSelector <- <(anyIndex sepArraySlice anyIndex ((sepArraySlice anyIndex) / (space Action20)))> */
-		nil,
-		/* 26 anyIndex <- <(<indexNumber?> Action21)> */
+		/* 26 arrayElementSelector <- <(((arraySliceSelector Action16) / indexSelector / ('*' Action17)) Action18)> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{26, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position155, tokenIndex155 := position, tokenIndex
+			position145, tokenIndex145 := position, tokenIndex
 			{
-				position156 := position
+				position146 := position
 				{
-					position157 := position
+					position147, tokenIndex147 := position, tokenIndex
 					{
-						position158, tokenIndex158 := position, tokenIndex
-						if !_rules[ruleindexNumber]() {
-							goto l158
+						position149 := position
+						_rules[ruleanyIndex]()
+						if !_rules[rulesepArraySlice]() {
+							goto l148
 						}
-						goto l159
-					l158:
-						position, tokenIndex = position158, tokenIndex158
+						_rules[ruleanyIndex]()
+						{
+							position150, tokenIndex150 := position, tokenIndex
+							if !_rules[rulesepArraySlice]() {
+								goto l151
+							}
+							_rules[ruleanyIndex]()
+							goto l150
+						l151:
+							position, tokenIndex = position150, tokenIndex150
+							_rules[ruleomittedIndex]()
+						}
+					l150:
+						add(rulearraySliceSelector, position149)
 					}
-				l159:
-					add(rulePegText, position157)
+					{
+						add(ruleAction16, position)
+					}
+					goto l147
+				l148:
+					position, tokenIndex = position147, tokenIndex147
+					{
+						position154 := position
+						if !_rules[ruleindexNumber]() {
+							goto l153
+						}
+						add(ruleindexSelector, position154)
+					}
+					goto l147
+				l153:
+					position, tokenIndex = position147, tokenIndex147
+					if buffer[position] != '*' {
+						goto l145
+					}
+					position++
+					{
+						add(ruleAction17, position)
+					}
 				}
+			l147:
 				{
-					add(ruleAction21, position)
+					add(ruleAction18, position)
 				}
-				add(ruleanyIndex, position156)
+				add(rulearrayElementSelector, position146)
 			}
-			memoize(26, position155, tokenIndex155, true)
+			memoize(26, position145, tokenIndex145, true)
 			return true
+		l145:
+			memoize(26, position145, tokenIndex145, false)
+			position, tokenIndex = position145, tokenIndex145
+			return false
 		},
-		/* 27 indexSelector <- <indexNumber> */
+		/* 27 arraySliceSelector <- <(anyIndex sepArraySlice anyIndex ((sepArraySlice anyIndex) / omittedIndex))> */
 		nil,
-		/* 28 indexNumber <- <(('-' / '+')? [0-9]+)> */
+		/* 28 anyIndex <- <(indexNumber / omittedIndex)> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{28, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position158, tokenIndex158 := position, tokenIndex
+			{
+				position159 := position
+				{
+					position160, tokenIndex160 := position, tokenIndex
+					if !_rules[ruleindexNumber]() {
+						goto l161
+					}
+					goto l160
+				l161:
+					position, tokenIndex = position160, tokenIndex160
+					_rules[ruleomittedIndex]()
+				}
+			l160:
+				add(ruleanyIndex, position159)
+			}
+			memoize(28, position158, tokenIndex158, true)
+			return true
+		},
+		/* 29 omittedIndex <- <Action19> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{29, position}]; ok {
 				return memoizedResult(memoized)
 			}
 			position162, tokenIndex162 := position, tokenIndex
 			{
 				position163 := position
 				{
-					position164, tokenIndex164 := position, tokenIndex
-					{
-						position166, tokenIndex166 := position, tokenIndex
-						if buffer[position] != '-' {
-							goto l167
-						}
-						position++
-						goto l166
-					l167:
-						position, tokenIndex = position166, tokenIndex166
-						if buffer[position] != '+' {
-							goto l164
-						}
-						position++
-					}
-				l166:
-					goto l165
-				l164:
-					position, tokenIndex = position164, tokenIndex164
+					add(ruleAction19, position)
 				}
-			l165:
-				if c := buffer[position]; c < '0' || c > '9' {
-					goto l162
-				}
-				position++
-			l168:
+				add(ruleomittedIndex, position163)
+			}
+			memoize(29, position162, tokenIndex162, true)
+			return true
+		},
+		/* 30 indexSelector <- <indexNumber> */
+		nil,
+		/* 31 indexNumber <- <(<(('-' / '+')? [0-9]+)> Action20)> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{31, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position166, tokenIndex166 := position, tokenIndex
+			{
+				position167 := position
 				{
-					position169, tokenIndex169 := position, tokenIndex
+					position168 := position
+					{
+						position169, tokenIndex169 := position, tokenIndex
+						{
+							position171, tokenIndex171 := position, tokenIndex
+							if buffer[position] != '-' {
+								goto l172
+							}
+							position++
+							goto l171
+						l172:
+							position, tokenIndex = position171, tokenIndex171
+							if buffer[position] != '+' {
+								goto l169
+							}
+							position++
+						}
+					l171:
+						goto l170
+					l169:
+						position, tokenIndex = position169, tokenIndex169
+					}
+				l170:
 					if c := buffer[position]; c < '0' || c > '9' {
-						goto l169
+						goto l166
 					}
 					position++
-					goto l168
-				l169:
-					position, tokenIndex = position169, tokenIndex169
+				l173:
+					{
+						position174, tokenIndex174 := position, tokenIndex
+						if c := buffer[position]; c < '0' || c > '9' {
+							goto l174
+						}
+						position++
+						goto l173
+					l174:
+						position, tokenIndex = position174, tokenIndex174
+					}
+					add(rulePegText, position168)
 				}
-				add(ruleindexNumber, position163)
+				{
+					add(ruleAction20, position)
+				}
+				add(ruleindexNumber, position167)
 			}
-			memoize(28, position162, tokenIndex162, true)
+			memoize(31, position166, tokenIndex166, true)
 			return true
-		l162:
-			memoize(28, position162, tokenIndex162, false)
-			position, tokenIndex = position162, tokenIndex162
+		l166:
+			memoize(31, position166, tokenIndex166, false)
+			position, tokenIndex = position166, tokenIndex166
 			return false
 		},
-		/* 29 sep <- <(space ',' space)> */
+		/* 32 sep <- <(space ',' space)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{29, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{32, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position170, tokenIndex170 := position, tokenIndex
+			position176, tokenIndex176 := position, tokenIndex
 			{
-				position171 := position
+				position177 := position
 				_rules[rulespace]()
 				if buffer[position] != ',' {
-					goto l170
+					goto l176
 				}
 				position++
 				_rules[rulespace]()
-				add(rulesep, position171)
+				add(rulesep, position177)
 			}
-			memoize(29, position170, tokenIndex170, true)
+			memoize(32, position176, tokenIndex176, true)
 			return true
-		l170:
-			memoize(29, position170, tokenIndex170, false)
-			position, tokenIndex = position170, tokenIndex170
+		l176:
+			memoize(32, position176, tokenIndex176, false)
+			position, tokenIndex = position176, tokenIndex176
 			return false
 		},
-		/* 30 sepArraySlice <- <(space ':' space)> */
+		/* 33 sepArraySlice <- <(space ':' space)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{30, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{33, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position172, tokenIndex172 := position, tokenIndex
+			position178, tokenIndex178 := position, tokenIndex
 			{
-				position173 := position
+				position179 := position
 				_rules[rulespace]()
 				if buffer[position] != ':' {
-					goto l172
+					goto l178
 				}
 				position++
 				_rules[rulespace]()
-				add(rulesepArraySlice, position173)
+				add(rulesepArraySlice, position179)
 			}
-			memoize(30, position172, tokenIndex172, true)
+			memoize(33, position178, tokenIndex178, true)
 			return true
-		l172:
-			memoize(30, position172, tokenIndex172, false)
-			position, tokenIndex = position172, tokenIndex172
+		l178:
+			memoize(33, position178, tokenIndex178, false)
+			position, tokenIndex = position178, tokenIndex178
 			return false
 		},
-		/* 31 scriptSelector <- <(scriptSelectorStart <command> scriptSelectorEnd Action22)> */
+		/* 34 scriptSelector <- <(scriptSelectorStart <command> scriptSelectorEnd Action21)> */
 		nil,
-		/* 32 command <- <(!scriptSelectorEnd .)+> */
+		/* 35 command <- <(!scriptSelectorEnd .)+> */
 		nil,
-		/* 33 filterSelector <- <(filterSelectorStart query filterSelectorEnd Action23)> */
+		/* 36 filterSelector <- <(filterSelectorStart query filterSelectorEnd Action22)> */
 		nil,
-		/* 34 query <- <(andQuery (logicOr andQuery Action24)*)> */
+		/* 37 query <- <(andQuery (logicOr andQuery Action23)*)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{34, position}]; ok {
-				return memoizedResult(memoized)
-			}
-			position177, tokenIndex177 := position, tokenIndex
-			{
-				position178 := position
-				if !_rules[ruleandQuery]() {
-					goto l177
-				}
-			l179:
-				{
-					position180, tokenIndex180 := position, tokenIndex
-					{
-						position181 := position
-						_rules[rulespace]()
-						if buffer[position] != '|' {
-							goto l180
-						}
-						position++
-						if buffer[position] != '|' {
-							goto l180
-						}
-						position++
-						_rules[rulespace]()
-						add(rulelogicOr, position181)
-					}
-					if !_rules[ruleandQuery]() {
-						goto l180
-					}
-					{
-						add(ruleAction24, position)
-					}
-					goto l179
-				l180:
-					position, tokenIndex = position180, tokenIndex180
-				}
-				add(rulequery, position178)
-			}
-			memoize(34, position177, tokenIndex177, true)
-			return true
-		l177:
-			memoize(34, position177, tokenIndex177, false)
-			position, tokenIndex = position177, tokenIndex177
-			return false
-		},
-		/* 35 andQuery <- <(basicQuery (logicAnd basicQuery Action25)*)> */
-		func() bool {
-			if memoized, ok := memoization[memoKey[U]{35, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{37, position}]; ok {
 				return memoizedResult(memoized)
 			}
 			position183, tokenIndex183 := position, tokenIndex
 			{
 				position184 := position
-				if !_rules[rulebasicQuery]() {
+				if !_rules[ruleandQuery]() {
 					goto l183
 				}
 			l185:
@@ -2018,741 +1994,806 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 					{
 						position187 := position
 						_rules[rulespace]()
-						if buffer[position] != '&' {
+						if buffer[position] != '|' {
 							goto l186
 						}
 						position++
-						if buffer[position] != '&' {
+						if buffer[position] != '|' {
 							goto l186
 						}
 						position++
 						_rules[rulespace]()
-						add(rulelogicAnd, position187)
+						add(rulelogicOr, position187)
 					}
-					if !_rules[rulebasicQuery]() {
+					if !_rules[ruleandQuery]() {
 						goto l186
 					}
 					{
-						add(ruleAction25, position)
+						add(ruleAction23, position)
 					}
 					goto l185
 				l186:
 					position, tokenIndex = position186, tokenIndex186
 				}
-				add(ruleandQuery, position184)
+				add(rulequery, position184)
 			}
-			memoize(35, position183, tokenIndex183, true)
+			memoize(37, position183, tokenIndex183, true)
 			return true
 		l183:
-			memoize(35, position183, tokenIndex183, false)
+			memoize(37, position183, tokenIndex183, false)
 			position, tokenIndex = position183, tokenIndex183
 			return false
 		},
-		/* 36 basicQuery <- <((subQueryStart query subQueryEnd) / (<comparator> Action26) / (<(logicNot? jsonpathFilter)> Action27))> */
+		/* 38 andQuery <- <(basicQuery (logicAnd basicQuery Action24)*)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{36, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{38, position}]; ok {
 				return memoizedResult(memoized)
 			}
 			position189, tokenIndex189 := position, tokenIndex
 			{
 				position190 := position
+				if !_rules[rulebasicQuery]() {
+					goto l189
+				}
+			l191:
 				{
-					position191, tokenIndex191 := position, tokenIndex
+					position192, tokenIndex192 := position, tokenIndex
 					{
 						position193 := position
-						if buffer[position] != '(' {
+						_rules[rulespace]()
+						if buffer[position] != '&' {
+							goto l192
+						}
+						position++
+						if buffer[position] != '&' {
 							goto l192
 						}
 						position++
 						_rules[rulespace]()
-						add(rulesubQueryStart, position193)
+						add(rulelogicAnd, position193)
 					}
-					if !_rules[rulequery]() {
+					if !_rules[rulebasicQuery]() {
 						goto l192
 					}
 					{
-						position194 := position
-						_rules[rulespace]()
-						if buffer[position] != ')' {
-							goto l192
-						}
-						position++
-						add(rulesubQueryEnd, position194)
+						add(ruleAction24, position)
 					}
 					goto l191
 				l192:
-					position, tokenIndex = position191, tokenIndex191
+					position, tokenIndex = position192, tokenIndex192
+				}
+				add(ruleandQuery, position190)
+			}
+			memoize(38, position189, tokenIndex189, true)
+			return true
+		l189:
+			memoize(38, position189, tokenIndex189, false)
+			position, tokenIndex = position189, tokenIndex189
+			return false
+		},
+		/* 39 basicQuery <- <((<comparator> Action25) / ((&('!') (logicNot jsonpathFilter Action26)) | (&('(') (subQueryStart query subQueryEnd)) | (&(' ' | '$' | '@') jsonpathFilter)))> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{39, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position195, tokenIndex195 := position, tokenIndex
+			{
+				position196 := position
+				{
+					position197, tokenIndex197 := position, tokenIndex
 					{
-						position196 := position
+						position199 := position
 						{
-							position197 := position
+							position200 := position
 							{
-								position198, tokenIndex198 := position, tokenIndex
+								position201, tokenIndex201 := position, tokenIndex
 								if !_rules[ruleqParam]() {
-									goto l199
+									goto l202
 								}
 								_rules[rulespace]()
 								{
-									position200, tokenIndex200 := position, tokenIndex
+									position203, tokenIndex203 := position, tokenIndex
 									if buffer[position] != '=' {
-										goto l201
+										goto l204
 									}
 									position++
 									if buffer[position] != '=' {
-										goto l201
+										goto l204
 									}
 									position++
 									_rules[rulespace]()
 									if !_rules[ruleqParam]() {
-										goto l201
+										goto l204
+									}
+									{
+										add(ruleAction27, position)
+									}
+									goto l203
+								l204:
+									position, tokenIndex = position203, tokenIndex203
+									if buffer[position] != '!' {
+										goto l202
+									}
+									position++
+									if buffer[position] != '=' {
+										goto l202
+									}
+									position++
+									_rules[rulespace]()
+									if !_rules[ruleqParam]() {
+										goto l202
 									}
 									{
 										add(ruleAction28, position)
 									}
-									goto l200
-								l201:
-									position, tokenIndex = position200, tokenIndex200
-									if buffer[position] != '!' {
-										goto l199
+								}
+							l203:
+								goto l201
+							l202:
+								position, tokenIndex = position201, tokenIndex201
+								if !_rules[ruleqNumericParam]() {
+									goto l207
+								}
+								_rules[rulespace]()
+								{
+									position208, tokenIndex208 := position, tokenIndex
+									if buffer[position] != '<' {
+										goto l209
 									}
 									position++
 									if buffer[position] != '=' {
-										goto l199
+										goto l209
 									}
 									position++
 									_rules[rulespace]()
-									if !_rules[ruleqParam]() {
-										goto l199
+									if !_rules[ruleqNumericParam]() {
+										goto l209
 									}
 									{
 										add(ruleAction29, position)
 									}
-								}
-							l200:
-								goto l198
-							l199:
-								position, tokenIndex = position198, tokenIndex198
-								if !_rules[ruleqNumericParam]() {
-									goto l204
-								}
-								_rules[rulespace]()
-								{
-									position205, tokenIndex205 := position, tokenIndex
+									goto l208
+								l209:
+									position, tokenIndex = position208, tokenIndex208
 									if buffer[position] != '<' {
-										goto l206
-									}
-									position++
-									if buffer[position] != '=' {
-										goto l206
+										goto l211
 									}
 									position++
 									_rules[rulespace]()
 									if !_rules[ruleqNumericParam]() {
-										goto l206
+										goto l211
 									}
 									{
 										add(ruleAction30, position)
 									}
-									goto l205
-								l206:
-									position, tokenIndex = position205, tokenIndex205
-									if buffer[position] != '<' {
-										goto l208
+									goto l208
+								l211:
+									position, tokenIndex = position208, tokenIndex208
+									if buffer[position] != '>' {
+										goto l213
+									}
+									position++
+									if buffer[position] != '=' {
+										goto l213
 									}
 									position++
 									_rules[rulespace]()
 									if !_rules[ruleqNumericParam]() {
-										goto l208
+										goto l213
 									}
 									{
 										add(ruleAction31, position)
 									}
-									goto l205
-								l208:
-									position, tokenIndex = position205, tokenIndex205
+									goto l208
+								l213:
+									position, tokenIndex = position208, tokenIndex208
 									if buffer[position] != '>' {
-										goto l210
-									}
-									position++
-									if buffer[position] != '=' {
-										goto l210
+										goto l207
 									}
 									position++
 									_rules[rulespace]()
 									if !_rules[ruleqNumericParam]() {
-										goto l210
+										goto l207
 									}
 									{
 										add(ruleAction32, position)
 									}
-									goto l205
-								l210:
-									position, tokenIndex = position205, tokenIndex205
-									if buffer[position] != '>' {
-										goto l204
-									}
-									position++
-									_rules[rulespace]()
-									if !_rules[ruleqNumericParam]() {
-										goto l204
-									}
-									{
-										add(ruleAction33, position)
-									}
 								}
-							l205:
-								goto l198
-							l204:
-								position, tokenIndex = position198, tokenIndex198
+							l208:
+								goto l201
+							l207:
+								position, tokenIndex = position201, tokenIndex201
 								if !_rules[rulesingleJsonpathFilter]() {
-									goto l195
+									goto l198
 								}
 								_rules[rulespace]()
 								if buffer[position] != '=' {
-									goto l195
+									goto l198
 								}
 								position++
 								if buffer[position] != '~' {
-									goto l195
+									goto l198
 								}
 								position++
 								_rules[rulespace]()
 								if buffer[position] != '/' {
-									goto l195
+									goto l198
 								}
 								position++
 								{
-									position213 := position
+									position216 := position
 									{
-										position214 := position
-									l215:
+										position217 := position
+									l218:
 										{
-											position216, tokenIndex216 := position, tokenIndex
+											position219, tokenIndex219 := position, tokenIndex
 											{
-												position217, tokenIndex217 := position, tokenIndex
-												if buffer[position] != '\\' {
-													goto l218
-												}
-												position++
+												position220, tokenIndex220 := position, tokenIndex
 												{
-													position219, tokenIndex219 := position, tokenIndex
-													if buffer[position] != '\\' {
-														goto l220
+													position222, tokenIndex222 := position, tokenIndex
+													{
+														position223, tokenIndex223 := position, tokenIndex
+														if buffer[position] != '/' {
+															goto l224
+														}
+														position++
+														goto l223
+													l224:
+														position, tokenIndex = position223, tokenIndex223
+														if buffer[position] != '\\' {
+															goto l222
+														}
+														position++
 													}
-													position++
-													goto l219
-												l220:
-													position, tokenIndex = position219, tokenIndex219
-													if buffer[position] != '/' {
-														goto l218
-													}
-													position++
-												}
-											l219:
-												goto l217
-											l218:
-												position, tokenIndex = position217, tokenIndex217
-												{
-													position221, tokenIndex221 := position, tokenIndex
-													if buffer[position] != '/' {
-														goto l221
-													}
-													position++
-													goto l216
-												l221:
-													position, tokenIndex = position221, tokenIndex221
+												l223:
+													goto l221
+												l222:
+													position, tokenIndex = position222, tokenIndex222
 												}
 												if !matchDot() {
-													goto l216
+													goto l221
+												}
+												goto l220
+											l221:
+												position, tokenIndex = position220, tokenIndex220
+												if buffer[position] != '\\' {
+													goto l219
+												}
+												position++
+												if !matchDot() {
+													goto l219
 												}
 											}
-										l217:
-											goto l215
-										l216:
-											position, tokenIndex = position216, tokenIndex216
+										l220:
+											goto l218
+										l219:
+											position, tokenIndex = position219, tokenIndex219
 										}
-										add(ruleregex, position214)
+										add(ruleregex, position217)
 									}
-									add(rulePegText, position213)
+									add(rulePegText, position216)
 								}
 								if buffer[position] != '/' {
+									goto l198
+								}
+								position++
+								{
+									add(ruleAction33, position)
+								}
+							}
+						l201:
+							add(rulecomparator, position200)
+						}
+						add(rulePegText, position199)
+					}
+					{
+						add(ruleAction25, position)
+					}
+					goto l197
+				l198:
+					position, tokenIndex = position197, tokenIndex197
+					{
+						switch buffer[position] {
+						case '!':
+							{
+								position228 := position
+								position++
+								_rules[rulespace]()
+								add(rulelogicNot, position228)
+							}
+							if !_rules[rulejsonpathFilter]() {
+								goto l195
+							}
+							{
+								add(ruleAction26, position)
+							}
+						case '(':
+							{
+								position230 := position
+								position++
+								_rules[rulespace]()
+								add(rulesubQueryStart, position230)
+							}
+							if !_rules[rulequery]() {
+								goto l195
+							}
+							{
+								position231 := position
+								_rules[rulespace]()
+								if buffer[position] != ')' {
 									goto l195
 								}
 								position++
-								{
-									add(ruleAction34, position)
-								}
+								add(rulesubQueryEnd, position231)
 							}
-						l198:
-							add(rulecomparator, position197)
-						}
-						add(rulePegText, position196)
-					}
-					{
-						add(ruleAction26, position)
-					}
-					goto l191
-				l195:
-					position, tokenIndex = position191, tokenIndex191
-					{
-						position224 := position
-						{
-							position225, tokenIndex225 := position, tokenIndex
-							{
-								position227 := position
-								if buffer[position] != '!' {
-									goto l225
-								}
-								position++
-								_rules[rulespace]()
-								add(rulelogicNot, position227)
-							}
-							goto l226
-						l225:
-							position, tokenIndex = position225, tokenIndex225
-						}
-					l226:
-						if !_rules[rulejsonpathFilter]() {
-							goto l189
-						}
-						add(rulePegText, position224)
-					}
-					{
-						add(ruleAction27, position)
-					}
-				}
-			l191:
-				add(rulebasicQuery, position190)
-			}
-			memoize(36, position189, tokenIndex189, true)
-			return true
-		l189:
-			memoize(36, position189, tokenIndex189, false)
-			position, tokenIndex = position189, tokenIndex189
-			return false
-		},
-		/* 37 logicOr <- <(space ('|' '|') space)> */
-		nil,
-		/* 38 logicAnd <- <(space ('&' '&') space)> */
-		nil,
-		/* 39 logicNot <- <('!' space)> */
-		nil,
-		/* 40 comparator <- <((qParam space (('=' '=' space qParam Action28) / ('!' '=' space qParam Action29))) / (qNumericParam space (('<' '=' space qNumericParam Action30) / ('<' space qNumericParam Action31) / ('>' '=' space qNumericParam Action32) / ('>' space qNumericParam Action33))) / (singleJsonpathFilter space ('=' '~') space '/' <regex> '/' Action34))> */
-		nil,
-		/* 41 qParam <- <((qLiteral Action35) / singleJsonpathFilter)> */
-		func() bool {
-			if memoized, ok := memoization[memoKey[U]{41, position}]; ok {
-				return memoizedResult(memoized)
-			}
-			position233, tokenIndex233 := position, tokenIndex
-			{
-				position234 := position
-				{
-					position235, tokenIndex235 := position, tokenIndex
-					{
-						position237 := position
-						{
-							switch buffer[position] {
-							case 'N', 'n':
-								{
-									position239 := position
-									{
-										position240, tokenIndex240 := position, tokenIndex
-										if buffer[position] != 'n' {
-											goto l241
-										}
-										position++
-										if buffer[position] != 'u' {
-											goto l241
-										}
-										position++
-										if buffer[position] != 'l' {
-											goto l241
-										}
-										position++
-										if buffer[position] != 'l' {
-											goto l241
-										}
-										position++
-										goto l240
-									l241:
-										position, tokenIndex = position240, tokenIndex240
-										if buffer[position] != 'N' {
-											goto l242
-										}
-										position++
-										if buffer[position] != 'u' {
-											goto l242
-										}
-										position++
-										if buffer[position] != 'l' {
-											goto l242
-										}
-										position++
-										if buffer[position] != 'l' {
-											goto l242
-										}
-										position++
-										goto l240
-									l242:
-										position, tokenIndex = position240, tokenIndex240
-										if buffer[position] != 'N' {
-											goto l236
-										}
-										position++
-										if buffer[position] != 'U' {
-											goto l236
-										}
-										position++
-										if buffer[position] != 'L' {
-											goto l236
-										}
-										position++
-										if buffer[position] != 'L' {
-											goto l236
-										}
-										position++
-									}
-								l240:
-									{
-										add(ruleAction45, position)
-									}
-									add(rulelNull, position239)
-								}
-							case '"', '\'':
-								if !_rules[rulelString]() {
-									goto l236
-								}
-							case 'F', 'T', 'f', 't':
-								{
-									position244 := position
-									{
-										position245, tokenIndex245 := position, tokenIndex
-										{
-											position247, tokenIndex247 := position, tokenIndex
-											if buffer[position] != 't' {
-												goto l248
-											}
-											position++
-											if buffer[position] != 'r' {
-												goto l248
-											}
-											position++
-											if buffer[position] != 'u' {
-												goto l248
-											}
-											position++
-											if buffer[position] != 'e' {
-												goto l248
-											}
-											position++
-											goto l247
-										l248:
-											position, tokenIndex = position247, tokenIndex247
-											if buffer[position] != 'T' {
-												goto l249
-											}
-											position++
-											if buffer[position] != 'r' {
-												goto l249
-											}
-											position++
-											if buffer[position] != 'u' {
-												goto l249
-											}
-											position++
-											if buffer[position] != 'e' {
-												goto l249
-											}
-											position++
-											goto l247
-										l249:
-											position, tokenIndex = position247, tokenIndex247
-											if buffer[position] != 'T' {
-												goto l246
-											}
-											position++
-											if buffer[position] != 'R' {
-												goto l246
-											}
-											position++
-											if buffer[position] != 'U' {
-												goto l246
-											}
-											position++
-											if buffer[position] != 'E' {
-												goto l246
-											}
-											position++
-										}
-									l247:
-										{
-											add(ruleAction41, position)
-										}
-										goto l245
-									l246:
-										position, tokenIndex = position245, tokenIndex245
-										{
-											position251, tokenIndex251 := position, tokenIndex
-											if buffer[position] != 'f' {
-												goto l252
-											}
-											position++
-											if buffer[position] != 'a' {
-												goto l252
-											}
-											position++
-											if buffer[position] != 'l' {
-												goto l252
-											}
-											position++
-											if buffer[position] != 's' {
-												goto l252
-											}
-											position++
-											if buffer[position] != 'e' {
-												goto l252
-											}
-											position++
-											goto l251
-										l252:
-											position, tokenIndex = position251, tokenIndex251
-											if buffer[position] != 'F' {
-												goto l253
-											}
-											position++
-											if buffer[position] != 'a' {
-												goto l253
-											}
-											position++
-											if buffer[position] != 'l' {
-												goto l253
-											}
-											position++
-											if buffer[position] != 's' {
-												goto l253
-											}
-											position++
-											if buffer[position] != 'e' {
-												goto l253
-											}
-											position++
-											goto l251
-										l253:
-											position, tokenIndex = position251, tokenIndex251
-											if buffer[position] != 'F' {
-												goto l236
-											}
-											position++
-											if buffer[position] != 'A' {
-												goto l236
-											}
-											position++
-											if buffer[position] != 'L' {
-												goto l236
-											}
-											position++
-											if buffer[position] != 'S' {
-												goto l236
-											}
-											position++
-											if buffer[position] != 'E' {
-												goto l236
-											}
-											position++
-										}
-									l251:
-										{
-											add(ruleAction42, position)
-										}
-									}
-								l245:
-									add(rulelBool, position244)
-								}
-							default:
-								if !_rules[rulelNumber]() {
-									goto l236
-								}
+						default:
+							if !_rules[rulejsonpathFilter]() {
+								goto l195
 							}
 						}
+					}
 
-						add(ruleqLiteral, position237)
-					}
-					{
-						add(ruleAction35, position)
-					}
-					goto l235
-				l236:
-					position, tokenIndex = position235, tokenIndex235
-					if !_rules[rulesingleJsonpathFilter]() {
-						goto l233
-					}
 				}
-			l235:
-				add(ruleqParam, position234)
+			l197:
+				add(rulebasicQuery, position196)
 			}
-			memoize(41, position233, tokenIndex233, true)
+			memoize(39, position195, tokenIndex195, true)
 			return true
-		l233:
-			memoize(41, position233, tokenIndex233, false)
-			position, tokenIndex = position233, tokenIndex233
+		l195:
+			memoize(39, position195, tokenIndex195, false)
+			position, tokenIndex = position195, tokenIndex195
 			return false
 		},
-		/* 42 qNumericParam <- <((lNumber Action36) / singleJsonpathFilter)> */
-		func() bool {
-			if memoized, ok := memoization[memoKey[U]{42, position}]; ok {
-				return memoizedResult(memoized)
-			}
-			position256, tokenIndex256 := position, tokenIndex
-			{
-				position257 := position
-				{
-					position258, tokenIndex258 := position, tokenIndex
-					if !_rules[rulelNumber]() {
-						goto l259
-					}
-					{
-						add(ruleAction36, position)
-					}
-					goto l258
-				l259:
-					position, tokenIndex = position258, tokenIndex258
-					if !_rules[rulesingleJsonpathFilter]() {
-						goto l256
-					}
-				}
-			l258:
-				add(ruleqNumericParam, position257)
-			}
-			memoize(42, position256, tokenIndex256, true)
-			return true
-		l256:
-			memoize(42, position256, tokenIndex256, false)
-			position, tokenIndex = position256, tokenIndex256
-			return false
-		},
-		/* 43 qLiteral <- <((&('N' | 'n') lNull) | (&('"' | '\'') lString) | (&('F' | 'T' | 'f' | 't') lBool) | (&('+' | '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') lNumber))> */
+		/* 40 logicOr <- <(space ('|' '|') space)> */
 		nil,
-		/* 44 singleJsonpathFilter <- <(<jsonpathFilter> Action37)> */
+		/* 41 logicAnd <- <(space ('&' '&') space)> */
+		nil,
+		/* 42 logicNot <- <('!' space)> */
+		nil,
+		/* 43 comparator <- <((qParam space (('=' '=' space qParam Action27) / ('!' '=' space qParam Action28))) / (qNumericParam space (('<' '=' space qNumericParam Action29) / ('<' space qNumericParam Action30) / ('>' '=' space qNumericParam Action31) / ('>' space qNumericParam Action32))) / (singleJsonpathFilter space ('=' '~') space '/' <regex> '/' Action33))> */
+		nil,
+		/* 44 qParam <- <((qLiteral Action34) / singleJsonpathFilter)> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{44, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position262, tokenIndex262 := position, tokenIndex
+			position236, tokenIndex236 := position, tokenIndex
 			{
-				position263 := position
+				position237 := position
 				{
-					position264 := position
-					if !_rules[rulejsonpathFilter]() {
-						goto l262
+					position238, tokenIndex238 := position, tokenIndex
+					{
+						position240 := position
+						{
+							switch buffer[position] {
+							case 'N', 'n':
+								{
+									position242 := position
+									{
+										position243, tokenIndex243 := position, tokenIndex
+										if buffer[position] != 'n' {
+											goto l244
+										}
+										position++
+										if buffer[position] != 'u' {
+											goto l244
+										}
+										position++
+										if buffer[position] != 'l' {
+											goto l244
+										}
+										position++
+										if buffer[position] != 'l' {
+											goto l244
+										}
+										position++
+										goto l243
+									l244:
+										position, tokenIndex = position243, tokenIndex243
+										if buffer[position] != 'N' {
+											goto l245
+										}
+										position++
+										if buffer[position] != 'u' {
+											goto l245
+										}
+										position++
+										if buffer[position] != 'l' {
+											goto l245
+										}
+										position++
+										if buffer[position] != 'l' {
+											goto l245
+										}
+										position++
+										goto l243
+									l245:
+										position, tokenIndex = position243, tokenIndex243
+										if buffer[position] != 'N' {
+											goto l239
+										}
+										position++
+										if buffer[position] != 'U' {
+											goto l239
+										}
+										position++
+										if buffer[position] != 'L' {
+											goto l239
+										}
+										position++
+										if buffer[position] != 'L' {
+											goto l239
+										}
+										position++
+									}
+								l243:
+									{
+										add(ruleAction44, position)
+									}
+									add(rulelNull, position242)
+								}
+							case '"', '\'':
+								if !_rules[rulelString]() {
+									goto l239
+								}
+							case 'F', 'T', 'f', 't':
+								{
+									position247 := position
+									{
+										position248, tokenIndex248 := position, tokenIndex
+										{
+											position250, tokenIndex250 := position, tokenIndex
+											if buffer[position] != 't' {
+												goto l251
+											}
+											position++
+											if buffer[position] != 'r' {
+												goto l251
+											}
+											position++
+											if buffer[position] != 'u' {
+												goto l251
+											}
+											position++
+											if buffer[position] != 'e' {
+												goto l251
+											}
+											position++
+											goto l250
+										l251:
+											position, tokenIndex = position250, tokenIndex250
+											if buffer[position] != 'T' {
+												goto l252
+											}
+											position++
+											if buffer[position] != 'r' {
+												goto l252
+											}
+											position++
+											if buffer[position] != 'u' {
+												goto l252
+											}
+											position++
+											if buffer[position] != 'e' {
+												goto l252
+											}
+											position++
+											goto l250
+										l252:
+											position, tokenIndex = position250, tokenIndex250
+											if buffer[position] != 'T' {
+												goto l249
+											}
+											position++
+											if buffer[position] != 'R' {
+												goto l249
+											}
+											position++
+											if buffer[position] != 'U' {
+												goto l249
+											}
+											position++
+											if buffer[position] != 'E' {
+												goto l249
+											}
+											position++
+										}
+									l250:
+										{
+											add(ruleAction40, position)
+										}
+										goto l248
+									l249:
+										position, tokenIndex = position248, tokenIndex248
+										{
+											position254, tokenIndex254 := position, tokenIndex
+											if buffer[position] != 'f' {
+												goto l255
+											}
+											position++
+											if buffer[position] != 'a' {
+												goto l255
+											}
+											position++
+											if buffer[position] != 'l' {
+												goto l255
+											}
+											position++
+											if buffer[position] != 's' {
+												goto l255
+											}
+											position++
+											if buffer[position] != 'e' {
+												goto l255
+											}
+											position++
+											goto l254
+										l255:
+											position, tokenIndex = position254, tokenIndex254
+											if buffer[position] != 'F' {
+												goto l256
+											}
+											position++
+											if buffer[position] != 'a' {
+												goto l256
+											}
+											position++
+											if buffer[position] != 'l' {
+												goto l256
+											}
+											position++
+											if buffer[position] != 's' {
+												goto l256
+											}
+											position++
+											if buffer[position] != 'e' {
+												goto l256
+											}
+											position++
+											goto l254
+										l256:
+											position, tokenIndex = position254, tokenIndex254
+											if buffer[position] != 'F' {
+												goto l239
+											}
+											position++
+											if buffer[position] != 'A' {
+												goto l239
+											}
+											position++
+											if buffer[position] != 'L' {
+												goto l239
+											}
+											position++
+											if buffer[position] != 'S' {
+												goto l239
+											}
+											position++
+											if buffer[position] != 'E' {
+												goto l239
+											}
+											position++
+										}
+									l254:
+										{
+											add(ruleAction41, position)
+										}
+									}
+								l248:
+									add(rulelBool, position247)
+								}
+							default:
+								if !_rules[rulelNumber]() {
+									goto l239
+								}
+							}
+						}
+
+						add(ruleqLiteral, position240)
 					}
-					add(rulePegText, position264)
+					{
+						add(ruleAction34, position)
+					}
+					goto l238
+				l239:
+					position, tokenIndex = position238, tokenIndex238
+					if !_rules[rulesingleJsonpathFilter]() {
+						goto l236
+					}
 				}
-				{
-					add(ruleAction37, position)
-				}
-				add(rulesingleJsonpathFilter, position263)
+			l238:
+				add(ruleqParam, position237)
 			}
-			memoize(44, position262, tokenIndex262, true)
+			memoize(44, position236, tokenIndex236, true)
 			return true
-		l262:
-			memoize(44, position262, tokenIndex262, false)
-			position, tokenIndex = position262, tokenIndex262
+		l236:
+			memoize(44, position236, tokenIndex236, false)
+			position, tokenIndex = position236, tokenIndex236
 			return false
 		},
-		/* 45 jsonpathFilter <- <(Action38 jsonpathParameter Action39)> */
+		/* 45 qNumericParam <- <((lNumber Action35) / singleJsonpathFilter)> */
 		func() bool {
 			if memoized, ok := memoization[memoKey[U]{45, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position266, tokenIndex266 := position, tokenIndex
+			position259, tokenIndex259 := position, tokenIndex
 			{
-				position267 := position
+				position260 := position
 				{
-					add(ruleAction38, position)
-				}
-				{
-					position269 := position
-					_rules[rulespace]()
-					{
-						position270 := position
-						{
-							position271, tokenIndex271 := position, tokenIndex
-							if !_rules[rulerootIdentifier]() {
-								goto l272
-							}
-							goto l271
-						l272:
-							position, tokenIndex = position271, tokenIndex271
-							{
-								position273 := position
-								if buffer[position] != '@' {
-									goto l266
-								}
-								position++
-								{
-									add(ruleAction4, position)
-								}
-								add(rulecurrentNodeIdentifier, position273)
-							}
-						}
-					l271:
-						add(ruleparameterRootNode, position270)
+					position261, tokenIndex261 := position, tokenIndex
+					if !_rules[rulelNumber]() {
+						goto l262
 					}
-					_rules[rulesegments]()
-					add(rulejsonpathParameter, position269)
+					{
+						add(ruleAction35, position)
+					}
+					goto l261
+				l262:
+					position, tokenIndex = position261, tokenIndex261
+					if !_rules[rulesingleJsonpathFilter]() {
+						goto l259
+					}
 				}
-				{
-					add(ruleAction39, position)
-				}
-				add(rulejsonpathFilter, position267)
+			l261:
+				add(ruleqNumericParam, position260)
 			}
-			memoize(45, position266, tokenIndex266, true)
+			memoize(45, position259, tokenIndex259, true)
 			return true
-		l266:
-			memoize(45, position266, tokenIndex266, false)
-			position, tokenIndex = position266, tokenIndex266
+		l259:
+			memoize(45, position259, tokenIndex259, false)
+			position, tokenIndex = position259, tokenIndex259
 			return false
 		},
-		/* 46 lNumber <- <(<(('-' / '+')? [0-9] ((&('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z') [A-Z]) | (&('.') '.') | (&('+') '+') | (&('-') '-') | (&('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') [0-9]) | (&('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z') [a-z]))*)> Action40)> */
+		/* 46 qLiteral <- <((&('N' | 'n') lNull) | (&('"' | '\'') lString) | (&('F' | 'T' | 'f' | 't') lBool) | (&('+' | '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') lNumber))> */
+		nil,
+		/* 47 singleJsonpathFilter <- <(<(&(rootWithSegment / currentNodeIdentifier) jsonpathFilter)> Action36)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{46, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{47, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position265, tokenIndex265 := position, tokenIndex
+			{
+				position266 := position
+				{
+					position267 := position
+					{
+						position268, tokenIndex268 := position, tokenIndex
+						{
+							position269, tokenIndex269 := position, tokenIndex
+							{
+								position271 := position
+								if !_rules[rulerootIdentifier]() {
+									goto l270
+								}
+								{
+									position272, tokenIndex272 := position, tokenIndex
+									if !_rules[rulesegment]() {
+										goto l273
+									}
+									goto l272
+								l273:
+									position, tokenIndex = position272, tokenIndex272
+									if !_rules[rulefunction]() {
+										goto l270
+									}
+								}
+							l272:
+								add(rulerootWithSegment, position271)
+							}
+							goto l269
+						l270:
+							position, tokenIndex = position269, tokenIndex269
+							if !_rules[rulecurrentNodeIdentifier]() {
+								goto l265
+							}
+						}
+					l269:
+						position, tokenIndex = position268, tokenIndex268
+					}
+					if !_rules[rulejsonpathFilter]() {
+						goto l265
+					}
+					add(rulePegText, position267)
+				}
+				{
+					add(ruleAction36, position)
+				}
+				add(rulesingleJsonpathFilter, position266)
+			}
+			memoize(47, position265, tokenIndex265, true)
+			return true
+		l265:
+			memoize(47, position265, tokenIndex265, false)
+			position, tokenIndex = position265, tokenIndex265
+			return false
+		},
+		/* 48 rootWithSegment <- <(rootIdentifier (segment / function))> */
+		nil,
+		/* 49 jsonpathFilter <- <(Action37 jsonpathParameter Action38)> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{49, position}]; ok {
 				return memoizedResult(memoized)
 			}
 			position276, tokenIndex276 := position, tokenIndex
 			{
 				position277 := position
 				{
-					position278 := position
+					add(ruleAction37, position)
+				}
+				{
+					position279 := position
+					_rules[rulespace]()
 					{
-						position279, tokenIndex279 := position, tokenIndex
+						position280 := position
 						{
 							position281, tokenIndex281 := position, tokenIndex
-							if buffer[position] != '-' {
+							if !_rules[rulerootIdentifier]() {
 								goto l282
 							}
-							position++
 							goto l281
 						l282:
 							position, tokenIndex = position281, tokenIndex281
+							if !_rules[rulecurrentNodeIdentifier]() {
+								goto l276
+							}
+						}
+					l281:
+						add(ruleparameterRootNode, position280)
+					}
+					_rules[rulesegments]()
+					add(rulejsonpathParameter, position279)
+				}
+				{
+					add(ruleAction38, position)
+				}
+				add(rulejsonpathFilter, position277)
+			}
+			memoize(49, position276, tokenIndex276, true)
+			return true
+		l276:
+			memoize(49, position276, tokenIndex276, false)
+			position, tokenIndex = position276, tokenIndex276
+			return false
+		},
+		/* 50 lNumber <- <(<(('-' / '+')? [0-9] ((&('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z') [A-Z]) | (&('.') '.') | (&('+') '+') | (&('-') '-') | (&('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') [0-9]) | (&('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z') [a-z]))*)> Action39)> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{50, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position284, tokenIndex284 := position, tokenIndex
+			{
+				position285 := position
+				{
+					position286 := position
+					{
+						position287, tokenIndex287 := position, tokenIndex
+						{
+							position289, tokenIndex289 := position, tokenIndex
+							if buffer[position] != '-' {
+								goto l290
+							}
+							position++
+							goto l289
+						l290:
+							position, tokenIndex = position289, tokenIndex289
 							if buffer[position] != '+' {
-								goto l279
+								goto l287
 							}
 							position++
 						}
-					l281:
-						goto l280
-					l279:
-						position, tokenIndex = position279, tokenIndex279
+					l289:
+						goto l288
+					l287:
+						position, tokenIndex = position287, tokenIndex287
 					}
-				l280:
+				l288:
 					if c := buffer[position]; c < '0' || c > '9' {
-						goto l276
+						goto l284
 					}
 					position++
-				l283:
+				l291:
 					{
-						position284, tokenIndex284 := position, tokenIndex
+						position292, tokenIndex292 := position, tokenIndex
 						{
 							switch buffer[position] {
 							case 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
@@ -2767,62 +2808,62 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 								position++
 							default:
 								if c := buffer[position]; c < 'a' || c > 'z' {
-									goto l284
+									goto l292
 								}
 								position++
 							}
 						}
 
-						goto l283
-					l284:
-						position, tokenIndex = position284, tokenIndex284
+						goto l291
+					l292:
+						position, tokenIndex = position292, tokenIndex292
 					}
-					add(rulePegText, position278)
+					add(rulePegText, position286)
 				}
 				{
-					add(ruleAction40, position)
+					add(ruleAction39, position)
 				}
-				add(rulelNumber, position277)
+				add(rulelNumber, position285)
 			}
-			memoize(46, position276, tokenIndex276, true)
+			memoize(50, position284, tokenIndex284, true)
 			return true
-		l276:
-			memoize(46, position276, tokenIndex276, false)
-			position, tokenIndex = position276, tokenIndex276
+		l284:
+			memoize(50, position284, tokenIndex284, false)
+			position, tokenIndex = position284, tokenIndex284
 			return false
 		},
-		/* 47 lBool <- <(((('t' 'r' 'u' 'e') / ('T' 'r' 'u' 'e') / ('T' 'R' 'U' 'E')) Action41) / ((('f' 'a' 'l' 's' 'e') / ('F' 'a' 'l' 's' 'e') / ('F' 'A' 'L' 'S' 'E')) Action42))> */
+		/* 51 lBool <- <(((('t' 'r' 'u' 'e') / ('T' 'r' 'u' 'e') / ('T' 'R' 'U' 'E')) Action40) / ((('f' 'a' 'l' 's' 'e') / ('F' 'a' 'l' 's' 'e') / ('F' 'A' 'L' 'S' 'E')) Action41))> */
 		nil,
-		/* 48 lString <- <(('\'' <(('\\' ((&('u') hexDigits) | (&('t') 't') | (&('r') 'r') | (&('n') 'n') | (&('f') 'f') | (&('b') 'b') | (&('\\') '\\') | (&('/') '/') | (&('\'') '\''))) / (!('\'' / '\\') .))*> '\'' Action43) / ('"' <(('\\' ((&('u') hexDigits) | (&('t') 't') | (&('r') 'r') | (&('n') 'n') | (&('f') 'f') | (&('b') 'b') | (&('\\') '\\') | (&('/') '/') | (&('"') '"'))) / (!('"' / '\\') .))*> '"' Action44))> */
+		/* 52 lString <- <(('\'' <(('\\' ((&('u') hexDigits) | (&('t') 't') | (&('r') 'r') | (&('n') 'n') | (&('f') 'f') | (&('b') 'b') | (&('\\') '\\') | (&('/') '/') | (&('\'') '\''))) / (!('\'' / '\\') .))*> '\'' Action42) / ('"' <(('\\' ((&('u') hexDigits) | (&('t') 't') | (&('r') 'r') | (&('n') 'n') | (&('f') 'f') | (&('b') 'b') | (&('\\') '\\') | (&('/') '/') | (&('"') '"'))) / (!('"' / '\\') .))*> '"' Action43))> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{48, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{52, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position288, tokenIndex288 := position, tokenIndex
+			position296, tokenIndex296 := position, tokenIndex
 			{
-				position289 := position
+				position297 := position
 				{
-					position290, tokenIndex290 := position, tokenIndex
+					position298, tokenIndex298 := position, tokenIndex
 					if buffer[position] != '\'' {
-						goto l291
+						goto l299
 					}
 					position++
 					{
-						position292 := position
-					l293:
+						position300 := position
+					l301:
 						{
-							position294, tokenIndex294 := position, tokenIndex
+							position302, tokenIndex302 := position, tokenIndex
 							{
-								position295, tokenIndex295 := position, tokenIndex
+								position303, tokenIndex303 := position, tokenIndex
 								if buffer[position] != '\\' {
-									goto l296
+									goto l304
 								}
 								position++
 								{
 									switch buffer[position] {
 									case 'u':
 										if !_rules[rulehexDigits]() {
-											goto l296
+											goto l304
 										}
 									case 't':
 										position++
@@ -2840,194 +2881,194 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 										position++
 									default:
 										if buffer[position] != '\'' {
-											goto l296
+											goto l304
 										}
 										position++
 									}
 								}
 
-								goto l295
-							l296:
-								position, tokenIndex = position295, tokenIndex295
+								goto l303
+							l304:
+								position, tokenIndex = position303, tokenIndex303
 								{
-									position298, tokenIndex298 := position, tokenIndex
+									position306, tokenIndex306 := position, tokenIndex
 									{
-										position299, tokenIndex299 := position, tokenIndex
+										position307, tokenIndex307 := position, tokenIndex
 										if buffer[position] != '\'' {
-											goto l300
+											goto l308
 										}
 										position++
-										goto l299
-									l300:
-										position, tokenIndex = position299, tokenIndex299
+										goto l307
+									l308:
+										position, tokenIndex = position307, tokenIndex307
 										if buffer[position] != '\\' {
-											goto l298
+											goto l306
 										}
 										position++
 									}
-								l299:
-									goto l294
-								l298:
-									position, tokenIndex = position298, tokenIndex298
+								l307:
+									goto l302
+								l306:
+									position, tokenIndex = position306, tokenIndex306
 								}
 								if !matchDot() {
-									goto l294
+									goto l302
 								}
 							}
-						l295:
-							goto l293
-						l294:
-							position, tokenIndex = position294, tokenIndex294
+						l303:
+							goto l301
+						l302:
+							position, tokenIndex = position302, tokenIndex302
 						}
-						add(rulePegText, position292)
+						add(rulePegText, position300)
 					}
 					if buffer[position] != '\'' {
-						goto l291
+						goto l299
+					}
+					position++
+					{
+						add(ruleAction42, position)
+					}
+					goto l298
+				l299:
+					position, tokenIndex = position298, tokenIndex298
+					if buffer[position] != '"' {
+						goto l296
+					}
+					position++
+					{
+						position310 := position
+					l311:
+						{
+							position312, tokenIndex312 := position, tokenIndex
+							{
+								position313, tokenIndex313 := position, tokenIndex
+								if buffer[position] != '\\' {
+									goto l314
+								}
+								position++
+								{
+									switch buffer[position] {
+									case 'u':
+										if !_rules[rulehexDigits]() {
+											goto l314
+										}
+									case 't':
+										position++
+									case 'r':
+										position++
+									case 'n':
+										position++
+									case 'f':
+										position++
+									case 'b':
+										position++
+									case '\\':
+										position++
+									case '/':
+										position++
+									default:
+										if buffer[position] != '"' {
+											goto l314
+										}
+										position++
+									}
+								}
+
+								goto l313
+							l314:
+								position, tokenIndex = position313, tokenIndex313
+								{
+									position316, tokenIndex316 := position, tokenIndex
+									{
+										position317, tokenIndex317 := position, tokenIndex
+										if buffer[position] != '"' {
+											goto l318
+										}
+										position++
+										goto l317
+									l318:
+										position, tokenIndex = position317, tokenIndex317
+										if buffer[position] != '\\' {
+											goto l316
+										}
+										position++
+									}
+								l317:
+									goto l312
+								l316:
+									position, tokenIndex = position316, tokenIndex316
+								}
+								if !matchDot() {
+									goto l312
+								}
+							}
+						l313:
+							goto l311
+						l312:
+							position, tokenIndex = position312, tokenIndex312
+						}
+						add(rulePegText, position310)
+					}
+					if buffer[position] != '"' {
+						goto l296
 					}
 					position++
 					{
 						add(ruleAction43, position)
 					}
-					goto l290
-				l291:
-					position, tokenIndex = position290, tokenIndex290
-					if buffer[position] != '"' {
-						goto l288
-					}
-					position++
-					{
-						position302 := position
-					l303:
-						{
-							position304, tokenIndex304 := position, tokenIndex
-							{
-								position305, tokenIndex305 := position, tokenIndex
-								if buffer[position] != '\\' {
-									goto l306
-								}
-								position++
-								{
-									switch buffer[position] {
-									case 'u':
-										if !_rules[rulehexDigits]() {
-											goto l306
-										}
-									case 't':
-										position++
-									case 'r':
-										position++
-									case 'n':
-										position++
-									case 'f':
-										position++
-									case 'b':
-										position++
-									case '\\':
-										position++
-									case '/':
-										position++
-									default:
-										if buffer[position] != '"' {
-											goto l306
-										}
-										position++
-									}
-								}
-
-								goto l305
-							l306:
-								position, tokenIndex = position305, tokenIndex305
-								{
-									position308, tokenIndex308 := position, tokenIndex
-									{
-										position309, tokenIndex309 := position, tokenIndex
-										if buffer[position] != '"' {
-											goto l310
-										}
-										position++
-										goto l309
-									l310:
-										position, tokenIndex = position309, tokenIndex309
-										if buffer[position] != '\\' {
-											goto l308
-										}
-										position++
-									}
-								l309:
-									goto l304
-								l308:
-									position, tokenIndex = position308, tokenIndex308
-								}
-								if !matchDot() {
-									goto l304
-								}
-							}
-						l305:
-							goto l303
-						l304:
-							position, tokenIndex = position304, tokenIndex304
-						}
-						add(rulePegText, position302)
-					}
-					if buffer[position] != '"' {
-						goto l288
-					}
-					position++
-					{
-						add(ruleAction44, position)
-					}
 				}
-			l290:
-				add(rulelString, position289)
+			l298:
+				add(rulelString, position297)
 			}
-			memoize(48, position288, tokenIndex288, true)
+			memoize(52, position296, tokenIndex296, true)
 			return true
-		l288:
-			memoize(48, position288, tokenIndex288, false)
-			position, tokenIndex = position288, tokenIndex288
+		l296:
+			memoize(52, position296, tokenIndex296, false)
+			position, tokenIndex = position296, tokenIndex296
 			return false
 		},
-		/* 49 hexDigits <- <('u' hexDigit hexDigit hexDigit hexDigit)> */
+		/* 53 hexDigits <- <('u' hexDigit hexDigit hexDigit hexDigit)> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{49, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{53, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position312, tokenIndex312 := position, tokenIndex
+			position320, tokenIndex320 := position, tokenIndex
 			{
-				position313 := position
+				position321 := position
 				if buffer[position] != 'u' {
-					goto l312
+					goto l320
 				}
 				position++
 				if !_rules[rulehexDigit]() {
-					goto l312
+					goto l320
 				}
 				if !_rules[rulehexDigit]() {
-					goto l312
+					goto l320
 				}
 				if !_rules[rulehexDigit]() {
-					goto l312
+					goto l320
 				}
 				if !_rules[rulehexDigit]() {
-					goto l312
+					goto l320
 				}
-				add(rulehexDigits, position313)
+				add(rulehexDigits, position321)
 			}
-			memoize(49, position312, tokenIndex312, true)
+			memoize(53, position320, tokenIndex320, true)
 			return true
-		l312:
-			memoize(49, position312, tokenIndex312, false)
-			position, tokenIndex = position312, tokenIndex312
+		l320:
+			memoize(53, position320, tokenIndex320, false)
+			position, tokenIndex = position320, tokenIndex320
 			return false
 		},
-		/* 50 hexDigit <- <((&('A' | 'B' | 'C' | 'D' | 'E' | 'F') [A-F]) | (&('a' | 'b' | 'c' | 'd' | 'e' | 'f') [a-f]) | (&('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') [0-9]))> */
+		/* 54 hexDigit <- <((&('A' | 'B' | 'C' | 'D' | 'E' | 'F') [A-F]) | (&('a' | 'b' | 'c' | 'd' | 'e' | 'f') [a-f]) | (&('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') [0-9]))> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{50, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{54, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position314, tokenIndex314 := position, tokenIndex
+			position322, tokenIndex322 := position, tokenIndex
 			{
-				position315 := position
+				position323 := position
 				{
 					switch buffer[position] {
 					case 'A', 'B', 'C', 'D', 'E', 'F':
@@ -3036,152 +3077,152 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 						position++
 					default:
 						if c := buffer[position]; c < '0' || c > '9' {
-							goto l314
+							goto l322
 						}
 						position++
 					}
 				}
 
-				add(rulehexDigit, position315)
+				add(rulehexDigit, position323)
 			}
-			memoize(50, position314, tokenIndex314, true)
-			return true
-		l314:
-			memoize(50, position314, tokenIndex314, false)
-			position, tokenIndex = position314, tokenIndex314
-			return false
-		},
-		/* 51 lNull <- <((('n' 'u' 'l' 'l') / ('N' 'u' 'l' 'l') / ('N' 'U' 'L' 'L')) Action45)> */
-		nil,
-		/* 52 regex <- <(('\\' ('\\' / '/')) / (!'/' .))*> */
-		nil,
-		/* 53 squareBracketStart <- <('[' space)> */
-		nil,
-		/* 54 squareBracketEnd <- <(space ']')> */
-		nil,
-		/* 55 scriptSelectorStart <- <('(' space)> */
-		nil,
-		/* 56 scriptSelectorEnd <- <(space ')')> */
-		func() bool {
-			if memoized, ok := memoization[memoKey[U]{56, position}]; ok {
-				return memoizedResult(memoized)
-			}
-			position322, tokenIndex322 := position, tokenIndex
-			{
-				position323 := position
-				_rules[rulespace]()
-				if buffer[position] != ')' {
-					goto l322
-				}
-				position++
-				add(rulescriptSelectorEnd, position323)
-			}
-			memoize(56, position322, tokenIndex322, true)
+			memoize(54, position322, tokenIndex322, true)
 			return true
 		l322:
-			memoize(56, position322, tokenIndex322, false)
+			memoize(54, position322, tokenIndex322, false)
 			position, tokenIndex = position322, tokenIndex322
 			return false
 		},
-		/* 57 filterSelectorStart <- <('?' '(' space)> */
+		/* 55 lNull <- <((('n' 'u' 'l' 'l') / ('N' 'u' 'l' 'l') / ('N' 'U' 'L' 'L')) Action44)> */
 		nil,
-		/* 58 filterSelectorEnd <- <(space ')')> */
+		/* 56 regex <- <((!('/' / '\\') .) / ('\\' .))*> */
 		nil,
-		/* 59 subQueryStart <- <('(' space)> */
+		/* 57 squareBracketStart <- <('[' space)> */
 		nil,
-		/* 60 subQueryEnd <- <(space ')')> */
+		/* 58 squareBracketEnd <- <(space ']')> */
 		nil,
-		/* 61 space <- <' '*> */
+		/* 59 scriptSelectorStart <- <('(' space)> */
+		nil,
+		/* 60 scriptSelectorEnd <- <(space ')')> */
 		func() bool {
-			if memoized, ok := memoization[memoKey[U]{61, position}]; ok {
+			if memoized, ok := memoization[memoKey[U]{60, position}]; ok {
 				return memoizedResult(memoized)
 			}
-			position328, tokenIndex328 := position, tokenIndex
+			position330, tokenIndex330 := position, tokenIndex
 			{
-				position329 := position
-			l330:
+				position331 := position
+				_rules[rulespace]()
+				if buffer[position] != ')' {
+					goto l330
+				}
+				position++
+				add(rulescriptSelectorEnd, position331)
+			}
+			memoize(60, position330, tokenIndex330, true)
+			return true
+		l330:
+			memoize(60, position330, tokenIndex330, false)
+			position, tokenIndex = position330, tokenIndex330
+			return false
+		},
+		/* 61 filterSelectorStart <- <('?' '(' space)> */
+		nil,
+		/* 62 filterSelectorEnd <- <(space ')')> */
+		nil,
+		/* 63 subQueryStart <- <('(' space)> */
+		nil,
+		/* 64 subQueryEnd <- <(space ')')> */
+		nil,
+		/* 65 space <- <' '*> */
+		func() bool {
+			if memoized, ok := memoization[memoKey[U]{65, position}]; ok {
+				return memoizedResult(memoized)
+			}
+			position336, tokenIndex336 := position, tokenIndex
+			{
+				position337 := position
+			l338:
 				{
-					position331, tokenIndex331 := position, tokenIndex
+					position339, tokenIndex339 := position, tokenIndex
 					if buffer[position] != ' ' {
-						goto l331
+						goto l339
 					}
 					position++
-					goto l330
-				l331:
-					position, tokenIndex = position331, tokenIndex331
+					goto l338
+				l339:
+					position, tokenIndex = position339, tokenIndex339
 				}
-				add(rulespace, position329)
+				add(rulespace, position337)
 			}
-			memoize(61, position328, tokenIndex328, true)
+			memoize(65, position336, tokenIndex336, true)
 			return true
 		},
-		/* 63 Action0 <- <{
+		/* 67 Action0 <- <{
 		    p.root = p.deleteRootNodeIdentifier(p.pop().(syntaxNode))
 		    p.setConnectedPath(p.root)
 		}> */
 		nil,
 		nil,
-		/* 65 Action1 <- <{
+		/* 69 Action1 <- <{
 		    panic(p.syntaxErr(
 		        begin, msgErrorInvalidSyntaxUnrecognizedInput, buffer))
 		}> */
 		nil,
-		/* 66 Action2 <- <{
+		/* 70 Action2 <- <{
 		    p.pushRootNodeIdentifier()
 		}> */
 		nil,
-		/* 67 Action3 <- <{
+		/* 71 Action3 <- <{
 		    p.pushRootNodeIdentifier()
 		}> */
 		nil,
-		/* 68 Action4 <- <{
+		/* 72 Action4 <- <{
 		    p.pushCurrentNodeIdentifier()
 		}> */
 		nil,
-		/* 69 Action5 <- <{
+		/* 73 Action5 <- <{
 		    p.setNodeChain()
 		    p.updateRootValueGroup()
 		}> */
 		nil,
-		/* 70 Action6 <- <{
+		/* 74 Action6 <- <{
 		    p.pushRecursiveChildIdentifier(p.pop().(syntaxNode))
 		}> */
 		nil,
-		/* 71 Action7 <- <{
+		/* 75 Action7 <- <{
 		    p.setLastNodePath(text)
 		}> */
 		nil,
-		/* 72 Action8 <- <{
+		/* 76 Action8 <- <{
 		    p.setLastNodePath(text)
 		}> */
 		nil,
-		/* 73 Action9 <- <{
+		/* 77 Action9 <- <{
 		    p.pushFunction(text, p.pop().(string))
 		}> */
 		nil,
-		/* 74 Action10 <- <{
+		/* 78 Action10 <- <{
 		    p.push(text)
 		}> */
 		nil,
-		/* 75 Action11 <- <{
+		/* 79 Action11 <- <{
 		    p.pushChildSingleIdentifier(p.unescape(text))
 		}> */
 		nil,
-		/* 76 Action12 <- <{
+		/* 80 Action12 <- <{
 		    identifier2 := p.pop().(syntaxNode)
 		    identifier1 := p.pop().(syntaxNode)
 		    p.pushChildMultiIdentifier(identifier1, identifier2)
 		}> */
 		nil,
-		/* 77 Action13 <- <{
+		/* 81 Action13 <- <{
 		    p.pushChildWildcardIdentifier()
 		}> */
 		nil,
-		/* 78 Action14 <- <{
+		/* 82 Action14 <- <{
 		    p.pushChildSingleIdentifier(p.pop().(string))
 		}> */
 		nil,
-		/* 79 Action15 <- <{
+		/* 83 Action15 <- <{
 		    childIndexUnion := p.pop().(*syntaxUnionQualifier)
 		    parentIndexUnion := p.pop().(*syntaxUnionQualifier)
 		    parentIndexUnion.merge(childIndexUnion)
@@ -3189,7 +3230,7 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 		    p.push(parentIndexUnion)
 		}> */
 		nil,
-		/* 80 Action16 <- <{
+		/* 84 Action16 <- <{
 		    step  := p.pop().(*syntaxIndexSubscript)
 		    end   := p.pop().(*syntaxIndexSubscript)
 		    start := p.pop().(*syntaxIndexSubscript)
@@ -3205,60 +3246,61 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 		    }
 		}> */
 		nil,
-		/* 81 Action17 <- <{
-		    p.pushIndexSubscript(text)
-		}> */
-		nil,
-		/* 82 Action18 <- <{
+		/* 85 Action17 <- <{
 		    p.pushWildcardSubscript()
 		}> */
 		nil,
-		/* 83 Action19 <- <{
+		/* 86 Action18 <- <{
 		    p.pushUnionQualifier(p.pop().(syntaxSubscript))
 		}> */
 		nil,
-		/* 84 Action20 <- <{
-		    p.pushIndexSubscript(`1`)
+		/* 87 Action19 <- <{
+		    p.pushOmittedIndexSubscript()
 		}> */
 		nil,
-		/* 85 Action21 <- <{
-		    if len(text) > 0 {
-		        p.pushIndexSubscript(text)
-		    } else {
-		        p.pushOmittedIndexSubscript(`0`)
-		    }
+		/* 88 Action20 <- <{
+		    p.pushIndexSubscript(text)
 		}> */
 		nil,
-		/* 86 Action22 <- <{
+		/* 89 Action21 <- <{
 		    p.pushScriptQualifier(text)
 		}> */
 		nil,
-		/* 87 Action23 <- <{
+		/* 90 Action22 <- <{
 		    p.pushFilterQualifier(p.pop().(syntaxQuery))
 		}> */
 		nil,
-		/* 88 Action24 <- <{
+		/* 91 Action23 <- <{
 		    rightQuery := p.pop().(syntaxQuery)
 		    leftQuery := p.pop().(syntaxQuery)
 		    p.pushLogicalOr(leftQuery, rightQuery)
 		}> */
 		nil,
-		/* 89 Action25 <- <{
+		/* 92 Action24 <- <{
 		    rightQuery := p.pop().(syntaxQuery)
 		    leftQuery := p.pop().(syntaxQuery)
 		    p.pushLogicalAnd(leftQuery, rightQuery)
 		}> */
 		nil,
-		/* 90 Action26 <- <{
+		/* 93 Action25 <- <{
 		    query := p.pop()
 		    p.push(query)
 
 		    if logicalNot, ok := query.(*syntaxLogicalNot); ok {
 		        query = (*logicalNot).query
 		    }
-		    if checkQuery, ok := query.(*syntaxBasicCompareQuery); ok {
-		        _, leftIsCurrentNode := checkQuery.leftParam.param.(*syntaxQueryParamCurrentNode)
-		        _, rightIsCurrentNode := checkQuery.rightParam.param.(*syntaxQueryParamCurrentNode)
+		    if checkQuery, ok := query.(*syntaxCompareQuery); ok {
+		        leftIsCurrentNode := false
+		        switch checkQuery.leftParam.(type) {
+		        case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
+		            leftIsCurrentNode = true
+		        }
+
+		        rightIsCurrentNode := false
+		        switch checkQuery.rightParam.(type) {
+		        case *syntaxQueryParamCurrentNode, *syntaxQueryParamCurrentNodePath:
+		            rightIsCurrentNode = true
+		        }
 		        if leftIsCurrentNode && rightIsCurrentNode {
 		            panic(p.syntaxErr(
 		                begin, msgErrorInvalidSyntaxTwoCurrentNode, buffer))
@@ -3266,81 +3308,74 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 		    }
 		}> */
 		nil,
-		/* 91 Action27 <- <{
-		    _ = p.pop()
+		/* 94 Action26 <- <{
 		    jsonpathFilter := p.pop().(syntaxQuery)
-
-		    if text[0:1] == `!` {
-		        p.pushLogicalNot(jsonpathFilter)
-		    } else {
-		        p.push(jsonpathFilter)
-		    }
+		    p.pushLogicalNot(jsonpathFilter)
 		}> */
 		nil,
-		/* 92 Action28 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 95 Action27 <- <{
+		    rightParam := p.pop().(syntaxCompareParameter)
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareEQ(leftParam, rightParam)
 		}> */
 		nil,
-		/* 93 Action29 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 96 Action28 <- <{
+		    rightParam := p.pop().(syntaxCompareParameter)
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareNE(leftParam, rightParam)
 		}> */
 		nil,
-		/* 94 Action30 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 97 Action29 <- <{
+		    rightParam := p.pop().(syntaxCompareParameter)
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareLE(leftParam, rightParam)
 		}> */
 		nil,
-		/* 95 Action31 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 98 Action30 <- <{
+		    rightParam := p.pop().(syntaxCompareParameter)
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareLT(leftParam, rightParam)
 		}> */
 		nil,
-		/* 96 Action32 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 99 Action31 <- <{
+		    rightParam := p.pop().(syntaxCompareParameter)
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareGE(leftParam, rightParam)
 		}> */
 		nil,
-		/* 97 Action33 <- <{
-		    rightParam := p.pop().(*syntaxBasicCompareParameter)
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 100 Action32 <- <{
+		    rightParam := p.pop().(syntaxCompareParameter)
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareGT(leftParam, rightParam)
 		}> */
 		nil,
-		/* 98 Action34 <- <{
-		    leftParam := p.pop().(*syntaxBasicCompareParameter)
+		/* 101 Action33 <- <{
+		    leftParam := p.pop().(syntaxCompareParameter)
 		    p.pushCompareRegex(leftParam, text)
 		}> */
 		nil,
-		/* 99 Action35 <- <{
+		/* 102 Action34 <- <{
 		    p.pushCompareParameterLiteral(p.pop())
 		}> */
 		nil,
-		/* 100 Action36 <- <{
+		/* 103 Action35 <- <{
 		    p.pushCompareParameterLiteral(p.pop())
 		}> */
 		nil,
-		/* 101 Action37 <- <{
-		    isLiteral := p.pop().(bool)
+		/* 104 Action36 <- <{
 		    param := p.pop().(syntaxQueryJSONPathParameter)
 		    if param.isValueGroupParameter() {
 		        panic(p.syntaxErr(
 		            begin, msgErrorInvalidSyntaxFilterValueGroup, buffer))
 		    }
-		    p.pushBasicCompareParameter(param.(syntaxQuery), isLiteral)
+		    p.push(param)
 		}> */
 		nil,
-		/* 102 Action38 <- <{
+		/* 105 Action37 <- <{
 		    p.saveParams()
 		}> */
 		nil,
-		/* 103 Action39 <- <{
+		/* 106 Action38 <- <{
 		    p.loadParams()
 
 		    node := p.pop().(syntaxNode)
@@ -3352,34 +3387,32 @@ func (p *pegJSONPathParser[U]) Init(options ...func(*pegJSONPathParser[U]) error
 		    switch checkNode.(type) {
 		    case *syntaxRootNodeIdentifier:
 		        p.pushCompareParameterRoot(p.deleteRootNodeIdentifier(node))
-		        p.push(true)
 		    case *syntaxCurrentNodeIdentifier:
 		        p.pushCompareParameterCurrentNode(p.deleteRootNodeIdentifier(node))
-		        p.push(false)
 		    }
 		}> */
 		nil,
-		/* 104 Action40 <- <{
+		/* 107 Action39 <- <{
 		    p.push(p.toFloat(text))
 		}> */
 		nil,
-		/* 105 Action41 <- <{
+		/* 108 Action40 <- <{
 		    p.push(true)
 		}> */
 		nil,
-		/* 106 Action42 <- <{
+		/* 109 Action41 <- <{
 		    p.push(false)
 		}> */
 		nil,
-		/* 107 Action43 <- <{
+		/* 110 Action42 <- <{
 		    p.push(p.unescapeSingleQuotedString(text))
 		}> */
 		nil,
-		/* 108 Action44 <- <{
+		/* 111 Action43 <- <{
 		    p.push(p.unescapeDoubleQuotedString(text))
 		}> */
 		nil,
-		/* 109 Action45 <- <{
+		/* 112 Action44 <- <{
 		    p.push(nil)
 		}> */
 		nil,

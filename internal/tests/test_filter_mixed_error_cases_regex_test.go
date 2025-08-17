@@ -24,6 +24,18 @@ func TestFilterRegexErrors(t *testing.T) {
 			inputJSON:   `[{"a":"case"},{"a":"CASE"},{"a":"Case"},{"a":"abc"}]`,
 			expectedErr: createErrorInvalidArgument(`(?x)CASE`, fmt.Errorf("error parsing regexp: invalid or unsupported Perl syntax: `(?x`")),
 		},
+
+		{
+			jsonpath:    `$[?(@.a=~/\q/)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: createErrorInvalidArgument(`\q`, fmt.Errorf("error parsing regexp: invalid escape sequence: `\\q`")),
+		},
+
+		{
+			jsonpath:    `$[?(@.a=~/\/)]`,
+			inputJSON:   `[{"a":"123"},{"a":123}]`,
+			expectedErr: createErrorInvalidSyntax(1, `unrecognized input`, `[?(@.a=~/\/)]`),
+		},
 	}
 
 	runTestCases(t, "TestFilterRegexErrors", testCases)
@@ -59,11 +71,58 @@ func TestFilterRegexSyntaxErrors(t *testing.T) {
 func TestFilterRegexMemberAccessErrors(t *testing.T) {
 	testCases := []TestCase{
 		{
+			jsonpath:    `$[?(@.b=~/abc/)]`,
+			inputJSON:   `[{"a":"abc"}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.b=~/abc/)]`),
+		},
+		{
 			jsonpath:    `$[?(@.a.b=~/abc/)]`,
 			inputJSON:   `[{"a":"abc"}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a.b=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a.b=~/abc/)]`,
+			inputJSON:   `[{"a":"abc"},{"a":{"b":"x"}}]`,
 			expectedErr: createErrorMemberNotExist(`[?(@.a.b=~/abc/)]`),
 		},
 	}
 
 	runTestCases(t, "TestFilterRegexMemberAccessErrors", testCases)
+}
+
+func TestFilterRegexInputJsonVariations(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[?(@.a=~/abc/)]`,
+			inputJSON:    `[{"a":"abc"}]`,
+			expectedJSON: `[{"a":"abc"}]`,
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":123}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":null}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":true}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":["abc"]}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":{"b":"abc"}}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+	}
+
+	runTestCases(t, "TestFilterRegexInputVariations", testCases)
 }

@@ -5,12 +5,12 @@ import "github.com/AsaiYusuke/jsonpath/errors"
 type syntaxAggregateFunction struct {
 	*syntaxBasicNode
 
-	function func([]interface{}) (interface{}, error)
+	function func([]any) (any, error)
 	param    syntaxNode
 }
 
 func (f *syntaxAggregateFunction) retrieve(
-	root, current interface{}, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, container *bufferContainer) errors.ErrorRuntime {
 
 	values := getContainer()
 	defer func() {
@@ -23,7 +23,7 @@ func (f *syntaxAggregateFunction) retrieve(
 
 	result := values.result
 	if !f.param.isValueGroup() {
-		if arrayParam, ok := values.result[0].([]interface{}); ok {
+		if arrayParam, ok := values.result[0].([]any); ok {
 			result = arrayParam
 		}
 	}

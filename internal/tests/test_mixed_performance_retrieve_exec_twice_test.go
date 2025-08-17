@@ -15,12 +15,12 @@ func TestRetrieveExecTwice(t *testing.T) {
 	srcJSON2 := `[123,{"b":456}]`
 	expectedOutput2 := "[456]"
 
-	var src1 interface{}
+	var src1 any
 	if err := json.Unmarshal([]byte(srcJSON1), &src1); err != nil {
 		t.Errorf("%s", err)
 		return
 	}
-	var src2 interface{}
+	var src2 any
 	if err := json.Unmarshal([]byte(srcJSON2), &src2); err != nil {
 		t.Errorf("%s", err)
 		return

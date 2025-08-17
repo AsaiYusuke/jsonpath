@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var useJSONNumberDecoderFunction = func(srcJSON string, src *interface{}) error {
+var useJSONNumberDecoderFunction = func(srcJSON string, src *any) error {
 	reader := strings.NewReader(srcJSON)
 	decoder := json.NewDecoder(reader)
 	decoder.UseNumber()
@@ -50,6 +50,45 @@ func TestDotNotation_JsonNumberFilter(t *testing.T) {
 			jsonpath:      `$[?(@.a==11)]`,
 			inputJSON:     `[{"a":10.999},{"a":11.00},{"a":11.10}]`,
 			expectedJSON:  `[{"a":11.00}]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a >= 123)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[123.456]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a >= 123.46)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[]`,
+			expectedErr:   createErrorMemberNotExist(`[?(@.a >= 123.46)]`),
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a < 123.46)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[123.456]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a < 123)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[]`,
+			expectedErr:   createErrorMemberNotExist(`[?(@.a < 123)]`),
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a <= 123.46)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[123.456]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a <= 123)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[]`,
+			expectedErr:   createErrorMemberNotExist(`[?(@.a <= 123)]`),
 			unmarshalFunc: useJSONNumberDecoderFunction,
 		},
 	}

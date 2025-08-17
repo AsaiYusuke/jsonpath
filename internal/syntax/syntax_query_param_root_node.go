@@ -4,25 +4,13 @@ type syntaxQueryParamRootNode struct {
 	param syntaxNode
 }
 
+// Dummy to satisfy syntaxQueryJSONPathParameter; not used in normal paths.
 func (e *syntaxQueryParamRootNode) isValueGroupParameter() bool {
-	return e.param.isValueGroup()
+	return false
 }
 
 func (e *syntaxQueryParamRootNode) compute(
-	root interface{}, _ []interface{}) []interface{} {
-
-	values := getContainer()
-	defer func() {
-		putContainer(values)
-	}()
-
-	if e.param.retrieve(root, root, values) != nil {
-		return emptyList
-	}
-
-	if len(values.result) == 1 {
-		return []interface{}{values.result[0]}
-	}
+	_ any, _ []any) []any {
 
 	return fullList
 }

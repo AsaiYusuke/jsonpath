@@ -6,7 +6,7 @@ type syntaxLogicalOr struct {
 }
 
 func (l *syntaxLogicalOr) compute(
-	root interface{}, currentList []interface{}) []interface{} {
+	root any, currentList []any) []any {
 
 	leftComputedList := l.leftQuery.compute(root, currentList)
 	if len(leftComputedList) == 1 {
