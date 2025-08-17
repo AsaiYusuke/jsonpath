@@ -3,8 +3,6 @@ package syntax
 import "regexp"
 
 type syntaxCompareRegex struct {
-	*syntaxStringTypeValidator
-
 	regex *regexp.Regexp
 }
 
@@ -14,9 +12,14 @@ func (r *syntaxCompareRegex) comparator(left []any, _ any) bool {
 		if left[leftIndex] == emptyEntity {
 			continue
 		}
-		if r.regex.MatchString(left[leftIndex].(string)) {
-			hasValue = true
-		} else {
+		switch leftValue := left[leftIndex].(type) {
+		case string:
+			if r.regex.MatchString(leftValue) {
+				hasValue = true
+			} else {
+				left[leftIndex] = emptyEntity
+			}
+		default:
 			left[leftIndex] = emptyEntity
 		}
 	}

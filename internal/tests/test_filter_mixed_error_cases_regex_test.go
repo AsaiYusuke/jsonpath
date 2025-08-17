@@ -71,11 +71,58 @@ func TestFilterRegexSyntaxErrors(t *testing.T) {
 func TestFilterRegexMemberAccessErrors(t *testing.T) {
 	testCases := []TestCase{
 		{
+			jsonpath:    `$[?(@.b=~/abc/)]`,
+			inputJSON:   `[{"a":"abc"}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.b=~/abc/)]`),
+		},
+		{
 			jsonpath:    `$[?(@.a.b=~/abc/)]`,
 			inputJSON:   `[{"a":"abc"}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a.b=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a.b=~/abc/)]`,
+			inputJSON:   `[{"a":"abc"},{"a":{"b":"x"}}]`,
 			expectedErr: createErrorMemberNotExist(`[?(@.a.b=~/abc/)]`),
 		},
 	}
 
 	runTestCases(t, "TestFilterRegexMemberAccessErrors", testCases)
+}
+
+func TestFilterRegexInputJsonVariations(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:     `$[?(@.a=~/abc/)]`,
+			inputJSON:    `[{"a":"abc"}]`,
+			expectedJSON: `[{"a":"abc"}]`,
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":123}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":null}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":true}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":["abc"]}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+		{
+			jsonpath:    `$[?(@.a=~/abc/)]`,
+			inputJSON:   `[{"a":{"b":"abc"}}]`,
+			expectedErr: createErrorMemberNotExist(`[?(@.a=~/abc/)]`),
+		},
+	}
+
+	runTestCases(t, "TestFilterRegexInputVariations", testCases)
 }

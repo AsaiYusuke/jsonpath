@@ -505,21 +505,13 @@ func (p *jsonPathParser) pushCompareEQ(
 	if rightLiteralParam, ok := rightParam.(*syntaxQueryParamLiteral); ok {
 		switch rightLiteralParam.literal[0].(type) {
 		case float64:
-			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-				syntaxTypeValidator: &syntaxNumericTypeValidator{},
-			}))
+			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{}))
 		case bool:
-			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-				syntaxTypeValidator: &syntaxBoolTypeValidator{},
-			}))
+			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{}))
 		case string:
-			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-				syntaxTypeValidator: &syntaxStringTypeValidator{},
-			}))
+			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{}))
 		case nil:
-			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{
-				syntaxTypeValidator: &syntaxNilTypeValidator{},
-			}))
+			p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareDirectEQ{}))
 		}
 
 		return

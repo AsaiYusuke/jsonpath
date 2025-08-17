@@ -4,6 +4,18 @@ import (
 	"testing"
 )
 
+func TestFilterComparison_ComplexNestedFilter(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:    `$[?( (@>1) > 2)]`,
+			inputJSON:   `[1,2,3,4]`,
+			expectedErr: createErrorInvalidSyntax(1, `unrecognized input`, `[?( (@>1) > 2)]`),
+		},
+	}
+
+	runTestCases(t, "TestFilterComparison_ComplexNestedFilter", testCases)
+}
+
 func TestFilterComparison_ComplexNestedArrayAccess(t *testing.T) {
 	testCases := []TestCase{
 		{

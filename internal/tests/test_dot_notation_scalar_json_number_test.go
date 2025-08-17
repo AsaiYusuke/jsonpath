@@ -52,6 +52,45 @@ func TestDotNotation_JsonNumberFilter(t *testing.T) {
 			expectedJSON:  `[{"a":11.00}]`,
 			unmarshalFunc: useJSONNumberDecoderFunction,
 		},
+		{
+			jsonpath:      `$[?(@.a >= 123)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[123.456]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a >= 123.46)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[]`,
+			expectedErr:   createErrorMemberNotExist(`[?(@.a >= 123.46)]`),
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a < 123.46)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[123.456]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a < 123)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[]`,
+			expectedErr:   createErrorMemberNotExist(`[?(@.a < 123)]`),
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a <= 123.46)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[123.456]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a <= 123)].a`,
+			inputJSON:     `[{"a":123.456}]`,
+			expectedJSON:  `[]`,
+			expectedErr:   createErrorMemberNotExist(`[?(@.a <= 123)]`),
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
 	}
 
 	runTestCases(t, "TestDotNotation_JsonNumberFilter", testCases)

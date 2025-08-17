@@ -3,7 +3,6 @@ package syntax
 import "reflect"
 
 type syntaxCompareDeepEQ struct {
-	*syntaxAnyValueTypeValidator
 }
 
 func (c *syntaxCompareDeepEQ) comparator(left []any, right any) bool {
