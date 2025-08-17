@@ -39,7 +39,7 @@ For syntax compatibility among other libraries, please check [:memo: my comparis
 ### Install
 
 ```bash
-go get github.com/AsaiYusuke/jsonpath
+go install github.com/AsaiYusuke/jsonpath
 ```
 
 ### Simple example
@@ -56,7 +56,7 @@ import (
 
 func main() {
   jsonPath, srcJSON := `$.key`, `{"key":"value"}`
-  var src interface{}
+  var src any
   json.Unmarshal([]byte(srcJSON), &src)
   output, _ := jsonpath.Retrieve(jsonPath, src)
   outputJSON, _ := json.Marshal(output)
@@ -130,17 +130,16 @@ These error types define the corresponding symptom, as listed below:
 The type checking is convenient to recognize which error happened.
 
 ```go
+import jsonpath "github.com/AsaiYusuke/jsonpath"
+import errors "github.com/AsaiYusuke/jsonpath/errors"
   :
   _,err := jsonpath.Retrieve(jsonPath, srcJSON)
-  if err != nil {
-    switch err.(type) {
-    case jsonpath.ErrorMemberNotExist:
-      fmt.printf(`retry with other srcJSON: %v`, err)
-      continue
-    case jsonpath.ErrorInvalidArgumentFormat:
-      return nil, fmt.errorf(`specified invalid argument: %v`, err)
-    }
-    :
+  switch err.(type) {
+  case errors.ErrorMemberNotExist:
+    fmt.printf(`retry with other srcJSON: %v`, err)
+    continue
+  case errors.ErrorInvalidArgument:
+    return nil, fmt.errorf(`specified invalid argument: %v`, err)
   }
 ```
 

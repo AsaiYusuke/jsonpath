@@ -1,4 +1,4 @@
-package tests
+package jsonpath_test
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/AsaiYusuke/jsonpath"
+	"github.com/AsaiYusuke/jsonpath/errors"
 )
 
 func Example() {
@@ -25,7 +26,7 @@ func ExampleRetrieve() {
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
 	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
@@ -40,7 +41,7 @@ func ExampleParse() {
 	srcJSON2 := `{"key":"value2"}`
 	jsonPathParser, err := jsonpath.Parse(jsonPath)
 	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	var src1, src2 any
@@ -48,12 +49,12 @@ func ExampleParse() {
 	json.Unmarshal([]byte(srcJSON2), &src2)
 	output1, err := jsonPathParser(src1)
 	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	output2, err := jsonPathParser(src2)
 	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON1, _ := json.Marshal(output1)
@@ -70,14 +71,15 @@ func ExampleErrorInvalidSyntax() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorInvalidSyntax:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorInvalidSyntax, invalid syntax (position=1, reason=unrecognized input, near=.)
+	// type: errors.ErrorInvalidSyntax, value: invalid syntax (position=1, reason=unrecognized input, near=.)
 }
 
 func ExampleErrorInvalidArgument() {
@@ -85,14 +87,15 @@ func ExampleErrorInvalidArgument() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorInvalidArgument:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorInvalidArgument, invalid argument (argument=1.0.0, error=strconv.ParseFloat: parsing "1.0.0": invalid syntax)
+	// type: errors.ErrorInvalidArgument, value: invalid argument (argument=1.0.0, error=strconv.ParseFloat: parsing "1.0.0": invalid syntax)
 }
 
 func ExampleErrorFunctionNotFound() {
@@ -100,14 +103,15 @@ func ExampleErrorFunctionNotFound() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorFunctionNotFound:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorFunctionNotFound, function not found (path=.unknown())
+	// type: errors.ErrorFunctionNotFound, value: function not found (path=.unknown())
 }
 
 func ExampleErrorNotSupported() {
@@ -115,14 +119,15 @@ func ExampleErrorNotSupported() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorNotSupported:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorNotSupported, not supported (path=[(command)], feature=script)
+	// type: errors.ErrorNotSupported, value: not supported (path=[(command)], feature=script)
 }
 
 func ExampleErrorMemberNotExist() {
@@ -130,14 +135,15 @@ func ExampleErrorMemberNotExist() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorMemberNotExist:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorMemberNotExist, member did not exist (path=.none)
+	// type: errors.ErrorMemberNotExist, value: member did not exist (path=.none)
 }
 
 func ExampleErrorTypeUnmatched() {
@@ -145,14 +151,15 @@ func ExampleErrorTypeUnmatched() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorTypeUnmatched:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorTypeUnmatched, type unmatched (path=.a, expected=object, found=[]interface {})
+	// type: errors.ErrorTypeUnmatched, value: type unmatched (path=.a, expected=object, found=[]interface {})
 }
 
 func ExampleErrorFunctionFailed() {
@@ -164,14 +171,15 @@ func ExampleErrorFunctionFailed() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorFunctionFailed:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
 	fmt.Println(string(outputJSON))
 	// Output:
-	// errors.ErrorFunctionFailed, function failed (path=.invalid(), error=invalid function executed)
+	// type: errors.ErrorFunctionFailed, value: function failed (path=.invalid(), error=invalid function executed)
 }
 
 func ExampleConfig_SetFilterFunction() {
@@ -186,8 +194,9 @@ func ExampleConfig_SetFilterFunction() {
 	var src any
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
-	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+	switch err.(type) {
+	case errors.ErrorFunctionNotFound:
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
@@ -216,7 +225,7 @@ func ExampleConfig_SetAggregateFunction() {
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
 	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	outputJSON, _ := json.Marshal(output)
@@ -233,7 +242,7 @@ func ExampleConfig_SetAccessorMode() {
 	json.Unmarshal([]byte(srcJSON), &src)
 	output, err := jsonpath.Retrieve(jsonPath, src, config)
 	if err != nil {
-		fmt.Printf(`%v, %v`, reflect.TypeOf(err), err)
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
 	accessor := output[0].(jsonpath.Accessor)
