@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/AsaiYusuke/jsonpath"
-	"github.com/AsaiYusuke/jsonpath/errors"
+	"github.com/AsaiYusuke/jsonpath/v2"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
 func Example() {

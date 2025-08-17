@@ -3,7 +3,7 @@ package syntax
 import (
 	"reflect"
 
-	"github.com/AsaiYusuke/jsonpath/errors"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
 type syntaxChildWildcardIdentifier struct {

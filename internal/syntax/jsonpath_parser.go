@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/AsaiYusuke/jsonpath/errors"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
 type jsonPathParser struct {

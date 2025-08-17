@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/AsaiYusuke/jsonpath"
+	"github.com/AsaiYusuke/jsonpath/v2"
 )
 
 type UnsupportedStructChild struct {

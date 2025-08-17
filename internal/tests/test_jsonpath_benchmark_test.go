@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/AsaiYusuke/jsonpath"
+	"github.com/AsaiYusuke/jsonpath/v2"
 )
 
 func execParserFunc(jsonPath, srcJSON string, b *testing.B) {
