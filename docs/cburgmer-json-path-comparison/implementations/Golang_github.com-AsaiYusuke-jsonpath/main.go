@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
-	"github.com/AsaiYusuke/jsonpath"
+	"github.com/AsaiYusuke/jsonpath/v2"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 
 	selector := os.Args[1]
 
-	data, err := ioutil.ReadAll(os.Stdin)
+	data, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -37,14 +38,14 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		switch err.(type) {
-		case jsonpath.ErrorInvalidArgument,
-			jsonpath.ErrorInvalidSyntax,
-			jsonpath.ErrorNotSupported,
-			jsonpath.ErrorFunctionNotFound:
+		case errors.ErrorInvalidArgument,
+			errors.ErrorInvalidSyntax,
+			errors.ErrorNotSupported,
+			errors.ErrorFunctionNotFound:
 			os.Exit(2)
-		case jsonpath.ErrorMemberNotExist,
-			jsonpath.ErrorTypeUnmatched,
-			jsonpath.ErrorFunctionFailed:
+		case errors.ErrorMemberNotExist,
+			errors.ErrorTypeUnmatched,
+			errors.ErrorFunctionFailed:
 			os.Exit(3)
 		}
 		os.Exit(1)
