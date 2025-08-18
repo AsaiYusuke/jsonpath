@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/AsaiYusuke/jsonpath"
+	"github.com/AsaiYusuke/jsonpath/v2"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
 func main() {
@@ -37,14 +38,14 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		switch err.(type) {
-		case jsonpath.ErrorInvalidArgument,
-			jsonpath.ErrorInvalidSyntax,
-			jsonpath.ErrorNotSupported,
-			jsonpath.ErrorFunctionNotFound:
+		case errors.ErrorInvalidArgument,
+			errors.ErrorInvalidSyntax,
+			errors.ErrorNotSupported,
+			errors.ErrorFunctionNotFound:
 			os.Exit(2)
-		case jsonpath.ErrorMemberNotExist,
-			jsonpath.ErrorTypeUnmatched,
-			jsonpath.ErrorFunctionFailed:
+		case errors.ErrorMemberNotExist,
+			errors.ErrorTypeUnmatched,
+			errors.ErrorFunctionFailed:
 			os.Exit(3)
 		}
 		os.Exit(1)
