@@ -473,6 +473,26 @@ JavaScript (brunerd)
 ]
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>[
+  {
+    "id": 3,
+    "name": "another"
+  },
+  {
+    "id": 4,
+    "name": "more"
+  },
+  {
+    "id": 5,
+    "name": "next to last"
+  }
+]
+</code></pre>
+
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
 </h4>
@@ -509,6 +529,38 @@ JavaScript (jsonpath-plus)
   {
     "id": 5,
     "name": "next to last"
+  }
+]
+</code></pre>
+
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[
+  {
+    "id": 3,
+    "name": "another"
+  },
+  {
+    "id": 3,
+    "name": "another"
+  },
+  {
+    "id": 4,
+    "name": "more"
+  },
+  {
+    "id": 4,
+    "name": "more"
+  },
+  {
+    "id": 5,
+    "name": "next to last"
+  },
+  {
+    "id": 6,
+    "name": "last"
   }
 ]
 </code></pre>
@@ -613,7 +665,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -654,6 +705,26 @@ PHP (remorhaz-jsonpath)
     "name": "last"
   }
 ]
+</code></pre>
+
+<h4 id="PHP_softcreatr-jsonpath">
+PHP (softcreatr-jsonpath)
+</h4>
+
+<pre><code>{
+  "0": {
+    "id": 3,
+    "name": "another"
+  },
+  "1": {
+    "id": 4,
+    "name": "more"
+  },
+  "more": {
+    "id": 5,
+    "name": "next to last"
+  }
+}
 </code></pre>
 
 <h4 id="Python_jsonpath">
@@ -719,13 +790,33 @@ Python (jsonpath2)
 ]
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "id": 3,
+    "name": "another"
+  },
+  {
+    "id": 4,
+    "name": "more"
+  },
+  {
+    "id": 5,
+    "name": "next to last"
+  }
+]
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -871,6 +962,26 @@ Rust (jsonpath_lib)
 
 <h4 id="Rust_jsonpath_plus">
 Rust (jsonpath_plus)
+</h4>
+
+<pre><code>[
+  {
+    "id": 3,
+    "name": "another"
+  },
+  {
+    "id": 4,
+    "name": "more"
+  },
+  {
+    "id": 5,
+    "name": "next to last"
+  }
+]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
 </h4>
 
 <pre><code>[
@@ -1045,40 +1156,6 @@ dotNET (Manatee.Json)
 ]
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $..*[?(@.id&gt;2)]
-  |   ^---
-  |
-  = expected childName
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<pre><code>[
-  {
-    "id": 3,
-    "name": "another"
-  },
-  {
-    "id": 4,
-    "name": "more"
-  },
-  {
-    "id": 5,
-    "name": "next to last"
-  }
-]
-</code></pre>
-
 <h3>Errors</h3>
 
 <h4 id="Clojure_json-path">
@@ -1103,13 +1180,6 @@ PHP (Goessner)
 </h4>
 
 <pre><code>ArgumentCountError
-</code></pre>
-
-<h4 id="PHP_softcreatr-jsonpath">
-PHP (softcreatr-jsonpath)
-</h4>
-
-<pre><code>TypeError
 </code></pre>
 
 <h4 id="Perl_JSON-Path">

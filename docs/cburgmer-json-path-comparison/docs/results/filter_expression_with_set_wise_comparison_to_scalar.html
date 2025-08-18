@@ -51,7 +51,7 @@ Dart (json_path)
 
 <p>Not supported</p>
 
-<pre><code>FormatException: end of input expected at 1:2. Expression: $[?(@[*]&gt;=4)]
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -115,6 +115,10 @@ Golang (github.com-ohler55-ojg)
 
 <pre><code>[
   [
+    3,
+    4
+  ],
+  [
     5,
     6
   ]
@@ -164,6 +168,13 @@ JavaScript (brunerd)
 
 <pre><code></code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -204,7 +215,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -264,13 +274,22 @@ Python (jsonpath2)
 <pre><code>[]
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JSONPathTypeError('non-singular query is not comparable')
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -307,6 +326,15 @@ Rust (jsonpath_plus)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 3, in long-hand segment, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -368,7 +396,9 @@ dotNET (JsonCons.JsonPath)
 dotNET (JsonPath.Net)
 </h4>
 
-<pre><code>[]
+<p>Not supported</p>
+
+<pre><code>Pattern '?(@[*]&gt;=4)...' not recognized.
 </code></pre>
 
 <h4 id="dotNET_Manatee.Json">
@@ -378,162 +408,6 @@ dotNET (Manatee.Json)
 <p>Not supported</p>
 
 <pre><code>JSON Path expression indexers only support single constant values. Path up to error: '$'
-</code></pre>
-
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(@[*]&gt;=4)]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:7-1:7 Integer
-| $[?(@[*]&gt;=4)]
-|       ^
-x 1:7-1:7 BracketChild
-| $[?(@[*]&gt;=4)]
-|       ^
-x 1:6-1:6 ScalarOperator
-| $[?(@[*]&gt;=4)]
-|      ^
-o 1:5-1:6 DocumentValue
-| $[?(@[*]&gt;=4)]
-|     ^
-o 1:5-1:6 UnaryFilterExpression
-| $[?(@[*]&gt;=4)]
-|     ^
-| x 1:7-1:7 Integer
-| | $[?(@[*]&gt;=4)]
-| |       ^
-| x 1:7-1:7 BracketChild
-| | $[?(@[*]&gt;=4)]
-| |       ^
-| x 1:6-1:6 ScalarOperator
-| | $[?(@[*]&gt;=4)]
-| |      ^
-| o 1:5-1:6 DocumentValue
-| | $[?(@[*]&gt;=4)]
-| |     ^
-| o 1:5-1:6 FilterValue
-| | $[?(@[*]&gt;=4)]
-| |     ^
-| | 
-|/  
-o 1:5-1:6 HigherPrecedenceFilterExpression
-| $[?(@[*]&gt;=4)]
-|     ^
-x 1:5-1:5 LogicalOr
-| $[?(@[*]&gt;=4)]
-|     ^
-| x 1:7-1:7 Integer
-| | $[?(@[*]&gt;=4)]
-| |       ^
-| x 1:7-1:7 BracketChild
-| | $[?(@[*]&gt;=4)]
-| |       ^
-| x 1:6-1:6 ScalarOperator
-| | $[?(@[*]&gt;=4)]
-| |      ^
-| o 1:5-1:6 DocumentValue
-| | $[?(@[*]&gt;=4)]
-| |     ^
-| o 1:5-1:6 UnaryFilterExpression
-| | $[?(@[*]&gt;=4)]
-| |     ^
-| | x 1:7-1:7 Integer
-| | | $[?(@[*]&gt;=4)]
-| | |       ^
-| | x 1:7-1:7 BracketChild
-| | | $[?(@[*]&gt;=4)]
-| | |       ^
-| | x 1:6-1:6 ScalarOperator
-| | | $[?(@[*]&gt;=4)]
-| | |      ^
-| | o 1:5-1:6 DocumentValue
-| | | $[?(@[*]&gt;=4)]
-| | |     ^
-| | o 1:5-1:6 FilterValue
-| | | $[?(@[*]&gt;=4)]
-| | |     ^
-| | | 
-| |/  
-| o 1:5-1:6 HigherPrecedenceFilterExpression
-| | $[?(@[*]&gt;=4)]
-| |     ^
-| x 1:5-1:5 LogicalAnd
-| | $[?(@[*]&gt;=4)]
-| |     ^
-| | x 1:7-1:7 Integer
-| | | $[?(@[*]&gt;=4)]
-| | |       ^
-| | x 1:7-1:7 BracketChild
-| | | $[?(@[*]&gt;=4)]
-| | |       ^
-| | x 1:6-1:6 ScalarOperator
-| | | $[?(@[*]&gt;=4)]
-| | |      ^
-| | o 1:5-1:6 DocumentValue
-| | | $[?(@[*]&gt;=4)]
-| | |     ^
-| | o 1:5-1:6 UnaryFilterExpression
-| | | $[?(@[*]&gt;=4)]
-| | |     ^
-| | | x 1:7-1:7 Integer
-| | | | $[?(@[*]&gt;=4)]
-| | | |       ^
-| | | x 1:7-1:7 BracketChild
-| | | | $[?(@[*]&gt;=4)]
-| | | |       ^
-| | | x 1:6-1:6 ScalarOperator
-| | | | $[?(@[*]&gt;=4)]
-| | | |      ^
-| | | o 1:5-1:6 DocumentValue
-| | | | $[?(@[*]&gt;=4)]
-| | | |     ^
-| | | o 1:5-1:6 FilterValue
-| | | | $[?(@[*]&gt;=4)]
-| | | |     ^
-| | | | 
-| | |/  
-| | o 1:5-1:6 HigherPrecedenceFilterExpression
-| | | $[?(@[*]&gt;=4)]
-| | |     ^
-| | | 
-|/ /  
-| | 
-|/  
-o 1:5-1:6 FilterExpression
-| $[?(@[*]&gt;=4)]
-|     ^
-x 1:3-1:3 BracketElement
-| $[?(@[*]&gt;=4)]
-|   ^
-x 1:3-1:3 BracketElements
-| $[?(@[*]&gt;=4)]
-|   ^
-x 1:2-1:2 BracketChildren
-| $[?(@[*]&gt;=4)]
-|  ^
-x 1:2-1:2 Operator
-| $[?(@[*]&gt;=4)]
-|  ^
-o 1:1-1:2 Start
-  $[?(@[*]&gt;=4)]
-  ^
 </code></pre>
 
 <h3>Errors</h3>
@@ -561,6 +435,13 @@ JavaScript (Goessner)
 <pre><code>jsonPath: Unexpected token *: _v[*]&gt;=4
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>non-singular query is not comparable ('$[?(@[*]&gt;':4)
+</code></pre>
+
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
 </h4>
@@ -572,7 +453,7 @@ JavaScript (jsonpath)
 JavaScript (jsonpath-plus)
 </h4>
 
-<pre><code>Unexpected token '*'
+<pre><code>Unexpected "*" at character 5
 </code></pre>
 
 <h4 id="PHP_Goessner">
@@ -601,7 +482,7 @@ Rust (jsonpath_lib)
 dotNET (JsonPathLib)
 </h4>
 
-<pre><code>Line 1: Unexpected token *
+<pre><code>Unexpected token '*' (&lt;anonymous&gt;:1:4)
 </code></pre>
 
 <h2>Footnotes</h2>

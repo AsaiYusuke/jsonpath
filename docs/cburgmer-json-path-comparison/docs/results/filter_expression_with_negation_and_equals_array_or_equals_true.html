@@ -57,7 +57,7 @@ Dart (json_path)
 
 <p>Not supported</p>
 
-<pre><code>FormatException: end of input expected at 1:2. Expression: $[?(!(@.d==["v1","v2"]) || (@.d == true))]
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -105,14 +105,6 @@ Golang (github.com-PaesslerAG-jsonpath)
 
 <pre><code>parsing error: $[?(!(@.d==["v1","v2"]) || (@.d == true))]	:1:5 - 1:6 unexpected "!" while scanning extensions
 </code></pre>
-
-<h4 id="Golang_github.com-ohler55-ojg">
-Golang (github.com-ohler55-ojg)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code></code></pre>
 
 <h4 id="Golang_github.com-vmware-labs-yaml-jsonpath">
 Golang (github.com-vmware-labs-yaml-jsonpath)
@@ -232,6 +224,23 @@ JavaScript (jsonpath-plus)
 ]
 </code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "d": true
+  }
+]
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -292,7 +301,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -319,6 +327,29 @@ PHP (remorhaz-jsonpath)
 </h4>
 
 <pre><code>[
+  {
+    "d": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "d": true
+  }
+]
+</code></pre>
+
+<h4 id="PHP_softcreatr-jsonpath">
+PHP (softcreatr-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      "v1",
+      "v2"
+    ]
+  },
   {
     "d": [
       "a",
@@ -369,13 +400,30 @@ Python (jsonpath2)
 ValueError("line 1:4 token recognition error at: '!('")
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "d": true
+  }
+]
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -404,6 +452,15 @@ Rust (jsonpath_lib)
 $[?(!(@.d==["v1","v2"]) || (@.d == true))]
 ^^^^
 
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 5, in long-hand segment, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -472,6 +529,29 @@ dotNET (JsonPath.Net)
 ]
 </code></pre>
 
+<h4 id="dotNET_JsonPathLib">
+dotNET (JsonPathLib)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      "v1",
+      "v2"
+    ]
+  },
+  {
+    "d": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "d": true
+  }
+]
+</code></pre>
+
 <h4 id="dotNET_Manatee.Json">
 dotNET (Manatee.Json)
 </h4>
@@ -479,178 +559,6 @@ dotNET (Manatee.Json)
 <p>Not supported</p>
 
 <pre><code>Unrecognized JSON Path Expression element. Path up to error: '$'
-</code></pre>
-
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:12-1:12 DocumentValue
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|            ^
-| x 1:12-1:12 IntegerPart
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| x 1:12-1:12 Number
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| x 1:12-1:12 SimpleValue
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| | 
-|/  
-x 1:12-1:12 FilterValue
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|            ^
-o 1:7-1:10 HigherPrecedenceFilterExpression
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|       ^^^
-x 1:7-1:7 LogicalOr
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|       ^
-| x 1:12-1:12 DocumentValue
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| | x 1:12-1:12 IntegerPart
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | x 1:12-1:12 Number
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | x 1:12-1:12 SimpleValue
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | | 
-| |/  
-| x 1:12-1:12 FilterValue
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| o 1:7-1:10 HigherPrecedenceFilterExpression
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |       ^^^
-| x 1:7-1:7 LogicalAnd
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |       ^
-| | x 1:12-1:12 DocumentValue
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | | x 1:12-1:12 IntegerPart
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | x 1:12-1:12 Number
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | x 1:12-1:12 SimpleValue
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | | 
-| | |/  
-| | x 1:12-1:12 FilterValue
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | o 1:7-1:10 HigherPrecedenceFilterExpression
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |       ^^^
-| | | 
-|/ /  
-| | 
-|/  
-o 1:7-1:10 FilterExpression
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|       ^^^
-x 1:6-1:6 UnaryFilterExpression
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|      ^
-x 1:5-1:5 UnaryFilterExpression
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|     ^
-x 1:5-1:5 HigherPrecedenceFilterExpression
-| $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-|     ^
-| x 1:12-1:12 DocumentValue
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| | x 1:12-1:12 IntegerPart
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | x 1:12-1:12 Number
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | x 1:12-1:12 SimpleValue
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | | 
-| |/  
-| x 1:12-1:12 FilterValue
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |            ^
-| o 1:7-1:10 HigherPrecedenceFilterExpression
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |       ^^^
-| x 1:7-1:7 LogicalOr
-| | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| |       ^
-| | x 1:12-1:12 DocumentValue
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | | x 1:12-1:12 IntegerPart
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | x 1:12-1:12 Number
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | x 1:12-1:12 SimpleValue
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | | 
-| | |/  
-| | x 1:12-1:12 FilterValue
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |            ^
-| | o 1:7-1:10 HigherPrecedenceFilterExpression
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |       ^^^
-| | x 1:7-1:7 LogicalAnd
-| | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | |       ^
-| | | x 1:12-1:12 DocumentValue
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | | x 1:12-1:12 IntegerPart
-| | | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | | |            ^
-| | | | x 1:12-1:12 Number
-| | | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | | |            ^
-| | | | x 1:12-1:12 SimpleValue
-| | | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | | |            ^
-| | | | | 
-| | | |/  
-| | | x 1:12-1:12 FilterValue
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |            ^
-| | | o 1:7-1:10 HigherPrecedenceFilterExpression
-| | | | $[?(!(@.d==["v1","v2"]) || (@.d == true))]
-| | | |       ^^^
-| | | | 
 </code></pre>
 
 <h3>Errors</h3>
@@ -679,6 +587,13 @@ Golang (github.com-bhmj-jsonslice)
 <pre><code>unknown token at 7: ["v1","v2"])||(@.d==true) at 4
 </code></pre>
 
+<h4 id="Golang_github.com-ohler55-ojg">
+Golang (github.com-ohler55-ojg)
+</h4>
+
+<pre><code>Exception: runtime error: comparing uncomparable type []interface {}
+</code></pre>
+
 <h4 id="Golang_github.com-oliveagle-jsonpath">
 Golang (github.com-oliveagle-jsonpath)
 ¹
@@ -694,19 +609,19 @@ Golang (github.com-spyzhov-ajson)
 <pre><code>wrong symbol '!' at 2
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>unexpected filter selector token '[' ('.d==["v1"':11)
+</code></pre>
+
 <h4 id="PHP_Goessner">
 PHP (Goessner)
 ²
 </h4>
 
 <pre><code>ArgumentCountError
-</code></pre>
-
-<h4 id="PHP_softcreatr-jsonpath">
-PHP (softcreatr-jsonpath)
-</h4>
-
-<pre><code>Error: 'Malformed filter query'
 </code></pre>
 
 <h4 id="Perl_JSON-Path">
@@ -723,13 +638,6 @@ Rust (jsonpath_plus)
 <pre><code>Error Parsing JSON Path:
 $[?(!(@.d==["v1","v2"]) || (@.d == true))]
 panic occurred
-</code></pre>
-
-<h4 id="dotNET_JsonPathLib">
-dotNET (JsonPathLib)
-</h4>
-
-<pre><code>Object reference not set to an instance of an object.
 </code></pre>
 
 <h2>Footnotes</h2>

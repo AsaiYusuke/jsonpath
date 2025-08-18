@@ -136,8 +136,26 @@ Haskell (jsonpath)
 <pre><code>[]
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
 <h4 id="JavaScript_jsonpath-plus">
 JavaScript (jsonpath-plus)
+</h4>
+
+<pre><code>[
+  "first",
+  "second",
+  "third"
+]
+</code></pre>
+
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
 </h4>
 
 <pre><code>[
@@ -224,15 +242,6 @@ PHP (softcreatr-jsonpath)
 ]
 </code></pre>
 
-<h4 id="Python_jsonpath-ng">
-Python (jsonpath-ng)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>JsonPathParserError('Parse error at 1:5 near token : (:)')
-</code></pre>
-
 <h4 id="Python_jsonpath-rw">
 Python (jsonpath-rw)
 </h4>
@@ -240,6 +249,13 @@ Python (jsonpath-rw)
 <p>Not supported</p>
 
 <pre><code>Exception('Parse error at 1:5 near token : (:)')
+</code></pre>
+
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[]
 </code></pre>
 
 <h4 id="Raku_JSON-Path">
@@ -258,6 +274,13 @@ Rust (jsonpath)
 <p>Not supported</p>
 
 <pre><code>parsing error
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<pre><code>[]
 </code></pre>
 
 <h4 id="Swift_Sextant">
@@ -303,40 +326,6 @@ dotNET (Manatee.Json)
 <pre><code>[]
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<pre><code>[]
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:7-1:7 NonZeroInteger
-| $[0:3:0]
-|       ^
-o 1:3-1:7 BracketElement
-| $[0:3:0]
-|   ^^^^
-o 1:3-1:7 BracketElements
-| $[0:3:0]
-|   ^^^^
-x 1:2-1:2 BracketChildren
-| $[0:3:0]
-|  ^
-x 1:2-1:2 Operator
-| $[0:3:0]
-|  ^
-o 1:1-1:2 Start
-  $[0:3:0]
-  ^
-</code></pre>
-
 <h3>Errors</h3>
 
 <h4 id="C_json-glib">
@@ -366,7 +355,30 @@ JavaScript (Goessner)
 ²
 </h4>
 
-<pre><code>FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+<pre><code>
+&lt;--- Last few GCs ---&gt;
+
+[115332:0x55d2125e6590]     1563 ms: Mark-sweep 24.5 (41.4) -&gt; 8.7 (41.4) MB, 18.6 / 0.0 ms  (average mu = 0.810, current mu = 0.858) allocation failure; scavenge might not succeed
+[115332:0x55d2125e6590]     1676 ms: Mark-sweep 34.4 (51.4) -&gt; 12.1 (44.7) MB, 26.2 / 0.0 ms  (average mu = 0.788, current mu = 0.768) allocation failure; scavenge might not succeed
+
+
+&lt;--- JS stacktrace ---&gt;
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+ 1: 0x7f3d3034833c node::Abort() [/lib/x86_64-linux-gnu/libnode.so.109]
+ 2: 0x7f3d3023c5db  [/lib/x86_64-linux-gnu/libnode.so.109]
+ 3: 0x7f3d3072e544 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, bool) [/lib/x86_64-linux-gnu/libnode.so.109]
+ 4: 0x7f3d3072e938 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, bool) [/lib/x86_64-linux-gnu/libnode.so.109]
+ 5: 0x7f3d3091a0e9  [/lib/x86_64-linux-gnu/libnode.so.109]
+ 6: 0x7f3d3092fc69 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/lib/x86_64-linux-gnu/libnode.so.109]
+ 7: 0x7f3d3090ac5a v8::internal::HeapAllocator::AllocateRawWithLightRetrySlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/lib/x86_64-linux-gnu/libnode.so.109]
+ 8: 0x7f3d3090bd78 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/lib/x86_64-linux-gnu/libnode.so.109]
+ 9: 0x7f3d308eb0ff v8::internal::Factory::AllocateRaw(int, v8::internal::AllocationType, v8::internal::AllocationAlignment) [/lib/x86_64-linux-gnu/libnode.so.109]
+10: 0x7f3d308e1543 v8::internal::FactoryBase&lt;v8::internal::Factory&gt;::NewFixedArrayWithHoles(int, v8::internal::AllocationType) [/lib/x86_64-linux-gnu/libnode.so.109]
+11: 0x7f3d308f7165 v8::internal::Factory::NewJSArrayStorage(v8::internal::ElementsKind, int, v8::internal::ArrayStorageAllocationMode) [/lib/x86_64-linux-gnu/libnode.so.109]
+12: 0x7f3d308f7206 v8::internal::Factory::NewJSArray(v8::internal::ElementsKind, int, int, v8::internal::ArrayStorageAllocationMode, v8::internal::AllocationType) [/lib/x86_64-linux-gnu/libnode.so.109]
+13: 0x7f3d30cfa57d v8::internal::Runtime_StringSplit(int, unsigned long*, v8::internal::Isolate*) [/lib/x86_64-linux-gnu/libnode.so.109]
+14: 0x7f3d3063e1f9  [/lib/x86_64-linux-gnu/libnode.so.109]
 </code></pre>
 
 <h4 id="JavaScript_brunerd">
@@ -385,7 +397,6 @@ JavaScript (jsonpath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>Error: 'Step cannot be 0'
@@ -404,6 +415,13 @@ Python (jsonpath)
 </h4>
 
 <pre><code>ValueError('range() arg 3 must not be zero')
+</code></pre>
+
+<h4 id="Python_jsonpath-ng">
+Python (jsonpath-ng)
+</h4>
+
+<pre><code>ValueError('slice step cannot be zero')
 </code></pre>
 
 <h4 id="Python_jsonpath2">

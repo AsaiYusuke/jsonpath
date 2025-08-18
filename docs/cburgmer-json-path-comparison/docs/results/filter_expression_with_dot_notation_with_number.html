@@ -55,13 +55,9 @@ Cpp (jsoncons)
 Dart (json_path)
 </h4>
 
-<pre><code>[
-  {
-    "2": "second",
-    "a": "first",
-    "b": "third"
-  }
-]
+<p>Not supported</p>
+
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -208,6 +204,19 @@ JavaScript (brunerd)
 
 <pre><code></code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[
+  {
+    "2": "second",
+    "a": "first",
+    "b": "third"
+  }
+]
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -257,7 +266,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -333,13 +341,22 @@ Python (jsonpath2)
 ValueError("line 1:6 mismatched input '2' expecting {'*', ID}")
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JSONPathSyntaxError("expected an expression, found '2'")
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -392,6 +409,15 @@ Rust (jsonpath_plus)
     "b": "third"
   }
 ]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 6, in long-hand segment, must start with lowercase alpha or '_'
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -452,38 +478,11 @@ dotNET (JsonPath.Net)
 
 <p>Not supported</p>
 
-<pre><code>Pattern '(@.2 == 's...' not recognized.
+<pre><code>Pattern '?(@.2 == '...' not recognized.
 </code></pre>
 
 <h4 id="dotNET_Manatee.Json">
 dotNET (Manatee.Json)
-</h4>
-
-<pre><code>[
-  {
-    "2": "second",
-    "a": "first",
-    "b": "third"
-  }
-]
-</code></pre>
-
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(@.2 == 'second')]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
 </h4>
 
 <pre><code>[
@@ -505,6 +504,13 @@ JavaScript (Goessner)
 <pre><code>jsonPath: Unexpected number: _v.2 == 'second'
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>unexpected shorthand selector '2' ('?(@.2 == ':6)
+</code></pre>
+
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
 </h4>
@@ -516,7 +522,7 @@ JavaScript (jsonpath)
 JavaScript (jsonpath-plus)
 </h4>
 
-<pre><code>Unexpected number
+<pre><code>Unexpected 2 at character 5
 </code></pre>
 
 <h4 id="PHP_Goessner">
@@ -538,7 +544,7 @@ Perl (JSON-Path)
 dotNET (JsonPathLib)
 </h4>
 
-<pre><code>Line 1: Unexpected number
+<pre><code>Unexpected number (&lt;anonymous&gt;:1:3)
 </code></pre>
 
 <h2>Footnotes</h2>

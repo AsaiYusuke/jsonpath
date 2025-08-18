@@ -12,10 +12,6 @@
 
 <h2>Results</h2>
 
-<h3 id="consensus">Consensus</h3>
-
-<p>Not supported</p>
-
 <h3>Other responses</h3>
 
 <h4 id="Bash_JSONPath.sh">
@@ -23,6 +19,15 @@ Bash (JSONPath.sh)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="C_json-glib">
+C (json-glib)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Unable to compile selector `$[?(2 in @.d)]': Invalid array index definition “?(2 in @.d)]”
 </code></pre>
 
 <h4 id="Clojure_json-path">
@@ -33,11 +38,77 @@ Clojure (json-path)
 <pre><code>[]
 </code></pre>
 
+<h4 id="Cpp_jsoncons">
+Cpp (jsoncons)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Expected dot or left bracket separator at line 1 and column 7
+</code></pre>
+
+<h4 id="Dart_json_path">
+Dart (json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
+</code></pre>
+
+<h4 id="Elixir_ExJsonPath">
+Elixir (ExJsonPath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>syntax error before: 2
+</code></pre>
+
 <h4 id="Elixir_jaxon">
 Elixir (jaxon)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="Elixir_warpath">
+Elixir (warpath)
+¹
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Parser error: Invalid token on line 1, syntax error before: &lt;&lt;"@"&gt;&gt;
+</code></pre>
+
+<h4 id="Erlang_ejsonpath">
+Erlang (ejsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>syntax error before: &lt;&lt;"in"&gt;&gt;
+</code></pre>
+
+<h4 id="Golang_github.com-AsaiYusuke-jsonpath">
+Golang (github.com-AsaiYusuke-jsonpath)
+²
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>invalid syntax (position=1, reason=unrecognized input, near=[?(2 in @.d)])
+</code></pre>
+
+<h4 id="Golang_github.com-PaesslerAG-jsonpath">
+Golang (github.com-PaesslerAG-jsonpath)
+¹
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>parsing error: $[?(2 in @.d)]	:1:7 - 1:9 unexpected Ident while scanning parentheses expected ")"
 </code></pre>
 
 <h4 id="Golang_github.com-ohler55-ojg">
@@ -72,6 +143,31 @@ Golang (github.com-oliveagle-jsonpath)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="Golang_github.com-vmware-labs-yaml-jsonpath">
+Golang (github.com-vmware-labs-yaml-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>invalid filter expression at position 6, following "2 "
+</code></pre>
+
+<h4 id="Haskell_jsonpath">
+Haskell (jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Invalid JSONPath: $[?(2 in @.d)]
+ Error: 1:7:
+  |
+1 | $[?(2 in @.d)]
+  |       ^^
+unexpected "in"
+expecting "!=", "&lt;=", "==", "&gt;=", '!', '&lt;', '&gt;', or white space
+
 </code></pre>
 
 <h4 id="JavaScript_Goessner">
@@ -134,8 +230,8 @@ JavaScript (jsonpath)
 <pre><code>[]
 </code></pre>
 
-<h4 id="JavaScript_jsonpath-plus">
-JavaScript (jsonpath-plus)
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
 </h4>
 
 <pre><code>[
@@ -145,8 +241,29 @@ JavaScript (jsonpath-plus)
       2,
       3
     ]
+  },
+  {
+    "d": [
+      2
+    ]
+  },
+  {
+    "d": [
+      4,
+      2
+    ]
   }
 ]
+</code></pre>
+
+<h4 id="Java_com.github.jsurfer">
+Java (com.github.jsurfer)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>line 1:4 no viable alternative at input '2'
+org.antlr.v4.runtime.misc.ParseCancellationException
 </code></pre>
 
 <h4 id="Java_com.jayway.jsonpath">
@@ -175,6 +292,16 @@ Java (com.jayway.jsonpath)
     ]
   }
 ]
+</code></pre>
+
+<h4 id="Kotlin_com.nfeld.jsonpathkt">
+Kotlin (com.nfeld.jsonpathkt)
+¹
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Unexpected char, char=?, index=2
 </code></pre>
 
 <h4 id="Objective-C_SMJJSONPath">
@@ -207,12 +334,55 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
-<p>Not found</p>
+<pre><code>[]
+</code></pre>
 
-<pre><code>jsonpath returned false, this might indicate an error
+<h4 id="PHP_remorhaz-jsonpath">
+PHP (remorhaz-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Error: 'Failed to build AST from JSONPath query: $[?(2 in @.d)]'
+</code></pre>
+
+<h4 id="PHP_softcreatr-jsonpath">
+PHP (softcreatr-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "d": [
+      2
+    ]
+  },
+  {
+    "d": [
+      1
+    ]
+  },
+  {
+    "d": [
+      3,
+      4
+    ]
+  },
+  {
+    "d": [
+      4,
+      2
+    ]
+  }
+]
 </code></pre>
 
 <h4 id="Python_jsonpath">
@@ -240,6 +410,69 @@ Python (jsonpath)
     ]
   }
 ]
+</code></pre>
+
+<h4 id="Python_jsonpath-ng">
+Python (jsonpath-ng)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JsonPathLexerError('Error on line 1, col 2: Unexpected character: ? ')
+</code></pre>
+
+<h4 id="Python_jsonpath-rw">
+Python (jsonpath-rw)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JsonPathLexerError('Error on line 1, col 2: Unexpected character: ? ')
+</code></pre>
+
+<h4 id="Python_jsonpath2">
+Python (jsonpath2)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>line 1:6 mismatched input 'in' expecting ')'
+ValueError("line 1:6 mismatched input 'in' expecting ')'")
+</code></pre>
+
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "d": [
+      2
+    ]
+  },
+  {
+    "d": [
+      4,
+      2
+    ]
+  }
+]
+</code></pre>
+
+<h4 id="Raku_JSON-Path">
+Raku (JSON-Path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -279,8 +512,91 @@ Ruby (jsonpath)
 ]
 </code></pre>
 
+<h4 id="Rust_jsonpath">
+Rust (jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>parsing error
+</code></pre>
+
+<h4 id="Rust_jsonpath_lib">
+Rust (jsonpath_lib)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>path error: 
+$[?(2 in @.d)]
+^^^^^^
+
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 4, in long-hand segment, parser error
+</code></pre>
+
+<h4 id="Scala_jsonpath">
+Scala (jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JPError(end of input expected)
+</code></pre>
+
 <h4 id="Swift_Sextant">
 Swift (Sextant)
+</h4>
+
+<pre><code>[
+  {
+    "d": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "d": [
+      2
+    ]
+  },
+  {
+    "d": [
+      4,
+      2
+    ]
+  }
+]
+</code></pre>
+
+<h4 id="dotNET_Json.NET">
+dotNET (Json.NET)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Could not read query operator.
+</code></pre>
+
+<h4 id="dotNET_JsonCons.JsonPath">
+dotNET (JsonCons.JsonPath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Syntax error
+</code></pre>
+
+<h4 id="dotNET_JsonPath.Net">
+dotNET (JsonPath.Net)
 </h4>
 
 <pre><code>[
@@ -342,6 +658,15 @@ dotNET (JsonPathLib)
 ]
 </code></pre>
 
+<h4 id="dotNET_Manatee.Json">
+dotNET (Manatee.Json)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Unrecognized JSON Path Expression element. Path up to error: '$'
+</code></pre>
+
 <h3>Errors</h3>
 
 <h4 id="Golang_github.com-bhmj-jsonslice">
@@ -360,19 +685,26 @@ Golang (github.com-spyzhov-ajson)
 <pre><code>wrong request: wrong request: ?(2 in @.d)
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>unexpected filter selector token 'i' ('2 in @.d)':8)
+</code></pre>
+
+<h4 id="JavaScript_jsonpath-plus">
+JavaScript (jsonpath-plus)
+</h4>
+
+<pre><code>jsonPath: in is not defined: 2 in @.d
+</code></pre>
+
 <h4 id="PHP_Goessner">
 PHP (Goessner)
 ²
 </h4>
 
 <pre><code>ArgumentCountError
-</code></pre>
-
-<h4 id="PHP_softcreatr-jsonpath">
-PHP (softcreatr-jsonpath)
-</h4>
-
-<pre><code>Error: 'Malformed filter query'
 </code></pre>
 
 <h4 id="Perl_JSON-Path">

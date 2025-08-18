@@ -70,7 +70,7 @@ Dart (json_path)
 
 <p>Not supported</p>
 
-<pre><code>FormatException: end of input expected at 1:2. Expression: $[?(@.key/10==5)]
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -153,17 +153,6 @@ Golang (github.com-oliveagle-jsonpath)
 <pre><code>[]
 </code></pre>
 
-<h4 id="Golang_github.com-spyzhov-ajson">
-Golang (github.com-spyzhov-ajson)
-</h4>
-
-<pre><code>[
-  {
-    "key": 50
-  }
-]
-</code></pre>
-
 <h4 id="Golang_github.com-vmware-labs-yaml-jsonpath">
 Golang (github.com-vmware-labs-yaml-jsonpath)
 </h4>
@@ -232,6 +221,17 @@ JavaScript (jsonpath-plus)
 ]
 </code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[
+  {
+    "key": 50
+  }
+]
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -251,9 +251,9 @@ Java (com.jayway.jsonpath)
 
 <p>Not supported</p>
 
-<pre><code>SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+<pre><code>SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
 com.jayway.jsonpath.InvalidPathException: Could not find matching close for / when parsing regex in : $[?(@.key/10==5)]
 </code></pre>
 
@@ -280,7 +280,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <p>Not supported</p>
@@ -348,13 +347,22 @@ Python (jsonpath2)
 ValueError("line 1:9 token recognition error at: '/'")
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JSONPathSyntaxError("unexpected token '/'")
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -402,6 +410,15 @@ Rust (jsonpath_plus)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 3, in long-hand segment, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -479,141 +496,6 @@ dotNET (Manatee.Json)
 ]
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(@.key/10==5)]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:10-1:10 ComparisonOperator
-| $[?(@.key/10==5)]
-|          ^
-| x 1:10-1:10 ScalarOperator
-| | $[?(@.key/10==5)]
-| |          ^
-| o 1:5-1:10 DocumentValue
-| | $[?(@.key/10==5)]
-| |     ^^^^^
-| o 1:5-1:10 UnaryFilterExpression
-| | $[?(@.key/10==5)]
-| |     ^^^^^
-| | x 1:10-1:10 ScalarOperator
-| | | $[?(@.key/10==5)]
-| | |          ^
-| | o 1:5-1:10 DocumentValue
-| | | $[?(@.key/10==5)]
-| | |     ^^^^^
-| | o 1:5-1:10 FilterValue
-| | | $[?(@.key/10==5)]
-| | |     ^^^^^
-| | | 
-|/ /  
-| | 
-|/  
-o 1:5-1:10 HigherPrecedenceFilterExpression
-| $[?(@.key/10==5)]
-|     ^^^^^
-x 1:5-1:5 LogicalOr
-| $[?(@.key/10==5)]
-|     ^
-| x 1:10-1:10 ComparisonOperator
-| | $[?(@.key/10==5)]
-| |          ^
-| | x 1:10-1:10 ScalarOperator
-| | | $[?(@.key/10==5)]
-| | |          ^
-| | o 1:5-1:10 DocumentValue
-| | | $[?(@.key/10==5)]
-| | |     ^^^^^
-| | o 1:5-1:10 UnaryFilterExpression
-| | | $[?(@.key/10==5)]
-| | |     ^^^^^
-| | | x 1:10-1:10 ScalarOperator
-| | | | $[?(@.key/10==5)]
-| | | |          ^
-| | | o 1:5-1:10 DocumentValue
-| | | | $[?(@.key/10==5)]
-| | | |     ^^^^^
-| | | o 1:5-1:10 FilterValue
-| | | | $[?(@.key/10==5)]
-| | | |     ^^^^^
-| | | | 
-| |/ /  
-| | | 
-| |/  
-| o 1:5-1:10 HigherPrecedenceFilterExpression
-| | $[?(@.key/10==5)]
-| |     ^^^^^
-| x 1:5-1:5 LogicalAnd
-| | $[?(@.key/10==5)]
-| |     ^
-| | x 1:10-1:10 ComparisonOperator
-| | | $[?(@.key/10==5)]
-| | |          ^
-| | | x 1:10-1:10 ScalarOperator
-| | | | $[?(@.key/10==5)]
-| | | |          ^
-| | | o 1:5-1:10 DocumentValue
-| | | | $[?(@.key/10==5)]
-| | | |     ^^^^^
-| | | o 1:5-1:10 UnaryFilterExpression
-| | | | $[?(@.key/10==5)]
-| | | |     ^^^^^
-| | | | x 1:10-1:10 ScalarOperator
-| | | | | $[?(@.key/10==5)]
-| | | | |          ^
-| | | | o 1:5-1:10 DocumentValue
-| | | | | $[?(@.key/10==5)]
-| | | | |     ^^^^^
-| | | | o 1:5-1:10 FilterValue
-| | | | | $[?(@.key/10==5)]
-| | | | |     ^^^^^
-| | | | | 
-| | |/ /  
-| | | | 
-| | |/  
-| | o 1:5-1:10 HigherPrecedenceFilterExpression
-| | | $[?(@.key/10==5)]
-| | |     ^^^^^
-| | | 
-|/ /  
-| | 
-|/  
-o 1:5-1:10 FilterExpression
-| $[?(@.key/10==5)]
-|     ^^^^^
-x 1:3-1:3 BracketElement
-| $[?(@.key/10==5)]
-|   ^
-x 1:3-1:3 BracketElements
-| $[?(@.key/10==5)]
-|   ^
-x 1:2-1:2 BracketChildren
-| $[?(@.key/10==5)]
-|  ^
-x 1:2-1:2 Operator
-| $[?(@.key/10==5)]
-|  ^
-o 1:1-1:2 Start
-  $[?(@.key/10==5)]
-  ^
-</code></pre>
-
 <h3>Errors</h3>
 
 <h4 id="Erlang_ejsonpath">
@@ -624,6 +506,20 @@ Erlang (ejsonpath)
 
 Crash dump is being written to: /dev/null...done
 {"init terminating in do_boot",{not_implemented,bin_op,'/'}}
+</code></pre>
+
+<h4 id="Golang_github.com-spyzhov-ajson">
+Golang (github.com-spyzhov-ajson)
+</h4>
+
+<pre><code>wrong request: wrong request: ?(@.key/10==5)
+</code></pre>
+
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>unexpected filter selector token '/' ('.key/10==':9)
 </code></pre>
 
 <h4 id="PHP_Goessner">
