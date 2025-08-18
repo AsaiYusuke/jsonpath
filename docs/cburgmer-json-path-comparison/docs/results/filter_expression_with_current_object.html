@@ -81,11 +81,15 @@ Dart (json_path)
 
 <pre><code>[
   "some value",
+  null,
   "value",
+  0,
   1,
   -1,
+  "",
   [],
   {},
+  false,
   true
 ]
 </code></pre>
@@ -188,9 +192,10 @@ Golang (github.com-bhmj-jsonslice)
 Golang (github.com-ohler55-ojg)
 </h4>
 
-<p>Not supported</p>
-
-<pre><code></code></pre>
+<pre><code>[
+  true
+]
+</code></pre>
 
 <h4 id="Golang_github.com-oliveagle-jsonpath">
 Golang (github.com-oliveagle-jsonpath)
@@ -288,6 +293,25 @@ JavaScript (brunerd)
 ]
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>[
+  "some value",
+  null,
+  "value",
+  0,
+  1,
+  -1,
+  "",
+  [],
+  {},
+  false,
+  true
+]
+</code></pre>
+
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
 </h4>
@@ -299,6 +323,25 @@ JavaScript (jsonpath)
   -1,
   [],
   {},
+  true
+]
+</code></pre>
+
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[
+  "some value",
+  null,
+  "value",
+  0,
+  1,
+  -1,
+  "",
+  [],
+  {},
+  false,
   true
 ]
 </code></pre>
@@ -367,7 +410,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -386,6 +428,25 @@ PHP (galbar-jsonpath)
 
 <h4 id="PHP_remorhaz-jsonpath">
 PHP (remorhaz-jsonpath)
+</h4>
+
+<pre><code>[
+  "some value",
+  null,
+  "value",
+  0,
+  1,
+  -1,
+  "",
+  [],
+  {},
+  false,
+  true
+]
+</code></pre>
+
+<h4 id="PHP_softcreatr-jsonpath">
+PHP (softcreatr-jsonpath)
 </h4>
 
 <pre><code>[
@@ -456,13 +517,29 @@ Python (jsonpath2)
 ]
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[
+  "some value",
+  null,
+  "value",
+  1,
+  -1,
+  [],
+  {},
+  true
+]
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -517,6 +594,25 @@ Rust (jsonpath_plus)
 </h4>
 
 <pre><code>[
+  true
+]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<pre><code>[
+  "some value",
+  null,
+  "value",
+  0,
+  1,
+  -1,
+  "",
+  [],
+  {},
+  false,
   true
 ]
 </code></pre>
@@ -598,6 +694,7 @@ dotNET (JsonPath.Net)
 
 <pre><code>[
   "some value",
+  null,
   "value",
   0,
   1,
@@ -619,46 +716,13 @@ dotNET (Manatee.Json)
 <pre><code>Sequence contains no elements
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(@)]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<pre><code>[
-  "some value",
-  null,
-  "value",
-  0,
-  1,
-  -1,
-  "",
-  [],
-  {},
-  false,
-  true
-]
-</code></pre>
-
 <h3>Errors</h3>
 
 <h4 id="JavaScript_jsonpath-plus">
 JavaScript (jsonpath-plus)
 </h4>
 
-<pre><code>Invalid or unexpected token
+<pre><code>Unexpected "@" at character 0
 </code></pre>
 
 <h4 id="PHP_Goessner">
@@ -667,13 +731,6 @@ PHP (Goessner)
 </h4>
 
 <pre><code>ArgumentCountError
-</code></pre>
-
-<h4 id="PHP_softcreatr-jsonpath">
-PHP (softcreatr-jsonpath)
-</h4>
-
-<pre><code>Error: 'Malformed filter query'
 </code></pre>
 
 <h4 id="Perl_JSON-Path">

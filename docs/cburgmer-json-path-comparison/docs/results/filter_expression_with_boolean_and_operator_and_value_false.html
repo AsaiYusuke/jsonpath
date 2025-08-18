@@ -67,7 +67,9 @@ Cpp (jsoncons)
 Dart (json_path)
 </h4>
 
-<pre><code>[]
+<p>Not supported</p>
+
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -208,6 +210,13 @@ JavaScript (jsonpath-plus)
 <pre><code>[]
 </code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -226,9 +235,9 @@ Java (com.jayway.jsonpath)
 
 <p>Not supported</p>
 
-<pre><code>SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+<pre><code>SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
 com.jayway.jsonpath.InvalidPathException: Expected path node
 </code></pre>
 
@@ -255,12 +264,9 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
-<p>Not found</p>
-
-<pre><code>jsonpath returned false, this might indicate an error
+<pre><code>[]
 </code></pre>
 
 <h4 id="PHP_remorhaz-jsonpath">
@@ -268,29 +274,6 @@ PHP (remorhaz-jsonpath)
 </h4>
 
 <pre><code>[]
-</code></pre>
-
-<h4 id="PHP_softcreatr-jsonpath">
-PHP (softcreatr-jsonpath)
-</h4>
-
-<pre><code>[
-  {
-    "key": 1
-  },
-  {
-    "key": 3
-  },
-  {
-    "key": "nice"
-  },
-  {
-    "key": {}
-  },
-  {
-    "key": []
-  }
-]
 </code></pre>
 
 <h4 id="Python_jsonpath">
@@ -331,13 +314,22 @@ Python (jsonpath2)
 ValueError("line 1:12 token recognition error at: '&amp;'")
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JSONPathSyntaxError('filter expression literals outside of function expressions must be compared')
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Rust_jsonpath">
@@ -366,6 +358,15 @@ Rust (jsonpath_plus)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 20, in long-hand segment, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -399,7 +400,7 @@ dotNET (JsonPath.Net)
 
 <p>Not supported</p>
 
-<pre><code>Pattern '(@.key&gt;0 &amp;...' not recognized.
+<pre><code>Pattern '?(@.key&gt;0 ...' not recognized.
 </code></pre>
 
 <h4 id="dotNET_JsonPathLib">
@@ -416,68 +417,14 @@ dotNET (Manatee.Json)
 <pre><code>[]
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(@.key&gt;0 &amp;&amp; false)]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:21-1:21 ComparisonOperator
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|                     ^
-x 1:16-1:16 HigherPrecedenceFilterExpression
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|                ^
-| x 1:21-1:21 ComparisonOperator
-| | $[?(@.key&gt;0 &amp;&amp; false)]
-| |                     ^
-| x 1:16-1:16 HigherPrecedenceFilterExpression
-| | $[?(@.key&gt;0 &amp;&amp; false)]
-| |                ^
-| x 1:16-1:16 LogicalAnd
-| | $[?(@.key&gt;0 &amp;&amp; false)]
-| |                ^
-| | 
-|/  
-x 1:5-1:5 LogicalAnd
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|     ^
-o 1:5-1:12 FilterExpression
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|     ^^^^^^^
-x 1:3-1:3 BracketElement
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|   ^
-x 1:3-1:3 BracketElements
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|   ^
-x 1:2-1:2 BracketChildren
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|  ^
-x 1:2-1:2 Operator
-| $[?(@.key&gt;0 &amp;&amp; false)]
-|  ^
-o 1:1-1:2 Start
-  $[?(@.key&gt;0 &amp;&amp; false)]
-  ^
-</code></pre>
-
 <h3>Errors</h3>
+
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>filter expression literals (false) must be compared (' &amp;&amp; false':15)
+</code></pre>
 
 <h4 id="PHP_Goessner">
 PHP (Goessner)
@@ -485,6 +432,13 @@ PHP (Goessner)
 </h4>
 
 <pre><code>ArgumentCountError
+</code></pre>
+
+<h4 id="PHP_softcreatr-jsonpath">
+PHP (softcreatr-jsonpath)
+</h4>
+
+<pre><code>Error: 'Malformed filter query'
 </code></pre>
 
 <h4 id="Perl_JSON-Path">

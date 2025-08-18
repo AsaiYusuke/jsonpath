@@ -1,8 +1,146 @@
+
+<!-- AsaiYusuke -->
+
 <style>
-  /* asai */
   .markdown-body thead tr:nth-child(1) th:nth-child(10),
   .markdown-body thead tr:nth-child(2) th:nth-child(12),
   .markdown-body tbody td:nth-child(12) {
     background-color: rgb(236, 230, 253) !important;
   }
+
+  .markdown-body tbody td:nth-child(12):has(a[data-content="➘"]) {
+    background-color: rgba(255, 249, 196, 0.9) !important;
+  }
+
+  .markdown-body tbody td:nth-child(12):has(a[data-content="✗"]) {
+    background-color: rgba(255, 214, 214, 0.95) !important;
+  }
 </style>
+
+<div id="AsaiYusuke-toggle-container" class="AsaiYusuke-toggle-container">
+  <label class="AsaiYusuke-toggle-label" for="AsaiYusuke-toggle-checkbox">
+    <input
+      type="checkbox"
+      id="AsaiYusuke-toggle-checkbox"
+      class="AsaiYusuke-toggle-checkbox"
+      aria-label="Show only ➘ and ✗ rows"
+    />
+    <span class="AsaiYusuke-toggle-text">Show only ➘ and ✗ rows</span>
+  </label>
+</div>
+
+<style>
+  .AsaiYusuke-toggle-container {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 9999;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .AsaiYusuke-toggle-label {
+    background: linear-gradient(90deg, #0d6efd, #0056d6);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.18);
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .AsaiYusuke-toggle-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(13, 110, 253, 0.22);
+  }
+  .AsaiYusuke-toggle-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #fff;
+    border-radius: 4px;
+  }
+  .AsaiYusuke-toggle-text {
+    white-space: nowrap;
+  }
+
+  .AsaiYusuke-hidden-by-filter {
+    display: none !important;
+  }
+  .AsaiYusuke-kept-by-filter {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.02);
+  }
+
+  @media (max-width: 520px) {
+    .AsaiYusuke-toggle-container {
+      right: 10px;
+      bottom: 10px;
+    }
+    .AsaiYusuke-toggle-label {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    const STORAGE_KEY = "AsaiYusuke-filter-show-just-markers";
+    const checkbox = document.getElementById("AsaiYusuke-toggle-checkbox");
+    if (!checkbox) return;
+
+    function rowHasMarker(row) {
+      try {
+        return !!row.querySelector(
+          'td:nth-child(12) a[data-content="➘"], td:nth-child(12) a[data-content="✗"]'
+        );
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function applyFilter(enabled) {
+      const rows = document.querySelectorAll(".markdown-body tbody tr");
+      rows.forEach((r) => {
+        if (enabled) {
+          if (rowHasMarker(r)) {
+            r.classList.remove("AsaiYusuke-hidden-by-filter");
+            r.classList.add("AsaiYusuke-kept-by-filter");
+          } else {
+            r.classList.add("AsaiYusuke-hidden-by-filter");
+            r.classList.remove("AsaiYusuke-kept-by-filter");
+          }
+        } else {
+          r.classList.remove("AsaiYusuke-hidden-by-filter");
+          r.classList.remove("AsaiYusuke-kept-by-filter");
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const enabled = stored === "1";
+      checkbox.checked = enabled;
+      applyFilter(enabled);
+    });
+
+    checkbox.addEventListener("change", () => {
+      const enabled = checkbox.checked;
+      localStorage.setItem(STORAGE_KEY, enabled ? "1" : "0");
+      applyFilter(enabled);
+      checkbox.focus();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (
+        e.key.toLowerCase() === "m" &&
+        !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)
+      ) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event("change"));
+      }
+    });
+  })();
+</script>

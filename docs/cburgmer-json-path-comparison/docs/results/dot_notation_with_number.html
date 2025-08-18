@@ -49,7 +49,9 @@ Cpp (jsoncons)
 Dart (json_path)
 </h4>
 
-<pre><code>[]
+<p>Not supported</p>
+
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -92,7 +94,7 @@ Golang (github.com-AsaiYusuke-jsonpath)
 
 <p>Not found</p>
 
-<pre><code>type unmatched (expected=object, found=[]interface {}, path=.2)
+<pre><code>type unmatched (path=.2, expected=object, found=[]interface {})
 </code></pre>
 
 <h4 id="Golang_github.com-PaesslerAG-jsonpath">
@@ -188,6 +190,15 @@ JavaScript (jsonpath-plus)
 ]
 </code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<pre><code>[
+  "third"
+]
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -205,9 +216,9 @@ Java (com.jayway.jsonpath)
 
 <p>Not found</p>
 
-<pre><code>SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+<pre><code>SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
 com.jayway.jsonpath.PathNotFoundException: Expected to find an object with property ['2'] in path $ but found 'net.minidev.json.JSONArray'. This is not a json object according to the JsonProvider: 'com.jayway.jsonpath.spi.json.JsonSmartJsonProvider'.
 </code></pre>
 
@@ -242,7 +253,6 @@ PHP (Goessner)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -289,9 +299,7 @@ Python (jsonpath)
 Python (jsonpath-ng)
 </h4>
 
-<p>Not supported</p>
-
-<pre><code>JsonPathParserError('Parse error at 1:2 near token 2 (NUMBER)')
+<pre><code>[]
 </code></pre>
 
 <h4 id="Python_jsonpath-rw">
@@ -311,6 +319,15 @@ Python (jsonpath2)
 
 <pre><code>line 1:2 mismatched input '2' expecting {'*', ID}
 ValueError("line 1:2 mismatched input '2' expecting {'*', ID}")
+</code></pre>
+
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JSONPathSyntaxError("unexpected token '2'")
 </code></pre>
 
 <h4 id="Raku_JSON-Path">
@@ -348,6 +365,15 @@ Rust (jsonpath_plus)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 2, in dot member name, must start with lowercase alpha or '_'
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -403,18 +429,13 @@ dotNET (Manatee.Json)
 <pre><code>[]
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
+<h3>Errors</h3>
+
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
 </h4>
 
-<pre><code>[]
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<pre><code>[]
+<pre><code>unexpected shorthand selector '2' ('$.2':2)
 </code></pre>
 
 <h2>Footnotes</h2>

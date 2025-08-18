@@ -53,7 +53,7 @@ Dart (json_path)
 
 <p>Not supported</p>
 
-<pre><code>FormatException: "$" expected at 1:1. Expression: @.a
+<pre><code>Instance of 'ParserException': "$" expected (at 1:1)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -179,6 +179,15 @@ JavaScript (jsonpath)
 ^
 </code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>mismatched input '@' expecting '$'
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -225,7 +234,6 @@ PHP (Goessner)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <p>Not supported</p>
@@ -294,6 +302,15 @@ Python (jsonpath2)
 ValueError("line 1:0 mismatched input '@' expecting '$'")
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JSONPathSyntaxError("unexpected token '@'")
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
@@ -331,6 +348,15 @@ Rust (jsonpath_lib)
 @.a
 ^
 
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 0, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -371,9 +397,9 @@ dotNET (JsonCons.JsonPath)
 dotNET (JsonPath.Net)
 </h4>
 
-<p>Not supported</p>
-
-<pre><code>Path must start with '$'
+<pre><code>[
+  1
+]
 </code></pre>
 
 <h4 id="dotNET_JsonPathLib">
@@ -390,32 +416,6 @@ dotNET (Manatee.Json)
 <pre><code>[
   1
 ]
-</code></pre>
-
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:1
-  |
-1 | @.a
-  | ^---
-  |
-  = expected rootSelector
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:1-1:1 Start
-| @.a
-| ^
 </code></pre>
 
 <h3>Errors</h3>
@@ -435,6 +435,13 @@ Golang (github.com-bhmj-jsonslice)
 </h4>
 
 <pre><code>path: $ expected
+</code></pre>
+
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>expected '$', found '@' ('@.a':0)
 </code></pre>
 
 <h4 id="JavaScript_jsonpath-plus">

@@ -1,22 +1,13 @@
 <meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.css">
 <article class="markdown-body">
-<h1>Dot notation after recursive descent</h1>
+<h1>Filter expression with subpaths deeply nested</h1>
 
 <h2>Setup</h2>
 
-<p>Selector: <code>$..key</code></p>
+<p>Selector: <code>$[?(@.a.b.c==3)]</code></p>
 
-<pre><code>{
-    "object": {
-        "key": "value",
-        "array": [
-            {"key": "something"},
-            {"key": {"key": "russian dolls"}}
-        ]
-    },
-    "key": "top"
-}
+<pre><code>[{"a": {"b": {"c": 3}}}, {"a": 3}, {"c": 3}, {"a": {"b": {"c": 2}}}]
 </code></pre>
 
 <h2>Results</h2>
@@ -24,12 +15,12 @@
 <h3 id="consensus">Consensus</h3>
 
 <pre><code>[
-  "russian dolls",
-  "something",
-  "top",
-  "value",
   {
-    "key": "russian dolls"
+    "a": {
+      "b": {
+        "c": 3
+      }
+    }
   }
 ]
 </code></pre>
@@ -41,10 +32,7 @@ Bash (JSONPath.sh)
 </h4>
 
 <pre><code>[
-  "russian dolls",
-  "something",
-  "top",
-  "value"
+  3
 ]
 </code></pre>
 
@@ -52,12 +40,22 @@ Bash (JSONPath.sh)
 C (json-glib)
 </h4>
 
+<p>Not supported</p>
+
+<pre><code>Unable to compile selector `$[?(@.a.b.c==3)]': Invalid array index definition “?(@.a.b.c==3)]”
+</code></pre>
+
+<h4 id="Clojure_json-path">
+Clojure (json-path)
+¹
+</h4>
+
 <pre><code>[
-  "something",
-  "top",
-  "value",
   {
-    "key": "russian dolls"
+    "a": 3
+  },
+  {
+    "c": 3
   }
 ]
 </code></pre>
@@ -66,56 +64,123 @@ C (json-glib)
 Elixir (jaxon)
 </h4>
 
-<pre><code>[
-  "top"
-]
+<pre><code>[]
 </code></pre>
-
-<h4 id="Raku_JSON-Path">
-Raku (JSON-Path)
-</h4>
-
-<pre><code>[
-  "russian dolls",
-  "something",
-  "value",
-  {
-    "key": "russian dolls"
-  }
-]
-</code></pre>
-
-<h4 id="Rust_jsonpath">
-Rust (jsonpath)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>parsing error
-</code></pre>
-
-<h4 id="Scala_jsonpath">
-Scala (jsonpath)
-</h4>
-
-<pre><code>[
-  "something",
-  "top",
-  "value",
-  {
-    "key": "russian dolls"
-  }
-]
-</code></pre>
-
-<h3>Errors</h3>
 
 <h4 id="Golang_github.com-oliveagle-jsonpath">
 Golang (github.com-oliveagle-jsonpath)
 ¹
 </h4>
 
-<pre><code>expression don't support in filter
+<pre><code>[]
+</code></pre>
+
+<h4 id="JavaScript_brunerd">
+JavaScript (brunerd)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code></code></pre>
+
+<h4 id="Kotlin_com.nfeld.jsonpathkt">
+Kotlin (com.nfeld.jsonpathkt)
+¹
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Unexpected char, char=?, index=2
+</code></pre>
+
+<h4 id="Python_jsonpath-ng">
+Python (jsonpath-ng)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JsonPathLexerError('Error on line 1, col 2: Unexpected character: ? ')
+</code></pre>
+
+<h4 id="Python_jsonpath-rw">
+Python (jsonpath-rw)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>JsonPathLexerError('Error on line 1, col 2: Unexpected character: ? ')
+</code></pre>
+
+<h4 id="Python_jsonpath2">
+Python (jsonpath2)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>line 1:12 extraneous input '=' expecting {'@', '$', 'true', 'false', 'null', '{', '[', STRING, NUMBER}
+ValueError("line 1:12 extraneous input '=' expecting {'@', '$', 'true', 'false', 'null', '{', '[', STRING, NUMBER}")
+</code></pre>
+
+<h4 id="Raku_JSON-Path">
+Raku (JSON-Path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
+</code></pre>
+
+<h4 id="Rust_jsonpath">
+Rust (jsonpath)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
+<h4 id="Rust_jsonpath_lib">
+Rust (jsonpath_lib)
+</h4>
+
+<pre><code>[]
+</code></pre>
+
+<h3>Errors</h3>
+
+<h4 id="JavaScript_Goessner">
+JavaScript (Goessner)
+²
+</h4>
+
+<pre><code>jsonPath: Cannot read properties of undefined (reading 'c'): _v.a.b.c==3
+</code></pre>
+
+<h4 id="JavaScript_jsonpath-plus">
+JavaScript (jsonpath-plus)
+</h4>
+
+<pre><code>jsonPath: Cannot read properties of undefined (reading 'c'): @.a.b.c==3
+</code></pre>
+
+<h4 id="PHP_Goessner">
+PHP (Goessner)
+²
+</h4>
+
+<pre><code>ArgumentCountError
+</code></pre>
+
+<h4 id="Perl_JSON-Path">
+Perl (JSON-Path)
+</h4>
+
+<pre><code>non-safe evaluation, died at main.pl line 11.
+</code></pre>
+
+<h4 id="dotNET_JsonPathLib">
+dotNET (JsonPathLib)
+</h4>
+
+<pre><code>Cannot read property 'b' of undefined
 </code></pre>
 
 <h2>Footnotes</h2>

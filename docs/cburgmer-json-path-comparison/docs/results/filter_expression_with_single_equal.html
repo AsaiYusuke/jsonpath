@@ -153,75 +153,6 @@ JavaScript (jsonpath)
 <pre><code>[]
 </code></pre>
 
-<h4 id="JavaScript_jsonpath-plus">
-JavaScript (jsonpath-plus)
-</h4>
-
-<pre><code>[
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42
-  },
-  {
-    "key": 42,
-    "some": "value"
-  }
-]
-</code></pre>
-
 <h4 id="PHP_softcreatr-jsonpath">
 PHP (softcreatr-jsonpath)
 </h4>
@@ -229,9 +160,6 @@ PHP (softcreatr-jsonpath)
 <pre><code>[
   {
     "key": 42
-  },
-  {
-    "key": "42"
   }
 ]
 </code></pre>
@@ -251,6 +179,75 @@ Python (jsonpath2)
 </h4>
 
 <pre><code>[]
+</code></pre>
+
+<h4 id="dotNET_JsonPathLib">
+dotNET (JsonPathLib)
+</h4>
+
+<pre><code>[
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0
+  },
+  {
+    "key": 42.0,
+    "some": "value"
+  }
+]
 </code></pre>
 
 <h3>Errors</h3>
@@ -278,6 +275,20 @@ Golang (github.com-spyzhov-ajson)
 <pre><code>wrong symbol '=' at 7
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>unexpected filter selector token '=' ('.key=42)]':9)
+</code></pre>
+
+<h4 id="JavaScript_jsonpath-plus">
+JavaScript (jsonpath-plus)
+</h4>
+
+<pre><code>jsonPath: Invalid left-hand side in assignment: @.key=42
+</code></pre>
+
 <h4 id="PHP_Goessner">
 PHP (Goessner)
 ²
@@ -298,8 +309,6 @@ Ruby (jsonpath)
 </h4>
 
 <pre><code>undefined method `=' for 0.0:Float
-Did you mean?  =~
-               ==
 </code></pre>
 
 <h4 id="Rust_jsonpath_plus">
@@ -309,13 +318,6 @@ Rust (jsonpath_plus)
 <pre><code>Error Parsing JSON Path:
 $[?(@.key=42)]
 panic occurred
-</code></pre>
-
-<h4 id="dotNET_JsonPathLib">
-dotNET (JsonPathLib)
-</h4>
-
-<pre><code>Object of type 'System.Double' cannot be converted to type 'Newtonsoft.Json.Linq.JToken'.
 </code></pre>
 
 <h2>Footnotes</h2>

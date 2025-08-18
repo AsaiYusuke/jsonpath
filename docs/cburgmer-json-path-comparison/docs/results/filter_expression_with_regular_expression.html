@@ -64,7 +64,7 @@ Dart (json_path)
 
 <p>Not supported</p>
 
-<pre><code>FormatException: end of input expected at 1:2. Expression: $[?(@.name=~/hello.*/)]
+<pre><code>Instance of 'ParserException': end of input expected (at 1:2)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -225,25 +225,16 @@ JavaScript (jsonpath)
 <pre><code>[]
 </code></pre>
 
-<h4 id="JavaScript_jsonpath-plus">
-JavaScript (jsonpath-plus)
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
 </h4>
 
 <pre><code>[
   {
-    "name": -1
+    "name": "hello world"
   },
   {
-    "name": -1
-  },
-  {
-    "name": -1
-  },
-  {
-    "name": -1
-  },
-  {
-    "name": -1
+    "name": "yes hello world"
   }
 ]
 </code></pre>
@@ -303,7 +294,6 @@ Objective-C (SMJJSONPath)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <pre><code>[
@@ -382,13 +372,24 @@ Python (jsonpath2)
 ValueError("line 1:11 token recognition error at: '~'")
 </code></pre>
 
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "name": "hello world"
+  }
+]
+</code></pre>
+
 <h4 id="Raku_JSON-Path">
 Raku (JSON-Path)
 </h4>
 
 <p>Not supported</p>
 
-<pre><code>Evaluation of embedded Perl 6 code not allowed (construct with :allow-eval)
+<pre><code>Evaluation of embedded Raku code not allowed (construct with :allow-eval)
 </code></pre>
 
 <h4 id="Ruby_jsonpath">
@@ -424,6 +425,15 @@ Rust (jsonpath_lib)
 $[?(@.name=~/hello.*/)]
 ^^^^^^^^^^
 
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 3, in long-hand segment, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -483,7 +493,30 @@ dotNET (JsonPath.Net)
 
 <p>Not supported</p>
 
-<pre><code>Pattern '(@.name=~/...' not recognized.
+<pre><code>Pattern '?(@.name=~...' not recognized.
+</code></pre>
+
+<h4 id="dotNET_JsonPathLib">
+dotNET (JsonPathLib)
+</h4>
+
+<pre><code>[
+  {
+    "name": -1.0
+  },
+  {
+    "name": -1.0
+  },
+  {
+    "name": -1.0
+  },
+  {
+    "name": -1.0
+  },
+  {
+    "name": -1.0
+  }
+]
 </code></pre>
 
 <h4 id="dotNET_Manatee.Json">
@@ -493,141 +526,6 @@ dotNET (Manatee.Json)
 <p>Not supported</p>
 
 <pre><code>Unrecognized JSON Path Expression element. Path up to error: '$'
-</code></pre>
-
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:3
-  |
-1 | $[?(@.name=~/hello.*/)]
-  |   ^---
-  |
-  = expected unionChild, unionArrayIndex, or sliceStart
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:11-1:11 ComparisonOperator
-| $[?(@.name=~/hello.*/)]
-|           ^
-| x 1:11-1:11 ScalarOperator
-| | $[?(@.name=~/hello.*/)]
-| |           ^
-| o 1:5-1:11 DocumentValue
-| | $[?(@.name=~/hello.*/)]
-| |     ^^^^^^
-| o 1:5-1:11 UnaryFilterExpression
-| | $[?(@.name=~/hello.*/)]
-| |     ^^^^^^
-| | x 1:11-1:11 ScalarOperator
-| | | $[?(@.name=~/hello.*/)]
-| | |           ^
-| | o 1:5-1:11 DocumentValue
-| | | $[?(@.name=~/hello.*/)]
-| | |     ^^^^^^
-| | o 1:5-1:11 FilterValue
-| | | $[?(@.name=~/hello.*/)]
-| | |     ^^^^^^
-| | | 
-|/ /  
-| | 
-|/  
-o 1:5-1:11 HigherPrecedenceFilterExpression
-| $[?(@.name=~/hello.*/)]
-|     ^^^^^^
-x 1:5-1:5 LogicalOr
-| $[?(@.name=~/hello.*/)]
-|     ^
-| x 1:11-1:11 ComparisonOperator
-| | $[?(@.name=~/hello.*/)]
-| |           ^
-| | x 1:11-1:11 ScalarOperator
-| | | $[?(@.name=~/hello.*/)]
-| | |           ^
-| | o 1:5-1:11 DocumentValue
-| | | $[?(@.name=~/hello.*/)]
-| | |     ^^^^^^
-| | o 1:5-1:11 UnaryFilterExpression
-| | | $[?(@.name=~/hello.*/)]
-| | |     ^^^^^^
-| | | x 1:11-1:11 ScalarOperator
-| | | | $[?(@.name=~/hello.*/)]
-| | | |           ^
-| | | o 1:5-1:11 DocumentValue
-| | | | $[?(@.name=~/hello.*/)]
-| | | |     ^^^^^^
-| | | o 1:5-1:11 FilterValue
-| | | | $[?(@.name=~/hello.*/)]
-| | | |     ^^^^^^
-| | | | 
-| |/ /  
-| | | 
-| |/  
-| o 1:5-1:11 HigherPrecedenceFilterExpression
-| | $[?(@.name=~/hello.*/)]
-| |     ^^^^^^
-| x 1:5-1:5 LogicalAnd
-| | $[?(@.name=~/hello.*/)]
-| |     ^
-| | x 1:11-1:11 ComparisonOperator
-| | | $[?(@.name=~/hello.*/)]
-| | |           ^
-| | | x 1:11-1:11 ScalarOperator
-| | | | $[?(@.name=~/hello.*/)]
-| | | |           ^
-| | | o 1:5-1:11 DocumentValue
-| | | | $[?(@.name=~/hello.*/)]
-| | | |     ^^^^^^
-| | | o 1:5-1:11 UnaryFilterExpression
-| | | | $[?(@.name=~/hello.*/)]
-| | | |     ^^^^^^
-| | | | x 1:11-1:11 ScalarOperator
-| | | | | $[?(@.name=~/hello.*/)]
-| | | | |           ^
-| | | | o 1:5-1:11 DocumentValue
-| | | | | $[?(@.name=~/hello.*/)]
-| | | | |     ^^^^^^
-| | | | o 1:5-1:11 FilterValue
-| | | | | $[?(@.name=~/hello.*/)]
-| | | | |     ^^^^^^
-| | | | | 
-| | |/ /  
-| | | | 
-| | |/  
-| | o 1:5-1:11 HigherPrecedenceFilterExpression
-| | | $[?(@.name=~/hello.*/)]
-| | |     ^^^^^^
-| | | 
-|/ /  
-| | 
-|/  
-o 1:5-1:11 FilterExpression
-| $[?(@.name=~/hello.*/)]
-|     ^^^^^^
-x 1:3-1:3 BracketElement
-| $[?(@.name=~/hello.*/)]
-|   ^
-x 1:3-1:3 BracketElements
-| $[?(@.name=~/hello.*/)]
-|   ^
-x 1:2-1:2 BracketChildren
-| $[?(@.name=~/hello.*/)]
-|  ^
-x 1:2-1:2 Operator
-| $[?(@.name=~/hello.*/)]
-|  ^
-o 1:1-1:2 Start
-  $[?(@.name=~/hello.*/)]
-  ^
 </code></pre>
 
 <h3>Errors</h3>
@@ -644,6 +542,20 @@ Golang (github.com-spyzhov-ajson)
 </h4>
 
 <pre><code>wrong request: wrong request: ?(@.name=~/hello.*/)
+</code></pre>
+
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>unexpected filter selector token '=' ('name=~/he':10)
+</code></pre>
+
+<h4 id="JavaScript_jsonpath-plus">
+JavaScript (jsonpath-plus)
+</h4>
+
+<pre><code>jsonPath: Invalid left-hand side in assignment: @.name=~/hello.*/
 </code></pre>
 
 <h4 id="PHP_Goessner">
@@ -668,13 +580,6 @@ Rust (jsonpath_plus)
 <pre><code>Error Parsing JSON Path:
 $[?(@.name=~/hello.*/)]
 panic occurred
-</code></pre>
-
-<h4 id="dotNET_JsonPathLib">
-dotNET (JsonPathLib)
-</h4>
-
-<pre><code>Object of type 'System.Double' cannot be converted to type 'Newtonsoft.Json.Linq.JToken'.
 </code></pre>
 
 <h2>Footnotes</h2>

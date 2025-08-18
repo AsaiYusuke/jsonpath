@@ -47,7 +47,7 @@ Dart (json_path)
 
 <p>Not supported</p>
 
-<pre><code>FormatException: "$" expected at 1:1. Expression: 
+<pre><code>Instance of 'ParserException': "$" expected (at 1:1)
 </code></pre>
 
 <h4 id="Elixir_ExJsonPath">
@@ -147,6 +147,15 @@ JavaScript (jsonpath-plus)
 ]
 </code></pre>
 
+<h4 id="JavaScript_jsonpathly">
+JavaScript (jsonpathly)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>mismatched input '&lt;EOF&gt;' expecting '$'
+</code></pre>
+
 <h4 id="Java_com.github.jsurfer">
 Java (com.github.jsurfer)
 </h4>
@@ -187,7 +196,6 @@ PHP (Goessner)
 
 <h4 id="PHP_galbar-jsonpath">
 PHP (galbar-jsonpath)
-²
 </h4>
 
 <p>Not supported</p>
@@ -232,7 +240,7 @@ Python (jsonpath-ng)
 
 <p>Not supported</p>
 
-<pre><code>AttributeError("'NoneType' object has no attribute 'lineno'")
+<pre><code>JsonPathParserError('Parse error near the end of string!')
 </code></pre>
 
 <h4 id="Python_jsonpath-rw">
@@ -252,6 +260,18 @@ Python (jsonpath2)
 
 <pre><code>line 1:0 missing '$' at '&lt;EOF&gt;'
 ValueError("line 1:0 missing '$' at '&lt;EOF&gt;'")
+</code></pre>
+
+<h4 id="Python_python-jsonpath">
+Python (python-jsonpath)
+</h4>
+
+<pre><code>[
+  {
+    "": 21,
+    "a": 42
+  }
+]
 </code></pre>
 
 <h4 id="Raku_JSON-Path">
@@ -294,6 +314,15 @@ Rust (jsonpath_lib)
 
 
 
+</code></pre>
+
+<h4 id="Rust_serde_json_path">
+Rust (serde_json_path)
+</h4>
+
+<p>Not supported</p>
+
+<pre><code>at position 0, parser error
 </code></pre>
 
 <h4 id="Scala_jsonpath">
@@ -356,32 +385,6 @@ dotNET (JsonPathLib)
 ]
 </code></pre>
 
-<h4 id="JSON_Path_Reference_Implementation">
-JSON (Path_Reference_Implementation)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code> --&gt; 1:1
-  |
-1 | 
-  | ^---
-  |
-  = expected rootSelector
-</code></pre>
-
-<h4 id="Proposal_A">
-Proposal (A)
-</h4>
-
-<p>Not supported</p>
-
-<pre><code>
-x 1:1-1:1 Start
-| 
-| ^
-</code></pre>
-
 <h3>Errors</h3>
 
 <h4 id="C_json-glib">
@@ -434,6 +437,13 @@ JavaScript (brunerd)
 <pre><code>undefined
 </code></pre>
 
+<h4 id="JavaScript_json-p3">
+JavaScript (json-p3)
+</h4>
+
+<pre><code>can't backup beyond start ('':0)
+</code></pre>
+
 <h4 id="JavaScript_jsonpath">
 JavaScript (jsonpath)
 </h4>
@@ -447,9 +457,9 @@ Java (com.jayway.jsonpath)
 ³
 </h4>
 
-<pre><code>SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+<pre><code>SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
 Exception in thread "main" java.lang.IllegalArgumentException: path can not be null or empty
 	at com.jayway.jsonpath.internal.Utils.notEmpty(Utils.java:401)
 	at com.jayway.jsonpath.internal.JsonContext.read(JsonContext.java:76)
