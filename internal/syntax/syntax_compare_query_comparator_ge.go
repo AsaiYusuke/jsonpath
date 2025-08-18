@@ -6,12 +6,14 @@ type syntaxCompareGE struct {
 }
 
 func (c *syntaxCompareGE) comparator(left []any, right any) bool {
-	var rightValue float64
-	switch rightType := right.(type) {
-	case float64:
-		rightValue = rightType
-	default:
+	rightFloatValue, rightIsFloat := right.(float64)
+	rightNumberValue, rightIsNumber := right.(json.Number)
+	rightStringValue, rightIsString := right.(string)
+	if !rightIsFloat && !rightIsNumber && !rightIsString {
 		return false
+	}
+	if rightIsNumber {
+		rightFloatValue, _ = rightNumberValue.Float64()
 	}
 
 	var hasValue bool
@@ -21,14 +23,20 @@ func (c *syntaxCompareGE) comparator(left []any, right any) bool {
 		}
 		switch leftValue := left[leftIndex].(type) {
 		case float64:
-			if leftValue >= rightValue {
+			if (rightIsFloat || rightIsNumber) && leftValue >= rightFloatValue {
 				hasValue = true
 			} else {
 				left[leftIndex] = emptyEntity
 			}
 		case json.Number:
 			leftFloat, _ := leftValue.Float64()
-			if leftFloat >= rightValue {
+			if (rightIsFloat || rightIsNumber) && leftFloat >= rightFloatValue {
+				hasValue = true
+			} else {
+				left[leftIndex] = emptyEntity
+			}
+		case string:
+			if rightIsString && leftValue >= rightStringValue {
 				hasValue = true
 			} else {
 				left[leftIndex] = emptyEntity
@@ -37,5 +45,6 @@ func (c *syntaxCompareGE) comparator(left []any, right any) bool {
 			left[leftIndex] = emptyEntity
 		}
 	}
+
 	return hasValue
 }

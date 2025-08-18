@@ -250,26 +250,26 @@ comparator <-
         }
     ) /
 
-    qNumericParam space (
-        '<=' space qNumericParam {
+    qNumberOrStringParam space (
+        '<=' space qNumberOrStringParam {
             rightParam := p.pop().(syntaxCompareParameter)
             leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareLE(leftParam, rightParam)
         } /
 
-        '<' space qNumericParam {
+        '<' space qNumberOrStringParam {
             rightParam := p.pop().(syntaxCompareParameter)
             leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareLT(leftParam, rightParam)
         } /
 
-        '>=' space qNumericParam {
+        '>=' space qNumberOrStringParam {
             rightParam := p.pop().(syntaxCompareParameter)
             leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareGE(leftParam, rightParam)
         } /
 
-        '>' space qNumericParam {
+        '>' space qNumberOrStringParam {
             rightParam := p.pop().(syntaxCompareParameter)
             leftParam := p.pop().(syntaxCompareParameter)
             p.pushCompareGT(leftParam, rightParam)
@@ -282,20 +282,18 @@ comparator <-
     }
 
 qParam <-
-    qLiteral {
+    ( lNumber / lBool / lString / lNull ) {
         p.pushCompareParameterLiteral(p.pop())
     } /
 
     singleJsonpathFilter
 
-qNumericParam <-
-    lNumber {
+qNumberOrStringParam <- ( lNumber / lString )
+    {
         p.pushCompareParameterLiteral(p.pop())
     } /
 
     singleJsonpathFilter
-
-qLiteral <- lNumber / lBool / lString / lNull
 
 singleJsonpathFilter <-
     < &( rootWithSegment / currentNodeIdentifier ) jsonpathFilter > {
