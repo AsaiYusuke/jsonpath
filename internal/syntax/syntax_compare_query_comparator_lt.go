@@ -6,12 +6,14 @@ type syntaxCompareLT struct {
 }
 
 func (c *syntaxCompareLT) comparator(left []any, right any) bool {
-	var rightValue float64
-	switch rightType := right.(type) {
-	case float64:
-		rightValue = rightType
-	default:
+	rightFloat, rightIsFloat := right.(float64)
+	rightNumber, rightIsNumber := right.(json.Number)
+	rightString, rightIsString := right.(string)
+	if !rightIsFloat && !rightIsNumber && !rightIsString {
 		return false
+	}
+	if rightIsNumber {
+		rightFloat, _ = rightNumber.Float64()
 	}
 
 	var hasValue bool
@@ -21,14 +23,20 @@ func (c *syntaxCompareLT) comparator(left []any, right any) bool {
 		}
 		switch leftValue := left[leftIndex].(type) {
 		case float64:
-			if leftValue < rightValue {
+			if (rightIsFloat || rightIsNumber) && leftValue < rightFloat {
 				hasValue = true
 			} else {
 				left[leftIndex] = emptyEntity
 			}
 		case json.Number:
 			leftFloat, _ := leftValue.Float64()
-			if leftFloat < rightValue {
+			if (rightIsFloat || rightIsNumber) && leftFloat < rightFloat {
+				hasValue = true
+			} else {
+				left[leftIndex] = emptyEntity
+			}
+		case string:
+			if rightIsString && leftValue < rightString {
 				hasValue = true
 			} else {
 				left[leftIndex] = emptyEntity
@@ -37,5 +45,6 @@ func (c *syntaxCompareLT) comparator(left []any, right any) bool {
 			left[leftIndex] = emptyEntity
 		}
 	}
+
 	return hasValue
 }

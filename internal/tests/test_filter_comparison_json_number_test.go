@@ -13,7 +13,7 @@ var useJSONNumberDecoderFunction = func(srcJSON string, src *any) error {
 	return decoder.Decode(src)
 }
 
-func TestDotNotation_JsonNumberFilter(t *testing.T) {
+func TestFilterComparison_JsonNumberFilter_LiteralOperations(t *testing.T) {
 	testCases := []TestCase{
 		{
 			jsonpath:      `$[?(@.a > 123)].a`,
@@ -93,5 +93,36 @@ func TestDotNotation_JsonNumberFilter(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, "TestDotNotation_JsonNumberFilter", testCases)
+	runTestCases(t, "TestFilterComparison_JsonNumberFilter_LiteralOperations", testCases)
+}
+
+func TestFilterComparison_JsonNumberFilter_JSONPathOperations(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:      `$[?(@.a > $[1].a)]`,
+			inputJSON:     `[{"a":123},{"a":123.456},{"a":124}]`,
+			expectedJSON:  `[{"a":124}]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a >= $[1].a)]`,
+			inputJSON:     `[{"a":123},{"a":123.456},{"a":124}]`,
+			expectedJSON:  `[{"a":123.456},{"a":124}]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a < $[1].a)]`,
+			inputJSON:     `[{"a":123},{"a":123.456},{"a":124}]`,
+			expectedJSON:  `[{"a":123}]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+		{
+			jsonpath:      `$[?(@.a <= $[1].a)]`,
+			inputJSON:     `[{"a":123},{"a":123.456},{"a":124}]`,
+			expectedJSON:  `[{"a":123},{"a":123.456}]`,
+			unmarshalFunc: useJSONNumberDecoderFunction,
+		},
+	}
+
+	runTestCases(t, "TestFilterComparison_JsonNumberFilter_LiteralOperations", testCases)
 }

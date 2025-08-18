@@ -526,39 +526,105 @@ func (p *jsonPathParser) pushCompareNE(
 	p.push(&syntaxLogicalNot{query: p.pop().(syntaxQuery)})
 }
 
+func (p *jsonPathParser) _isStringLiteral(param syntaxCompareParameter) bool {
+	if literalParam, ok := param.(*syntaxQueryParamLiteral); ok {
+		if len(literalParam.literal) == 1 {
+			if _, isString := literalParam.literal[0].(string); isString {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (p *jsonPathParser) _isNumberLiteral(param syntaxCompareParameter) bool {
+	if literalParam, ok := param.(*syntaxQueryParamLiteral); ok {
+		if len(literalParam.literal) == 1 {
+			if _, isFloat := literalParam.literal[0].(float64); isFloat {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (p *jsonPathParser) pushCompareGE(
 	leftParam, rightParam syntaxCompareParameter) {
-	if isLiteralParam(leftParam) {
-		p.push(p._createCompareQuery(rightParam, leftParam, &syntaxCompareLE{}))
+	if isLiteralParam(leftParam) && !isLiteralParam(rightParam) {
+		p.pushCompareLE(rightParam, leftParam)
 		return
 	}
+
+	if p._isNumberLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareNumberGE{}))
+		return
+	}
+
+	if p._isStringLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareStringGE{}))
+		return
+	}
+
 	p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareGE{}))
 }
 
 func (p *jsonPathParser) pushCompareGT(
 	leftParam, rightParam syntaxCompareParameter) {
-	if isLiteralParam(leftParam) {
-		p.push(p._createCompareQuery(rightParam, leftParam, &syntaxCompareLT{}))
+	if isLiteralParam(leftParam) && !isLiteralParam(rightParam) {
+		p.pushCompareLT(rightParam, leftParam)
 		return
 	}
+
+	if p._isNumberLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareNumberGT{}))
+		return
+	}
+
+	if p._isStringLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareStringGT{}))
+		return
+	}
+
 	p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareGT{}))
 }
 
 func (p *jsonPathParser) pushCompareLE(
 	leftParam, rightParam syntaxCompareParameter) {
-	if isLiteralParam(leftParam) {
-		p.push(p._createCompareQuery(rightParam, leftParam, &syntaxCompareGE{}))
+	if isLiteralParam(leftParam) && !isLiteralParam(rightParam) {
+		p.pushCompareGE(rightParam, leftParam)
 		return
 	}
+
+	if p._isNumberLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareNumberLE{}))
+		return
+	}
+
+	if p._isStringLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareStringLE{}))
+		return
+	}
+
 	p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareLE{}))
 }
 
 func (p *jsonPathParser) pushCompareLT(
 	leftParam, rightParam syntaxCompareParameter) {
-	if isLiteralParam(leftParam) {
-		p.push(p._createCompareQuery(rightParam, leftParam, &syntaxCompareGT{}))
+	if isLiteralParam(leftParam) && !isLiteralParam(rightParam) {
+		p.pushCompareGT(rightParam, leftParam)
 		return
 	}
+
+	if p._isNumberLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareNumberLT{}))
+		return
+	}
+
+	if p._isStringLiteral(rightParam) {
+		p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareStringLT{}))
+		return
+	}
+
 	p.push(p._createCompareQuery(leftParam, rightParam, &syntaxCompareLT{}))
 }
 
