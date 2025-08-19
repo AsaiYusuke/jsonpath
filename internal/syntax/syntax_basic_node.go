@@ -1,6 +1,9 @@
 package syntax
 
-import "github.com/AsaiYusuke/jsonpath/v2/errors"
+import (
+	"github.com/AsaiYusuke/jsonpath/v2/config"
+	"github.com/AsaiYusuke/jsonpath/v2/errors"
+)
 
 type syntaxBasicNode struct {
 	path                 string
@@ -64,7 +67,7 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 	}
 
 	if i.accessorMode {
-		container.result = append(container.result, Accessor{
+		container.result = append(container.result, config.Accessor{
 			Get: func() any { return nextSrc },
 			Set: nil,
 		})
@@ -88,7 +91,7 @@ func (i *syntaxBasicNode) retrieveMapNext(
 	}
 
 	if i.accessorMode {
-		container.result = append(container.result, Accessor{
+		container.result = append(container.result, config.Accessor{
 			Get: func() any { return currentMap[key] },
 			Set: func(value any) { currentMap[key] = value },
 		})
@@ -107,7 +110,7 @@ func (i *syntaxBasicNode) retrieveListNext(
 	}
 
 	if i.accessorMode {
-		container.result = append(container.result, Accessor{
+		container.result = append(container.result, config.Accessor{
 			Get: func() any { return currentList[index] },
 			Set: func(value any) { currentList[index] = value },
 		})

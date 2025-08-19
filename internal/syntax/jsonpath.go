@@ -3,6 +3,8 @@ package syntax
 import (
 	"regexp"
 	"sync"
+
+	"github.com/AsaiYusuke/jsonpath/v2/config"
 )
 
 var parseMutex sync.Mutex
@@ -10,7 +12,7 @@ var parser = pegJSONPathParser[uint32]{}
 var unescapeRegex = regexp.MustCompile(`\\(.)`)
 
 // Retrieve returns the retrieved JSON using the given JSONPath.
-func Retrieve(jsonPath string, src any, config ...Config) ([]any, error) {
+func Retrieve(jsonPath string, src any, config ...config.Config) ([]any, error) {
 	jsonPathFunc, err := Parse(jsonPath, config...)
 	if err != nil {
 		return nil, err
@@ -19,7 +21,7 @@ func Retrieve(jsonPath string, src any, config ...Config) ([]any, error) {
 }
 
 // Parse returns the parser function using the given JSONPath.
-func Parse(jsonPath string, config ...Config) (f func(src any) ([]any, error), err error) {
+func Parse(jsonPath string, config ...config.Config) (f func(src any) ([]any, error), err error) {
 	parseMutex.Lock()
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -43,9 +45,9 @@ func Parse(jsonPath string, config ...Config) (f func(src any) ([]any, error), e
 	parser.jsonPathParser.unescapeRegex = unescapeRegex
 
 	if len(config) > 0 {
-		parser.jsonPathParser.filterFunctions = config[0].filterFunctions
-		parser.jsonPathParser.aggregateFunctions = config[0].aggregateFunctions
-		parser.jsonPathParser.accessorMode = config[0].accessorMode
+		parser.jsonPathParser.filterFunctions = config[0].FilterFunctions
+		parser.jsonPathParser.aggregateFunctions = config[0].AggregateFunctions
+		parser.jsonPathParser.accessorMode = config[0].AccessorMode
 	}
 
 	parser.Parse()

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/AsaiYusuke/jsonpath/v2"
+	"github.com/AsaiYusuke/jsonpath/v2/config"
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
@@ -56,7 +57,7 @@ func createErrorFunctionNotFound(function string) errors.ErrorFunctionNotFound {
 func execTestRetrieve(t *testing.T, inputJSON any, testCase TestCase, fileLine string) ([]any, error) {
 	jsonPath := testCase.jsonpath
 	hasConfig := false
-	config := jsonpath.Config{}
+	config := config.Config{}
 	expectedError := testCase.expectedErr
 	var actualObject []any
 	var err error
@@ -258,7 +259,7 @@ func createAccessorModeValidator(
 	srcGetter func(any) any,
 	srcSetter func(any, any)) func(any, []any) error {
 	return func(src any, actualObject []any) error {
-		accessor := actualObject[resultIndex].(jsonpath.Accessor)
+		accessor := actualObject[resultIndex].(config.Accessor)
 
 		getValue := accessor.Get()
 		if getValue != expectedValue1 {
@@ -291,7 +292,7 @@ func createAccessorModeValidator(
 
 func createGetOnlyValidator(expected any) func(any, []any) error {
 	return func(src any, actualObject []any) error {
-		accessor, ok := actualObject[0].(jsonpath.Accessor)
+		accessor, ok := actualObject[0].(config.Accessor)
 		if !ok {
 			return fmt.Errorf("result[0] is not Accessor: %T", actualObject[0])
 		}
@@ -308,7 +309,7 @@ func createGetOnlyValidator(expected any) func(any, []any) error {
 
 var sliceStructChangedResultValidator = func(src any, actualObject []any) error {
 	srcArray := src.([]any)
-	accessor := actualObject[0].(jsonpath.Accessor)
+	accessor := actualObject[0].(config.Accessor)
 
 	accessor.Set(4) // srcArray:[1,4,3] , accessor:[1,4,3]
 	if len(srcArray) != 3 || srcArray[1] != 4 {
@@ -345,7 +346,7 @@ var sliceStructChangedResultValidator = func(src any, actualObject []any) error 
 
 var mapStructChangedResultValidator = func(src any, actualObject []any) error {
 	srcMap := src.(map[string]any)
-	accessor := actualObject[0].(jsonpath.Accessor)
+	accessor := actualObject[0].(config.Accessor)
 
 	accessor.Set(2) // srcMap:{"a":2} , accessor:{"a":2}
 	if len(srcMap) != 1 || srcMap[`a`] != 2 {

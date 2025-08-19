@@ -1,4 +1,4 @@
-package syntax
+package config
 
 // Accessor represents the accessor to the result nodes of JSONPath.
 type Accessor struct {
