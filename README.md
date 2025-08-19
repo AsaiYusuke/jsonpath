@@ -91,7 +91,7 @@ The `Retrieve` function extracts values from a JSON object using a JSONPath expr
 output, err := jsonpath.Retrieve(jsonPath, src)
 ```
 
-[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Retrieve)
+[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2#example-Retrieve)
 
 The `Parse` function returns a parser function that checks the JSONPath syntax in advance. You can use this parser function to repeatedly extract values with the same JSONPath:
 
@@ -101,7 +101,7 @@ output1, err1 := parsed(src1)
 output2, err2 := parsed(src2)
 ```
 
-[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Parse)
+[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2#example-Parse)
 
 ### \* Error handling
 
@@ -111,18 +111,18 @@ If an error occurs during API execution, a specific error type is returned. The 
 
 | Error type              | Message format                                     | Symptom                                                                                                          | Ex                                                                                        |
 | ----------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The JSONPath contains invalid syntax. The _reason_ in the message provides more details. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidSyntax)    |
-| `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | An argument in the JSONPath is invalid according to Go syntax.                                | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorInvalidArgument)  |
-| `ErrorFunctionNotFound` | `function not found (path=%s)`                 | The specified function in the JSONPath was not found.                                                             | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionNotFound) |
-| `ErrorNotSupported`     | `not supported (path=%s, feature=%s)`              | The JSONPath uses unsupported syntax.                                                              | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorNotSupported)     |
+| `ErrorInvalidSyntax`    | `invalid syntax (position=%d, reason=%s, near=%s)` | The JSONPath contains invalid syntax. The _reason_ in the message provides more details. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorInvalidSyntax)    |
+| `ErrorInvalidArgument`  | `invalid argument (argument=%s, error=%s)`         | An argument in the JSONPath is invalid according to Go syntax.                                | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorInvalidArgument)  |
+| `ErrorFunctionNotFound` | `function not found (path=%s)`                 | The specified function in the JSONPath was not found.                                                             | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorFunctionNotFound) |
+| `ErrorNotSupported`     | `not supported (path=%s, feature=%s)`              | The JSONPath uses unsupported syntax.                                                              | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorNotSupported)     |
 
 #### Runtime errors from `Retrieve` or parser functions
 
 | Error type            | Message format                                    | Symptom                                                                             | Ex                                                                                      |
 | --------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `ErrorMemberNotExist` | `member did not exist (path=%s)`                  | The specified object or array member does not exist in the JSON object. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorMemberNotExist) |
-| `ErrorTypeUnmatched`  | `type unmatched (path=%s, expected=%s, found=%s)` | The type of the node in the JSON object does not match what is expected by the JSONPath.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorTypeUnmatched)  |
-| `ErrorFunctionFailed` | `function failed (path=%s, error=%s)`         | The function specified in the JSONPath failed to execute.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-ErrorFunctionFailed) |
+| `ErrorMemberNotExist` | `member did not exist (path=%s)`                  | The specified object or array member does not exist in the JSON object. | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorMemberNotExist) |
+| `ErrorTypeUnmatched`  | `type unmatched (path=%s, expected=%s, found=%s)` | The type of the node in the JSON object does not match what is expected by the JSONPath.           | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorTypeUnmatched)  |
+| `ErrorFunctionFailed` | `function failed (path=%s, error=%s)`         | The function specified in the JSONPath failed to execute.                                      | [:memo:](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/errors#example-ErrorFunctionFailed) |
 
 Type checking makes it easy to determine which error occurred.
 
@@ -150,13 +150,13 @@ There are two types of functions:
 
 A filter function applies a user-defined function to each value in the result, transforming them individually.
 
-[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetFilterFunction)
+[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/config#example-Config.SetFilterFunction)
 
 #### Aggregate function
 
 An aggregate function combines all values in the result into a single value.
 
-[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAggregateFunction)
+[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/config#example-Config.SetAggregateFunction)
 
 ### \* Accessing JSON
 
@@ -164,7 +164,7 @@ Instead of retrieving values directly, you can obtain accessors (_Getters_ / _Se
 
 Enable this feature by calling `Config.SetAccessorMode()`.
 
-[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath#example-Config.SetAccessorMode)
+[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2/config#example-Accessor)
 
 #### Accessor limitations
 
