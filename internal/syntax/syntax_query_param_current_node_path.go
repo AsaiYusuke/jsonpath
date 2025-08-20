@@ -16,9 +16,6 @@ func (e *syntaxQueryParamCurrentNodePath) compute(
 	var hasValue bool
 
 	container := getContainer()
-	defer func() {
-		putContainer(container)
-	}()
 
 	for index := range currentList {
 		container.result = container.result[:0]
@@ -31,6 +28,8 @@ func (e *syntaxQueryParamCurrentNodePath) compute(
 		// Only the first element is returned because it is an existence check.
 		result[index] = container.result[0]
 	}
+
+	putContainer(container)
 
 	if hasValue {
 		return result
