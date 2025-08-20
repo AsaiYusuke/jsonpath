@@ -46,20 +46,16 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 			}
 
 			sortKeys, keyLength := getSortedRecursiveKeys(typedNodes)
-			if len(targetNodes)+keyLength > cap(targetNodes) {
-				if cap(targetNodes)*2 > len(targetNodes)+keyLength {
-					targetNodes = slices.Grow(targetNodes, cap(targetNodes)*2)
-				} else {
-					targetNodes = slices.Grow(targetNodes, len(targetNodes)+keyLength)
-				}
-			}
-			oldLength := len(targetNodes)
-			targetNodes = targetNodes[:oldLength+keyLength]
+			if keyLength > 0 {
+				oldLength := len(targetNodes)
+				targetNodes = slices.Grow(targetNodes, keyLength)
+				targetNodes = targetNodes[:oldLength+keyLength]
 
-			appendIndex := oldLength
-			for index := keyLength - 1; index >= 0; index-- {
-				targetNodes[appendIndex] = typedNodes[(*sortKeys)[index]]
-				appendIndex++
+				appendIndex := oldLength
+				for index := keyLength - 1; index >= 0; index-- {
+					targetNodes[appendIndex] = typedNodes[(*sortKeys)[index]]
+					appendIndex++
+				}
 			}
 
 			putSortSlice(sortKeys)
@@ -71,18 +67,25 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 				}
 			}
 
-			if len(targetNodes)+len(typedNodes) > cap(targetNodes) {
-				if cap(targetNodes)*2 > len(targetNodes)+len(typedNodes) {
-					targetNodes = slices.Grow(targetNodes, cap(targetNodes)*2)
-				} else {
-					targetNodes = slices.Grow(targetNodes, len(targetNodes)+len(typedNodes))
-				}
-			}
-
-			for index := len(typedNodes) - 1; index >= 0; index-- {
+			keyLength := 0
+			for index := range typedNodes {
 				switch typedNodes[index].(type) {
 				case map[string]any, []any:
-					targetNodes = append(targetNodes, typedNodes[index])
+					keyLength++
+				}
+			}
+			if keyLength > 0 {
+				oldLength := len(targetNodes)
+				targetNodes = slices.Grow(targetNodes, keyLength)
+				targetNodes = targetNodes[:oldLength+keyLength]
+
+				appendIndex := oldLength
+				for index := len(typedNodes) - 1; index >= 0; index-- {
+					switch typedNodes[index].(type) {
+					case map[string]any, []any:
+						targetNodes[appendIndex] = typedNodes[index]
+						appendIndex++
+					}
 				}
 			}
 		}
