@@ -8,13 +8,6 @@ type syntaxSliceNegativeStepSubscript struct {
 	step  *syntaxIndexSubscript
 }
 
-func (s *syntaxSliceNegativeStepSubscript) forEachIndex(srcLength int, handleIndex func(index int)) {
-	loopStart, loopEnd := s.getLoopStart(srcLength), s.getLoopEnd(srcLength)
-	for i := loopStart; i > loopEnd; i += s.step.number {
-		handleIndex(i)
-	}
-}
-
 func (s *syntaxSliceNegativeStepSubscript) getLoopStart(srcLength int) int {
 	if s.start.isOmitted {
 		return s.getNormalizedValue(srcLength-1, srcLength)
@@ -40,4 +33,17 @@ func (s *syntaxSliceNegativeStepSubscript) getNormalizedValue(value int, srcLeng
 		return value + srcLength
 	}
 	return value
+}
+
+func (s *syntaxSliceNegativeStepSubscript) count(srcLength int) int {
+	start, end := s.getLoopStart(srcLength), s.getLoopEnd(srcLength)
+	if start <= end {
+		return 0
+	}
+	d := -s.step.number
+	return (start - end + d - 1) / d
+}
+
+func (s *syntaxSliceNegativeStepSubscript) indexAt(srcLength int, ordinal int) int {
+	return s.getLoopStart(srcLength) + ordinal*s.step.number
 }

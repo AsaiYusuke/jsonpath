@@ -4,8 +4,10 @@ type syntaxWildcardSubscript struct {
 	*syntaxBasicSubscript
 }
 
-func (*syntaxWildcardSubscript) forEachIndex(srcLength int, handleIndex func(index int)) {
-	for index := range srcLength {
-		handleIndex(index)
-	}
+func (*syntaxWildcardSubscript) count(srcLength int) int {
+	return srcLength
+}
+
+func (*syntaxWildcardSubscript) indexAt(srcLength int, ordinal int) int {
+	return ordinal
 }

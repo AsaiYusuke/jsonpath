@@ -1,6 +1,7 @@
 package syntax
 
 type syntaxSubscript interface {
-	forEachIndex(srcLength int, handleIndex func(index int))
 	isValueGroup() bool
+	count(srcLength int) int
+	indexAt(srcLength int, ordinal int) int
 }
