@@ -9,12 +9,12 @@ type syntaxFilterFunction struct {
 }
 
 func (f *syntaxFilterFunction) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
 	filteredValue, err := f.function(current)
 	if err != nil {
 		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err)
 	}
 
-	return f.retrieveAnyValueNext(root, filteredValue, container)
+	return f.retrieveAnyValueNext(root, filteredValue, results)
 }

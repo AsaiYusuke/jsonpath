@@ -13,14 +13,14 @@ type syntaxFilterQualifier struct {
 }
 
 func (f *syntaxFilterQualifier) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
 	switch typedNodes := current.(type) {
 	case map[string]any:
-		return f.retrieveMap(root, typedNodes, container)
+		return f.retrieveMap(root, typedNodes, results)
 
 	case []any:
-		return f.retrieveList(root, typedNodes, container)
+		return f.retrieveList(root, typedNodes, results)
 
 	default:
 		if current != nil {
@@ -33,23 +33,30 @@ func (f *syntaxFilterQualifier) retrieve(
 }
 
 func (f *syntaxFilterQualifier) retrieveMap(
-	root any, srcMap map[string]any, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcMap map[string]any, results *[]any) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 
 	sortKeys, keyLength := getSortedKeys(srcMap)
 
-	valueList := make([]any, keyLength)
+	buf := getNodeSlice()
+	if cap(*buf) < keyLength {
+		*buf = make([]any, keyLength)
+	}
+	*buf = (*buf)[:keyLength]
 	for index := range *sortKeys {
-		valueList[index] = srcMap[(*sortKeys)[index]]
+		(*buf)[index] = srcMap[(*sortKeys)[index]]
 	}
 
-	valueList = f.query.compute(root, valueList)
+	valueList := f.query.compute(root, *buf)
+
+	putNodeSlice(buf)
 
 	isEachResult := len(valueList) == len(srcMap)
 
 	if !isEachResult {
 		if valueList[0] == emptyEntity {
+			putSortSlice(sortKeys)
 			return f.newErrMemberNotExist()
 		}
 	}
@@ -60,14 +67,14 @@ func (f *syntaxFilterQualifier) retrieveMap(
 				continue
 			}
 		}
-		if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], container); len(container.result) == 0 && err != nil {
+		if err := f.retrieveMapNext(root, srcMap, (*sortKeys)[index], results); len(*results) == 0 && err != nil {
 			deepestError = f.getMostResolvedError(err, deepestError)
 		}
 	}
 
 	putSortSlice(sortKeys)
 
-	if len(container.result) > 0 {
+	if len(*results) > 0 {
 		return nil
 	}
 
@@ -79,7 +86,7 @@ func (f *syntaxFilterQualifier) retrieveMap(
 }
 
 func (f *syntaxFilterQualifier) retrieveList(
-	root any, srcList []any, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcList []any, results *[]any) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 
@@ -99,12 +106,12 @@ func (f *syntaxFilterQualifier) retrieveList(
 				continue
 			}
 		}
-		if err := f.retrieveListNext(root, srcList, index, container); len(container.result) == 0 && err != nil {
+		if err := f.retrieveListNext(root, srcList, index, results); len(*results) == 0 && err != nil {
 			deepestError = f.getMostResolvedError(err, deepestError)
 		}
 	}
 
-	if len(container.result) > 0 {
+	if len(*results) > 0 {
 		return nil
 	}
 

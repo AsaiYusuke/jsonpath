@@ -15,7 +15,7 @@ type syntaxRecursiveChildIdentifier struct {
 }
 
 func (i *syntaxRecursiveChildIdentifier) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
 	switch current.(type) {
 	case map[string]any, []any:
@@ -40,7 +40,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 		switch typedNodes := currentTargetNode.(type) {
 		case map[string]any:
 			if i.nextMapRequired {
-				if err := i.next.retrieve(root, typedNodes, container); len(container.result) == 0 && err != nil {
+				if err := i.next.retrieve(root, typedNodes, results); len(*results) == 0 && err != nil {
 					deepestError = i.getMostResolvedError(err, deepestError)
 				}
 			}
@@ -62,7 +62,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 
 		case []any:
 			if i.nextListRequired {
-				if err := i.next.retrieve(root, typedNodes, container); len(container.result) == 0 && err != nil {
+				if err := i.next.retrieve(root, typedNodes, results); len(*results) == 0 && err != nil {
 					deepestError = i.getMostResolvedError(err, deepestError)
 				}
 			}
@@ -94,7 +94,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	*pooledNodes = targetNodes
 	putNodeSlice(pooledNodes)
 
-	if len(container.result) > 0 {
+	if len(*results) > 0 {
 		return nil
 	}
 

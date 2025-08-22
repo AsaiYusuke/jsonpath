@@ -15,19 +15,19 @@ type syntaxChildMultiIdentifier struct {
 }
 
 func (i *syntaxChildMultiIdentifier) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
 	if i.isAllWildcard {
 		if _, ok := current.([]any); ok {
 			// If the "current" variable points to the array structure
 			// and only wildcards are specified for qualifier,
 			// then switch to syntaxUnionQualifier.
-			return i.unionQualifier.retrieve(root, current, container)
+			return i.unionQualifier.retrieve(root, current, results)
 		}
 	}
 
 	if srcMap, ok := current.(map[string]any); ok {
-		return i.retrieveMap(root, srcMap, container)
+		return i.retrieveMap(root, srcMap, results)
 	}
 
 	if current != nil {
@@ -39,7 +39,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(
-	root any, srcMap map[string]any, container *bufferContainer) errors.ErrorRuntime {
+	root any, srcMap map[string]any, results *[]any) errors.ErrorRuntime {
 
 	var deepestError errors.ErrorRuntime
 
@@ -50,12 +50,12 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 			}
 		}
 
-		if err := identifier.retrieve(root, srcMap, container); len(container.result) == 0 && err != nil {
+		if err := identifier.retrieve(root, srcMap, results); len(*results) == 0 && err != nil {
 			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
 
-	if len(container.result) > 0 {
+	if len(*results) > 0 {
 		return nil
 	}
 

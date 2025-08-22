@@ -13,10 +13,10 @@ type syntaxChildSingleIdentifier struct {
 }
 
 func (i *syntaxChildSingleIdentifier) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
 	if srcMap, ok := current.(map[string]any); ok {
-		return i.retrieveMapNext(root, srcMap, i.identifier, container)
+		return i.retrieveMapNext(root, srcMap, i.identifier, results)
 	}
 
 	if current != nil {

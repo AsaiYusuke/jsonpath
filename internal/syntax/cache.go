@@ -9,10 +9,6 @@ var sortSliceSyncPool = &sync.Pool{
 	New: func() any { return new(sort.StringSlice) },
 }
 
-var resultSyncPool = &sync.Pool{
-	New: func() any { return new(bufferContainer) },
-}
-
 var nodeSliceSyncPool = &sync.Pool{
 	New: func() any {
 		slice := make([]any, 0, 10)
@@ -62,15 +58,6 @@ func putSortSlice(sortKeys *sort.StringSlice) {
 	if sortKeys != nil {
 		sortSliceSyncPool.Put(sortKeys)
 	}
-}
-
-func getContainer() *bufferContainer {
-	return resultSyncPool.Get().(*bufferContainer)
-}
-
-func putContainer(container *bufferContainer) {
-	container.result = container.result[:0]
-	resultSyncPool.Put(container)
 }
 
 func getNodeSlice() *[]any { return nodeSliceSyncPool.Get().(*[]any) }

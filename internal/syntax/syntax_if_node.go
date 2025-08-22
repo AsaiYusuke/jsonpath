@@ -3,7 +3,7 @@ package syntax
 import "github.com/AsaiYusuke/jsonpath/v2/errors"
 
 type syntaxNode interface {
-	retrieve(root, current any, container *bufferContainer) errors.ErrorRuntime
+	retrieve(root, current any, results *[]any) errors.ErrorRuntime
 	setPath(path string)
 	getPath() string
 	setValueGroup()

@@ -13,7 +13,7 @@ type syntaxUnionQualifier struct {
 }
 
 func (u *syntaxUnionQualifier) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
 	srcArray, ok := current.([]any)
 	if !ok {
@@ -30,13 +30,13 @@ func (u *syntaxUnionQualifier) retrieve(
 	for _, subscript := range u.subscripts {
 		srcLen := len(srcArray)
 		for ord := range subscript.count(srcLen) {
-			if err := u.retrieveListNext(root, srcArray, subscript.indexAt(srcLen, ord), container); len(container.result) == 0 && err != nil {
+			if err := u.retrieveListNext(root, srcArray, subscript.indexAt(srcLen, ord), results); len(*results) == 0 && err != nil {
 				deepestError = u.getMostResolvedError(err, deepestError)
 			}
 		}
 	}
 
-	if len(container.result) > 0 {
+	if len(*results) > 0 {
 		return nil
 	}
 

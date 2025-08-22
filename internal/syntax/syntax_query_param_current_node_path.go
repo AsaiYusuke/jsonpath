@@ -15,21 +15,20 @@ func (e *syntaxQueryParamCurrentNodePath) compute(
 
 	var hasValue bool
 
-	container := getContainer()
+	buf := getNodeSlice()
 
 	for index := range currentList {
-		container.result = container.result[:0]
-		if e.param.retrieve(root, currentList[index], container) != nil {
+		*buf = (*buf)[:0]
+		if e.param.retrieve(root, currentList[index], buf) != nil {
 			result[index] = emptyEntity
 			continue
 		}
 		hasValue = true
 		// If e.param.isValueGroup==true,
 		// Only the first element is returned because it is an existence check.
-		result[index] = container.result[0]
+		result[index] = (*buf)[0]
 	}
-
-	putContainer(container)
+	putNodeSlice(buf)
 
 	if hasValue {
 		return result
