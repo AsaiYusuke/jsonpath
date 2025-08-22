@@ -11,14 +11,12 @@ func (e *syntaxQueryParamRootNodePath) isValueGroupParameter() bool {
 func (e *syntaxQueryParamRootNodePath) compute(
 	root any, _ []any) []any {
 
-	values := getContainer()
-	defer func() {
-		putContainer(values)
-	}()
+	buf := getNodeSlice()
+	defer func() { putNodeSlice(buf) }()
 
-	if e.param.retrieve(root, root, values) != nil {
+	if e.param.retrieve(root, root, buf) != nil {
 		return emptyList
 	}
 
-	return []any{values.result[0]}
+	return []any{(*buf)[0]}
 }

@@ -55,19 +55,19 @@ func Parse(jsonPath string, config ...config.Config) (f func(src any) ([]any, er
 
 	root := parser.jsonPathParser.root
 	return func(src any) ([]any, error) {
-		container := getContainer()
-		defer func() {
-			putContainer(container)
-		}()
+		buf := getNodeSlice()
 
-		if err := root.retrieve(src, src, container); err != nil {
+		if err := root.retrieve(src, src, buf); err != nil {
+			putNodeSlice(buf)
 			return nil, err
 		}
 
-		result := make([]any, len(container.result))
-		copy(result, container.result)
+		res := *buf
+		out := make([]any, len(res))
+		copy(out, res)
 
-		return result, nil
+		putNodeSlice(buf)
+		return out, nil
 
 	}, nil
 }

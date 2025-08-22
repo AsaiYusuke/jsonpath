@@ -60,26 +60,26 @@ func (i *syntaxBasicNode) newErrMemberNotExist() errors.ErrorMemberNotExist {
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
-	root any, nextSrc any, container *bufferContainer) errors.ErrorRuntime {
+	root any, nextSrc any, results *[]any) errors.ErrorRuntime {
 
 	if i.next != nil {
-		return i.next.retrieve(root, nextSrc, container)
+		return i.next.retrieve(root, nextSrc, results)
 	}
 
 	if i.accessorMode {
-		container.result = append(container.result, config.Accessor{
+		*results = append(*results, config.Accessor{
 			Get: func() any { return nextSrc },
 			Set: nil,
 		})
 	} else {
-		container.result = append(container.result, nextSrc)
+		*results = append(*results, nextSrc)
 	}
 
 	return nil
 }
 
 func (i *syntaxBasicNode) retrieveMapNext(
-	root any, currentMap map[string]any, key string, container *bufferContainer) errors.ErrorRuntime {
+	root any, currentMap map[string]any, key string, results *[]any) errors.ErrorRuntime {
 
 	nextNode, ok := currentMap[key]
 	if !ok {
@@ -87,35 +87,35 @@ func (i *syntaxBasicNode) retrieveMapNext(
 	}
 
 	if i.next != nil {
-		return i.next.retrieve(root, nextNode, container)
+		return i.next.retrieve(root, nextNode, results)
 	}
 
 	if i.accessorMode {
-		container.result = append(container.result, config.Accessor{
+		*results = append(*results, config.Accessor{
 			Get: func() any { return currentMap[key] },
 			Set: func(value any) { currentMap[key] = value },
 		})
 	} else {
-		container.result = append(container.result, nextNode)
+		*results = append(*results, nextNode)
 	}
 
 	return nil
 }
 
 func (i *syntaxBasicNode) retrieveListNext(
-	root any, currentList []any, index int, container *bufferContainer) errors.ErrorRuntime {
+	root any, currentList []any, index int, results *[]any) errors.ErrorRuntime {
 
 	if i.next != nil {
-		return i.next.retrieve(root, currentList[index], container)
+		return i.next.retrieve(root, currentList[index], results)
 	}
 
 	if i.accessorMode {
-		container.result = append(container.result, config.Accessor{
+		*results = append(*results, config.Accessor{
 			Get: func() any { return currentList[index] },
 			Set: func(value any) { currentList[index] = value },
 		})
 	} else {
-		container.result = append(container.result, currentList[index])
+		*results = append(*results, currentList[index])
 	}
 
 	return nil

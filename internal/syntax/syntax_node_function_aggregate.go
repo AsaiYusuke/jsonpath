@@ -10,20 +10,18 @@ type syntaxAggregateFunction struct {
 }
 
 func (f *syntaxAggregateFunction) retrieve(
-	root, current any, container *bufferContainer) errors.ErrorRuntime {
+	root, current any, results *[]any) errors.ErrorRuntime {
 
-	values := getContainer()
-	defer func() {
-		putContainer(values)
-	}()
+	buf := getNodeSlice()
+	defer func() { putNodeSlice(buf) }()
 
-	if err := f.param.retrieve(root, current, values); err != nil {
+	if err := f.param.retrieve(root, current, buf); err != nil {
 		return err
 	}
 
-	result := values.result
+	result := *buf
 	if !f.param.isValueGroup() {
-		if arrayParam, ok := values.result[0].([]any); ok {
+		if arrayParam, ok := (*buf)[0].([]any); ok {
 			result = arrayParam
 		}
 	}
@@ -33,5 +31,5 @@ func (f *syntaxAggregateFunction) retrieve(
 		return errors.NewErrorFunctionFailed(f.path, f.remainingPathLen, err)
 	}
 
-	return f.retrieveAnyValueNext(root, filteredValue, container)
+	return f.retrieveAnyValueNext(root, filteredValue, results)
 }

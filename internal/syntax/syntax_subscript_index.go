@@ -7,11 +7,6 @@ type syntaxIndexSubscript struct {
 	isOmitted bool
 }
 
-// Dummy to satisfy syntaxSubscript; not used in normal paths.
-func (i *syntaxIndexSubscript) forEachIndex(_ int, _ func(_ int)) {
-	// no-op
-}
-
 func (i *syntaxIndexSubscript) getIndex(srcLength int) int {
 	if i.number < -srcLength || i.number >= srcLength {
 		return -1
@@ -22,4 +17,15 @@ func (i *syntaxIndexSubscript) getIndex(srcLength int) int {
 	}
 
 	return i.number
+}
+
+func (i *syntaxIndexSubscript) count(srcLength int) int {
+	if i.getIndex(srcLength) >= 0 {
+		return 1
+	}
+	return 0
+}
+
+func (i *syntaxIndexSubscript) indexAt(srcLength int, ordinal int) int {
+	return i.getIndex(srcLength)
 }
