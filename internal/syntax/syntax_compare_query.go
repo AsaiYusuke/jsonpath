@@ -23,7 +23,7 @@ func (q *syntaxCompareQuery) compute(
 		return leftValues
 	}
 
-	if len(leftValues) == 1 && leftValues[0] == emptyEntity && len(rightValues) == 1 && rightValues[0] == emptyEntity {
+	if len(leftValues) == 1 && leftValues[0] == emptyEntity && rightValues[0] == emptyEntity {
 		if _, ok := q.comparator.(*syntaxCompareDeepEQ); ok {
 			return currentList
 		}
