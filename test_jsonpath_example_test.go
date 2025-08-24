@@ -64,3 +64,38 @@ func ExampleParse() {
 	// ["value1"]
 	// ["value2"]
 }
+
+func ExampleParse_reuseBuffer() {
+	jsonPath := `$.key`
+	srcJSON1 := `{"key":"value1"}`
+	srcJSON2 := `{"key":"value2"}`
+	jsonPathParser, err := jsonpath.Parse(jsonPath)
+	if err != nil {
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
+		return
+	}
+	var src1, src2 any
+	json.Unmarshal([]byte(srcJSON1), &src1)
+	json.Unmarshal([]byte(srcJSON2), &src2)
+	buf := make([]any, 0, 4)
+	output1, err := jsonPathParser(src1, &buf)
+	if err != nil {
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
+		return
+	}
+	output2, err := jsonPathParser(src2, &buf)
+	if err != nil {
+		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
+		return
+	}
+	outputJSON1, _ := json.Marshal(output1)
+	outputJSON2, _ := json.Marshal(output2)
+	bufJSON, _ := json.Marshal(buf)
+	fmt.Println(string(outputJSON1))
+	fmt.Println(string(outputJSON2))
+	fmt.Println(string(bufJSON))
+	// Output:
+	// ["value2"]
+	// ["value2"]
+	// ["value2"]
+}

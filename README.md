@@ -103,6 +103,32 @@ output2, err2 := parsed(src2)
 
 [:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2#example-Parse)
 
+parser function
+
+- The parser function accepts an optional second argument: a pointer to a `[]any` buffer.
+- When omitted or `nil`, a new slice is allocated on each call and returned.
+- When provided (non-nil), the buffer will be reset to length 0 and filled directly, enabling reuse without extra allocations.
+
+Example of buffer reuse:
+
+```go
+parsed, _ := jsonpath.Parse("$[*]")
+buf := make([]any, 0, 4)
+out1, _ := parsed([]any{1}, &buf) // writes into buf -> [1]
+out2, _ := parsed([]any{2}, &buf) // reuses the same buf -> now [2]
+fmt.Println(out1)
+fmt.Println(out2)
+fmt.Println(buf)
+  // Output:
+  // [2]
+  // [2]
+  // [2]
+```
+
+[:memo: Example](https://pkg.go.dev/github.com/AsaiYusuke/jsonpath/v2#example-Parse-reuseBuffer)
+
+Note: Do not share the same buffer across goroutines concurrently.
+
 ### \* Error handling
 
 If an error occurs during API execution, a specific error type is returned. The following error types help you identify the cause:
