@@ -21,7 +21,7 @@ func Retrieve(jsonPath string, src any, config ...config.Config) ([]any, error) 
 }
 
 // Parse returns the parser function using the given JSONPath.
-func Parse(jsonPath string, config ...config.Config) (f func(src any) ([]any, error), err error) {
+func Parse(jsonPath string, config ...config.Config) (f func(src any, dst ...*[]any) ([]any, error), err error) {
 	parseMutex.Lock()
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -54,20 +54,32 @@ func Parse(jsonPath string, config ...config.Config) (f func(src any) ([]any, er
 	parser.Execute()
 
 	root := parser.jsonPathParser.root
-	return func(src any) ([]any, error) {
-		buf := getNodeSlice()
+	return func(src any, dst ...*[]any) ([]any, error) {
+		var buf *[]any
+		usePool := true
+		if len(dst) > 0 && dst[0] != nil {
+			*(dst[0]) = (*(dst[0]))[:0]
+			buf = dst[0]
+			usePool = false
+		} else {
+			buf = getNodeSlice()
+		}
 
 		if err := root.retrieve(src, src, buf); err != nil {
-			putNodeSlice(buf)
+			if usePool {
+				putNodeSlice(buf)
+			}
 			return nil, err
 		}
 
-		res := *buf
-		out := make([]any, len(res))
-		copy(out, res)
+		if usePool {
+			res := *buf
+			out := make([]any, len(res))
+			copy(out, res)
+			putNodeSlice(buf)
+			return out, nil
+		}
 
-		putNodeSlice(buf)
-		return out, nil
-
+		return *buf, nil
 	}, nil
 }
