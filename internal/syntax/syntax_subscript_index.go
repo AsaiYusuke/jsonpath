@@ -8,7 +8,7 @@ type syntaxIndexSubscript struct {
 }
 
 func (i *syntaxIndexSubscript) getIndex(srcLength int) int {
-	if i.number < -srcLength || i.number >= srcLength {
+	if i.number >= srcLength {
 		return -1
 	}
 

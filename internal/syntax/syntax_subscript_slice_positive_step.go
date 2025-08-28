@@ -23,7 +23,7 @@ func (s *syntaxSlicePositiveStepSubscript) getLoopEnd(srcLength int) int {
 }
 
 func (s *syntaxSlicePositiveStepSubscript) getNormalizedValue(value int, srcLength int) int {
-	if value > srcLength {
+	if value >= srcLength {
 		return srcLength
 	}
 	if value < -srcLength {

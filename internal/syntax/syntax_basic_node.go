@@ -71,10 +71,10 @@ func (i *syntaxBasicNode) retrieveAnyValueNext(
 			Get: func() any { return nextSrc },
 			Set: nil,
 		})
-	} else {
-		*results = append(*results, nextSrc)
+		return nil
 	}
 
+	*results = append(*results, nextSrc)
 	return nil
 }
 
@@ -95,10 +95,10 @@ func (i *syntaxBasicNode) retrieveMapNext(
 			Get: func() any { return currentMap[key] },
 			Set: func(value any) { currentMap[key] = value },
 		})
-	} else {
-		*results = append(*results, nextNode)
+		return nil
 	}
 
+	*results = append(*results, nextNode)
 	return nil
 }
 
@@ -114,10 +114,10 @@ func (i *syntaxBasicNode) retrieveListNext(
 			Get: func() any { return currentList[index] },
 			Set: func(value any) { currentList[index] = value },
 		})
-	} else {
-		*results = append(*results, currentList[index])
+		return nil
 	}
 
+	*results = append(*results, currentList[index])
 	return nil
 }
 
