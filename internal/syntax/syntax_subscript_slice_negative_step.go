@@ -23,7 +23,7 @@ func (s *syntaxSliceNegativeStepSubscript) getLoopEnd(srcLength int) int {
 }
 
 func (s *syntaxSliceNegativeStepSubscript) getNormalizedValue(value int, srcLength int) int {
-	if value > srcLength-1 {
+	if value >= srcLength {
 		return srcLength - 1
 	}
 	if value < -srcLength-1 {
@@ -40,8 +40,8 @@ func (s *syntaxSliceNegativeStepSubscript) count(srcLength int) int {
 	if start <= end {
 		return 0
 	}
-	d := -s.step.number
-	return (start - end + d - 1) / d
+	step := -s.step.number
+	return (start - end + step - 1) / step
 }
 
 func (s *syntaxSliceNegativeStepSubscript) indexAt(srcLength int, ordinal int) int {
