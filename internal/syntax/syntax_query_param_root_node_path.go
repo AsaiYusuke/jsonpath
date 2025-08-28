@@ -12,11 +12,13 @@ func (e *syntaxQueryParamRootNodePath) compute(
 	root any, _ []any) []any {
 
 	buf := getNodeSlice()
-	defer func() { putNodeSlice(buf) }()
 
 	if e.param.retrieve(root, root, buf) != nil {
+		putNodeSlice(buf)
 		return emptyList
 	}
 
-	return []any{(*buf)[0]}
+	value := (*buf)[0]
+	putNodeSlice(buf)
+	return []any{value}
 }
