@@ -425,3 +425,20 @@ func TestRetrieve_filterExistsFromDeleted(t *testing.T) {
 
 	runTestCases(t, "TestRetrieve_filterExistsFromDeleted", testCases)
 }
+
+func TestRetrieve_filterEmptyInputFastPath(t *testing.T) {
+	testCases := []TestCase{
+		{
+			jsonpath:    `$[?(@)]`,
+			inputJSON:   `{}`,
+			expectedErr: createErrorMemberNotExist(`[?(@)]`),
+		},
+		{
+			jsonpath:    `$[?(@)]`,
+			inputJSON:   `[]`,
+			expectedErr: createErrorMemberNotExist(`[?(@)]`),
+		},
+	}
+
+	runTestCases(t, "TestFilterQualifier_EmptyMapAndList_ReturnsMemberNotExist", testCases)
+}

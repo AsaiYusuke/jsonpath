@@ -35,6 +35,10 @@ func (f *syntaxFilterQualifier) retrieve(
 func (f *syntaxFilterQualifier) retrieveMap(
 	root any, srcMap map[string]any, results *[]any) errors.ErrorRuntime {
 
+	if len(srcMap) == 0 {
+		return f.newErrMemberNotExist()
+	}
+
 	var deepestError errors.ErrorRuntime
 
 	sortKeys, keyLength := getSortedKeys(srcMap)
@@ -87,6 +91,10 @@ func (f *syntaxFilterQualifier) retrieveMap(
 
 func (f *syntaxFilterQualifier) retrieveList(
 	root any, srcList []any, results *[]any) errors.ErrorRuntime {
+
+	if len(srcList) == 0 {
+		return f.newErrMemberNotExist()
+	}
 
 	var deepestError errors.ErrorRuntime
 

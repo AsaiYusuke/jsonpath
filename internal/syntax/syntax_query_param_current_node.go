@@ -11,9 +11,6 @@ func (e *syntaxQueryParamCurrentNode) isValueGroupParameter() bool {
 func (e *syntaxQueryParamCurrentNode) compute(
 	root any, currentList []any) []any {
 
-	if len(currentList) == 0 {
-		return emptyList
-	}
 	result := make([]any, len(currentList))
 	copy(result, currentList)
 	return result
