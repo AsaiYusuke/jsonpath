@@ -81,9 +81,9 @@ func (e ErrorTypeUnmatched) Error() string {
 	return fmt.Sprintf(`type unmatched (path=%s, expected=%s, found=%s)`, e.ErrorBasicRuntime.GetPath(), e.ExpectedType, e.FoundType)
 }
 
-func NewErrorTypeUnmatched(path string, remainingPathLen int, expected string, found string) ErrorTypeUnmatched {
+func NewErrorTypeUnmatched(errBasicRuntime *ErrorBasicRuntime, expected string, found string) ErrorTypeUnmatched {
 	return ErrorTypeUnmatched{
-		ErrorBasicRuntime: &ErrorBasicRuntime{path: path, remainingPathLen: remainingPathLen},
+		ErrorBasicRuntime: errBasicRuntime,
 		ExpectedType:      expected,
 		FoundType:         found,
 	}
@@ -98,9 +98,9 @@ func (e ErrorMemberNotExist) Error() string {
 	return fmt.Sprintf(`member did not exist (path=%s)`, e.ErrorBasicRuntime.GetPath())
 }
 
-func NewErrorMemberNotExist(path string, remainingPathLen int) ErrorMemberNotExist {
+func NewErrorMemberNotExist(errBasicRuntime *ErrorBasicRuntime) ErrorMemberNotExist {
 	return ErrorMemberNotExist{
-		ErrorBasicRuntime: &ErrorBasicRuntime{path: path, remainingPathLen: remainingPathLen},
+		ErrorBasicRuntime: errBasicRuntime,
 	}
 }
 

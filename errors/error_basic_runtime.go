@@ -13,3 +13,10 @@ func (e *ErrorBasicRuntime) GetPath() string {
 func (e *ErrorBasicRuntime) GetRemainingPathLen() int {
 	return e.remainingPathLen
 }
+
+func NewErrorBasicRuntime(path string, remainingPathLen int) ErrorBasicRuntime {
+	return ErrorBasicRuntime{
+		path:             path,
+		remainingPathLen: remainingPathLen,
+	}
+}

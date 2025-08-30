@@ -1,18 +1,26 @@
 package syntax
 
 import (
+	"reflect"
+	"sync"
+
 	"github.com/AsaiYusuke/jsonpath/v2/config"
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
+type syntaxNodeErrState struct {
+	basicRuntime errors.ErrorBasicRuntime
+}
+
 type syntaxBasicNode struct {
-	path                 string
-	remainingPath        string
-	remainingPathLen     int
-	valueGroup           bool
-	next                 syntaxNode
-	accessorMode         bool
-	preErrMemberNotExist errors.ErrorMemberNotExist
+	path             string
+	remainingPath    string
+	remainingPathLen int
+	valueGroup       bool
+	next             syntaxNode
+	accessorMode     bool
+	errState         *syntaxNodeErrState
+	onceErrState     sync.Once
 }
 
 func (i *syntaxBasicNode) setPath(path string) {
@@ -52,11 +60,24 @@ func (i *syntaxBasicNode) getNext() syntaxNode {
 	return i.next
 }
 
+func (i *syntaxBasicNode) ensureErrState() {
+	i.onceErrState.Do(func() {
+		i.errState = &syntaxNodeErrState{}
+		i.errState.basicRuntime = errors.NewErrorBasicRuntime(i.path, i.remainingPathLen)
+	})
+}
+
 func (i *syntaxBasicNode) newErrMemberNotExist() errors.ErrorMemberNotExist {
-	if i.preErrMemberNotExist.ErrorBasicRuntime == nil {
-		i.preErrMemberNotExist = errors.NewErrorMemberNotExist(i.path, i.remainingPathLen)
+	i.ensureErrState()
+	return errors.NewErrorMemberNotExist(&i.errState.basicRuntime)
+}
+
+func (i *syntaxBasicNode) newErrTypeUnmatched(expected string, current any) errors.ErrorTypeUnmatched {
+	i.ensureErrState()
+	if current != nil {
+		return errors.NewErrorTypeUnmatched(&i.errState.basicRuntime, expected, reflect.TypeOf(current).String())
 	}
-	return i.preErrMemberNotExist
+	return errors.NewErrorTypeUnmatched(&i.errState.basicRuntime, expected, msgTypeNull)
 }
 
 func (i *syntaxBasicNode) retrieveAnyValueNext(
