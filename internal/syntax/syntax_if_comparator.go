@@ -1,5 +1,5 @@
 package syntax
 
 type syntaxComparator interface {
-	comparator(left []any, right any) bool
+	compare(left []any, right any) bool
 }

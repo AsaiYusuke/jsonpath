@@ -5,7 +5,7 @@ import "encoding/json"
 type syntaxCompareGT struct {
 }
 
-func (c *syntaxCompareGT) comparator(left []any, right any) bool {
+func (c *syntaxCompareGT) compare(left []any, right any) bool {
 	rightFloat, rightIsFloat := right.(float64)
 	rightNumber, rightIsNumber := right.(json.Number)
 	rightString, rightIsString := right.(string)

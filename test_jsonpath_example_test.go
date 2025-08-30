@@ -78,12 +78,13 @@ func ExampleParse_reuseBuffer() {
 	json.Unmarshal([]byte(srcJSON1), &src1)
 	json.Unmarshal([]byte(srcJSON2), &src2)
 	buf := make([]any, 0, 4)
-	output1, err := jsonPathParser(src1, &buf)
+	args := []*[]any{&buf}
+	output1, err := jsonPathParser(src1, args...)
 	if err != nil {
 		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return
 	}
-	output2, err := jsonPathParser(src2, &buf)
+	output2, err := jsonPathParser(src2, args...)
 	if err != nil {
 		fmt.Printf(`type: %v, value: %v`, reflect.TypeOf(err), err)
 		return

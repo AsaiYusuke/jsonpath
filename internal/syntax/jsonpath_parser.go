@@ -8,11 +8,12 @@ import (
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
+var unescapeRegex = regexp.MustCompile(`\\(.)`)
+
 type jsonPathParser struct {
 	root               syntaxNode
 	paramsList         [][]any
 	params             []any
-	unescapeRegex      *regexp.Regexp
 	filterFunctions    map[string]func(any) (any, error)
 	aggregateFunctions map[string]func([]any) (any, error)
 	accessorMode       bool
@@ -59,8 +60,8 @@ func (p *jsonPathParser) toFloat(text string) float64 {
 }
 
 func (p *jsonPathParser) unescape(text string) string {
-	return p.unescapeRegex.ReplaceAllStringFunc(text, func(block string) string {
-		varBlockSet := p.unescapeRegex.FindStringSubmatch(block)
+	return unescapeRegex.ReplaceAllStringFunc(text, func(block string) string {
+		varBlockSet := unescapeRegex.FindStringSubmatch(block)
 		return varBlockSet[1]
 	})
 }

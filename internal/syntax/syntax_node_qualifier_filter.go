@@ -32,8 +32,6 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		return f.newErrMemberNotExist()
 	}
 
-	var deepestError errors.ErrorRuntime
-
 	sortKeys, keyLength := getSortedKeys(srcMap)
 
 	buf := getNodeSlice()
@@ -57,6 +55,8 @@ func (f *syntaxFilterQualifier) retrieveMap(
 			return f.newErrMemberNotExist()
 		}
 	}
+
+	var deepestError errors.ErrorRuntime
 
 	for index := range *sortKeys {
 		if isEachResult {
@@ -89,8 +89,6 @@ func (f *syntaxFilterQualifier) retrieveList(
 		return f.newErrMemberNotExist()
 	}
 
-	var deepestError errors.ErrorRuntime
-
 	valueList := f.query.compute(root, srcList)
 
 	isEachResult := len(valueList) == len(srcList)
@@ -100,6 +98,8 @@ func (f *syntaxFilterQualifier) retrieveList(
 			return f.newErrMemberNotExist()
 		}
 	}
+
+	var deepestError errors.ErrorRuntime
 
 	for index := range srcList {
 		if isEachResult {

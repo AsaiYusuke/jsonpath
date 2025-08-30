@@ -21,9 +21,10 @@ func execParserFunc(jsonPath, srcJSON string, b *testing.B) {
 	}
 
 	buf := make([]any, 0, 256)
+	args := []*[]any{&buf}
 
 	for b.Loop() {
-		if _, err := parserFunc(src, &buf); err != nil {
+		if _, err := parserFunc(src, args...); err != nil {
 			b.Errorf(`%s`, err)
 		}
 
