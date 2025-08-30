@@ -114,8 +114,9 @@ Example of buffer reuse:
 ```go
 parsed, _ := jsonpath.Parse("$[*]")
 buf := make([]any, 0, 4)
-out1, _ := parsed([]any{1}, &buf) // writes into buf -> [1]
-out2, _ := parsed([]any{2}, &buf) // reuses the same buf -> now [2]
+args := []*[]any{&buf}
+out1, _ := parsed([]any{1}, args...) // writes into buf -> [1]
+out2, _ := parsed([]any{2}, args...) // reuses the same buf -> now [2]
 fmt.Println(out1)
 fmt.Println(out2)
 fmt.Println(buf)
