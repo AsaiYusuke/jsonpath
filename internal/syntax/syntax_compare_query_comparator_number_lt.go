@@ -5,7 +5,7 @@ import "encoding/json"
 type syntaxCompareNumberLT struct {
 }
 
-func (c *syntaxCompareNumberLT) comparator(left []any, right any) bool {
+func (c *syntaxCompareNumberLT) compare(left []any, right any) bool {
 	rightFloatValue, _ := right.(float64)
 
 	var hasValue bool

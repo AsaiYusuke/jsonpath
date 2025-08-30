@@ -6,7 +6,7 @@ type syntaxCompareRegex struct {
 	regex *regexp.Regexp
 }
 
-func (r *syntaxCompareRegex) comparator(left []any, _ any) bool {
+func (r *syntaxCompareRegex) compare(left []any, _ any) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {

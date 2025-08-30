@@ -3,7 +3,7 @@ package syntax
 type syntaxCompareStringGE struct {
 }
 
-func (c *syntaxCompareStringGE) comparator(left []any, right any) bool {
+func (c *syntaxCompareStringGE) compare(left []any, right any) bool {
 	rightStringValue, _ := right.(string)
 
 	var hasValue bool

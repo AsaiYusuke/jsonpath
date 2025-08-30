@@ -3,7 +3,7 @@ package syntax
 type syntaxCompareStringLE struct {
 }
 
-func (c *syntaxCompareStringLE) comparator(left []any, right any) bool {
+func (c *syntaxCompareStringLE) compare(left []any, right any) bool {
 	rightStringValue, _ := right.(string)
 
 	var hasValue bool

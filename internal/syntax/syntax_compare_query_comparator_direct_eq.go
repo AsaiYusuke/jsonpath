@@ -5,7 +5,7 @@ import "encoding/json"
 type syntaxCompareDirectEQ struct {
 }
 
-func (c *syntaxCompareDirectEQ) comparator(left []any, right any) bool {
+func (c *syntaxCompareDirectEQ) compare(left []any, right any) bool {
 	var hasValue bool
 	for leftIndex := range left {
 		if left[leftIndex] == emptyEntity {

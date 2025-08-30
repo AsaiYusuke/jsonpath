@@ -19,7 +19,7 @@ func (q *syntaxCompareQuery) compute(
 	rightValues := q.rightParam.compute(root, currentList)
 
 	// The syntax parser always results in a literal value on the right side as input.
-	if q.comparator.comparator(leftValues, rightValues[0]) {
+	if q.comparator.compare(leftValues, rightValue) {
 		return leftValues
 	}
 
