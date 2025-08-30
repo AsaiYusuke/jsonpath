@@ -1,7 +1,6 @@
 package syntax
 
 import (
-	"regexp"
 	"sync"
 
 	"github.com/AsaiYusuke/jsonpath/v2/config"
@@ -9,7 +8,6 @@ import (
 
 var parseMutex sync.Mutex
 var parser = pegJSONPathParser[uint32]{}
-var unescapeRegex = regexp.MustCompile(`\\(.)`)
 
 // Retrieve returns the retrieved JSON using the given JSONPath.
 func Retrieve(jsonPath string, src any, config ...config.Config) ([]any, error) {
@@ -41,8 +39,6 @@ func Parse(jsonPath string, config ...config.Config) (f func(src any, dst ...*[]
 	} else {
 		parser.Reset()
 	}
-
-	parser.jsonPathParser.unescapeRegex = unescapeRegex
 
 	if len(config) > 0 {
 		parser.jsonPathParser.filterFunctions = config[0].FilterFunctions
