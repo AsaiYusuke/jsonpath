@@ -1,8 +1,6 @@
 package syntax
 
 import (
-	"reflect"
-
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
@@ -21,12 +19,7 @@ func (i *syntaxChildWildcardIdentifier) retrieve(
 		return i.retrieveList(root, typedNodes, results)
 
 	default:
-		if current != nil {
-			return errors.NewErrorTypeUnmatched(
-				i.path, i.remainingPathLen, msgTypeObjectOrArray, reflect.TypeOf(current).String())
-		}
-		return errors.NewErrorTypeUnmatched(
-			i.path, i.remainingPathLen, msgTypeObjectOrArray, msgTypeNull)
+		return i.newErrTypeUnmatched(msgTypeObjectOrArray, current)
 	}
 }
 

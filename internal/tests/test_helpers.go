@@ -31,11 +31,13 @@ func createErrorFunctionFailed(functionName string, errorString string) errors.E
 }
 
 func createErrorMemberNotExist(path string) errors.ErrorMemberNotExist {
-	return errors.NewErrorMemberNotExist(path, len(path))
+	errBasicError := errors.NewErrorBasicRuntime(path, len(path))
+	return errors.NewErrorMemberNotExist(&errBasicError)
 }
 
 func createErrorTypeUnmatched(path string, expected string, found string) errors.ErrorTypeUnmatched {
-	return errors.NewErrorTypeUnmatched(path, len(path), expected, found)
+	errBasicError := errors.NewErrorBasicRuntime(path, len(path))
+	return errors.NewErrorTypeUnmatched(&errBasicError, expected, found)
 }
 
 func createErrorInvalidSyntax(position int, reason string, near string) errors.ErrorInvalidSyntax {

@@ -1,7 +1,6 @@
 package syntax
 
 import (
-	"reflect"
 	"slices"
 
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
@@ -20,12 +19,7 @@ func (i *syntaxRecursiveChildIdentifier) retrieve(
 	switch current.(type) {
 	case map[string]any, []any:
 	default:
-		if current != nil {
-			return errors.NewErrorTypeUnmatched(
-				i.path, i.remainingPathLen, msgTypeObjectOrArray, reflect.TypeOf(current).String())
-		}
-		return errors.NewErrorTypeUnmatched(
-			i.path, i.remainingPathLen, msgTypeObjectOrArray, msgTypeNull)
+		return i.newErrTypeUnmatched(msgTypeObjectOrArray, current)
 	}
 
 	var deepestError errors.ErrorRuntime

@@ -1,8 +1,6 @@
 package syntax
 
 import (
-	"reflect"
-
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
@@ -30,12 +28,7 @@ func (i *syntaxChildMultiIdentifier) retrieve(
 		return i.retrieveMap(root, srcMap, results)
 	}
 
-	if current != nil {
-		return errors.NewErrorTypeUnmatched(
-			i.path, i.remainingPathLen, msgTypeObject, reflect.TypeOf(current).String())
-	}
-	return errors.NewErrorTypeUnmatched(
-		i.path, i.remainingPathLen, msgTypeObject, msgTypeNull)
+	return i.newErrTypeUnmatched(msgTypeObject, current)
 }
 
 func (i *syntaxChildMultiIdentifier) retrieveMap(

@@ -1,8 +1,6 @@
 package syntax
 
 import (
-	"reflect"
-
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
 )
 
@@ -17,18 +15,13 @@ func (u *syntaxUnionQualifier) retrieve(
 
 	srcArray, ok := current.([]any)
 	if !ok {
-		if current != nil {
-			return errors.NewErrorTypeUnmatched(
-				u.path, u.remainingPathLen, msgTypeArray, reflect.TypeOf(current).String())
-		}
-		return errors.NewErrorTypeUnmatched(
-			u.path, u.remainingPathLen, msgTypeArray, msgTypeNull)
+		return u.newErrTypeUnmatched(msgTypeArray, current)
 	}
 
 	var deepestError errors.ErrorRuntime
 
+	srcLen := len(srcArray)
 	for _, subscript := range u.subscripts {
-		srcLen := len(srcArray)
 		for ord := range subscript.count(srcLen) {
 			if err := u.retrieveListNext(root, srcArray, subscript.indexAt(srcLen, ord), results); len(*results) == 0 && err != nil {
 				deepestError = u.getMostResolvedError(err, deepestError)
