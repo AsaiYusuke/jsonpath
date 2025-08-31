@@ -18,6 +18,13 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
+      - name: Generate parser (peg)
+        run: go generate ./...
+
+      - name: Check generated files up-to-date
+        run: |
+          git --no-pager diff --exit-code || (echo "Run 'go generate ./...' and commit generated changes" && exit 1)
+
       - name: Run Unit tests
         run: go test -race -covermode atomic -coverprofile=covprofile -coverpkg=.,./config,./errors,./internal/syntax ./...
 
