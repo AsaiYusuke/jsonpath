@@ -1,5 +1,5 @@
 module example.com/main
 
-go 1.24
+go 1.25
 
-require github.com/AsaiYusuke/jsonpath/v2 v2.0.0
+require github.com/AsaiYusuke/jsonpath/v2 v2.2.0
