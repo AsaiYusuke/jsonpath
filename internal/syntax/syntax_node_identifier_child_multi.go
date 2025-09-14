@@ -37,13 +37,12 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 	var deepestError errors.ErrorRuntime
 
 	for _, identifier := range i.identifiers {
-		if singleIdentifier, ok := identifier.(*syntaxChildSingleIdentifier); ok {
-			if _, ok = srcMap[singleIdentifier.identifier]; !ok {
-				continue
-			}
-		}
-
 		if err := identifier.retrieve(root, srcMap, results); len(*results) == 0 && err != nil {
+			if singleIdentifier, ok := identifier.(*syntaxChildSingleIdentifier); ok {
+				if _, ok = srcMap[singleIdentifier.identifier]; !ok {
+					continue
+				}
+			}
 			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
