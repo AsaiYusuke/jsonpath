@@ -38,6 +38,11 @@ func (i *syntaxChildMultiIdentifier) retrieveMap(
 
 	for _, identifier := range i.identifiers {
 		if err := identifier.retrieve(root, srcMap, results); len(*results) == 0 && err != nil {
+			if singleIdentifier, ok := identifier.(*syntaxChildSingleIdentifier); ok {
+				if _, ok = srcMap[singleIdentifier.identifier]; !ok {
+					continue
+				}
+			}
 			deepestError = i.getMostResolvedError(err, deepestError)
 		}
 	}
