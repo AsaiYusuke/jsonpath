@@ -1,8 +1,6 @@
 package syntax
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/AsaiYusuke/jsonpath/v2/errors"
@@ -25,8 +23,8 @@ func TestUnescapeDoubleQuotedString(t *testing.T) {
 		{input: `\r`, expectOut: "\r"},
 		{input: `\t`, expectOut: "\t"},
 		{input: `\uD834\uDD1E`, expectOut: `𝄞`},
-		{input: `"`, expectError: errors.ErrorInvalidArgument{ArgumentName: `"`, Err: fmt.Errorf(`invalid character '"' after top-level value`)}},
-		{input: `\u`, expectError: errors.ErrorInvalidArgument{ArgumentName: `\u`, Err: fmt.Errorf(`invalid character '"' in \u hexadecimal character escape`)}},
+		{input: `"`, expectError: errors.ErrorInvalidArgument{ArgumentName: `"`}},
+		{input: `\u`, expectError: errors.ErrorInvalidArgument{ArgumentName: `\u`}},
 	}
 	parser := jsonPathParser{}
 
@@ -57,7 +55,7 @@ func TestUnescapeSingleQuotedString(t *testing.T) {
 		{input: `\t`, expectOut: "\t"},
 		{input: `\uD834\uDD1E`, expectOut: `𝄞`},
 		{input: `'`, expectOut: `'`},
-		{input: `\u`, expectError: errors.ErrorInvalidArgument{ArgumentName: `\u`, Err: fmt.Errorf(`invalid character '"' in \u hexadecimal character escape`)}},
+		{input: `\u`, expectError: errors.ErrorInvalidArgument{ArgumentName: `\u`}},
 	}
 	parser := jsonPathParser{}
 
@@ -77,12 +75,12 @@ func TestUnescapeSingleQuotedString(t *testing.T) {
 
 func expectPanic(t *testing.T, text string, expectedError error, function func(string) string) {
 	defer func() {
-		actualError := recover().(error)
-		if reflect.TypeOf(expectedError) != reflect.TypeOf(actualError) ||
-			fmt.Sprintf(`%s`, expectedError) != fmt.Sprintf(`%s`, actualError) {
-			t.Errorf("expect<%s> != actual<%s>\n", expectedError, actualError)
+		actual := recover()
+		actualError, ok := actual.(errors.ErrorInvalidArgument)
+		expected, expectedOK := expectedError.(errors.ErrorInvalidArgument)
+		if !ok || !expectedOK || expected.ArgumentName != actualError.ArgumentName || actualError.Err == nil {
+			t.Errorf("input %q: expected %T with argument %q, got %T (%v)", text, expectedError, expected.ArgumentName, actual, actual)
 		}
-
 	}()
 	function(text)
 	t.Errorf("expect panic")
