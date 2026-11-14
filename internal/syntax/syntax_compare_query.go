@@ -7,9 +7,9 @@ type syntaxCompareQuery struct {
 }
 
 func (q *syntaxCompareQuery) compute(
-	root any, currentList []any) []any {
+	root any, currentList []any, scratch *syntaxQueryScratch) []any {
 
-	leftValues := q.leftParam.compute(root, currentList)
+	leftValues := q.leftParam.compute(root, currentList, scratch)
 	if len(leftValues) == 1 && leftValues[0] == emptyEntity {
 		if _, ok := q.comparator.(*syntaxCompareDeepEQ); !ok {
 			return emptyList
@@ -17,7 +17,7 @@ func (q *syntaxCompareQuery) compute(
 	}
 
 	// The syntax parser always results in a literal value on the right side as input.
-	rightValue := q.rightParam.compute(root, currentList)[0]
+	rightValue := q.rightParam.compute(root, currentList, scratch)[0]
 
 	if q.comparator.compare(leftValues, rightValue) {
 		return leftValues

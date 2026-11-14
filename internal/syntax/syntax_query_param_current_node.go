@@ -9,9 +9,9 @@ func (e *syntaxQueryParamCurrentNode) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamCurrentNode) compute(
-	root any, currentList []any) []any {
+	_ any, currentList []any, scratch *syntaxQueryScratch) []any {
 
-	result := make([]any, len(currentList))
+	result := scratch.getSlice(len(currentList))
 	copy(result, currentList)
 	return result
 }

@@ -5,9 +5,9 @@ type syntaxLogicalNot struct {
 }
 
 func (l *syntaxLogicalNot) compute(
-	root any, currentList []any) []any {
+	root any, currentList []any, scratch *syntaxQueryScratch) []any {
 
-	computedList := l.query.compute(root, currentList)
+	computedList := l.query.compute(root, currentList, scratch)
 	if len(computedList) == 1 {
 		if computedList[0] == emptyEntity {
 			return fullList

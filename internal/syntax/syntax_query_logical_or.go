@@ -6,17 +6,17 @@ type syntaxLogicalOr struct {
 }
 
 func (l *syntaxLogicalOr) compute(
-	root any, currentList []any) []any {
+	root any, currentList []any, scratch *syntaxQueryScratch) []any {
 
-	leftComputedList := l.leftQuery.compute(root, currentList)
+	leftComputedList := l.leftQuery.compute(root, currentList, scratch)
 	if len(leftComputedList) == 1 {
 		if leftComputedList[0] == emptyEntity {
-			return l.rightQuery.compute(root, currentList)
+			return l.rightQuery.compute(root, currentList, scratch)
 		}
 		return leftComputedList
 	}
 
-	rightComputedList := l.rightQuery.compute(root, currentList)
+	rightComputedList := l.rightQuery.compute(root, currentList, scratch)
 	if len(rightComputedList) == 1 {
 		if rightComputedList[0] == emptyEntity {
 			return leftComputedList
