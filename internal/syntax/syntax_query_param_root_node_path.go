@@ -9,7 +9,7 @@ func (e *syntaxQueryParamRootNodePath) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamRootNodePath) compute(
-	root any, _ []any) []any {
+	root any, _ []any, scratch *syntaxQueryScratch) []any {
 
 	buf := getNodeSlice()
 
@@ -20,5 +20,7 @@ func (e *syntaxQueryParamRootNodePath) compute(
 
 	value := (*buf)[0]
 	putNodeSlice(buf)
-	return []any{value}
+	result := scratch.getSlice(1)
+	result[0] = value
+	return result
 }

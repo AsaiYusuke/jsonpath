@@ -43,7 +43,9 @@ func (f *syntaxFilterQualifier) retrieveMap(
 		(*buf)[index] = srcMap[(*sortKeys)[index]]
 	}
 
-	valueList := f.query.compute(root, *buf)
+	scratch := getSyntaxQueryScratch()
+	defer putSyntaxQueryScratch(scratch)
+	valueList := f.query.compute(root, *buf, scratch)
 
 	putNodeSlice(buf)
 
@@ -89,7 +91,9 @@ func (f *syntaxFilterQualifier) retrieveList(
 		return f.newErrMemberNotExist()
 	}
 
-	valueList := f.query.compute(root, srcList)
+	scratch := getSyntaxQueryScratch()
+	defer putSyntaxQueryScratch(scratch)
+	valueList := f.query.compute(root, srcList, scratch)
 
 	isEachResult := len(valueList) == len(srcList)
 

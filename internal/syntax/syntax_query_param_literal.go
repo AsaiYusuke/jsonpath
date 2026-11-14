@@ -5,7 +5,7 @@ type syntaxQueryParamLiteral struct {
 }
 
 func (l *syntaxQueryParamLiteral) compute(
-	_ any, _ []any) []any {
+	_ any, _ []any, _ *syntaxQueryScratch) []any {
 
 	return l.literal
 }

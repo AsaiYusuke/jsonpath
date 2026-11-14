@@ -10,7 +10,7 @@ func (e *syntaxQueryParamRootNode) isValueGroupParameter() bool {
 }
 
 func (e *syntaxQueryParamRootNode) compute(
-	_ any, _ []any) []any {
+	_ any, _ []any, _ *syntaxQueryScratch) []any {
 
 	return fullList
 }
