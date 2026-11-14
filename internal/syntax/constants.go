@@ -23,14 +23,14 @@ var fullEntity = fullEntityIdentifier{}
 var fullList = []any{fullEntity}
 
 var literalParamTypes = map[reflect.Type]struct{}{
-	reflect.TypeOf(syntaxQueryParamLiteral{}):      {},
-	reflect.TypeOf(syntaxQueryParamRootNode{}):     {},
-	reflect.TypeOf(syntaxQueryParamRootNodePath{}): {},
+	reflect.TypeFor[syntaxQueryParamLiteral]():      {},
+	reflect.TypeFor[syntaxQueryParamRootNode]():     {},
+	reflect.TypeFor[syntaxQueryParamRootNodePath](): {},
 }
 
 func isLiteralParam(v any) bool {
 	t := reflect.TypeOf(v)
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	_, isLiteral := literalParamTypes[t]
